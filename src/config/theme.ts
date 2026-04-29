@@ -32,6 +32,8 @@ export const lightTheme = {
     weightMedium:  '500' as const,
     weightBold:    '700' as const,
     weightBlack:   '900' as const,
+    lineHeightSm:       18,
+    letterSpacingTight: -0.3,
   },
 };
 

@@ -9,7 +9,7 @@ interface ConfirmationPanelProps {
 const Panel = styled.View`
   flex: 3;
   background-color: ${({ theme }) => theme.colors.background};
-  padding: ${({ theme }) => theme.spacing.md}px ${({ theme }) => theme.spacing.md}px;
+  padding: ${({ theme }) => theme.spacing.md}px;
   align-items: center;
   justify-content: center;
   gap: ${({ theme }) => theme.spacing.sm}px;
@@ -18,7 +18,7 @@ const Panel = styled.View`
 const IconCircle = styled.View`
   width: 44px;
   height: 44px;
-  border-radius: 22px;
+  border-radius: ${({ theme }) => theme.radii.full}px;
   background-color: ${({ theme }) => theme.colors.success};
   align-items: center;
   justify-content: center;
@@ -33,14 +33,14 @@ const Heading = styled.Text`
   font-size: ${({ theme }) => theme.typography.sizeMd}px;
   font-weight: ${({ theme }) => theme.typography.weightBold};
   color: ${({ theme }) => theme.colors.gradientMid};
-  letter-spacing: -0.3px;
+  letter-spacing: ${({ theme }) => theme.typography.letterSpacingTight}px;
 `;
 
 const BodyText = styled.Text`
   font-size: ${({ theme }) => theme.typography.sizeXs}px;
   color: ${({ theme }) => theme.colors.textMuted};
   text-align: center;
-  line-height: 18px;
+  line-height: ${({ theme }) => theme.typography.lineHeightSm}px;
 `;
 
 const EmailPillWrapper = styled.View`
