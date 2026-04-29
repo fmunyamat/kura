@@ -7,19 +7,19 @@ export interface SocialAuthButtonsProps {
 }
 
 const ButtonsWrapper = styled.View`
-  gap: 8px;
+  gap: ${({ theme }) => theme.spacing.sm}px;
 `;
 
 const SocialButton = styled.TouchableOpacity`
   height: 44px;
   border-radius: ${({ theme }) => theme.radii.md}px;
-  border-width: 1.5px;
+  border-width: 1px;
   border-color: ${({ theme }) => theme.colors.border};
   background-color: ${({ theme }) => theme.colors.background};
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: ${({ theme }) => theme.spacing.xs}px;
 `;
 
 const ButtonLabel = styled.Text`
@@ -32,14 +32,14 @@ const GoogleDot = styled.View`
   width: 14px;
   height: 14px;
   border-radius: 7px;
-  background-color: #4285f4;
+  background-color: ${({ theme }) => theme.colors.googleBrand};
 `;
 
 const AppleDot = styled.View`
   width: 14px;
   height: 14px;
   border-radius: 7px;
-  background-color: #000000;
+  background-color: ${({ theme }) => theme.colors.appleBrand};
 `;
 
 export const SocialAuthButtons: React.FC<SocialAuthButtonsProps> = ({

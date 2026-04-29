@@ -1,2 +1,2 @@
 export { SocialAuthButtons } from './SocialAuthButtons';
-export type { SocialAuthButtonsProps } from './SocialAuthButtons';
+export type { SocialAuthButtonsProps } from './SocialAuthButtons.ios';
