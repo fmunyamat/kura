@@ -2,8 +2,15 @@ import React from 'react';
 import styled from 'styled-components/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Image } from 'expo-image';
+import { lightTheme } from '~/config/theme';
 
-const HERO_COLORS = ['#0c3520', '#135633', '#1e6b3c', '#2D6A2D', '#3d7d35'] as const;
+const HERO_COLORS = [
+  lightTheme.colors.gradientDark,
+  lightTheme.colors.gradientMid,
+  lightTheme.colors.gradientMidLight,
+  lightTheme.colors.primary,
+  lightTheme.colors.gradientLight,
+] as const;
 const FADE_COLORS = [
   'rgba(255,255,255,0)',
   'rgba(255,255,255,0.08)',
@@ -38,7 +45,7 @@ const LogoImage = styled(Image)`
 const Wordmark = styled.Text`
   color: ${({ theme }) => theme.colors.background};
   font-size: 17px;
-  font-weight: 900;
+  font-weight: ${({ theme }) => theme.typography.weightBlack};
   letter-spacing: -0.8px;
   margin-top: 2px;
 `;
@@ -46,7 +53,7 @@ const Wordmark = styled.Text`
 const Tagline = styled.Text`
   color: ${({ theme }) => theme.colors.lime};
   font-size: 6.5px;
-  font-weight: 700;
+  font-weight: ${({ theme }) => theme.typography.weightBold};
   text-transform: uppercase;
   letter-spacing: 1.1px;
   margin-top: 2px;
@@ -60,6 +67,7 @@ export const HeroSection: React.FC = () => (
   >
     <LogoImage
       testID="kura-logo"
+      accessibilityLabel="Kura logo"
       source={require('../../../../../assets/images/kura-logo.svg')}
       contentFit="contain"
     />

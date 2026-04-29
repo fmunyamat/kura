@@ -4,6 +4,7 @@ export const lightTheme = {
     primaryMid:      '#5A9E3A',
     gradientDark:    '#0c3520',
     gradientMid:     '#135633',
+    gradientMidLight: '#1e6b3c',
     gradientLight:   '#3d7d35',
     lime:            'rgba(184,229,106,0.92)',
     background:      '#FFFFFF',
@@ -27,6 +28,7 @@ export const lightTheme = {
     weightRegular: '400' as const,
     weightMedium:  '500' as const,
     weightBold:    '700' as const,
+    weightBlack:   '900' as const,
   },
 };
 
