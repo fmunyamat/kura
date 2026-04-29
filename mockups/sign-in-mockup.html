@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Kura Sign In Mockup</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,900&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #0d0d0d;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 48px 24px;
+      font-family: 'Outfit', sans-serif;
+    }
+
+    .label {
+      font-size: 11px; font-weight: 500;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      color: rgba(255,255,255,0.25);
+      margin-bottom: 32px;
+    }
+
+    /* Phone shell */
+    .phone {
+      position: relative;
+      width: 375px;
+      height: 812px;
+      border-radius: 54px;
+      background: #1c1c1e;
+      border: 1px solid rgba(255,255,255,0.12);
+      overflow: hidden;
+      box-shadow: 0 40px 80px rgba(0,0,0,0.8), 0 8px 24px rgba(0,0,0,0.5),
+                  inset 0 0 0 1px rgba(255,255,255,0.06);
+    }
+
+    /* Dynamic island */
+    .island {
+      position: absolute;
+      top: 14px; left: 50%;
+      transform: translateX(-50%);
+      width: 120px; height: 34px;
+      background: #000;
+      border-radius: 20px;
+      z-index: 20;
+    }
+
+    /* Status bar */
+    .status {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 59px;
+      display: flex; align-items: flex-end;
+      justify-content: space-between;
+      padding: 0 28px 10px;
+      z-index: 20;
+    }
+    .status-time { font-size: 15px; font-weight: 600; color: rgba(255,255,255,0.85); }
+    .status-right { display: flex; align-items: center; gap: 6px; }
+    .bars { display: flex; align-items: flex-end; gap: 2px; }
+    .bar { width: 3px; background: rgba(255,255,255,0.75); border-radius: 1px; }
+    .batt {
+      width: 25px; height: 12px;
+      border: 1.5px solid rgba(255,255,255,0.5);
+      border-radius: 3px;
+      display: flex; align-items: center; padding: 2px;
+      position: relative;
+    }
+    .batt::after {
+      content: '';
+      position: absolute; right: -5px; top: 50%;
+      transform: translateY(-50%);
+      width: 3px; height: 6px;
+      background: rgba(255,255,255,0.4);
+      border-radius: 0 2px 2px 0;
+    }
+    .batt-fill { width: 78%; height: 100%; background: rgba(255,255,255,0.8); border-radius: 1px; }
+
+    /* ── Hero section: top 325px ── */
+    .hero {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 325px;
+      background: #1a1a1a;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding-top: 59px;
+      gap: 0;
+    }
+    .logo { width: 100px; height: 100px; margin-bottom: 14px; }
+    .logo img { width: 100%; height: 100%; object-fit: contain; }
+    .wordmark {
+      font-family: 'Fraunces', serif;
+      font-size: 40px; font-weight: 900;
+      color: #ffffff; letter-spacing: -1.5px; line-height: 1;
+      margin-bottom: 8px;
+    }
+    .tagline {
+      font-size: 11px; font-weight: 600;
+      color: rgba(184,229,106,0.9);
+      letter-spacing: 2.5px; text-transform: uppercase;
+    }
+
+    /* ── Auth panel: remaining 487px ── */
+    .auth {
+      position: absolute;
+      top: 325px; left: 0; right: 0; bottom: 0;
+      background: #242424;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      padding: 28px 24px 40px;
+      display: flex; flex-direction: column;
+      gap: 14px;
+    }
+
+    .field { display: flex; flex-direction: column; gap: 7px; }
+    .field-label { font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.6); }
+    .field-input {
+      height: 48px;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 10px;
+      background: rgba(255,255,255,0.05);
+      padding: 0 14px;
+      display: flex; align-items: center;
+    }
+    .placeholder { font-size: 15px; color: rgba(255,255,255,0.2); }
+
+    .btn {
+      height: 50px; border-radius: 10px;
+      position: relative;
+      display: flex; align-items: center; justify-content: center;
+      background: linear-gradient(90deg, #2D6A2D 0%, #5A9E3A 100%);
+      flex-shrink: 0;
+    }
+    .btn-text { font-size: 15px; font-weight: 700; color: #fff; }
+    .btn-arrow {
+      position: absolute; right: 18px;
+      fill: none;
+      stroke: rgba(255,255,255,0.6);
+      stroke-width: 2;
+      stroke-linecap: round; stroke-linejoin: round;
+    }
+
+    .divider { display: flex; align-items: center; gap: 10px; }
+    .div-line { flex: 1; height: 1px; background: rgba(255,255,255,0.1); }
+    .div-text { font-size: 11px; color: rgba(255,255,255,0.3); white-space: nowrap; }
+
+    .social {
+      height: 48px;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 10px;
+      background: rgba(255,255,255,0.05);
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      flex-shrink: 0;
+    }
+    .g-icon { width: 17px; height: 17px; flex-shrink: 0; }
+    .g-icon svg { width: 100%; height: 100%; }
+    .social-text { font-size: 14px; font-weight: 600; color: rgba(255,255,255,0.75); }
+
+    /* Home indicator */
+    .home-bar {
+      position: absolute; bottom: 10px; left: 50%;
+      transform: translateX(-50%);
+      width: 134px; height: 5px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 3px; z-index: 20;
+    }
+  </style>
+</head>
+<body>
+  <p class="label">Kura &middot; Sign In Screen</p>
+
+  <div class="phone">
+    <div class="island"></div>
+
+    <!-- Status bar -->
+    <div class="status">
+      <span class="status-time">9:41</span>
+      <div class="status-right">
+        <div class="bars">
+          <div class="bar" style="height:4px"></div>
+          <div class="bar" style="height:6px"></div>
+          <div class="bar" style="height:9px"></div>
+          <div class="bar" style="height:12px"></div>
+        </div>
+        <svg width="16" height="13" viewBox="0 0 16 13" fill="none">
+          <path d="M8 10.5a1.25 1.25 0 1 1 0 2.5 1.25 1.25 0 0 1 0-2.5z" fill="rgba(255,255,255,0.75)"/>
+          <path d="M3.5 7.2A6.4 6.4 0 0 1 8 5.3a6.4 6.4 0 0 1 4.5 1.9" stroke="rgba(255,255,255,0.75)" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+          <path d="M1 4.1A10.1 10.1 0 0 1 8 1a10.1 10.1 0 0 1 7 3.1" stroke="rgba(255,255,255,0.75)" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+        </svg>
+        <div class="batt"><div class="batt-fill"></div></div>
+      </div>
+    </div>
+
+    <!-- Hero -->
+    <div class="hero">
+      <div class="logo">
+        <img src="../assets/images/kura-logo.svg" alt="Kura">
+      </div>
+      <div class="wordmark">kura</div>
+      <div class="tagline">Lawn care, simplified</div>
+    </div>
+
+    <!-- Auth panel -->
+    <div class="auth">
+      <div class="field">
+        <span class="field-label">Email address</span>
+        <div class="field-input">
+          <span class="placeholder">you@example.com</span>
+        </div>
+      </div>
+
+      <div class="btn">
+        <span class="btn-text">Send magic link</span>
+        <svg class="btn-arrow" width="14" height="14" viewBox="0 0 14 14">
+          <path d="M2 7h10M8 3l4 4-4 4"/>
+        </svg>
+      </div>
+
+      <div class="divider">
+        <div class="div-line"></div>
+        <span class="div-text">or continue with</span>
+        <div class="div-line"></div>
+      </div>
+
+      <div class="social">
+        <div class="g-icon">
+          <svg viewBox="0 0 18 18" fill="none">
+            <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
+            <path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34A853"/>
+            <path d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/>
+            <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/>
+          </svg>
+        </div>
+        <span class="social-text">Continue with Google</span>
+      </div>
+    </div>
+
+    <div class="home-bar"></div>
+  </div>
+</body>
+</html>

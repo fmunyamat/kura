@@ -13,12 +13,14 @@ const KEYBOARD_BEHAVIOR = Platform.select<'padding' | undefined>({
 
 const Screen = styled(KeyboardAvoidingView)`
   flex: 1;
-  background-color: ${({ theme }) => theme.colors.background};
+  background-color: ${({ theme }) => theme.colors.screenDark};
 `;
 
 const AuthPanel = styled.View`
   flex: 3;
-  background-color: ${({ theme }) => theme.colors.background};
+  background-color: ${({ theme }) => theme.colors.panelDark};
+  border-top-width: 1px;
+  border-top-color: rgba(255,255,255,0.08);
   padding: ${({ theme }) => theme.spacing.md}px;
   gap: ${({ theme }) => theme.spacing.sm}px;
 `;
@@ -32,12 +34,12 @@ const Divider = styled.View`
 const DividerLine = styled.View`
   flex: 1;
   height: 1px;
-  background-color: ${({ theme }) => theme.colors.border};
+  background-color: ${({ theme }) => theme.colors.borderOnDark};
 `;
 
 const DividerText = styled.Text`
   font-size: ${({ theme }) => theme.typography.sizeXs}px;
-  color: ${({ theme }) => theme.colors.textMuted};
+  color: ${({ theme }) => theme.colors.textMutedOnDark};
 `;
 
 export const SignInScreen: React.FC = () => {

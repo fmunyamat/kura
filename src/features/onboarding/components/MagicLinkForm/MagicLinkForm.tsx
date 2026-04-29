@@ -17,18 +17,18 @@ const Container = styled.View`
 const Label = styled.Text`
   font-size: ${({ theme }: { theme: DefaultTheme }) => theme.typography.sizeSm}px;
   font-weight: ${({ theme }: { theme: DefaultTheme }) => theme.typography.weightMedium};
-  color: ${({ theme }: { theme: DefaultTheme }) => theme.colors.text};
+  color: ${({ theme }: { theme: DefaultTheme }) => theme.colors.textMutedOnDark};
   margin-bottom: ${({ theme }: { theme: DefaultTheme }) => theme.spacing.xs}px;
 `;
 
 const StyledTextInput = styled(TextInput)`
   border-width: 1px;
-  border-color: ${({ theme }: { theme: DefaultTheme }) => theme.colors.inputBorder};
-  background-color: ${({ theme }: { theme: DefaultTheme }) => theme.colors.inputBackground};
+  border-color: ${({ theme }: { theme: DefaultTheme }) => theme.colors.inputBorderDark};
+  background-color: ${({ theme }: { theme: DefaultTheme }) => theme.colors.inputBackgroundDark};
   border-radius: ${({ theme }: { theme: DefaultTheme }) => theme.radii.md}px;
   padding: ${({ theme }: { theme: DefaultTheme }) => theme.spacing.md}px;
   font-size: ${({ theme }: { theme: DefaultTheme }) => theme.typography.sizeMd}px;
-  color: ${({ theme }: { theme: DefaultTheme }) => theme.colors.text};
+  color: ${({ theme }: { theme: DefaultTheme }) => theme.colors.textOnDark};
 `;
 
 const SubmitButton = styled.TouchableOpacity`
@@ -61,6 +61,7 @@ export const MagicLinkForm: React.FC<MagicLinkFormProps> = ({
       <Label>Email address</Label>
       <StyledTextInput
         placeholder="you@example.com"
+        placeholderTextColor="rgba(255,255,255,0.25)"
         value={email}
         onChangeText={onEmailChange}
         keyboardType="email-address"

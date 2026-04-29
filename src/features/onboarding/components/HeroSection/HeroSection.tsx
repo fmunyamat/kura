@@ -1,91 +1,58 @@
 import { Image } from 'expo-image';
-import { LinearGradient } from 'expo-linear-gradient';
 import React from 'react';
+import { useWindowDimensions } from 'react-native';
 import styled from 'styled-components/native';
-import { lightTheme } from '~/config/theme';
 
-const HERO_COLORS = [
-    lightTheme.colors.gradientDark,
-    lightTheme.colors.gradientMid,
-    lightTheme.colors.gradientMidLight,
-    lightTheme.colors.primary,
-    lightTheme.colors.gradientLight,
-] as const;
-
-const FADE_COLORS = [
-    'rgba(255,255,255,0)',
-    'rgba(255,255,255,0.08)',
-    'rgba(255,255,255,0.25)',
-    'rgba(255,255,255,0.55)',
-    'rgba(255,255,255,0.82)',
-    'rgba(255,255,255,1)',
-] as const;
-
-const FADE_LOCATIONS = [0, 0.2, 0.4, 0.6, 0.8, 1] as const;
-
-const HeroGradient = styled(LinearGradient)
+const HeroContainer = styled.View<{ $isTablet: boolean }>
 `
     flex: 2;
     align-items: center;
     justify-content: center;
-    padding-bottom: 72px;
+    background-color: ${({ theme }) => theme.colors.screenDark};
+    padding-bottom: ${({ $isTablet }) => ($isTablet ? 72 : 57.6)}px;
 `;
 
-const FadeOverlay = styled(LinearGradient)
+const LogoImage = styled(Image)<{ $isTablet: boolean }>
 `
-    position: absolute;
-    bottom: 0px;
-    left: 0px;
-    right: 0px;
-    height: 80px;
+    width: ${({ $isTablet }) => ($isTablet ? 150 : 120)}px;
+    height: ${({ $isTablet }) => ($isTablet ? 150 : 120)}px;
+    margin-top: ${({ $isTablet }) => ($isTablet ? 40 : 32)}px;
 `;
 
-const LogoImage = styled(Image)
-`
-    width: 150px;
-    height: 150px;
-    marginTop: 40px;
-`;
-
-const Wordmark = styled.Text
+const Wordmark = styled.Text<{ $isTablet: boolean }>
 `
     color: ${({ theme }) => theme.colors.background};
-    font-size: ${({ theme }) => theme.typography.size2xl}px;
+    font-size: ${({ $isTablet, theme }) => ($isTablet ? theme.typography.size2xl : theme.typography.size2xl * 0.8)}px;
     font-weight: ${({ theme }) => theme.typography.weightBlack};
     letter-spacing: -1px;
     margin-top: ${({ theme }) => theme.spacing.xs}px;
 `;
 
-const Tagline = styled.Text
+const Tagline = styled.Text<{ $isTablet: boolean }>
 `
     color: ${({ theme }) => theme.colors.lime};
-    font-size: ${({ theme }) => theme.typography.sizeSm}px;
+    font-size: ${({ $isTablet, theme }) => ($isTablet ? theme.typography.sizeSm : theme.typography.sizeSm * 0.8)}px;
     font-weight: ${({ theme }) => theme.typography.weightBold};
     text-transform: uppercase;
     letter-spacing: 2px;
     margin-top: ${({ theme }) => theme.spacing.xs}px;
 `;
 
-export const HeroSection: React.FC = () => (
-    <HeroGradient
-        colors={HERO_COLORS}
-        start={{ x: 0.1, y: 0 }}
-        end={{ x: 0.9, y: 1 }}
-    >
-    <LogoImage
-        testID="kura-logo"
-        accessibilityLabel="Kura logo"
-        source={require('../../../../../assets/images/kura-logo.svg')}
-        contentFit="contain"
-    />
-    <Wordmark>kura</Wordmark>
-    <Tagline>Lawn care, simplified</Tagline>
-    <FadeOverlay
-        colors={FADE_COLORS}
-        locations={FADE_LOCATIONS}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 0, y: 1 }}
-        pointerEvents="none"
-    />
-  </HeroGradient>
-);
+export const HeroSection: React.FC = () => {
+    const { width, height } = useWindowDimensions();
+    const isTablet = Math.min(width, height) >= 600;
+
+    return (
+        <HeroContainer $isTablet={isTablet}>
+            <LogoImage
+                $isTablet={isTablet}
+                testID="kura-logo"
+                accessibilityLabel="Kura logo"
+                source={require('../../../../../assets/images/kura-logo.svg')}
+                contentFit="contain"
+            />
+            <Wordmark $isTablet={isTablet}>kura</Wordmark>
+            <Tagline $isTablet={isTablet}>Lawn care, simplified</Tagline>
+        </HeroContainer>
+    );
+};
