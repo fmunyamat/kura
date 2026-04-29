@@ -43,7 +43,7 @@ const GradientBackground = styled(LinearGradient)`
 `;
 
 const ButtonText = styled.Text`
-  color: #fff;
+  color: ${({ theme }: { theme: DefaultTheme }) => theme.colors.white};
   font-size: ${({ theme }: { theme: DefaultTheme }) => theme.typography.sizeMd}px;
   font-weight: ${({ theme }: { theme: DefaultTheme }) => theme.typography.weightBold};
 `;
@@ -68,15 +68,23 @@ export const MagicLinkForm: React.FC<MagicLinkFormProps> = ({
         autoCorrect={false}
         autoComplete="email"
         textContentType="emailAddress"
+        accessibilityLabel="Email address"
       />
-      <SubmitButton onPress={onSubmit} disabled={isLoading} activeOpacity={0.85}>
+      <SubmitButton
+        onPress={onSubmit}
+        disabled={isLoading}
+        activeOpacity={0.85}
+        accessibilityLabel={isLoading ? 'Sending magic link' : 'Send magic link'}
+        accessibilityRole="button"
+        accessibilityState={{ busy: isLoading, disabled: isLoading }}
+      >
         <GradientBackground
           colors={[theme.colors.primary, theme.colors.primaryMid]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
         >
           {isLoading ? (
-            <ActivityIndicator color="#fff" />
+            <ActivityIndicator color={theme.colors.white} />
           ) : (
             <ButtonText>Send magic link</ButtonText>
           )}

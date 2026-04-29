@@ -38,4 +38,15 @@ describe('MagicLinkForm', () => {
     fireEvent.press(getByText('Send magic link'));
     expect(onSubmit).toHaveBeenCalledTimes(1);
   });
+
+  it('shows ActivityIndicator and disables button when isLoading is true', () => {
+    const onSubmit = jest.fn();
+    const { queryByText, UNSAFE_getByType } = render(
+      <MagicLinkForm email="" onEmailChange={jest.fn()} onSubmit={onSubmit} isLoading />,
+      { wrapper: Wrapper }
+    );
+    expect(queryByText('Send magic link')).toBeNull();
+    const { ActivityIndicator } = require('react-native');
+    expect(UNSAFE_getByType(ActivityIndicator)).toBeTruthy();
+  });
 });

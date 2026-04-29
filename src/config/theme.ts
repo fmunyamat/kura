@@ -15,6 +15,7 @@ export const lightTheme = {
     textMuted:       '#888888',
     border:          '#e0e0e0',
     success:         '#C8E6C0',
+    white:           '#FFFFFF',
   },
   spacing: { xs: 4, sm: 8, md: 16, lg: 24, xl: 32, xxl: 48 },
   radii:   { sm: 4, md: 8, lg: 16, full: 9999 },
