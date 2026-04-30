@@ -1,5 +1,4 @@
 import { Image } from 'expo-image';
-import React from 'react';
 import styled from 'styled-components/native';
 
 export interface SocialAuthButtonsProps {
@@ -38,9 +37,9 @@ const ButtonLabel = styled.Text
     color: ${({ theme }) => theme.colors.textOnDark};
 `;
 
-export const SocialAuthButtons: React.FC<SocialAuthButtonsProps> = ({
+export const SocialAuthButtons = ({
   onGooglePress,
-}) => (
+}: SocialAuthButtonsProps) => (
     <ButtonsWrapper>
         <SocialButton
             onPress={onGooglePress}
@@ -48,11 +47,11 @@ export const SocialAuthButtons: React.FC<SocialAuthButtonsProps> = ({
             accessibilityLabel="Continue with Google"
             accessibilityRole="button"
         >
-        <BrandLogo
-            source={require('../../../../../assets/images/google-logo.svg')}
-            contentFit="contain"
-        />
-        <ButtonLabel>Sign in with Google</ButtonLabel>
+            <BrandLogo
+                source={require('../../../../../assets/images/google-logo.svg')}
+                contentFit="contain"
+            />
+            <ButtonLabel>Sign in with Google</ButtonLabel>
         </SocialButton>
     </ButtonsWrapper>
 );

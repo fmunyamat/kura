@@ -35,6 +35,7 @@ These are non-negotiable. Don't work around them, don't ask if they apply.
 - **No secrets in the codebase.** API keys, Supabase URLs, anon keys — all via `EXPO_PUBLIC_*` env vars. Never hardcoded. (MASVS-STORAGE-1, MASWE-0005)
 - **No AsyncStorage for sensitive data.** Tokens and session data go through `expo-secure-store` only. AsyncStorage is unencrypted and readable on rooted/jailbroken devices. (MASVS-STORAGE-1, MASWE-0006)
 - **No class-based components.** Functional components with hooks only, always.
+- **No `React.FC`.** Type props directly in the function signature instead. This keeps the type information in one place and avoids the hidden `children` prop that `React.FC` used to add automatically. Use: `export const MyComponent = ({ prop }: MyProps) => { ... }` — never `React.FC<MyProps>`.
 - **No inline `style={}`** except for values that must be computed at runtime (e.g. `Animated.Value` transforms, `onLayout` widths). Everything else is a styled-component.
 - **No `StyleSheet.create()`.** Styles belong in styled-components co-located with the component.
 - **No hardcoded color or spacing values** in component files. All tokens come from `theme`.
@@ -47,6 +48,67 @@ These are non-negotiable. Don't work around them, don't ask if they apply.
 - **Validate all external input with Zod** before it touches app state or the service layer. (MASVS-CODE-4, MASWE-0079)
 - **Never expose internal errors to the UI.** Log to Sentry; show a generic user-facing message. (MASVS-CODE-4, MASWE-0087)
 - **No custom cryptography.** Delegate all crypto to Supabase Auth, expo-secure-store, and TLS. (MASVS-CRYPTO-1, MASWE-0019)
+
+---
+
+## Code Style & Readability
+
+These rules exist because the codebase is actively being debugged and extended — comments are a first-class tool here, not noise.
+
+### Comment everything — in plain English
+
+Write comments as if explaining to someone who has never seen this code before. Use everyday words, no jargon. Every comment must explain **how** the code works, not just name what it is.
+
+Add a comment on:
+
+- **Every component** — describe what it draws on screen and how it behaves when the user interacts with it.
+- **Every hook** — explain what it tracks, what triggers it, and what it hands back to the component.
+- **Every service function** — describe the database or API call it makes, what data goes in, and what comes back.
+- **Every styled-component** — explain its visual role and any behaviour-driven styles (e.g. why opacity changes on a certain prop).
+- **Non-trivial logic** — walk through what the condition checks, what each branch does, and why.
+- **Security controls** — explain in plain English why the restriction exists, not just that it does.
+
+```tsx
+// EmailInput — the text box where the user types their email address.
+// We turn off autoComplete and textContentType so the device doesn't save
+// what the user types here — that prevents the keyboard from caching
+// sensitive input on the device (required by MASVS-PLATFORM-2).
+const EmailInput = styled(TextInput)`
+  border-width: 1px;
+  border-color: ${({ theme }) => theme.colors.inputBorderDark};
+`;
+
+// useTaskList — loads the list of lawn tasks for this user.
+// It asks Supabase for tasks that match the user's grass type and the
+// current season, then hands them back ready to display.
+// Results are kept fresh for 1 hour — if the hour hasn't passed,
+// the cached list is shown instantly while a background refresh runs.
+export const useTaskList = () => { ... };
+
+// If Supabase returns an error, we throw so TanStack Query catches it
+// and shows the error state — we never pass raw error messages to the UI
+// because they can contain internal database details (MASWE-0087).
+if (error) throw new Error(error.message);
+```
+
+### Naming
+
+- Components, hooks, services, and variables must be named for what they **do**, not what they **are**.
+  - ✅ `useSubmitMagicLink`, `TaskCompletionRow`, `fetchTasksForSeason`
+  - ❌ `useHelper`, `MyComponent`, `getData`
+- Booleans prefix with `is`, `has`, or `can`: `isLoading`, `hasError`, `canSubmit`.
+- Event handlers prefix with `handle`: `handleSubmit`, `handleEmailChange`.
+
+### Structure for scannability
+
+- Keep components under ~120 lines. Extract sub-components or hooks if they grow beyond that.
+- Order within a component file:
+  1. Imports
+  2. Types / interfaces
+  3. Styled-components
+  4. Component function
+  5. Exports
+- One concept per file — don't co-locate unrelated components.
 
 ---
 

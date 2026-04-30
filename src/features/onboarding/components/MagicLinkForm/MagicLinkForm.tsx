@@ -1,7 +1,6 @@
-import React from 'react';
-import { ActivityIndicator, TextInput } from 'react-native';
-import styled, { useTheme, DefaultTheme } from 'styled-components/native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { ActivityIndicator, TextInput } from 'react-native';
+import styled, { DefaultTheme, useTheme } from 'styled-components/native';
 
 interface MagicLinkFormProps {
   email: string;
@@ -48,49 +47,48 @@ const ButtonText = styled.Text`
   font-weight: ${({ theme }: { theme: DefaultTheme }) => theme.typography.weightBold};
 `;
 
-export const MagicLinkForm: React.FC<MagicLinkFormProps> = ({
+export const MagicLinkForm = ({
   email,
   onEmailChange,
   onSubmit,
   isLoading = false,
-}) => {
+}: MagicLinkFormProps) => {
   const theme = useTheme();
 
   return (
     <Container>
-      <Label>Email address</Label>
-      <StyledTextInput
-        placeholder="you@example.com"
-        placeholderTextColor="rgba(255,255,255,0.25)"
-        value={email}
-        onChangeText={onEmailChange}
-        keyboardType="email-address"
-        autoCapitalize="none"
-        autoCorrect={false}
-        autoComplete="email"
-        textContentType="emailAddress"
-        accessibilityLabel="Email address"
-      />
-      <SubmitButton
-        onPress={onSubmit}
-        disabled={isLoading}
-        activeOpacity={0.85}
-        accessibilityLabel={isLoading ? 'Sending magic link' : 'Send magic link'}
-        accessibilityRole="button"
-        accessibilityState={{ busy: isLoading, disabled: isLoading }}
-      >
-        <GradientBackground
-          colors={[theme.colors.primary, theme.colors.primaryMid]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 0 }}
+        <StyledTextInput
+            placeholder="Enter Email Address"
+            placeholderTextColor="rgba(255,255,255,0.25)"
+            value={email}
+            onChangeText={onEmailChange}
+            keyboardType="email-address"
+            autoCapitalize="none"
+            autoCorrect={false}
+            autoComplete="email"
+            textContentType="emailAddress"
+            accessibilityLabel="Email address"
+        />
+        <SubmitButton
+            onPress={onSubmit}
+            disabled={isLoading}
+            activeOpacity={0.85}
+            accessibilityLabel={isLoading ? 'Sending magic link' : 'Send magic link'}
+            accessibilityRole="button"
+            accessibilityState={{ busy: isLoading, disabled: isLoading }}
         >
-          {isLoading ? (
-            <ActivityIndicator color={theme.colors.white} />
-          ) : (
-            <ButtonText>Send magic link</ButtonText>
-          )}
-        </GradientBackground>
-      </SubmitButton>
+            <GradientBackground
+                colors={[theme.colors.primary, theme.colors.primaryMid]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+            >
+                {isLoading ? (
+                    <ActivityIndicator color={theme.colors.white} />
+                ) : (
+                    <ButtonText>Send magic link</ButtonText>
+                )}
+            </GradientBackground>
+        </SubmitButton>
     </Container>
   );
 };

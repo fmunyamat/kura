@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { KeyboardAvoidingView, Platform } from 'react-native';
 import styled from 'styled-components/native';
 import { HeroSection } from '../components/HeroSection';
@@ -21,8 +21,8 @@ const AuthPanel = styled.View`
   background-color: ${({ theme }) => theme.colors.panelDark};
   border-top-width: 1px;
   border-top-color: rgba(255,255,255,0.08);
-  padding: ${({ theme }) => theme.spacing.md}px;
-  gap: ${({ theme }) => theme.spacing.sm}px;
+  padding: ${({ theme }) => theme.spacing.lg}px;
+  gap: ${({ theme }) => theme.spacing.lg}px;
 `;
 
 const Divider = styled.View`
@@ -42,7 +42,7 @@ const DividerText = styled.Text`
   color: ${({ theme }) => theme.colors.textMutedOnDark};
 `;
 
-export const SignInScreen: React.FC = () => {
+export const SignInScreen = () => {
   const [email, setEmail] = useState('');
   const [submitted, setSubmitted] = useState(false);
 

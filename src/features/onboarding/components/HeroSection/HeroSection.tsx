@@ -1,5 +1,4 @@
 import { Image } from 'expo-image';
-import React from 'react';
 import { useWindowDimensions } from 'react-native';
 import styled from 'styled-components/native';
 
@@ -38,7 +37,7 @@ const Tagline = styled.Text<{ $isTablet: boolean }>
     margin-top: ${({ theme }) => theme.spacing.xs}px;
 `;
 
-export const HeroSection: React.FC = () => {
+export const HeroSection = () => {
     const { width, height } = useWindowDimensions();
     const isTablet = Math.min(width, height) >= 600;
 
