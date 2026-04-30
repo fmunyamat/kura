@@ -102,12 +102,15 @@ const Divider = styled.View`
   gap: ${({ theme }) => theme.spacing.sm}px;
 `;
 
+// DividerLine — one of the two thin horizontal rules flanking the label.
+// flex: 1 makes each line take equal space, so the label is always centred.
 const DividerLine = styled.View`
   flex: 1;
   height: 1px;
   background-color: ${({ theme }) => theme.colors.borderOnDark};
 `;
 
+// DividerText — the small "or continue with" label between the two rules.
 const DividerText = styled.Text`
   font-size: ${({ theme }) => theme.typography.sizeXs}px;
   color: ${({ theme }) => theme.colors.textMutedOnDark};
