@@ -28,10 +28,11 @@ const SocialButton = styled.TouchableOpacity`
   gap: ${({ theme }) => theme.spacing.xs}px;
 `;
 
-// BrandLogo — the provider's logo icon. Fixed 18×18 size on both platforms.
+// BrandLogo — the provider's logo icon. Size comes from theme.iconSizes.sm so
+// that all inline brand icons stay consistent if the token is ever updated.
 const BrandLogo = styled(Image)`
-  width: 18px;
-  height: 18px;
+  width: ${({ theme }) => theme.iconSizes.sm}px;
+  height: ${({ theme }) => theme.iconSizes.sm}px;
 `;
 
 // ButtonLabel — the provider name next to the logo. Shortened to single words
