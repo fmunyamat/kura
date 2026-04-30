@@ -21,8 +21,12 @@ const Clip = styled.View`
 `;
 
 // Blur — the expo-blur BlurView that applies a frosted-glass effect over
-// whatever is rendered behind this card in the view hierarchy. intensity and
-// tint are set via JSX props when the card is used, not here.
+// whatever is rendered behind this card in the view hierarchy. styled-components
+// cannot apply intensity or tint as CSS, so they are set as React props directly
+// on the <Blur> element inside GlassCard's render. intensity is configurable via
+// GlassCard's intensity prop. tint is fixed at "dark" because this card is
+// designed specifically for dark photo backgrounds — a light tint would look
+// washed-out over the full-bleed background image used on the sign-in screen.
 const Blur = styled(BlurView)``;
 
 // Content — sits on top of the blur and adds a faint white tint so the card
