@@ -42,6 +42,8 @@ export const lightTheme = {
     weightBlack:   '900' as const,
     lineHeightSm:       18,
     letterSpacingTight: -0.3,
+    letterSpacingBrand: -1,
+    letterSpacingWide:   2,
   },
 };
 

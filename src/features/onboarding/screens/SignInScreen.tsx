@@ -64,7 +64,7 @@ const Wordmark = styled.Text<{ $isTablet: boolean }>`
   font-size: ${({ $isTablet, theme }) =>
     $isTablet ? theme.typography.size2xl : theme.typography.size2xl * 0.8}px;
   font-weight: ${({ theme }) => theme.typography.weightBlack};
-  letter-spacing: -1px;
+  letter-spacing: ${({ theme }) => theme.typography.letterSpacingBrand}px;
 `;
 
 // Tagline — "Lawn care, simplified" in lime, uppercase and letter-spaced for
@@ -75,7 +75,7 @@ const Tagline = styled.Text<{ $isTablet: boolean }>`
     $isTablet ? theme.typography.sizeSm : theme.typography.sizeSm * 0.8}px;
   font-weight: ${({ theme }) => theme.typography.weightBold};
   text-transform: uppercase;
-  letter-spacing: 2px;
+  letter-spacing: ${({ theme }) => theme.typography.letterSpacingWide}px;
 `;
 
 // PanelHost — the lower three-fifths that holds both sliding panels.
@@ -92,6 +92,16 @@ const GlassAuthContent = styled.View<{ $width: number }>`
   width: ${({ $width }) => $width}px;
   padding: ${({ theme }) => theme.spacing.md}px;
   justify-content: center;
+`;
+
+// PanelRow — the horizontal Animated row that holds both panels side-by-side.
+// flex-direction: row and flex: 1 are static layout values defined here so the
+// Animated.View inline style only needs to carry the two runtime-computed values:
+// the total width (2× screen width, from useWindowDimensions) and the translateX
+// transform (driven by the Animated.Value slideAnim).
+const PanelRow = styled(Animated.View)`
+  flex-direction: row;
+  flex: 1;
 `;
 
 // Divider — the "or continue with" row between the magic link form and
@@ -182,15 +192,13 @@ export const SignInScreen = () => {
           </GlassHero>
 
           <PanelHost>
-            {/* The Animated.View holds both panels in a horizontal row.
+            {/* PanelRow holds both panels in a horizontal row.
                 Total width is 2× screen width — one panel slot each.
                 slideAnim shifts the entire row so the right panel comes
                 into view. Both panels are always mounted so the slide
                 is instant with no layout recalculation mid-animation. */}
-            <Animated.View
+            <PanelRow
               style={{
-                flexDirection: 'row',
-                flex: 1,
                 width: screenWidth * 2,
                 transform: [{ translateX: slideAnim }],
               }}
@@ -218,7 +226,7 @@ export const SignInScreen = () => {
               </GlassAuthContent>
 
               <ConfirmationPanel email={email} onReset={handleReset} />
-            </Animated.View>
+            </PanelRow>
           </PanelHost>
         </TintOverlay>
       </PhotoBackground>
