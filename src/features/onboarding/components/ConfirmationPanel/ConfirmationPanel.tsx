@@ -1,4 +1,3 @@
-import React from 'react';
 import styled from 'styled-components/native';
 
 interface ConfirmationPanelProps {
@@ -62,10 +61,10 @@ const ResetLink = styled.Text`
   margin-top: ${({ theme }) => theme.spacing.xs}px;
 `;
 
-export const ConfirmationPanel: React.FC<ConfirmationPanelProps> = ({
+export const ConfirmationPanel = ({
   email,
   onReset,
-}) => (
+}: ConfirmationPanelProps) => (
   <Panel>
     <IconCircle>
       <IconText>✉️</IconText>
