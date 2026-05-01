@@ -27,7 +27,11 @@ export const lightTheme = {
     borderOnDark:        'rgba(255,255,255,0.10)',
     buttonSurfaceDark:   '#2a2a2a',
   },
-  spacing: { xs: 4, sm: 8, md: 16, lg: 24, xl: 32, xxl: 48 },
+  spacing:   { xs: 4, sm: 8, md: 16, lg: 24, xl: 32, xxl: 48 },
+  // iconSizes — fixed dimensions for inline brand/action icons used alongside text.
+  // sm (18px) matches the Google and Apple logos in SocialAuthButtons and is the
+  // default size for any small icon sitting next to a button label.
+  iconSizes: { sm: 18 },
   radii:   { sm: 4, md: 8, lg: 16, full: 9999 },
   typography: {
     sizeXs: 12,
@@ -42,6 +46,8 @@ export const lightTheme = {
     weightBlack:   '900' as const,
     lineHeightSm:       18,
     letterSpacingTight: -0.3,
+    letterSpacingBrand: -1,
+    letterSpacingWide:   2,
   },
 };
 

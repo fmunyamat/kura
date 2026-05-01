@@ -1,0 +1,1418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kura — Sign-In Explorations</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=Syne:wght@700;800&family=Nunito:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green-900: #0c3520;
+      --green-700: #2D6A2D;
+      --green-500: #5A9E3A;
+      --lime:      rgba(184,229,106,0.92);
+      --screen:    #1a1a1a;
+      --panel:     #242424;
+    }
+
+    /* ─── PAGE SHELL ─── */
+    body {
+      background-color: #050905;
+      background-image:
+        radial-gradient(ellipse at 15% 20%, rgba(45,106,45,0.12) 0%, transparent 55%),
+        radial-gradient(ellipse at 85% 80%, rgba(12,53,32,0.15) 0%, transparent 55%),
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+      min-height: 100vh;
+      font-family: 'DM Sans', sans-serif;
+      color: #fff;
+    }
+
+    /* ─── HEADER ─── */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      padding: 52px 72px 40px;
+      border-bottom: 1px solid rgba(255,255,255,0.055);
+    }
+
+    .brand-mark {
+      display: flex;
+      align-items: baseline;
+      gap: 20px;
+    }
+
+    .brand-word {
+      font-family: 'Bebas Neue', cursive;
+      font-size: 80px;
+      letter-spacing: 6px;
+      line-height: 1;
+      color: #fff;
+    }
+
+    .brand-word em {
+      color: rgba(184,229,106,0.85);
+      font-style: normal;
+    }
+
+    .brand-sub {
+      font-size: 11px;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.28);
+      font-weight: 300;
+      padding-bottom: 10px;
+    }
+
+    .header-right {
+      text-align: right;
+    }
+
+    .header-title {
+      font-size: 24px;
+      font-weight: 300;
+      color: rgba(255,255,255,0.65);
+    }
+
+    .header-meta {
+      margin-top: 6px;
+      font-size: 11px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.2);
+    }
+
+    /* ─── CONCEPT LEGEND STRIP ─── */
+    .legend {
+      display: flex;
+      padding: 0 72px;
+      border-bottom: 1px solid rgba(255,255,255,0.055);
+      overflow-x: auto;
+    }
+
+    .legend-item {
+      flex: 1;
+      padding: 18px 0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-right: 1px solid rgba(255,255,255,0.055);
+      padding-right: 20px;
+      padding-left: 20px;
+      min-width: 0;
+      cursor: default;
+      transition: background 0.2s;
+    }
+
+    .legend-item:first-child { padding-left: 0; }
+    .legend-item:last-child  { border-right: none; }
+
+    .legend-num {
+      font-family: 'Bebas Neue', cursive;
+      font-size: 28px;
+      line-height: 1;
+      color: rgba(184,229,106,0.5);
+      flex-shrink: 0;
+    }
+
+    .legend-text {}
+
+    .legend-name {
+      font-size: 12px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.7);
+      white-space: nowrap;
+    }
+
+    .legend-tagline {
+      font-size: 10px;
+      color: rgba(255,255,255,0.25);
+      margin-top: 2px;
+      white-space: nowrap;
+    }
+
+    /* ─── PHONE GRID ─── */
+    .grid {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 48px 36px;
+      padding: 64px 40px 80px;
+    }
+
+    .phone-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 22px;
+      animation: rise 0.7s cubic-bezier(0.22,1,0.36,1) both;
+    }
+
+    .phone-wrap:nth-child(1) { animation-delay: 0.05s; }
+    .phone-wrap:nth-child(2) { animation-delay: 0.15s; }
+    .phone-wrap:nth-child(3) { animation-delay: 0.25s; }
+    .phone-wrap:nth-child(4) { animation-delay: 0.35s; }
+    .phone-wrap:nth-child(5) { animation-delay: 0.45s; }
+
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(32px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Phone chassis */
+    .phone {
+      width: 248px;
+      height: 536px;
+      background: #141414;
+      border-radius: 44px;
+      padding: 8px;
+      box-shadow:
+        0 0 0 1px rgba(255,255,255,0.07),
+        inset 0 0 0 1px rgba(255,255,255,0.03),
+        0 48px 96px -12px rgba(0,0,0,0.85),
+        0 24px 48px -8px rgba(0,0,0,0.5);
+      transition: transform 0.35s cubic-bezier(0.22,1,0.36,1),
+                  box-shadow 0.35s cubic-bezier(0.22,1,0.36,1);
+      position: relative;
+    }
+
+    .phone:hover {
+      transform: translateY(-10px) scale(1.025);
+      box-shadow:
+        0 0 0 1px rgba(184,229,106,0.15),
+        0 64px 120px -12px rgba(0,0,0,0.9),
+        0 32px 64px -8px rgba(45,106,45,0.2);
+    }
+
+    /* Side buttons */
+    .phone::before {
+      content: '';
+      position: absolute;
+      right: -3px;
+      top: 100px;
+      width: 3px;
+      height: 60px;
+      background: #1a1a1a;
+      border-radius: 0 3px 3px 0;
+    }
+
+    .phone::after {
+      content: '';
+      position: absolute;
+      left: -3px;
+      top: 80px;
+      width: 3px;
+      height: 40px;
+      background: #1a1a1a;
+      border-radius: 3px 0 0 3px;
+      box-shadow: 0 50px 0 #1a1a1a;
+    }
+
+    .screen {
+      width: 100%;
+      height: 100%;
+      border-radius: 37px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Dynamic island */
+    .island {
+      position: absolute;
+      top: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 88px;
+      height: 26px;
+      border-radius: 14px;
+      z-index: 50;
+    }
+
+    /* Shared status bar */
+    .sbar {
+      height: 48px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      padding: 0 22px 10px;
+      position: relative;
+      z-index: 10;
+    }
+
+    .sbar-time {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.2px;
+    }
+
+    .sbar-icons {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .sbar-signal {
+      display: flex;
+      align-items: flex-end;
+      gap: 1.5px;
+      height: 8px;
+    }
+
+    .sbar-signal span {
+      width: 2.5px;
+      background: currentColor;
+      border-radius: 1px;
+    }
+
+    .sbar-signal span:nth-child(1) { height: 3px; }
+    .sbar-signal span:nth-child(2) { height: 5px; }
+    .sbar-signal span:nth-child(3) { height: 7px; }
+    .sbar-signal span:nth-child(4) { height: 9px; }
+
+    .sbar-wifi {
+      font-size: 9px;
+      font-weight: 700;
+      opacity: 0.8;
+    }
+
+    .sbar-batt {
+      width: 20px;
+      height: 10px;
+      border: 1.5px solid currentColor;
+      border-radius: 2.5px;
+      position: relative;
+      opacity: 0.8;
+    }
+
+    .sbar-batt::before {
+      content: '';
+      position: absolute;
+      right: -4px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 2.5px;
+      height: 5px;
+      background: currentColor;
+      border-radius: 0 1px 1px 0;
+    }
+
+    .sbar-batt::after {
+      content: '';
+      position: absolute;
+      left: 2px;
+      top: 2px;
+      bottom: 2px;
+      right: 4px;
+      background: currentColor;
+      border-radius: 1px;
+    }
+
+    /* Phone label */
+    .plabel {
+      text-align: center;
+    }
+
+    .plabel-num {
+      display: block;
+      font-family: 'Bebas Neue', cursive;
+      font-size: 11px;
+      letter-spacing: 3px;
+      color: rgba(184,229,106,0.6);
+      margin-bottom: 5px;
+    }
+
+    .plabel-name {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.8);
+      margin-bottom: 4px;
+    }
+
+    .plabel-desc {
+      display: block;
+      font-size: 11px;
+      font-weight: 300;
+      color: rgba(255,255,255,0.28);
+      max-width: 210px;
+      line-height: 1.6;
+    }
+
+
+    /* ══════════════════════════════════════
+       01 · GLASSMORPHISM
+    ══════════════════════════════════════ */
+    .s-glass {
+      height: 100%;
+      background-image: url('../assets/images/mowing-photo.jpg');
+      background-size: cover;
+      background-position: center;
+      display: flex;
+      flex-direction: column;
+      font-family: 'DM Sans', sans-serif;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Dark tint + subtle mowing stripe overlay on top of the real photo */
+    .s-glass::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        repeating-linear-gradient(
+          95deg,
+          rgba(55,120,55,0.06) 0px,
+          rgba(55,120,55,0.06) 22px,
+          rgba(25,60,25,0.04) 22px,
+          rgba(25,60,25,0.04) 44px
+        ),
+        rgba(5,12,5,0.58);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .glass-hero {
+      flex: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      z-index: 1;
+      gap: 4px;
+    }
+
+    .glass-logo-wrap {
+      width: 54px; height: 54px;
+      background: linear-gradient(135deg, var(--green-700), var(--green-500));
+      border-radius: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      margin-bottom: 8px;
+      box-shadow: 0 10px 28px rgba(45,106,45,0.45), 0 0 0 1px rgba(90,158,58,0.3);
+    }
+
+    .glass-word {
+      font-size: 30px;
+      font-weight: 600;
+      color: #fff;
+      letter-spacing: -0.5px;
+    }
+
+    .glass-tag {
+      font-size: 8.5px;
+      letter-spacing: 2.8px;
+      text-transform: uppercase;
+      color: rgba(184,229,106,0.8);
+    }
+
+    .glass-body {
+      flex: 3;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .glass-card {
+      background: rgba(255,255,255,0.06);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 18px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+    }
+
+    .glass-lbl {
+      font-size: 9.5px;
+      color: rgba(255,255,255,0.45);
+      letter-spacing: 0.4px;
+    }
+
+    .glass-inp {
+      background: rgba(255,255,255,0.055);
+      border: 1px solid rgba(255,255,255,0.09);
+      border-radius: 9px;
+      padding: 9px 12px;
+      font-size: 10.5px;
+      color: rgba(255,255,255,0.35);
+    }
+
+    .glass-cta {
+      background: linear-gradient(90deg, #2D6A2D, #5A9E3A);
+      border-radius: 9px;
+      padding: 10px;
+      text-align: center;
+      font-size: 11px;
+      font-weight: 600;
+      color: #fff;
+      letter-spacing: 0.2px;
+    }
+
+    .glass-div {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .glass-div-line { flex: 1; height: 1px; background: rgba(255,255,255,0.09); }
+
+    .glass-div-txt {
+      font-size: 8.5px;
+      color: rgba(255,255,255,0.28);
+    }
+
+    .glass-soc {
+      display: flex;
+      gap: 8px;
+    }
+
+    .glass-soc-btn {
+      flex: 1;
+      background: rgba(255,255,255,0.05);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.09);
+      border-radius: 9px;
+      padding: 8px 4px;
+      text-align: center;
+      font-size: 9px;
+      color: rgba(255,255,255,0.55);
+    }
+
+
+    /* ══════════════════════════════════════
+       02 · HIGH-CONTRAST
+    ══════════════════════════════════════ */
+    .s-contrast {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      font-family: 'Syne', sans-serif;
+      background: #000;
+    }
+
+    .contrast-hero {
+      flex: 2;
+      background: #000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      gap: 6px;
+    }
+
+    .contrast-stripe {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--green-700);
+    }
+
+    .contrast-logo-wrap {
+      width: 46px; height: 46px;
+      border: 1.5px solid var(--green-700);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      margin-bottom: 8px;
+    }
+
+    .contrast-word {
+      font-size: 32px;
+      font-weight: 800;
+      color: #fff;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    .contrast-tag {
+      font-size: 7.5px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--green-700);
+      font-weight: 700;
+    }
+
+    .contrast-body {
+      flex: 3;
+      /* Photo is crushed almost to black underneath, giving the grass
+         texture a faint presence while keeping the high-contrast aesthetic */
+      background-image:
+        repeating-linear-gradient(
+          0deg,
+          rgba(45,106,45,0.07) 0px,
+          rgba(45,106,45,0.07) 2px,
+          transparent 2px,
+          transparent 14px
+        ),
+        linear-gradient(rgba(4,4,4,0.88), rgba(4,4,4,0.88)),
+        url('../assets/images/mowing-photo.jpg');
+      background-size: auto, auto, cover;
+      background-position: auto, auto, center bottom;
+      padding: 18px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .contrast-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .contrast-lbl {
+      font-size: 7.5px;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: var(--green-700);
+      font-weight: 700;
+    }
+
+    .contrast-inp {
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid var(--green-700);
+      padding: 8px 0;
+      font-size: 10.5px;
+      color: rgba(255,255,255,0.3);
+    }
+
+    .contrast-cta {
+      background: var(--green-700);
+      padding: 11px;
+      text-align: center;
+      font-size: 9.5px;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+    }
+
+    .contrast-div {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .contrast-div-line { flex: 1; height: 1px; background: rgba(45,106,45,0.25); }
+
+    .contrast-div-txt {
+      font-size: 8px;
+      color: rgba(255,255,255,0.18);
+      letter-spacing: 1px;
+    }
+
+    .contrast-soc {
+      display: flex;
+      gap: 8px;
+    }
+
+    .contrast-soc-btn {
+      flex: 1;
+      border: 1px solid rgba(45,106,45,0.35);
+      padding: 8px 4px;
+      text-align: center;
+      font-size: 8.5px;
+      color: rgba(255,255,255,0.35);
+    }
+
+
+    /* ══════════════════════════════════════
+       03 · ILLUSTRATIVE NATURE
+    ══════════════════════════════════════ */
+    .s-illus {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      font-family: 'Nunito', sans-serif;
+      /* Real photo sits at the base; the SVG illustration layers over it
+         so the actual lawn peeks through the illustrated landscape */
+      background-image: url('../assets/images/mowing-photo.jpg');
+      background-size: cover;
+      background-position: center bottom;
+      position: relative;
+    }
+
+    .illus-svg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 56%;
+    }
+
+    .illus-hero {
+      flex: 0 0 56%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      z-index: 2;
+      gap: 4px;
+    }
+
+    .illus-logo-wrap {
+      width: 50px; height: 50px;
+      background: rgba(255,255,255,0.1);
+      border: 1.5px solid rgba(255,255,255,0.18);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      margin-bottom: 8px;
+    }
+
+    .illus-word {
+      font-size: 28px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .illus-tag {
+      font-size: 8px;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: rgba(184,229,106,0.75);
+      font-weight: 600;
+    }
+
+    .illus-body {
+      flex: 1;
+      background: rgba(8,18,8,0.93);
+      backdrop-filter: blur(4px);
+      border-radius: 22px 22px 0 0;
+      margin-top: -18px;
+      padding: 20px 16px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+      position: relative;
+      z-index: 3;
+    }
+
+    .illus-lbl {
+      font-size: 9px;
+      color: rgba(255,255,255,0.4);
+      font-weight: 600;
+    }
+
+    .illus-inp {
+      background: rgba(255,255,255,0.055);
+      border: 1.5px solid rgba(90,158,58,0.22);
+      border-radius: 11px;
+      padding: 9px 12px;
+      font-size: 10.5px;
+      color: rgba(255,255,255,0.32);
+    }
+
+    .illus-cta {
+      background: linear-gradient(135deg, #2D6A2D, #5A9E3A);
+      border-radius: 28px;
+      padding: 10px;
+      text-align: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .illus-div {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .illus-div-line { flex: 1; height: 1px; background: rgba(90,158,58,0.18); }
+
+    .illus-div-txt {
+      font-size: 8.5px;
+      color: rgba(255,255,255,0.22);
+    }
+
+    .illus-soc {
+      display: flex;
+      gap: 8px;
+    }
+
+    .illus-soc-btn {
+      flex: 1;
+      background: rgba(255,255,255,0.04);
+      border: 1.5px solid rgba(90,158,58,0.18);
+      border-radius: 11px;
+      padding: 7px 4px;
+      text-align: center;
+      font-size: 9px;
+      color: rgba(255,255,255,0.45);
+    }
+
+
+    /* ══════════════════════════════════════
+       04 · CENTERED BRAND STORY
+    ══════════════════════════════════════ */
+    .s-brand {
+      height: 100%;
+      background: #f4f6f3;
+      display: flex;
+      flex-direction: column;
+      font-family: 'DM Sans', sans-serif;
+    }
+
+    .brand-hero {
+      flex: 1.1;
+      /* Near-opaque sage overlay lets the mowing photo show through just
+         enough to add organic texture without breaking the light-mode feel */
+      background-image:
+        linear-gradient(180deg, rgba(228,236,226,0.93) 0%, rgba(240,244,239,0.97) 100%),
+        url('../assets/images/mowing-photo.jpg');
+      background-size: auto, cover;
+      background-position: auto, center top;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      padding-bottom: 22px;
+      gap: 4px;
+    }
+
+    .brand-logo-wrap {
+      width: 44px; height: 44px;
+      background: var(--green-700);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      margin-bottom: 10px;
+    }
+
+    .brand-word {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 36px;
+      font-weight: 400;
+      color: #1a2a1a;
+      letter-spacing: 3px;
+    }
+
+    .brand-tag {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: 12.5px;
+      color: var(--green-700);
+      letter-spacing: 0.3px;
+    }
+
+    .brand-body {
+      flex: 2;
+      background: #f4f6f3;
+      padding: 26px 20px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .brand-group {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .brand-lbl {
+      font-size: 8.5px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: #999;
+      font-weight: 500;
+    }
+
+    .brand-inp {
+      border: none;
+      border-bottom: 1.5px solid #d2dbd1;
+      padding: 8px 0;
+      font-size: 11px;
+      color: #555;
+      background: transparent;
+      width: 100%;
+    }
+
+    .brand-cta {
+      background: var(--green-700);
+      border-radius: 9px;
+      padding: 12px;
+      text-align: center;
+      font-size: 11px;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .brand-div {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand-div-line { flex: 1; height: 1px; background: #dce4db; }
+
+    .brand-div-txt {
+      font-size: 9px;
+      color: #bbb;
+    }
+
+    .brand-soc {
+      display: flex;
+      gap: 8px;
+    }
+
+    .brand-soc-btn {
+      flex: 1;
+      border: 1px solid #d5ddd4;
+      border-radius: 9px;
+      padding: 8px 4px;
+      text-align: center;
+      font-size: 9px;
+      color: #666;
+      background: #fff;
+    }
+
+
+    /* ══════════════════════════════════════
+       05 · TACTICAL SPLIT
+    ══════════════════════════════════════ */
+    .s-tact {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      font-family: 'IBM Plex Sans', sans-serif;
+    }
+
+    .tact-photo {
+      flex: 0 0 38%;
+      position: relative;
+      /* Actual mowing photo with mowing stripes and a dark tint layered on top */
+      background-image:
+        repeating-linear-gradient(
+          88deg,
+          rgba(50,100,50,0.1) 0px,
+          rgba(50,100,50,0.1) 26px,
+          rgba(25,60,25,0.1) 26px,
+          rgba(25,60,25,0.1) 52px
+        ),
+        linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)),
+        url('../assets/images/mowing-photo.jpg');
+      background-size: auto, auto, cover;
+      background-position: auto, auto, center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+    }
+
+    .tact-photo::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 36px;
+      background: linear-gradient(transparent, var(--screen));
+      pointer-events: none;
+    }
+
+    .tact-logo-wrap {
+      width: 40px; height: 40px;
+      border: 1px solid rgba(255,255,255,0.2);
+      background: rgba(255,255,255,0.07);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      margin-bottom: 6px;
+    }
+
+    .tact-word {
+      font-size: 24px;
+      font-weight: 600;
+      color: #fff;
+      letter-spacing: -0.2px;
+    }
+
+    .tact-tag {
+      font-size: 7.5px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: rgba(184,229,106,0.65);
+      font-weight: 400;
+    }
+
+    .tact-form {
+      flex: 1;
+      background: var(--screen);
+      padding: 20px 16px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .tact-group {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .tact-lbl {
+      font-size: 7.5px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.38);
+      font-weight: 500;
+    }
+
+    .tact-inp {
+      background: #242424;
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 9px;
+      padding: 9px 12px;
+      font-size: 10.5px;
+      color: rgba(255,255,255,0.3);
+      width: 100%;
+    }
+
+    .tact-cta {
+      background: linear-gradient(90deg, #2D6A2D, #5A9E3A);
+      border-radius: 28px;
+      padding: 11px;
+      text-align: center;
+      font-size: 11px;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .tact-div {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .tact-div-line { flex: 1; height: 1px; background: rgba(255,255,255,0.07); }
+
+    .tact-div-txt {
+      font-size: 8.5px;
+      color: rgba(255,255,255,0.22);
+    }
+
+    .tact-soc {
+      display: flex;
+      gap: 8px;
+    }
+
+    .tact-soc-btn {
+      flex: 1;
+      background: #242424;
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 28px;
+      padding: 8px 4px;
+      text-align: center;
+      font-size: 9px;
+      color: rgba(255,255,255,0.42);
+    }
+
+    /* ─── FOOTER ─── */
+    .footer {
+      padding: 22px 72px;
+      border-top: 1px solid rgba(255,255,255,0.055);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .footer-txt {
+      font-size: 11px;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.18);
+    }
+
+    .footer-dots {
+      display: flex;
+      gap: 6px;
+    }
+
+    .footer-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: rgba(184,229,106,0.35);
+    }
+
+    .footer-dot:nth-child(3) {
+      background: rgba(184,229,106,0.6);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="header">
+    <div class="brand-mark">
+      <div class="brand-word">KUR<em>A</em></div>
+      <div class="brand-sub">Lawn Care App</div>
+    </div>
+    <div class="header-right">
+      <div class="header-title">Sign-In Screen Explorations</div>
+      <div class="header-meta">5 Design Directions · April 2026</div>
+    </div>
+  </header>
+
+  <!-- CONCEPT LEGEND -->
+  <nav class="legend">
+    <div class="legend-item">
+      <div class="legend-num">01</div>
+      <div class="legend-text">
+        <div class="legend-name">Glassmorphism</div>
+        <div class="legend-tagline">Frosted glass card over photo</div>
+      </div>
+    </div>
+    <div class="legend-item">
+      <div class="legend-num">02</div>
+      <div class="legend-text">
+        <div class="legend-name">High-Contrast</div>
+        <div class="legend-tagline">Pure black + brand green accents</div>
+      </div>
+    </div>
+    <div class="legend-item">
+      <div class="legend-num">03</div>
+      <div class="legend-text">
+        <div class="legend-name">Illustrative</div>
+        <div class="legend-tagline">Layered vector landscape</div>
+      </div>
+    </div>
+    <div class="legend-item">
+      <div class="legend-num">04</div>
+      <div class="legend-text">
+        <div class="legend-name">Brand Story</div>
+        <div class="legend-tagline">Serif tagline · light mode</div>
+      </div>
+    </div>
+    <div class="legend-item">
+      <div class="legend-num">05</div>
+      <div class="legend-text">
+        <div class="legend-name">Tactical Split</div>
+        <div class="legend-tagline">Photo top 40% · dark form below</div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- PHONE GRID -->
+  <main class="grid">
+
+    <!-- 01 · GLASSMORPHISM -->
+    <div class="phone-wrap">
+      <div class="phone">
+        <div class="screen">
+          <div class="s-glass">
+            <div class="island" style="background:#0b1a0b;"></div>
+            <div class="sbar" style="color:rgba(255,255,255,0.85)">
+              <span class="sbar-time">9:41</span>
+              <div class="sbar-icons">
+                <div class="sbar-signal" style="color:rgba(255,255,255,0.7)">
+                  <span></span><span></span><span></span><span></span>
+                </div>
+                <span class="sbar-wifi" style="color:rgba(255,255,255,0.7)">▲</span>
+                <div class="sbar-batt" style="color:rgba(255,255,255,0.75)"></div>
+              </div>
+            </div>
+            <div class="glass-hero">
+              <div class="glass-logo-wrap">🌿</div>
+              <div class="glass-word">kura</div>
+              <div class="glass-tag">Lawn care, simplified</div>
+            </div>
+            <div class="glass-body">
+              <div class="glass-card">
+                <div class="glass-lbl">Email address</div>
+                <div class="glass-inp">you@example.com</div>
+                <div class="glass-cta">Send magic link</div>
+              </div>
+              <div class="glass-div">
+                <div class="glass-div-line"></div>
+                <span class="glass-div-txt">or continue with</span>
+                <div class="glass-div-line"></div>
+              </div>
+              <div class="glass-soc">
+                <div class="glass-soc-btn">G &nbsp;Google</div>
+                <div class="glass-soc-btn">&nbsp;Apple</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="plabel">
+        <span class="plabel-num">CONCEPT 01</span>
+        <span class="plabel-name">Glassmorphism</span>
+        <span class="plabel-desc">Frosted glass card floats over the mowing photo — premium depth without clutter</span>
+      </div>
+    </div>
+
+    <!-- 02 · HIGH-CONTRAST -->
+    <div class="phone-wrap">
+      <div class="phone">
+        <div class="screen">
+          <div class="s-contrast">
+            <div class="island" style="background:#000;"></div>
+            <div class="sbar" style="background:#000;color:rgba(255,255,255,0.85)">
+              <span class="sbar-time">9:41</span>
+              <div class="sbar-icons">
+                <div class="sbar-signal" style="color:rgba(255,255,255,0.7)">
+                  <span></span><span></span><span></span><span></span>
+                </div>
+                <span class="sbar-wifi" style="color:rgba(255,255,255,0.7)">▲</span>
+                <div class="sbar-batt" style="color:rgba(255,255,255,0.75)"></div>
+              </div>
+            </div>
+            <div class="contrast-hero">
+              <div class="contrast-logo-wrap">🌿</div>
+              <div class="contrast-word">kura</div>
+              <div class="contrast-tag">Lawn care, simplified</div>
+              <div class="contrast-stripe"></div>
+            </div>
+            <div class="contrast-body">
+              <div class="contrast-group">
+                <div class="contrast-lbl">Email</div>
+                <div class="contrast-inp">you@example.com</div>
+              </div>
+              <div class="contrast-cta">Send magic link</div>
+              <div class="contrast-div">
+                <div class="contrast-div-line"></div>
+                <span class="contrast-div-txt">or continue with</span>
+                <div class="contrast-div-line"></div>
+              </div>
+              <div class="contrast-soc">
+                <div class="contrast-soc-btn">G &nbsp;Google</div>
+                <div class="contrast-soc-btn">&nbsp;Apple</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="plabel">
+        <span class="plabel-num">CONCEPT 02</span>
+        <span class="plabel-name">High-Contrast</span>
+        <span class="plabel-desc">Pure black top half, brand green everywhere — maximum brand recognition</span>
+      </div>
+    </div>
+
+    <!-- 03 · ILLUSTRATIVE NATURE -->
+    <div class="phone-wrap">
+      <div class="phone">
+        <div class="screen">
+          <div class="s-illus">
+
+            <!-- SVG Landscape -->
+            <svg class="illus-svg" viewBox="0 0 248 300" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+              <!-- Night sky -->
+              <defs>
+                <radialGradient id="skyGrad" cx="50%" cy="0%" r="80%">
+                  <stop offset="0%"   stop-color="#0d2010"/>
+                  <stop offset="100%" stop-color="#060e06"/>
+                </radialGradient>
+              </defs>
+              <rect width="248" height="300" fill="url(#skyGrad)"/>
+              <!-- Stars -->
+              <circle cx="40"  cy="25" r="0.9" fill="rgba(255,255,255,0.45)"/>
+              <circle cx="120" cy="15" r="1.1" fill="rgba(255,255,255,0.35)"/>
+              <circle cx="195" cy="35" r="0.8" fill="rgba(255,255,255,0.5)"/>
+              <circle cx="70"  cy="50" r="0.7" fill="rgba(255,255,255,0.3)"/>
+              <circle cx="220" cy="18" r="1.0" fill="rgba(255,255,255,0.4)"/>
+              <circle cx="155" cy="45" r="0.6" fill="rgba(255,255,255,0.25)"/>
+              <circle cx="30"  cy="65" r="0.8" fill="rgba(255,255,255,0.3)"/>
+              <!-- Far hill layer -->
+              <ellipse cx="60"  cy="230" rx="130" ry="90" fill="#0e1e0e"/>
+              <ellipse cx="190" cy="240" rx="120" ry="80" fill="#0c1a0c"/>
+              <!-- Mid hill layer -->
+              <ellipse cx="25"  cy="255" rx="110" ry="65" fill="#142814"/>
+              <ellipse cx="210" cy="260" rx="130" ry="70" fill="#122212"/>
+              <!-- Foreground lawn -->
+              <rect x="0" y="235" width="248" height="65" fill="#1a3a1a"/>
+              <!-- Mowing stripes -->
+              <rect x="0"   y="235" width="31" height="65" fill="rgba(30,70,30,0.45)"/>
+              <rect x="62"  y="235" width="31" height="65" fill="rgba(30,70,30,0.45)"/>
+              <rect x="124" y="235" width="31" height="65" fill="rgba(30,70,30,0.45)"/>
+              <rect x="186" y="235" width="31" height="65" fill="rgba(30,70,30,0.45)"/>
+              <!-- Tree silhouettes -->
+              <path d="M8,195   L14,155 L20,195Z" fill="#0a160a"/>
+              <path d="M228,185 L234,148 L240,185Z" fill="#0a160a"/>
+              <path d="M105,192 L110,160 L115,192Z" fill="#0a160a"/>
+              <!-- Moon -->
+              <circle cx="195" cy="28" r="12" fill="rgba(220,240,200,0.08)"/>
+              <circle cx="199" cy="26" r="11" fill="#060e06"/>
+            </svg>
+
+            <div class="island" style="background:#0b1a0b;"></div>
+            <div class="sbar" style="color:rgba(255,255,255,0.8)">
+              <span class="sbar-time">9:41</span>
+              <div class="sbar-icons">
+                <div class="sbar-signal" style="color:rgba(255,255,255,0.65)">
+                  <span></span><span></span><span></span><span></span>
+                </div>
+                <span class="sbar-wifi" style="color:rgba(255,255,255,0.65)">▲</span>
+                <div class="sbar-batt" style="color:rgba(255,255,255,0.7)"></div>
+              </div>
+            </div>
+            <div class="illus-hero">
+              <div class="illus-logo-wrap">🌿</div>
+              <div class="illus-word">kura</div>
+              <div class="illus-tag">Lawn care, simplified</div>
+            </div>
+            <div class="illus-body">
+              <div class="illus-lbl">Email address</div>
+              <div class="illus-inp">you@example.com</div>
+              <div class="illus-cta">Send magic link →</div>
+              <div class="illus-div">
+                <div class="illus-div-line"></div>
+                <span class="illus-div-txt">or continue with</span>
+                <div class="illus-div-line"></div>
+              </div>
+              <div class="illus-soc">
+                <div class="illus-soc-btn">G &nbsp;Google</div>
+                <div class="illus-soc-btn">&nbsp;Apple</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="plabel">
+        <span class="plabel-num">CONCEPT 03</span>
+        <span class="plabel-name">Illustrative Nature</span>
+        <span class="plabel-desc">Layered SVG landscape at night — a unique, ownable visual identity</span>
+      </div>
+    </div>
+
+    <!-- 04 · CENTERED BRAND STORY -->
+    <div class="phone-wrap">
+      <div class="phone">
+        <div class="screen">
+          <div class="s-brand">
+            <div class="island" style="background:#e6ede4;"></div>
+            <div class="sbar" style="background:transparent;color:rgba(30,50,30,0.7)">
+              <span class="sbar-time" style="color:#333">9:41</span>
+              <div class="sbar-icons">
+                <div class="sbar-signal" style="color:rgba(30,60,30,0.55)">
+                  <span></span><span></span><span></span><span></span>
+                </div>
+                <span class="sbar-wifi" style="color:rgba(30,60,30,0.55)">▲</span>
+                <div class="sbar-batt" style="color:rgba(30,60,30,0.6)"></div>
+              </div>
+            </div>
+            <div class="brand-hero">
+              <div class="brand-logo-wrap">🌿</div>
+              <div class="brand-word">kura</div>
+              <div class="brand-tag">Lawn care, simplified.</div>
+            </div>
+            <div class="brand-body">
+              <div class="brand-group">
+                <div class="brand-lbl">Email address</div>
+                <div class="brand-inp">you@example.com</div>
+              </div>
+              <div class="brand-cta">Send magic link</div>
+              <div class="brand-div">
+                <div class="brand-div-line"></div>
+                <span class="brand-div-txt">or continue with</span>
+                <div class="brand-div-line"></div>
+              </div>
+              <div class="brand-soc">
+                <div class="brand-soc-btn">G &nbsp;Google</div>
+                <div class="brand-soc-btn">&nbsp;Apple</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="plabel">
+        <span class="plabel-num">CONCEPT 04</span>
+        <span class="plabel-name">Centered Brand Story</span>
+        <span class="plabel-desc">Serif wordmark, italic tagline, generous space — editorial and refined</span>
+      </div>
+    </div>
+
+    <!-- 05 · TACTICAL SPLIT -->
+    <div class="phone-wrap">
+      <div class="phone">
+        <div class="screen">
+          <div class="s-tact">
+            <div class="tact-photo">
+              <div class="island" style="background:#091809;"></div>
+              <div class="sbar" style="position:absolute;top:0;left:0;right:0;color:rgba(255,255,255,0.8)">
+                <span class="sbar-time">9:41</span>
+                <div class="sbar-icons">
+                  <div class="sbar-signal" style="color:rgba(255,255,255,0.65)">
+                    <span></span><span></span><span></span><span></span>
+                  </div>
+                  <span class="sbar-wifi" style="color:rgba(255,255,255,0.65)">▲</span>
+                  <div class="sbar-batt" style="color:rgba(255,255,255,0.7)"></div>
+                </div>
+              </div>
+              <div class="tact-logo-wrap">🌿</div>
+              <div class="tact-word">kura</div>
+              <div class="tact-tag">Lawn care, simplified</div>
+            </div>
+            <div class="tact-form">
+              <div class="tact-group">
+                <div class="tact-lbl">Email address</div>
+                <div class="tact-inp">you@example.com</div>
+              </div>
+              <div class="tact-cta">Send magic link</div>
+              <div class="tact-div">
+                <div class="tact-div-line"></div>
+                <span class="tact-div-txt">or continue with</span>
+                <div class="tact-div-line"></div>
+              </div>
+              <div class="tact-soc">
+                <div class="tact-soc-btn">G &nbsp;Google</div>
+                <div class="tact-soc-btn">&nbsp;Apple</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="plabel">
+        <span class="plabel-num">CONCEPT 05</span>
+        <span class="plabel-name">Tactical Split</span>
+        <span class="plabel-desc">Hard photo/form split — organized, tool-like with pill-shaped buttons</span>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <span class="footer-txt">Kura — Design System</span>
+    <div class="footer-dots">
+      <div class="footer-dot"></div>
+      <div class="footer-dot"></div>
+      <div class="footer-dot"></div>
+    </div>
+    <span class="footer-txt">V1 · 2026</span>
+  </footer>
+
+</body>
+</html>

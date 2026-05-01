@@ -14,7 +14,7 @@ describe('SocialAuthButtons (iOS)', () => {
       <SocialAuthButtons onGooglePress={jest.fn()} onApplePress={jest.fn()} />,
       { wrapper: Wrapper },
     );
-    expect(getByText('Continue with Google')).toBeTruthy();
+    expect(getByText('Google')).toBeTruthy();
   });
 
   it('renders the Apple button', () => {
@@ -22,7 +22,7 @@ describe('SocialAuthButtons (iOS)', () => {
       <SocialAuthButtons onGooglePress={jest.fn()} onApplePress={jest.fn()} />,
       { wrapper: Wrapper },
     );
-    expect(getByText('Continue with Apple')).toBeTruthy();
+    expect(getByText('Apple')).toBeTruthy();
   });
 
   it('calls onGooglePress when Google button is pressed', () => {
@@ -31,7 +31,7 @@ describe('SocialAuthButtons (iOS)', () => {
       <SocialAuthButtons onGooglePress={onGooglePress} onApplePress={jest.fn()} />,
       { wrapper: Wrapper },
     );
-    fireEvent.press(getByText('Continue with Google'));
+    fireEvent.press(getByText('Google'));
     expect(onGooglePress).toHaveBeenCalledTimes(1);
   });
 
@@ -41,7 +41,7 @@ describe('SocialAuthButtons (iOS)', () => {
       <SocialAuthButtons onGooglePress={jest.fn()} onApplePress={onApplePress} />,
       { wrapper: Wrapper },
     );
-    fireEvent.press(getByText('Continue with Apple'));
+    fireEvent.press(getByText('Apple'));
     expect(onApplePress).toHaveBeenCalledTimes(1);
   });
 });
