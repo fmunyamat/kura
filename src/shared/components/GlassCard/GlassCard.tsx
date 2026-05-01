@@ -30,8 +30,9 @@ const Clip = styled.View`
 const Blur = styled(BlurView)``;
 
 // Content — sits on top of the blur and adds a faint white tint so the card
-// reads as a distinct surface. Also supplies the inner padding and gap that
-// space out whatever children are placed inside.
+// reads as a distinct surface. Also supplies the inner padding. The gap spaces
+// out multiple top-level sections — when a single wrapper child is used, it has
+// no siblings to gap against and is inert.
 const Content = styled.View`
   background-color: rgba(255, 255, 255, 0.04);
   padding: ${({ theme }) => theme.spacing.md}px;

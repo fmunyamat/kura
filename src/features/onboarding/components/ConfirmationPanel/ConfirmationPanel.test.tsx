@@ -1,3 +1,5 @@
+jest.mock('expo-blur', () => ({ BlurView: 'BlurView' }));
+
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
 import { ThemeProvider } from 'styled-components/native';
