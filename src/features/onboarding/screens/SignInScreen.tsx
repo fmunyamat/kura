@@ -1,18 +1,18 @@
 import { Image } from 'expo-image';
 import { useRef, useState } from 'react';
 import {
-  Animated,
-  Easing,
-  ImageBackground,
-  KeyboardAvoidingView,
-  Platform,
-  useWindowDimensions,
+    Animated,
+    Easing,
+    ImageBackground,
+    KeyboardAvoidingView,
+    Platform,
+    useWindowDimensions,
 } from 'react-native';
 import styled from 'styled-components/native';
+import { GlassCard } from '~/shared/components/GlassCard';
 import { ConfirmationPanel } from '../components/ConfirmationPanel';
 import { MagicLinkForm } from '../components/MagicLinkForm';
 import { SocialAuthButtons } from '../components/SocialAuthButtons';
-import { GlassCard } from '~/shared/components/GlassCard';
 
 const KEYBOARD_BEHAVIOR = Platform.select<'padding' | undefined>({
   ios: 'padding',
@@ -40,12 +40,13 @@ const TintOverlay = styled.View`
   background-color: rgba(5, 12, 5, 0.58);
 `;
 
-// GlassHero — the upper two-fifths of the screen. The logo, wordmark, and
+// GlassHero — the upper quarter of the screen. The logo, wordmark, and
 // tagline sit here, floating directly over the tinted photo.
 const GlassHero = styled.View`
-  flex: 2;
+  flex: 1;
   align-items: center;
   justify-content: center;
+  padding-top: ${({ theme }) => theme.spacing.xxl*4}px;
   gap: ${({ theme }) => theme.spacing.xs}px;
 `;
 
