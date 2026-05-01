@@ -25,7 +25,7 @@ const StyledTextInput = styled(TextInput)`
   border-color: ${({ theme }: { theme: DefaultTheme }) => theme.colors.inputBorderDark};
   background-color: ${({ theme }: { theme: DefaultTheme }) => theme.colors.inputBackgroundDark};
   border-radius: ${({ theme }: { theme: DefaultTheme }) => theme.radii.md}px;
-  padding: ${({ theme }: { theme: DefaultTheme }) => theme.spacing.md}px;
+  padding: ${({ theme }: { theme: DefaultTheme }) => theme.spacing.sm}px;
   font-size: ${({ theme }: { theme: DefaultTheme }) => theme.typography.sizeMd}px;
   color: ${({ theme }: { theme: DefaultTheme }) => theme.colors.textOnDark};
 `;
