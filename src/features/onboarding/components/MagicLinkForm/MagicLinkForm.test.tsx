@@ -16,7 +16,7 @@ describe('MagicLinkForm', () => {
       <MagicLinkForm email="" onEmailChange={jest.fn()} onSubmit={jest.fn()} />,
       { wrapper: Wrapper }
     );
-    expect(getByPlaceholderText('you@example.com')).toBeTruthy();
+    expect(getByPlaceholderText('Enter Email Address')).toBeTruthy();
   });
 
   it('calls onEmailChange when text changes', () => {
@@ -25,7 +25,7 @@ describe('MagicLinkForm', () => {
       <MagicLinkForm email="" onEmailChange={onEmailChange} onSubmit={jest.fn()} />,
       { wrapper: Wrapper }
     );
-    fireEvent.changeText(getByPlaceholderText('you@example.com'), 'test@example.com');
+    fireEvent.changeText(getByPlaceholderText('Enter Email Address'), 'test@example.com');
     expect(onEmailChange).toHaveBeenCalledWith('test@example.com');
   });
 
