@@ -20,6 +20,7 @@ Beginner lawn care app. Target audience: People with zero lawn experience. Every
 | Forms | React Hook Form + Zod |
 | Styling | styled-components/native v6+ |
 | Images | expo-image |
+| Camera / Photo picker | expo-image-picker |
 | Secure Storage | expo-secure-store |
 | Screen Capture | expo-screen-capture |
 | Testing | Jest · React Native Testing Library · Detox (E2E) |
@@ -142,10 +143,17 @@ src/
 │   │   ├── hooks/                 # useTaskList.ts, useCompleteTask.ts
 │   │   ├── services/tasks.service.ts
 │   │   └── types.ts
-│   └── notifications/
-│       ├── hooks/useNotifications.ts
-│       ├── services/notifications.service.ts
-│       │   # platform split: .ios.ts / .android.ts / .ts (fallback)
+│   ├── notifications/
+│   │   ├── hooks/useNotifications.ts
+│   │   ├── services/notifications.service.ts
+│   │   │   # platform split: .ios.ts / .android.ts / .ts (fallback)
+│   │   └── types.ts
+│   └── progress-photos/
+│       ├── screens/               # LawnProgressScreen, PhotoCaptureScreen
+│       ├── components/PhotoTimeline/  # scrollable before→now timeline
+│       ├── components/PhotoThumbnail/ # single photo cell with date label
+│       ├── hooks/                 # useLawnPhotos.ts, useUploadPhoto.ts
+│       ├── services/progressPhotos.service.ts
 │       └── types.ts
 │
 ├── shared/
@@ -503,8 +511,10 @@ Rules:
 
 | Permission | Timing | Reason |
 |---|---|---|
-| `NOTIFICATIONS` | At end of onboarding, with explanation shown | Weekly reminders |
+| `NOTIFICATIONS` | At end of onboarding, with explanation shown | Weekly task reminders and photo check-in reminders |
+| `CAMERA` | When user taps "Take a photo" in Progress tab, with plain-English rationale shown first | Lawn progress photos |
 | `LOCATION` | **Never** | ZIP is entered manually — no GPS |
+| `MEDIA_LIBRARY` | **Never** | Photos go directly to Supabase Storage — not saved to device gallery |
 | `CONTACTS` | **Never** | No social features |
 | `MICROPHONE` | **Never** | No audio features |
 
@@ -559,6 +569,14 @@ export const taskCompletionSchema = z.object({
   taskId:      z.string().uuid(),
   completedAt: z.string().datetime(),
 });
+export const lawnPhotoSchema = z.object({
+  weekNumber: z.number().int().min(0).max(52),
+});
+// storagePathSchema ensures paths follow the expected {uuid}/{timestamp}-week-{n}.jpg shape
+// before they are passed to Supabase Storage — prevents path-traversal style inputs
+export const storagePathSchema = z
+  .string()
+  .regex(/^[0-9a-f-]{36}\/\d+-week-\d+\.jpg$/, 'Invalid storage path format');
 // All service layer inputs pass through these schemas before any DB write
 ```
 
@@ -619,6 +637,7 @@ Data minimization: collect only what is required for each feature.
 | ZIP code | Season detection | Until account deleted | Editable in Settings |
 | Grass type | Task filtering | Until account deleted | Editable in Settings |
 | Task completion timestamps | Progress tracking | Until account deleted | Deletable |
+| Lawn progress photos | Visual progress timeline | Until account deleted | Deletable individually from Progress tab; all deleted on account deletion |
 | Device push token | Notifications | Until notifications disabled | Toggle in Settings |
 | Crash reports (Sentry) | App stability | 90 days | No PII in reports |
 
@@ -642,7 +661,7 @@ Sentry.init({
 });
 ```
 
-- **Account deletion** triggers a Supabase Edge Function that: (1) cascade-deletes all rows in `user_profiles`, `task_completions` via `ON DELETE CASCADE` FK. (MASWE-0113)
+- **Account deletion** triggers a Supabase Edge Function that: (1) cascade-deletes all rows in `user_profiles`, `task_completions`, and `lawn_photos` via `ON DELETE CASCADE` FK; (2) calls `storage.remove()` to delete all objects under `{user_id}/` in the `lawn-photos` bucket — Storage objects are not covered by FK cascades. (MASWE-0113)
 - **Privacy policy** linked in Settings screen and App Store listing — accurately reflects data table above (MASWE-0111)
 - **App Store privacy nutrition label** must accurately declare data collection (MASWE-0112)
 
@@ -682,14 +701,16 @@ Production secrets are stored in EAS Secrets (`eas secret:create`), never in the
 ```
 RootNavigator (reads Supabase session)
   ├── AuthStack      — unauthenticated
-  │   └── Onboarding: LocationScreen → GrassTypeScreen → PreviewScreen
+  │   └── Onboarding: LocationScreen → GrassTypeScreen → PreviewScreen → PhotoCaptureScreen (before photo)
   └── AppTabs        — authenticated
       ├── HomeStack:     TaskListScreen → TaskDetailScreen
+      ├── ProgressStack: LawnProgressScreen → PhotoCaptureScreen
       └── SettingsScreen
 ```
 
 - All param lists typed in `src/types/navigation.ts` — no untyped `route.navigate()` calls
 - Notification taps deep-link to `HomeStack > TaskListScreen` via registered `kura://` scheme
+- Photo reminder notification taps deep-link to `ProgressStack > PhotoCaptureScreen` via `kura://progress/capture`
 - All deep link paths validated against the registered scheme — unrecognized paths are silently dropped (MASWE-0058)
 
 ---
@@ -699,11 +720,116 @@ RootNavigator (reads Supabase session)
 ```ts
 // config/features.ts
 export const FEATURES = {
-  STREAK_COUNTER: true,
-  GLOSSARY:       false,  // in development
-  PUSH_DIGEST:    true,
+  STREAK_COUNTER:       true,
+  GLOSSARY:             false,  // in development
+  PUSH_DIGEST:          true,
+  LAWN_PROGRESS_PHOTOS: true,
 } as const;
 ```
+
+---
+
+## Lawn Progress Photos
+
+Users take a "before" photo of their lawn at the end of onboarding, then receive push reminders at fixed intervals throughout the season to capture update shots. The Progress tab shows a scrollable before→now timeline so they can see how far their lawn has come.
+
+### Photo reminder schedule
+
+Reminders are scheduled locally via `expo-notifications` immediately after the user captures their before photo. The schedule is fixed — no server-side scheduling required.
+
+| Interval | Timing | Notification copy |
+|---|---|---|
+| Before photo | Prompted at end of onboarding | — (in-app prompt, no push) |
+| 4 weeks | 28 days after before photo | "Your lawn has had a month to grow — snap an update photo!" |
+| 8 weeks | 56 days after before photo | "Two months in — time to see your progress!" |
+| 16 weeks | 112 days after before photo | "It's been four months. Take a photo and see how far your lawn has come." |
+| End of season | 180 days after before photo | "Season's almost over — capture your final photo before things go dormant." |
+
+Notification content never includes ZIP code, grass type, or any other PII (MASWE-0054).
+
+### Photo capture
+
+Use `expo-image-picker` with camera mode. Always set `exif: false` to strip GPS metadata before the bytes ever leave the device — EXIF GPS coordinates count as location data (MASWE-0109).
+
+```ts
+// Always pass exif: false — EXIF data can contain GPS coordinates which we never collect
+const result = await ImagePicker.launchCameraAsync({
+  mediaTypes: ImagePicker.MediaTypeOptions.Images,
+  quality:    0.8,
+  exif:       false,
+  allowsEditing: false,
+});
+```
+
+Request `CAMERA` permission at the moment the user taps "Take a photo" — not at app launch — and show a plain-English rationale before the system dialog appears (MASWE-0117). `MEDIA_LIBRARY` permission is never requested because photos go directly to Supabase Storage, not the device gallery.
+
+### Photo storage
+
+Photos live in a **private** Supabase Storage bucket named `lawn-photos`. The bucket has no public access — the app always fetches images via signed URLs with a 1-hour expiry. Photos are never cached to `AsyncStorage`, the device gallery, or any external storage (MASWE-0007).
+
+```ts
+// features/progress-photos/services/progressPhotos.service.ts
+export const progressPhotosService = {
+  // uploadLawnPhoto — reads the local file URI from expo-image-picker and streams
+  // the bytes directly to Supabase Storage. The path starts with the user's auth UID
+  // so the bucket policy can enforce per-user isolation server-side.
+  // Returns the storage path (not a URL) — call getSignedPhotoUrl to display it.
+  async uploadLawnPhoto(localUri: string, weekNumber: number): Promise<string> {
+    lawnPhotoSchema.parse({ weekNumber }); // validate before touching Storage
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('Not authenticated');
+
+    const path = `${user.id}/${Date.now()}-week-${weekNumber}.jpg`;
+    const file = await fetch(localUri).then(r => r.blob());
+
+    const { error } = await supabase.storage
+      .from('lawn-photos')
+      .upload(path, file, { contentType: 'image/jpeg', upsert: false });
+
+    if (error) throw new Error(error.message);
+    return path;
+  },
+
+  // getSignedPhotoUrl — exchanges a storage path for a short-lived signed URL.
+  // The URL expires after 1 hour — never persist it; always fetch a fresh one.
+  async getSignedPhotoUrl(storagePath: string): Promise<string> {
+    storagePathSchema.parse(storagePath); // reject obviously malformed paths
+
+    const { data, error } = await supabase.storage
+      .from('lawn-photos')
+      .createSignedUrl(storagePath, 3600);
+
+    if (error) throw new Error(error.message);
+    return data.signedUrl;
+  },
+};
+```
+
+**Supabase Storage bucket policies** — enforce server-side that users can only access their own folder:
+
+```sql
+-- Only the owning user can read their own photos.
+-- The path must begin with their auth UID — enforced by the policy, not the client.
+CREATE POLICY "own_photos_select"
+  ON storage.objects FOR SELECT
+  USING (bucket_id = 'lawn-photos'
+    AND auth.uid()::text = (storage.foldername(name))[1]);
+
+CREATE POLICY "own_photos_insert"
+  ON storage.objects FOR INSERT
+  WITH CHECK (bucket_id = 'lawn-photos'
+    AND auth.uid()::text = (storage.foldername(name))[1]);
+
+CREATE POLICY "own_photos_delete"
+  ON storage.objects FOR DELETE
+  USING (bucket_id = 'lawn-photos'
+    AND auth.uid()::text = (storage.foldername(name))[1]);
+```
+
+### Account deletion
+
+The account deletion Edge Function must explicitly delete all objects under `{user_id}/` in the `lawn-photos` bucket before removing the user record. The `ON DELETE CASCADE` FK on `lawn_photos` handles row deletion automatically, but Supabase Storage objects require a separate `storage.remove()` call.
 
 ---
 
@@ -713,6 +839,7 @@ export const FEATURES = {
 |---|---|
 | Notifications | `expo-notifications`. Register Android channels at startup. |
 | Secure storage | `expo-secure-store` (Keychain iOS / EncryptedSharedPreferences Android) |
+| Camera / photo picker | `expo-image-picker`. Always `exif: false`. Request permission at point of use. |
 | Safe areas | `react-native-safe-area-context`. Never hardcode status bar heights. |
 | Keyboard | `KeyboardAvoidingView` with platform-appropriate `behavior` prop. |
 | Haptics | `expo-haptics` — silently no-ops on unsupported devices. |
@@ -730,6 +857,9 @@ All FK references to `auth.users` use `ON DELETE CASCADE` so account deletion re
 | `user_profiles` | `user_id` (FK → auth.users CASCADE DELETE), `zip_code`, `grass_type`, `season_override`, `notifications_enabled` |
 | `tasks` | `id`, `title`, `subtitle`, `why_it_matters`, `estimated_minutes`, `recurrence`, `seasons text[]`, `grass_types text[]` |
 | `task_completions` | `id`, `user_id` (RLS + CASCADE DELETE), `task_id`, `completed_at`, `week_of` |
+| `lawn_photos` | `id`, `user_id` (RLS + CASCADE DELETE), `storage_path`, `taken_at`, `week_number`, `season` |
+
+**Supabase Storage:** private bucket `lawn-photos`. Objects are stored at `{user_id}/{timestamp}-week-{n}.jpg`. Access is controlled by Storage policies (see Lawn Progress Photos section) — there is no public URL. The account deletion Edge Function must call `storage.remove()` on the user's folder in addition to relying on the cascade FK for row cleanup.
 
 Types generated via: `supabase gen types typescript > src/types/supabase.ts`
 
@@ -753,9 +883,16 @@ Test files co-located with source — never in a top-level `__tests__` folder.
 
 - RLS: sign in as User A, query `task_completions` filtering by User B's `user_id` — expect empty result
 - RLS: INSERT `task_completion` with spoofed `user_id` — expect RLS policy rejection
+- RLS: sign in as User A, query `lawn_photos` filtering by User B's `user_id` — expect empty result
+- Storage policy: request signed URL for a path starting with a different user's UID — expect 403
+- Photos: confirm `expo-image-picker` is always called with `exif: false` — assert no EXIF keys in upload payload
+- Photos: confirm uploaded bytes go to Supabase Storage, not `AsyncStorage` or external storage
+- Photos: E2E — tap "Take a photo", grant permission, capture, verify thumbnail appears in `LawnProgressScreen`
+- Notifications: after before photo captured, assert 4 photo reminder notifications are scheduled with correct fire dates
 - Input: pass malformed ZIP codes to `zipCodeSchema.parse()` — expect `ZodError`
 - Input: pass non-UUID string to `taskIdSchema.parse()` — expect `ZodError`
 - Deep link: pass unrecognized scheme to linking config — assert no navigation occurs
+- Deep link: `kura://progress/capture` — assert navigation to `PhotoCaptureScreen`
 - Logger: in production mode, assert `console.log` is never called
 
 ---
@@ -785,6 +922,7 @@ Use as a PR review gate for all security-relevant changes.
 - [ ] Notification content contains no user PII (MASWE-0054)
 - [ ] `expo-screen-capture` active on all authenticated screens (MASWE-0055)
 - [ ] No sensitive data written to external/shared storage (MASWE-0007)
+- [ ] Lawn photos uploaded directly to Supabase Storage — not written to device gallery or AsyncStorage (MASWE-0007)
 
 ### MASVS-CRYPTO
 - [ ] No custom crypto implemented (MASWE-0019)
@@ -810,7 +948,10 @@ Use as a PR review gate for all security-relevant changes.
 ### MASVS-PLATFORM
 - [ ] Only necessary permissions declared in manifest (MASWE-0117)
 - [ ] Permissions requested at point of use with rationale string (MASWE-0117)
+- [ ] `CAMERA` permission requested only when user taps "Take a photo", with plain-English rationale shown first (MASWE-0117)
+- [ ] `MEDIA_LIBRARY` permission not requested — photos bypass the device gallery entirely (MASWE-0117)
 - [ ] Deep link paths validated — unrecognized paths ignored (MASWE-0058)
+- [ ] `kura://progress/capture` registered in linking config and navigates to `PhotoCaptureScreen` (MASWE-0058)
 - [ ] No PII or tokens written to system clipboard (MASWE-0065)
 - [ ] Keyboard cache disabled on sensitive text inputs (MASWE-0055)
 
@@ -830,11 +971,13 @@ Use as a PR review gate for all security-relevant changes.
 
 ### MASVS-PRIVACY
 - [ ] No GPS/location data collected anywhere (MASWE-0109)
+- [ ] `exif: false` passed to `expo-image-picker` — GPS EXIF stripped before upload (MASWE-0109)
 - [ ] No analytics or ad SDK in bundle (MASWE-0110)
 - [ ] Sentry `beforeSend` strips email and IP from crash reports (MASWE-0108)
 - [ ] Account deletion removes all rows and Storage objects via cascade + Edge Function (MASWE-0113)
-- [ ] Privacy policy linked in Settings and App Store listing (MASWE-0111)
-- [ ] App Store privacy nutrition label matches actual data collection (MASWE-0112)
+- [ ] Account deletion Edge Function calls `storage.remove()` on `{user_id}/` in `lawn-photos` bucket (MASWE-0113)
+- [ ] Privacy policy linked in Settings and App Store listing — updated to declare photo collection (MASWE-0111)
+- [ ] App Store privacy nutrition label updated to declare "Photos or Videos" data type (MASWE-0112)
 
 ---
 
