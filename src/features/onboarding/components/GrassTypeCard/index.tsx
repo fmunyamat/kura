@@ -1,0 +1,1 @@
+export { GrassTypeCard } from './GrassTypeCard';
