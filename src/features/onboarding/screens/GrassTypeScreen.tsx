@@ -39,7 +39,7 @@ const OptionList = styled.View`
 
 // PrimaryButton — the Continue CTA.
 const PrimaryButton = styled.TouchableOpacity<{ $enabled: boolean }>`
-  background-color: ${({ theme }) => theme.colors.primaryDeep};
+  background-color: ${({ theme }) => theme.colors.gradientMidLight};
   border-radius: ${({ theme }) => theme.radii.md}px;
   padding: ${({ theme }) => theme.spacing.md}px;
   align-items: center;
