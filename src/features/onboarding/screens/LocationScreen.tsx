@@ -1,5 +1,5 @@
-import { router } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
+import { router } from 'expo-router';
 import { useState } from 'react';
 import { Linking } from 'react-native';
 import styled, { useTheme } from 'styled-components/native';
@@ -7,7 +7,7 @@ import { OnboardingLayout } from '~/features/onboarding/components/OnboardingLay
 
 // FieldGroup — wraps a label + input pair with a small gap.
 const FieldGroup = styled.View`
-  gap: ${({ theme }) => theme.spacing.xs}px;
+  gap: ${({ theme }) => theme.spacing.sm}px;
 `;
 
 // FieldLabel — small uppercase label above each input.

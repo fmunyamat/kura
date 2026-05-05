@@ -1,14 +1,13 @@
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useEffect } from 'react';
-import { ReactNode } from 'react';
+import { ReactNode, useEffect } from 'react';
 import { Keyboard, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming,
+    useAnimatedStyle,
+    useSharedValue,
+    withTiming,
 } from 'react-native-reanimated';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import styled from 'styled-components/native';
 import { OnboardingProgressBar } from '~/features/onboarding/components/OnboardingProgressBar';
 
@@ -21,6 +20,7 @@ interface OnboardingLayoutProps {
   subtitle: string;
   // children — the form content rendered inside the frosted glass panel.
   children: ReactNode;
+  
 }
 
 // Background — full-screen LinearGradient using the app's four-stop green
@@ -129,11 +129,19 @@ const GlassPanelClip = styled.View`
 
 // GlassPanelContent — sits on top of the BlurView and applies the dark green
 // tint. rgba(22,48,24,0.82) over a dark BlurView creates the deep frosted
-// panel that floats off the gradient background.
+// panel that floats off the gradient background. No gap here — the ScrollView
+// is the only direct child, so gap would have nothing to act on.
 const GlassPanelContent = styled.View`
   background-color: ${({ theme }) => theme.colors.glassOnboardingPanel};
   padding: ${({ theme }) => theme.spacing.md}px;
-  gap: ${({ theme }) => theme.spacing.sm}px;
+`;
+
+// PanelInner — the actual gap container that lives inside the ScrollView.
+// Gap must be here rather than on GlassPanelContent because GlassPanelContent's
+// only direct child is the ScrollView, so any gap set there has no siblings
+// to act on.
+const PanelInner = styled.View`
+  gap: ${({ theme }) => theme.spacing.lg}px;
 `;
 
 // OnboardingLayout — the shared wrapper for all four onboarding screens.
@@ -201,7 +209,7 @@ export const OnboardingLayout = ({
                 showsVerticalScrollIndicator={false}
                 keyboardShouldPersistTaps="handled"
               >
-                {children}
+                <PanelInner>{children}</PanelInner>
               </ScrollView>
             </GlassPanelContent>
           </BlurView>
