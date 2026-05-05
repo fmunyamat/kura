@@ -57,7 +57,7 @@ const TaskList = styled.View`
 
 // PrimaryButton — the single CTA on this screen.
 const PrimaryButton = styled.TouchableOpacity`
-  background-color: ${({ theme }) => theme.colors.primaryDeep};
+  background-color: ${({ theme }) => theme.colors.gradientMidLight};
   border-radius: ${({ theme }) => theme.radii.md}px;
   padding: ${({ theme }) => theme.spacing.md}px;
   align-items: center;
