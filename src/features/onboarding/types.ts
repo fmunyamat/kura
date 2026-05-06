@@ -3,4 +3,4 @@ export interface SignInState {
   submitted: boolean;
 }
 
-export type GrassType = 'cool-season' | 'warm-season' | 'unknown';
+export type GrassTypeList = 'cool-season' | 'warm-season' | 'unknown';

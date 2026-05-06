@@ -1,2 +1,2 @@
-import { GrassTypeScreen } from '@/src/features/onboarding/screens/GrassTypeScreen';
-export default GrassTypeScreen;
+import { GrassType } from '@/src/features/onboarding/screens/GrassType';
+export default GrassType;

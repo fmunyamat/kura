@@ -6,11 +6,11 @@ jest.mock('../../../assets/images/google-logo.svg', () => 'google-logo-svg', { v
 jest.mock('../../../assets/images/apple-logo.svg', () => 'apple-logo-svg', { virtual: true });
 jest.mock('../../../../assets/images/mowing-photo.jpg', () => 1, { virtual: true });
 
+import { fireEvent, render } from '@testing-library/react-native';
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react-native';
 import { ThemeProvider } from 'styled-components/native';
 import { lightTheme } from '~/config/theme';
-import { SignInScreen } from './SignInScreen';
+import { SignInScreen } from './SignIn';
 
 const Wrapper = ({ children }: { children: React.ReactNode }) => (
   <ThemeProvider theme={lightTheme}>{children}</ThemeProvider>

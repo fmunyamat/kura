@@ -1,2 +1,2 @@
-import { LocationScreen } from '@/src/features/onboarding/screens/LocationScreen';
-export default LocationScreen;
+import { Location } from '@/src/features/onboarding/screens/Location';
+export default Location;
