@@ -3,11 +3,11 @@ import { useState } from 'react';
 import styled from 'styled-components/native';
 import { GrassTypeCard } from '~/features/onboarding/components/GrassTypeCard';
 import { OnboardingLayout } from '~/features/onboarding/components/OnboardingLayout';
-import type { GrassType } from '~/features/onboarding/types';
+import type { GrassTypeList } from '~/features/onboarding/types';
 
 // GRASS_OPTIONS — the three choices shown on this screen.
 const GRASS_OPTIONS: Array<{
-  value: GrassType;
+  value: GrassTypeList;
   icon: string;
   name: string;
   description: string;
@@ -52,24 +52,22 @@ const ButtonText = styled.Text`
   color: ${({ theme }) => theme.colors.white};
 `;
 
-// GrassTypeScreen — lets the user identify their grass type.
+// GrassType — lets the user identify their grass type.
 // One option must be selected before Continue activates.
 // "I'm not sure" maps to 'unknown' — the task engine infers grass type
 // from ZIP code server-side rather than storing a wrong value.
-export const GrassTypeScreen = () => {
-  const [selected, setSelected] = useState<GrassType | null>(null);
+export const GrassType = () => {
+  const [selected, setSelected] = useState<GrassTypeList | null>(null);
 
   const handleContinue = () => {
     if (!selected) return;
-    router.push('/onboarding/preview');
+    router.push('/onboarding/photo-capture');
   };
 
   return (
     <OnboardingLayout
-      step={2}
-      totalSteps={4}
       heroIcon="🌿"
-      stepLabel="Step 2 of 4"
+      stepLabel="Step 2 of 3"
       title="What kind of grass do you have?"
       subtitle="This determines which tasks are right for your lawn."
     >

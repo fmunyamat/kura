@@ -51,12 +51,12 @@ const SkipText = styled.Text`
   text-decoration-line: underline;
 `;
 
-// PhotoCaptureScreen — the final onboarding step. The user takes a "before"
+// PhotoCapture — the final onboarding step. The user takes a "before"
 // photo of their lawn to anchor the progress timeline.
 // Skipping is allowed — they can take the photo later from the Progress tab.
 // Camera integration and permission handling will be wired up when the
 // service layer is added. For now the buttons navigate directly.
-export const PhotoCaptureScreen = () => {
+export const PhotoCapture = () => {
   const handleTakePhoto = () => {
     // Placeholder: camera capture and service call will be added in the next phase.
     router.replace('/(tabs)');
@@ -68,10 +68,8 @@ export const PhotoCaptureScreen = () => {
 
   return (
     <OnboardingLayout
-      step={4}
-      totalSteps={4}
       heroIcon="📸"
-      stepLabel="Step 4 of 4"
+      stepLabel="Step 3 of 3"
       title='Snap a "before" photo'
       subtitle="See how much your lawn improves over the season."
     >

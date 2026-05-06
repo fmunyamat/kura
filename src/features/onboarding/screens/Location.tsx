@@ -122,10 +122,10 @@ const ButtonText = styled.Text<{ $isTablet: boolean }>`
   letter-spacing: 0.2px;
 `;
 
-// LocationScreen — collects the user's ZIP code and total lawn size in sq ft.
+// Location — collects the user's ZIP code and total lawn size in sq ft.
 // Both fields must be filled before Continue activates. ZIP drives season
 // detection; lawn size drives fertilizer and seed quantity calculations.
-export const LocationScreen = () => {
+export const Location = () => {
   const theme = useTheme();
   const { width, height } = useWindowDimensions();
   // isTablet — true when the shortest screen dimension is at least 600pt,
@@ -151,10 +151,8 @@ export const LocationScreen = () => {
 
   return (
     <OnboardingLayout
-      step={1}
-      totalSteps={4}
       heroIcon="📍"
-      stepLabel="Step 1 of 4"
+      stepLabel="Step 1 of 3"
       title="Tell us about your yard"
       subtitle="We use this to figure out your season and how much product your lawn needs."
     >
