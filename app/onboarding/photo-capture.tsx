@@ -1,2 +1,2 @@
-import { PhotoCaptureScreen } from '@/src/features/onboarding/screens/PhotoCaptureScreen';
-export default PhotoCaptureScreen;
+import { PhotoCapture } from '@/src/features/onboarding/screens/PhotoCapture';
+export default PhotoCapture;

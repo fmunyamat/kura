@@ -1,19 +1,18 @@
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
-import { ReactNode, useEffect } from 'react';
+import { useFocusEffect } from 'expo-router';
+import { ReactNode, useCallback, useEffect, useRef } from 'react';
 import { Keyboard, KeyboardAvoidingView, Platform, ScrollView, useWindowDimensions } from 'react-native';
 import Animated, {
+    SlideOutRight,
     useAnimatedStyle,
     useSharedValue,
     withTiming,
 } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import styled from 'styled-components/native';
-import { OnboardingProgressBar } from '~/features/onboarding/components/OnboardingProgressBar';
 
 interface OnboardingLayoutProps {
-  step: number;
-  totalSteps: number;
   heroIcon: string;
   stepLabel: string;
   title: string;
@@ -183,8 +182,6 @@ const PanelInner = styled.View<{ $isTablet: boolean }>`
 // On tablets (min(width, height) >= 600) the hero and panel are centred together
 // as a group in the middle of the screen with controlled spacing between them.
 export const OnboardingLayout = ({
-  step,
-  totalSteps,
   heroIcon,
   stepLabel,
   title,
@@ -195,6 +192,37 @@ export const OnboardingLayout = ({
   // isTablet — true when the shortest screen dimension is at least 600pt,
   // matching the threshold used throughout the app (e.g. SignInScreen).
   const isTablet = Math.min(width, height) >= 600;
+
+  // translateX drives the horizontal slide animation for the hero + panel.
+  // Starts at `width` (off-screen right) so the first focus effect slides it in.
+  const translateX = useSharedValue(width);
+
+  // isMounted — distinguishes the initial focus (forward navigation, slide from
+  // right) from a re-focus (back navigation reveals this screen, slide from left).
+  // Stack keeps screens mounted when a child is pushed on top, so `entering` props
+  // on Animated.View don't fire for the "revealed" screen — useFocusEffect does.
+  const isMounted = useRef(false);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (!isMounted.current) {
+        // First focus — this screen just mounted via forward navigation.
+        isMounted.current = true;
+        translateX.value = width;
+        translateX.value = withTiming(0, { duration: 300 });
+      } else {
+        // Re-focus — the child screen was popped and this screen is revealed.
+        // Slide in from the left to match the rightward exit of the departing screen.
+        translateX.value = -width;
+        translateX.value = withTiming(0, { duration: 300 });
+      }
+    }, [translateX, width])
+  );
+
+  const contentStyle = useAnimatedStyle(() => ({
+    flex: 1,
+    transform: [{ translateX: translateX.value }],
+  }));
 
   // androidKeyboardOffset — tracks keyboard height on Android so we can
   // manually push the layout up. Only active on Android; iOS uses KAV.
@@ -228,8 +256,10 @@ export const OnboardingLayout = ({
   }));
 
   const panelContent = (
-    <>
-      <OnboardingProgressBar currentStep={step} totalSteps={totalSteps} />
+    // SlideOutRight fires when a screen is popped (back navigation unmounts it).
+    // The entering animation is handled by useFocusEffect + contentStyle above,
+    // which correctly covers both mount (forward) and re-focus (back) cases.
+    <Animated.View style={contentStyle} exiting={SlideOutRight.duration(250)}>
       <ContentArea $isTablet={isTablet}>
         <HeroZone $isTablet={isTablet}>
           <HeroIcon $isTablet={isTablet}>{heroIcon}</HeroIcon>
@@ -257,7 +287,7 @@ export const OnboardingLayout = ({
           </GlassPanelClip>
         </GlassPanelShadow>
       </ContentArea>
-    </>
+    </Animated.View>
   );
 
   return (
