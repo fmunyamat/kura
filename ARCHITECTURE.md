@@ -12,17 +12,31 @@ src/
 │   │   ├── ThemeProvider.tsx      # styled-components ThemeProvider
 │   │   └── SentryProvider.tsx     # error tracking with PII scrubbing
 │   └── navigation/
-│       ├── RootNavigator.tsx      # gates on auth session
-│       ├── AuthStack.tsx          # unauthenticated: onboarding
-│       └── AppTabs.tsx            # authenticated: Home | Settings
+│       ├── RootNavigator.tsx      # gates on Supabase session + profile completion
+│       ├── AuthStack.tsx          # unauthenticated: sign-in via Supabase OTP
+│       ├── OnboardingStack.tsx    # authenticated but no profile yet: Location → GrassType → PhotoCapture
+│       └── AppTabs.tsx            # authenticated + onboarded: Home | Settings
 │
 ├── features/
 │   ├── onboarding/
-│   │   ├── screens/               # Location, GrassType
+│   │   ├── screens/               # Location, GrassType, PhotoCapture
 │   │   ├── components/GrassTypePicker/
-│   │   ├── hooks/useOnboarding.ts
-│   │   ├── services/onboarding.service.ts
+│   │   ├── store/useOnboardingStore.ts  # Zustand — accumulates zip/lawnSize/lat/lng/grassType across screens
+│   │   ├── services/
+│   │   │   ├── geocoding.service.ts    # ZIP → lat/lng via Zippopotam.us (called once at onboarding)
+│   │   │   └── onboarding.service.ts   # saves complete profile to user_profiles at end of onboarding
 │   │   └── types.ts
+│   ├── recommendations/
+│   │   ├── components/RecommendationCard/  # task card with Yes / Not yet buttons
+│   │   ├── constants/recommendationContent.ts  # maps recommendation type → display copy
+│   │   ├── hooks/
+│   │   │   ├── useActiveRecommendations.ts  # TanStack Query — fetches status=pending rows
+│   │   │   ├── useConfirmRecommendation.ts  # mutation — status → confirmed
+│   │   │   └── useSnoozeRecommendation.ts   # mutation — status → snoozed + snoozed_until
+│   │   ├── services/recommendations.service.ts
+│   │   └── types.ts
+│   ├── settings/
+│   │   └── screens/SettingsScreen.tsx  # change grass type + "I've moved" data reset
 │   ├── tasks/
 │   │   ├── screens/               # TaskList, TaskDetail
 │   │   ├── components/TaskCard/   # TaskCard.tsx + TaskCard.test.tsx + index.tsx
@@ -31,7 +45,9 @@ src/
 │   │   ├── services/tasks.service.ts
 │   │   └── types.ts
 │   ├── notifications/
-│   │   ├── hooks/useNotifications.ts
+│   │   ├── hooks/
+│   │   │   ├── useNotifications.ts
+│   │   │   └── usePushToken.ts    # registers device + upserts Expo push token to user_profiles
 │   │   ├── services/notifications.service.ts
 │   │   │   # platform split: .ios.ts / .android.ts / .ts (fallback)
 │   │   └── types.ts
@@ -66,6 +82,22 @@ src/
     ├── supabase.ts                # generated: supabase gen types typescript
     ├── navigation.ts              # typed param lists for all navigators
     └── styled.d.ts                # DefaultTheme module augmentation
+```
+
+**Supabase Edge Functions** live outside `src/` in the Supabase project folder:
+
+```
+supabase/
+├── functions/
+│   └── recommendation-engine/    # daily cron — GDD calc, rule eval, push notifications
+│       ├── index.ts               # main orchestrator: load users → fetch weather → check rules
+│       ├── gdd.ts                 # GDD calculation, season reset, mid-season backfill logic
+│       ├── weather.ts             # Open-Meteo fetching + weather_cache read/write
+│       ├── rules.ts               # rule definitions keyed by type; GDD/soil temp conditions
+│       └── push.ts                # Expo Push API notification sender
+└── migrations/
+    ├── 20260511000001_recommendation_engine_tables.sql
+    └── 20260511000002_reset_user_data_rpc.sql
 ```
 
 ---
@@ -171,14 +203,20 @@ export const tasksService = {
 ## Navigation
 
 ```
-RootNavigator (reads Supabase session)
-  ├── AuthStack      — unauthenticated
-  │   └── Onboarding: Location → GrassType → PhotoCapture (before photo)
-  └── AppTabs        — authenticated
+RootNavigator
+  ├── AuthStack          — no Supabase session
+  │   └── SignIn: email input → OTP verification (Supabase magic link)
+  ├── OnboardingStack    — session exists but user profile not yet created
+  │   └── Location → GrassType → PhotoCapture
+  └── AppTabs            — session exists and profile is complete
       ├── HomeStack:     TaskList → TaskDetail
       ├── ProgressStack: LawnProgress → PhotoCapture
       └── SettingsScreen
 ```
+
+**Auth flow:** The user enters their email, receives a one-time passcode via Supabase, and confirms it. Once the Supabase session is established, `RootNavigator` checks for an existing user profile row. If none exists the user is sent to `OnboardingStack`; if one exists they go straight to `AppTabs`.
+
+**Profile gate:** `RootNavigator` queries `profiles` (RLS-protected, `auth.uid()`) on session change. A missing row means first-time user → onboarding. A present row means returning user → tabs. Zustand stores the resolved state so the gate only queries Supabase once per session.
 
 - All param lists typed in `src/types/navigation.ts` — no untyped `route.navigate()` calls
 - Notification taps deep-link to `HomeStack > TaskList` via registered `kura://` scheme
@@ -192,10 +230,11 @@ RootNavigator (reads Supabase session)
 ```ts
 // config/features.ts
 export const FEATURES = {
-  STREAK_COUNTER:       true,
-  GLOSSARY:             false,  // in development
-  PUSH_DIGEST:          true,
-  LAWN_PROGRESS_PHOTOS: true,
+  STREAK_COUNTER:        true,
+  GLOSSARY:              false,  // in development
+  PUSH_DIGEST:           true,
+  LAWN_PROGRESS_PHOTOS:  true,
+  RECOMMENDATION_ENGINE: true,   // GDD + soil temp rule engine + RecommendationCard UI
 } as const;
 ```
 
