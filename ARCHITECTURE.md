@@ -14,12 +14,12 @@ src/
 │   └── navigation/
 │       ├── RootNavigator.tsx      # gates on Supabase session + profile completion
 │       ├── AuthStack.tsx          # unauthenticated: sign-in via Supabase OTP
-│       ├── OnboardingStack.tsx    # authenticated but no profile yet: Location → GrassType → PhotoCapture
+│       ├── OnboardingStack.tsx    # authenticated but no profile yet: Location → GrassType → EffortLevel → PhotoCapture
 │       └── AppTabs.tsx            # authenticated + onboarded: Home | Settings
 │
 ├── features/
 │   ├── onboarding/
-│   │   ├── screens/               # Location, GrassType, PhotoCapture
+│   │   ├── screens/               # Location, GrassType, EffortLevel, PhotoCapture
 │   │   ├── components/GrassTypePicker/
 │   │   ├── store/useOnboardingStore.ts  # Zustand — accumulates zip/lawnSize/lat/lng/grassType across screens
 │   │   ├── services/
@@ -36,7 +36,8 @@ src/
 │   │   ├── services/recommendations.service.ts
 │   │   └── types.ts
 │   ├── settings/
-│   │   └── screens/SettingsScreen.tsx  # change grass type + "I've moved" data reset
+│   │   ├── screens/SettingsScreen.tsx  # change grass type, change effort level, "I've moved" data reset
+│   │   └── hooks/useUpdateEffortLevel.ts  # (to implement) mutation — updates user_profiles.effort_level
 │   ├── tasks/
 │   │   ├── screens/               # TaskList, TaskDetail
 │   │   ├── components/TaskCard/   # TaskCard.tsx + TaskCard.test.tsx + index.tsx
@@ -207,7 +208,7 @@ RootNavigator
   ├── AuthStack          — no Supabase session
   │   └── SignIn: email input → OTP verification (Supabase magic link)
   ├── OnboardingStack    — session exists but user profile not yet created
-  │   └── Location → GrassType → PhotoCapture
+  │   └── Location → GrassType → EffortLevel → PhotoCapture
   └── AppTabs            — session exists and profile is complete
       ├── HomeStack:     TaskList → TaskDetail
       ├── ProgressStack: LawnProgress → PhotoCapture

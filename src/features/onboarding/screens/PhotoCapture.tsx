@@ -69,7 +69,7 @@ export const PhotoCapture = () => {
   return (
     <OnboardingLayout
       heroIcon="📸"
-      stepLabel="Step 3 of 3"
+      stepLabel="Step 4 of 4"
       title='Snap a "before" photo'
       subtitle="See how much your lawn improves over the season."
     >

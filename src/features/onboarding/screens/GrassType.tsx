@@ -61,13 +61,13 @@ export const GrassType = () => {
 
   const handleContinue = () => {
     if (!selected) return;
-    router.push('/onboarding/photo-capture');
+    router.push('/onboarding/effort-level');
   };
 
   return (
     <OnboardingLayout
       heroIcon="🌿"
-      stepLabel="Step 2 of 3"
+      stepLabel="Step 2 of 4"
       title="What kind of grass do you have?"
       subtitle="This determines which tasks are right for your lawn."
     >

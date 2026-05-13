@@ -7,16 +7,21 @@ import { OnboardingProgressBar } from '~/features/onboarding/components/Onboardi
 
 // STEP_MAP — maps each onboarding route to its 1-based step number.
 const STEP_MAP: Record<string, number> = {
-  '/onboarding':               1,
-  '/onboarding/grass-type':    2,
-  '/onboarding/photo-capture': 3,
+  '/onboarding':                1,
+  '/onboarding/grass-type':     2,
+  '/onboarding/effort-level':   3,
+  '/onboarding/photo-capture':  4,
 };
 
-const TOTAL_STEPS = 3;
+const TOTAL_STEPS = 4;
 
 // SHOWS_BACK — routes that display the back arrow overlay.
 // Location (/onboarding) is excluded — there is nowhere to go back to.
-const SHOWS_BACK = new Set(['/onboarding/grass-type', '/onboarding/photo-capture']);
+const SHOWS_BACK = new Set([
+  '/onboarding/grass-type',
+  '/onboarding/effort-level',
+  '/onboarding/photo-capture',
+]);
 
 // PROGRESS_BAR_HEIGHT — rendered height of OnboardingProgressBar:
 // 3px Segment + 8px padding-bottom on Bar = 11px total.

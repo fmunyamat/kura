@@ -152,7 +152,7 @@ export const Location = () => {
   return (
     <OnboardingLayout
       heroIcon="📍"
-      stepLabel="Step 1 of 3"
+      stepLabel="Step 1 of 4"
       title="Tell us about your yard"
       subtitle="We use this to figure out your season and how much product your lawn needs."
     >

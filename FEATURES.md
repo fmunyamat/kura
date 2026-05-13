@@ -6,8 +6,8 @@ All FK references to `auth.users` use `ON DELETE CASCADE` so account deletion re
 
 | Table | Key columns |
 |---|---|
-| `user_profiles` | `user_id` (FK → auth.users CASCADE DELETE), `zip_code`, `lawn_size`, `grass_type`, `lat`, `lng`, `cumulative_gdd`, `gdd_last_updated`, `push_token`, `season_override`, `notifications_enabled` |
-| `tasks` | `id`, `title`, `subtitle`, `why_it_matters`, `estimated_minutes`, `recurrence`, `seasons text[]`, `grass_types text[]` |
+| `user_profiles` | `user_id` (FK → auth.users CASCADE DELETE), `zip_code`, `lawn_size`, `grass_type`, `lat`, `lng`, `cumulative_gdd`, `gdd_last_updated`, `push_token`, `season_override`, `notifications_enabled`, `effort_level` |
+| `tasks` | `id`, `title`, `subtitle`, `why_it_matters`, `estimated_minutes`, `recurrence`, `seasons text[]`, `grass_types text[]`, `min_effort_level` |
 | `task_completions` | `id`, `user_id` (RLS + CASCADE DELETE), `task_id`, `completed_at`, `week_of` |
 | `lawn_photos` | `id`, `user_id` (RLS + CASCADE DELETE), `storage_path`, `taken_at`, `week_number`, `season` |
 | `recommendation_events` | `id`, `user_id` (RLS + CASCADE DELETE), `type`, `status`, `snoozed_until`, `gdd_at_trigger`, `soil_temp_at_trigger`, `created_at`, `updated_at` |
@@ -122,6 +122,74 @@ Available in Settings. Warns the user that all lawn history, photos, and progres
 ### Open items
 
 - GDD threshold ranges per rule type — to be provided by Farai before Plan 3 (Edge Function) is implemented
+
+---
+
+## Effort Levels
+
+Users pick a goal-based effort tier during onboarding (Step 3 of 4). The tier controls which lawn care tasks get recommended. It can be changed anytime in Settings.
+
+### The three tiers
+
+| Value | Label | Description | Who sees it |
+|---|---|---|---|
+| 1 | 🌱 Just keeping it alive | Only the tasks that truly matter | All users at this tier |
+| 2 | 🌿 Nice-looking lawn | Regular upkeep, nothing too demanding | Tiers 2 and 3 |
+| 3 | 🏆 Best on the block | The full seasonal routine, start to finish | Tier 3 only |
+
+### How it works
+
+Each task in the `tasks` table has a `min_effort_level smallint NOT NULL DEFAULT 1` column. The recommendation engine filters tasks with:
+
+```sql
+AND min_effort_level <= [user.effort_level]
+```
+
+This is cumulative — a tier-3 user always sees everything a tier-1 and tier-2 user sees. Tier 1 unlocks essentials only (e.g. pre-emergent); tier 2 adds regular upkeep (e.g. spring fertilize); tier 3 adds the full routine (e.g. aerate and overseed).
+
+### Schema changes (to implement)
+
+**Migration file** — add to `supabase/migrations/` with the next sequential timestamp:
+
+```sql
+-- Add effort level to user profiles. NOT NULL, no default — every user sets
+-- this during onboarding. Value must be 1, 2, or 3.
+ALTER TABLE user_profiles
+  ADD COLUMN effort_level smallint NOT NULL
+  CONSTRAINT effort_level_range CHECK (effort_level BETWEEN 1 AND 3);
+
+-- Add minimum effort level to tasks. DEFAULT 1 so all existing tasks remain
+-- visible to all users until explicitly raised.
+ALTER TABLE tasks
+  ADD COLUMN min_effort_level smallint NOT NULL DEFAULT 1
+  CONSTRAINT min_effort_level_range CHECK (min_effort_level BETWEEN 1 AND 3);
+```
+
+**RLS:** No new policies needed. `user_profiles` already has RLS; `tasks` is read-only for all authenticated users.
+
+### Onboarding store (to implement)
+
+Add `effortLevel: 1 | 2 | 3 | null` to `useOnboardingStore` (Zustand). The `EffortLevel` screen writes to this field; `onboarding.service.ts` reads it and saves it to `user_profiles.effort_level` at the end of onboarding alongside zip, grass type, lat, and lng.
+
+### Settings (to implement)
+
+Add `useUpdateEffortLevel` mutation hook in `features/settings/hooks/`. It calls a Supabase update on `user_profiles` and invalidates the profile query so the Settings screen reflects the new value immediately.
+
+### Zod validation
+
+The shared schema lives in `shared/utils/validation.ts`:
+
+```ts
+// effortLevelSchema — validates that an effort level is exactly 1, 2, or 3.
+// Used by onboarding, settings, and the service layer before any DB write.
+export const effortLevelSchema = z.union([
+  z.literal(1),
+  z.literal(2),
+  z.literal(3),
+]);
+```
+
+**All form inputs** must also be validated through Zod before touching state or the service layer. This includes: sign-in email, location ZIP code, location lawn size, and the effort level selection. See CLAUDE.md rule: "Validate all external input with Zod before it touches app state or the service layer."
 
 ---
 
