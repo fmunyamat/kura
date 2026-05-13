@@ -6,14 +6,190 @@ All FK references to `auth.users` use `ON DELETE CASCADE` so account deletion re
 
 | Table | Key columns |
 |---|---|
-| `user_profiles` | `user_id` (FK → auth.users CASCADE DELETE), `zip_code`, `grass_type`, `season_override`, `notifications_enabled` |
-| `tasks` | `id`, `title`, `subtitle`, `why_it_matters`, `estimated_minutes`, `recurrence`, `seasons text[]`, `grass_types text[]` |
+| `user_profiles` | `user_id` (FK → auth.users CASCADE DELETE), `zip_code`, `lawn_size`, `grass_type`, `lat`, `lng`, `cumulative_gdd`, `gdd_last_updated`, `push_token`, `season_override`, `notifications_enabled`, `effort_level` |
+| `tasks` | `id`, `title`, `subtitle`, `why_it_matters`, `estimated_minutes`, `recurrence`, `seasons text[]`, `grass_types text[]`, `min_effort_level` |
 | `task_completions` | `id`, `user_id` (RLS + CASCADE DELETE), `task_id`, `completed_at`, `week_of` |
 | `lawn_photos` | `id`, `user_id` (RLS + CASCADE DELETE), `storage_path`, `taken_at`, `week_number`, `season` |
+| `recommendation_events` | `id`, `user_id` (RLS + CASCADE DELETE), `type`, `status`, `snoozed_until`, `gdd_at_trigger`, `soil_temp_at_trigger`, `created_at`, `updated_at` |
+| `weather_cache` | `lat`, `lng`, `fetched_date` (PK composite), `soil_temp_6cm`, `soil_temp_18cm`, `tmax`, `tmin` |
 
 **Supabase Storage:** private bucket `lawn-photos`. Objects are stored at `{user_id}/{timestamp}-week-{n}.jpg`. Access is controlled by Storage policies — there is no public URL. The account deletion Edge Function must call `storage.remove()` on the user's folder in addition to relying on the cascade FK for row cleanup.
 
 Types generated via: `supabase gen types typescript > src/types/supabase.ts`
+
+---
+
+## Recommendation Engine
+
+The recommendation engine decides what lawn care actions to recommend and when. It uses two primary data signals — soil temperature and cumulative Growing Degree Days (GDD) — to trigger time-sensitive recommendations. A fine-tuning layer of in-app Yes/No questions personalises each recommendation based on what the user is actually observing on their lawn.
+
+### How it works
+
+1. A Supabase Edge Function (`recommendation-engine`) runs daily via pg_cron
+2. For each user it fetches weather data, updates their cumulative GDD, and checks rules
+3. When a rule fires, it inserts a row into `recommendation_events` and sends a push notification
+4. The user taps the notification → app opens → a task card appears on the Home screen
+5. The card asks a plain-English question ("Are you seeing green blades?") with Yes / Not yet buttons
+6. **Yes** → `status = confirmed` — task accepted
+7. **Not yet** → `status = snoozed` — hidden for 5 days, Edge Function rechecks after
+
+### GDD calculation
+
+Growing Degree Days measure accumulated heat over a season. They reset annually and are stored per user so the daily cron only needs to add today's increment — not recalculate from scratch.
+
+| Grass type | Base temp | Season start (annual reset) |
+|---|---|---|
+| Cool-season | 32°F | January 1 |
+| Warm-season | 50°F | March 1 |
+
+**Daily formula:**
+```
+GDD_today = max(((tmax + tmin) / 2) − base_temp, 0)
+cumulative_gdd += GDD_today
+```
+
+`cumulative_gdd` and `gdd_last_updated` are stored on `user_profiles`. If `gdd_last_updated < season_start_this_year` the value is reset to 0 before the new increment is added.
+
+**Mid-season signup:** New users (`gdd_last_updated IS NULL`) get a one-time backfill on their first cron run. The Edge Function fetches historical weather from season start to today, calculates the full cumulative GDD, and stores it. From the next day forward only today's increment is added. This means recommendations fire immediately at the correct GDD level for users who sign up part-way through the season.
+
+### Soil temperature
+
+Fetch `soil_temperature_6cm` and `soil_temperature_18cm` from Open-Meteo and average them:
+
+```
+soil_temp = (soil_temperature_6cm + soil_temperature_18cm) / 2
+```
+
+This averages the upper root zone. Surface temperature (0cm) fluctuates too much with direct sunlight to be reliable for grass dormancy or pre-emergent timing.
+
+### Weather data (Open-Meteo)
+
+Open-Meteo is free, requires no API key, and provides soil temperature at exact 6cm and 18cm depths alongside daily temperature max/min. All temperatures are requested in °F (`temperature_unit=fahrenheit`).
+
+**Deduplication:** Before calling Open-Meteo, the Edge Function groups users by lat/lng. Each unique location is fetched **once** per day regardless of how many users share it. Results are stored in `weather_cache` (keyed on `lat + lng + fetched_date`). If the cron retries, already-cached locations are skipped automatically.
+
+### Geocoding (Zippopotam.us)
+
+ZIP → lat/lng conversion happens **once** at the end of onboarding via Zippopotam.us (free, no API key, US/Canada). The result is stored in `user_profiles.lat` and `user_profiles.lng`. The Edge Function reads coordinates directly from the DB on every run — the geocoding API is never called again after signup.
+
+### Grass type inference
+
+When a user selects "I'm not sure" on the GrassType onboarding screen:
+1. Their ZIP is geocoded to lat/lng
+2. Grass type is inferred from latitude: **≥ 37°N = cool-season**, **< 37°N = warm-season**
+3. The inferred type is shown as a suggestion — never silently saved
+4. The user confirms or overrides before continuing
+5. After confirming, a note reminds them they can change it in Settings later
+
+The recommendation engine never runs against a user whose grass type is unresolved (`unknown`).
+
+**37°N reference (above = cool-season, below = warm-season):**
+
+| Cool-season states | Warm-season states |
+|---|---|
+| WA, OR, ID, MT, WY, CO, UT, NV (north), ND, SD, NE, KS, MN, WI, MI, IA, IL, IN, OH, MO (most), PA, NY, NJ, CT, RI, MA, VT, NH, ME, DE, MD, WV, N. Virginia | HI, FL, GA, AL, MS, LA, SC, AR, OK, TX, NM, AZ, S. California, S. Nevada, S. Virginia, NC, TN |
+
+Transition zone states (VA, NC, TN, central CA, central NV) straddle the line — the suggestion is shown to the user for confirmation rather than applied silently.
+
+### recommendation_events table
+
+One row per recommendation fired per user. The Edge Function inserts rows (service role); the client only reads and updates `status` / `snoozed_until`.
+
+| Column | Purpose |
+|---|---|
+| `type` | Rule identifier, e.g. `pre_emergent`, `dormancy_break`, `spring_fertilize` |
+| `status` | `pending` → `confirmed` / `snoozed` / `dismissed` |
+| `snoozed_until` | Date set when user taps "Not yet" — Edge Function skips until this date passes |
+| `gdd_at_trigger` | Cumulative GDD when the rule fired (for debugging) |
+| `soil_temp_at_trigger` | Averaged soil temp when the rule fired (for debugging) |
+
+**RLS:** Users may SELECT and UPDATE their own rows. INSERT is restricted to the Edge Function service role.
+
+### weather_cache table
+
+Stores today's weather per unique lat/lng. Keyed on `(lat, lng, fetched_date)` so duplicate inserts are blocked by the primary key. No user access — service role only (RLS enabled, no policies).
+
+### Push notifications
+
+The Expo push token is registered at app launch via `usePushToken` and stored in `user_profiles.push_token`. The Edge Function reads this token and sends notifications via the Expo Push API when a rule fires. Notification content never includes PII (MASWE-0054).
+
+Recommendation notification taps deep-link to `kura://home`. TanStack Query refetches on screen focus — the pending card is already there.
+
+### "I've moved" — full data reset
+
+Available in Settings. Warns the user that all lawn history, photos, and progress will be erased, then calls the `reset_user_data()` Postgres RPC which atomically deletes `user_profiles`, `task_completions`, `recommendation_events`, and `lawn_photos` rows. The `lawn-photos` Storage folder is deleted separately by the client after the RPC returns. The auth account (email/session) is preserved — no re-registration needed. Onboarding restarts from the Location step.
+
+### Open items
+
+- GDD threshold ranges per rule type — to be provided by Farai before Plan 3 (Edge Function) is implemented
+
+---
+
+## Effort Levels
+
+Users pick a goal-based effort tier during onboarding (Step 3 of 4). The tier controls which lawn care tasks get recommended. It can be changed anytime in Settings.
+
+### The three tiers
+
+| Value | Label | Description | Who sees it |
+|---|---|---|---|
+| 1 | 🌱 Just keeping it alive | Only the tasks that truly matter | All users at this tier |
+| 2 | 🌿 Nice-looking lawn | Regular upkeep, nothing too demanding | Tiers 2 and 3 |
+| 3 | 🏆 Best on the block | The full seasonal routine, start to finish | Tier 3 only |
+
+### How it works
+
+Each task in the `tasks` table has a `min_effort_level smallint NOT NULL DEFAULT 1` column. The recommendation engine filters tasks with:
+
+```sql
+AND min_effort_level <= [user.effort_level]
+```
+
+This is cumulative — a tier-3 user always sees everything a tier-1 and tier-2 user sees. Tier 1 unlocks essentials only (e.g. pre-emergent); tier 2 adds regular upkeep (e.g. spring fertilize); tier 3 adds the full routine (e.g. aerate and overseed).
+
+### Schema changes (to implement)
+
+**Migration file** — add to `supabase/migrations/` with the next sequential timestamp:
+
+```sql
+-- Add effort level to user profiles. NOT NULL, no default — every user sets
+-- this during onboarding. Value must be 1, 2, or 3.
+ALTER TABLE user_profiles
+  ADD COLUMN effort_level smallint NOT NULL
+  CONSTRAINT effort_level_range CHECK (effort_level BETWEEN 1 AND 3);
+
+-- Add minimum effort level to tasks. DEFAULT 1 so all existing tasks remain
+-- visible to all users until explicitly raised.
+ALTER TABLE tasks
+  ADD COLUMN min_effort_level smallint NOT NULL DEFAULT 1
+  CONSTRAINT min_effort_level_range CHECK (min_effort_level BETWEEN 1 AND 3);
+```
+
+**RLS:** No new policies needed. `user_profiles` already has RLS; `tasks` is read-only for all authenticated users.
+
+### Onboarding store (to implement)
+
+Add `effortLevel: 1 | 2 | 3 | null` to `useOnboardingStore` (Zustand). The `EffortLevel` screen writes to this field; `onboarding.service.ts` reads it and saves it to `user_profiles.effort_level` at the end of onboarding alongside zip, grass type, lat, and lng.
+
+### Settings (to implement)
+
+Add `useUpdateEffortLevel` mutation hook in `features/settings/hooks/`. It calls a Supabase update on `user_profiles` and invalidates the profile query so the Settings screen reflects the new value immediately.
+
+### Zod validation
+
+The shared schema lives in `shared/utils/validation.ts`:
+
+```ts
+// effortLevelSchema — validates that an effort level is exactly 1, 2, or 3.
+// Used by onboarding, settings, and the service layer before any DB write.
+export const effortLevelSchema = z.union([
+  z.literal(1),
+  z.literal(2),
+  z.literal(3),
+]);
+```
+
+**All form inputs** must also be validated through Zod before touching state or the service layer. This includes: sign-in email, location ZIP code, location lawn size, and the effort level selection. See CLAUDE.md rule: "Validate all external input with Zod before it touches app state or the service layer."
 
 ---
 
