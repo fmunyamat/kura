@@ -4,6 +4,24 @@ Beginner lawn care app. Target audience: People with zero lawn experience. Every
 
 ---
 
+## Session Memory
+
+At the start of every new session, read `MEMORY.md` and resume from where we left off.
+
+Throughout the session, keep `MEMORY.md` updated in real time — log every task started, decision made, problem hit, and what's next. Write enough detail that if the computer dies mid-session, reading `MEMORY.md` alone is enough to pick up exactly where we stopped.
+
+At the end of every completed task, ask: **"Do you want to keep or erase the contents of MEMORY.md?"**
+
+---
+
+## Git Workflow
+
+- Before making edits, create a descriptive feature branch (e.g., `feat/sign-in-ui`, `docs/remove-camera-section`)
+- Never edit directly on main
+- Communicate clearly when working in a git worktree and state the worktree path upfront
+
+---
+
 ## Reference Docs
 
 | Topic | File |
@@ -63,6 +81,14 @@ These are non-negotiable. Don't work around them, don't ask if they apply.
 - **Validate all external input with Zod** before it touches app state or the service layer. (MASVS-CODE-4, MASWE-0079)
 - **Never expose internal errors to the UI.** Log to Sentry; show a generic user-facing message. (MASVS-CODE-4, MASWE-0087)
 - **No custom cryptography.** Delegate all crypto to Supabase Auth, expo-secure-store, and TLS. (MASVS-CRYPTO-1, MASWE-0019)
+
+---
+
+## Implementation vs Planning
+- When the user asks to 'build', 'implement', or 'create' a UI, go directly to implementation
+- Do NOT invoke brainstorming/planning skills or ask clarifying questions unless the request is ambiguous
+- Only plan when explicitly asked to 'design', 'brainstorm', or 'plan'
+- Default to UI-only scope; do NOT install state management or backend packages unless asked
 
 ---
 
