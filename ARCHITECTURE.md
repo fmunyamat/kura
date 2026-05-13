@@ -90,11 +90,10 @@ src/
 ```
 supabase/
 ├── functions/
-│   └── recommendation-engine/    # daily cron — GDD calc, rule eval, push notifications
+│   └── recommendation-engine/    # daily cron — soil temp rule eval, push notifications
 │       ├── index.ts               # main orchestrator: load users → fetch weather → check rules
-│       ├── gdd.ts                 # GDD calculation, season reset, mid-season backfill logic
-│       ├── weather.ts             # Open-Meteo fetching + weather_cache read/write
-│       ├── rules.ts               # rule definitions keyed by type; GDD/soil temp conditions
+│       ├── weather.ts             # Open-Meteo fetching + weather_cache + soil_temp_streaks write
+│       ├── rules.ts               # rule definitions keyed by type; soil temp + streak conditions
 │       └── push.ts                # Expo Push API notification sender
 └── migrations/
     ├── 20260511000001_recommendation_engine_tables.sql
@@ -235,7 +234,7 @@ export const FEATURES = {
   GLOSSARY:              false,  // in development
   PUSH_DIGEST:           true,
   LAWN_PROGRESS_PHOTOS:  true,
-  RECOMMENDATION_ENGINE: true,   // GDD + soil temp rule engine + RecommendationCard UI
+  RECOMMENDATION_ENGINE: true,   // soil temp rule engine + RecommendationCard UI
 } as const;
 ```
 

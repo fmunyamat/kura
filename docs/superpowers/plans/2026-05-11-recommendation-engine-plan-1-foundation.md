@@ -18,7 +18,7 @@
 |---|---|---|
 | Create | `src/config/env.ts` | Zod-validated EXPO_PUBLIC_* env vars — fails fast if missing |
 | Create | `src/shared/lib/supabase.ts` | Single Supabase client using SecureStore for auth tokens |
-| Create | `supabase/migrations/20260511000001_recommendation_engine_tables.sql` | Adds lat/lng/GDD/push_token to user_profiles; creates recommendation_events and weather_cache |
+| Create | `supabase/migrations/20260511000001_recommendation_engine_tables.sql` | Adds lat/lng/push_token to user_profiles; creates recommendation_events and weather_cache |
 | Create | `src/features/onboarding/store/useOnboardingStore.ts` | Zustand store accumulating zip/lawnSize/lat/lng/grassType across screens |
 | Modify | `src/features/onboarding/types.ts` | Add GrassType resolved type (no 'unknown') |
 | Create | `src/features/onboarding/services/geocoding.service.ts` | Calls Zippopotam.us, returns lat/lng, validates response with Zod |
@@ -157,17 +157,14 @@ mkdir -p supabase/migrations
 Create `supabase/migrations/20260511000001_recommendation_engine_tables.sql`:
 
 ```sql
--- Add geocoding, GDD tracking, and push notification columns to user_profiles.
+-- Add geocoding and push notification columns to user_profiles.
 -- lat/lng are stored once at onboarding so the daily cron never needs to
--- call the geocoding API. cumulative_gdd is updated incrementally each day
--- to avoid recalculating from season start every run.
+-- call the geocoding API again after signup.
 ALTER TABLE user_profiles
-  ADD COLUMN IF NOT EXISTS lawn_size        integer,
-  ADD COLUMN IF NOT EXISTS lat              numeric(9,6),
-  ADD COLUMN IF NOT EXISTS lng              numeric(9,6),
-  ADD COLUMN IF NOT EXISTS cumulative_gdd   numeric    DEFAULT 0,
-  ADD COLUMN IF NOT EXISTS gdd_last_updated date,
-  ADD COLUMN IF NOT EXISTS push_token       text;
+  ADD COLUMN IF NOT EXISTS lawn_size  integer,
+  ADD COLUMN IF NOT EXISTS lat        numeric(9,6),
+  ADD COLUMN IF NOT EXISTS lng        numeric(9,6),
+  ADD COLUMN IF NOT EXISTS push_token text;
 
 -- recommendation_events — one row per recommendation fired per user.
 -- The Edge Function inserts rows (service role); the client only reads
@@ -179,7 +176,6 @@ CREATE TABLE IF NOT EXISTS recommendation_events (
   status                 text        NOT NULL DEFAULT 'pending'
                            CHECK (status IN ('pending','confirmed','snoozed','dismissed')),
   snoozed_until          date,
-  gdd_at_trigger         numeric,
   soil_temp_at_trigger   numeric,
   created_at             timestamptz NOT NULL DEFAULT now(),
   updated_at             timestamptz NOT NULL DEFAULT now()
@@ -199,7 +195,7 @@ CREATE POLICY "own_recommendations_update"
   USING (auth.uid() = user_id)
   WITH CHECK (auth.uid() = user_id);
 
--- weather_cache — stores today's weather data per unique lat/lng.
+-- weather_cache — stores today's soil temp per unique lat/lng.
 -- Keyed on (lat, lng, fetched_date) so the daily cron never fetches
 -- the same location twice in one run, even across retries.
 -- No user access — service role only.
@@ -208,9 +204,6 @@ CREATE TABLE IF NOT EXISTS weather_cache (
   lng              numeric(9,6)  NOT NULL,
   fetched_date     date          NOT NULL,
   soil_temp_6cm    numeric,
-  soil_temp_18cm   numeric,
-  tmax             numeric,
-  tmin             numeric,
   created_at       timestamptz   NOT NULL DEFAULT now(),
   PRIMARY KEY (lat, lng, fetched_date)
 );
@@ -245,7 +238,7 @@ Replace `YOUR_PROJECT_ID` with your Supabase project ID (found in the project UR
 
 ```bash
 git add supabase/migrations/20260511000001_recommendation_engine_tables.sql src/types/supabase.ts
-git commit -m "feat: add recommendation_events, weather_cache tables and user_profiles columns"
+git commit -m "feat: add recommendation_events, weather_cache, soil_temp_streaks tables and user_profiles columns"
 ```
 
 ---

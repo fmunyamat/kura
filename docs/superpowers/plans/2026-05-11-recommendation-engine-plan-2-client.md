@@ -122,7 +122,6 @@ export interface RecommendationEvent {
   type: string;
   status: RecommendationStatus;
   snoozed_until: string | null;
-  gdd_at_trigger: number | null;
   soil_temp_at_trigger: number | null;
   created_at: string;
   updated_at: string;
@@ -147,7 +146,7 @@ import type { RecommendationContent } from '~/features/recommendations/types';
 // RECOMMENDATION_CONTENT — maps each recommendation type string to the
 // copy shown on its task card. The question text is written for beginners —
 // plain language, no lawn jargon. More types will be added here when
-// GDD threshold ranges are confirmed.
+// soil temp threshold ranges are confirmed.
 export const RECOMMENDATION_CONTENT: Record<string, RecommendationContent> = {
   dormancy_break: {
     title: 'Your grass may be waking up',
@@ -443,7 +442,6 @@ const mockRec = {
   type: 'dormancy_break',
   status: 'pending' as const,
   snoozed_until: null,
-  gdd_at_trigger: 120,
   soil_temp_at_trigger: 52.3,
   created_at: '2026-05-01T00:00:00Z',
   updated_at: '2026-05-01T00:00:00Z',
@@ -1268,4 +1266,4 @@ git commit -m "fix: resolve test failures after Plan 2 integration"
 
 **Plan 2 complete.** The Home screen shows recommendation cards when the Edge Function fires them. The Settings screen lets users change their grass type or trigger a full data reset if they move.
 
-**Next:** Plan 3 (Edge Function) will be written once GDD threshold ranges are confirmed by Farai. The plan will cover: GDD utilities, Open-Meteo weather fetching, weather_cache deduplication, rule evaluation, Expo push notification sending, main orchestrator, and pg_cron scheduling.
+**Next:** Plan 3 (Edge Function) will be written once soil temp threshold ranges are confirmed. The plan will cover: Open-Meteo weather fetching, weather_cache deduplication, soil_temp_streaks tracking, rule evaluation, Expo push notification sending, main orchestrator, and pg_cron scheduling.

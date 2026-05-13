@@ -3,7 +3,7 @@ Date: 2026-05-11
 
 ## Overview
 
-The recommendation engine decides what lawn care actions to recommend and when. It uses two primary data signals — soil temperature and cumulative Growing Degree Days (GDD) — to trigger time-sensitive recommendations. A fine-tuning layer of in-app Yes/No questions personalises recommendations per user based on what they're actually observing on their lawn.
+The recommendation engine decides what lawn care actions to recommend and when. It uses soil temperature as the primary signal to trigger time-sensitive recommendations. A fine-tuning layer of in-app Yes/No questions personalises recommendations per user based on what they're actually observing on their lawn.
 
 ---
 
@@ -11,10 +11,8 @@ The recommendation engine decides what lawn care actions to recommend and when. 
 
 This spec covers:
 - Daily server-side recommendation evaluation (Supabase Edge Function + pg_cron)
-- GDD calculation, storage, and season reset logic
-- Soil temperature fetching and averaging
+- Soil temperature fetching (6cm depth) and streak tracking
 - Weather API deduplication and caching
-- Mid-season signup backfill
 - Client-side recommendation display (task cards with Yes/No)
 - Grass type inference and confirmation at onboarding
 - "I've moved" data reset in Settings
@@ -29,9 +27,9 @@ The system has two independent halves that communicate through the database.
 
 A Supabase Edge Function called `recommendation-engine` runs every morning via pg_cron. It:
 1. Loads all users with complete profiles, grouped by lat/lng
-2. Fetches today's weather from Open-Meteo once per unique location (checking `weather_cache` first)
-3. Updates each user's cumulative GDD by adding today's increment
-4. Checks each user's GDD and soil temp against the rule set
+2. Fetches today's soil temperature from Open-Meteo once per unique location (checking `weather_cache` first)
+3. Updates the `soil_temp_streaks` table for each location
+4. Checks each user's soil temp and streak against the rule set
 5. Inserts into `recommendation_events` and sends a push notification when a rule fires
 
 ### Client side (runs when the user opens the app)
@@ -49,10 +47,6 @@ The Home screen fetches `pending` recommendations via TanStack Query and renders
 lat               numeric(9,6)
 lng               numeric(9,6)
 
--- GDD tracking (updated daily by Edge Function)
-cumulative_gdd    numeric   DEFAULT 0
-gdd_last_updated  date      -- NULL = new user awaiting backfill
-
 -- Push notifications
 push_token        text      -- Expo push token, upserted at app launch
 ```
@@ -66,8 +60,7 @@ CREATE TABLE recommendation_events (
   type                   text NOT NULL,  -- 'pre_emergent' | 'dormancy_break' | 'spring_fertilize' | etc.
   status                 text NOT NULL DEFAULT 'pending',  -- 'pending' | 'confirmed' | 'snoozed' | 'dismissed'
   snoozed_until          date,           -- set when status = 'snoozed'
-  gdd_at_trigger         numeric,        -- cumulative GDD when this fired (for debugging)
-  soil_temp_at_trigger   numeric,        -- averaged soil temp when this fired (for debugging)
+  soil_temp_at_trigger   numeric,        -- soil temp when this fired (for debugging)
   created_at             timestamptz DEFAULT now(),
   updated_at             timestamptz DEFAULT now()
 );
@@ -87,51 +80,20 @@ CREATE TABLE weather_cache (
   lng             numeric(9,6),
   fetched_date    date,
   soil_temp_6cm   numeric,   -- °F (Open-Meteo called with temperature_unit=fahrenheit)
-  soil_temp_18cm  numeric,   -- °F
-  tmax            numeric,   -- °F, daily max air temp
-  tmin            numeric,   -- °F, daily min air temp
   created_at      timestamptz DEFAULT now(),
   PRIMARY KEY (lat, lng, fetched_date)
 );
 ```
 
-> All temperatures stored in °F. Request Open-Meteo with `temperature_unit=fahrenheit` so no conversion is needed before applying the GDD formula or soil temp thresholds.
+> Temperatures stored in °F. Request Open-Meteo with `temperature_unit=fahrenheit` so no conversion is needed before applying soil temp thresholds.
 
 Static tasks (shared, seeded) remain completely separate from `recommendation_events` (per-user, dynamic).
 
 ---
 
-## GDD Calculation
-
-### Base temperatures and season start dates
-
-| Grass type    | Base temp | Season start |
-|---------------|-----------|--------------|
-| Cool-season   | 32°F      | January 1    |
-| Warm-season   | 50°F      | March 1      |
-
-### Daily formula
-
-```
-GDD_today = max(((tmax + tmin) / 2) − base_temp, 0)
-cumulative_gdd += GDD_today
-```
-
-### Season reset
-
-If `gdd_last_updated < season_start_this_year`, reset `cumulative_gdd = 0` before adding any new data. This handles the annual rollover automatically without a separate job.
-
----
-
 ## Soil Temperature
 
-Fetch `soil_temperature_6cm` and `soil_temperature_18cm` from Open-Meteo and average them:
-
-```
-soil_temp = (soil_temperature_6cm + soil_temperature_18cm) / 2
-```
-
-This averages the upper root zone for a stable, accurate reading. Surface temperature (0cm) fluctuates too much with direct sunlight and air temp to be reliable for grass dormancy or pre-emergent timing.
+Fetch `soil_temperature_6cm` from Open-Meteo. This is the closest depth to the 2-inch threshold cited by university turfgrass research for pre-emergent timing. Surface temperature (0cm) fluctuates too much with direct sunlight and air temp to be reliable for grass dormancy or pre-emergent timing.
 
 ---
 
@@ -139,42 +101,27 @@ This averages the upper root zone for a stable, accurate reading. Surface temper
 
 ### Step 1 — Load and group users
 
-Query `user_profiles` for all users with `grass_type != 'unknown'`, `lat IS NOT NULL`, and `push_token IS NOT NULL`. Group into a map of `"lat,lng" → [users]`. Split users into two buckets: **new** (`gdd_last_updated IS NULL`) and **existing**.
+Query `user_profiles` for all users with `grass_type != 'unknown'`, `lat IS NOT NULL`, and `push_token IS NOT NULL`. Group into a map of `"lat,lng" → [users]`.
 
 ### Step 2 — Fetch weather per unique location
 
 For each unique lat/lng:
 1. Check `weather_cache` for a row matching today's date — if found, use it (handles cron retries and shared locations)
-2. If not found:
-   - **Existing users at this location:** fetch only today's data from Open-Meteo (`tmax`, `tmin`, `soil_temp_6cm`, `soil_temp_18cm`)
-   - **New users at this location:** fetch historical data from season start to today (one-time backfill cost)
-3. Insert into `weather_cache`
+2. If not found, fetch today's `soil_temp_6cm` from Open-Meteo and insert into `weather_cache`
+3. Upsert `soil_temp_streaks` — increment `streak_days` if `soil_temp_6cm >= 50°F`, otherwise reset to 0
 
-### Step 3 — Update cumulative GDD per user
+### Step 3 — Check rules
 
-Four cases handled in order:
-
-| Condition | Action |
-|---|---|
-| `gdd_last_updated = today` | Skip — already processed (safe for retries) |
-| `gdd_last_updated IS NULL` | Backfill: sum GDD from season start to today, store |
-| `gdd_last_updated < season_start_this_year` | New season: reset to 0, then backfill from season start |
-| Otherwise | Add today's single increment to stored total |
-
-### Step 4 — Check rules
-
-For each user, check their `cumulative_gdd` and averaged soil temp against the rule set. Each rule specifies:
+For each user, check `soil_temp_6cm` and `streak_days` from `soil_temp_streaks` against the rule set. Each rule specifies:
 - `type` — identifier string
 - `grassTypes` — which grass types it applies to
-- `condition` — function of `{ gdd, soilTemp }` returning boolean
+- `condition` — function of `{ soilTemp, streakDays }` returning boolean
 - `snooze_days` — how long to snooze if user answers No
 - `notificationTitle` / `notificationBody` — push copy
 
 Before firing, verify no existing row for this `user_id + type` is `pending`, `confirmed`, or `snoozed` with `snoozed_until` in the future. If the coast is clear, insert a `pending` row and send a push notification via Expo Push API.
 
-> **Note:** Specific GDD thresholds per rule type to be provided by Farai and added to the rule set before implementation.
-
-### Step 5 — Season rollover cleanup
+### Step 4 — Season rollover cleanup
 
 On Jan 1 (cool-season) and Mar 1 (warm-season), mark any leftover `pending` or `snoozed` rows from the previous season as `dismissed`. Confirmed rows are retained as historical record.
 
@@ -268,12 +215,11 @@ Wrapped in a transaction — atomically deletes `user_profiles`, `task_completio
 | Failure | Behaviour |
 |---|---|
 | Open-Meteo unreachable for a location | Log, skip all users at that location, continue with remaining locations |
-| Single user GDD update fails | Log, skip that user, continue |
 | Push notification fails (expired token) | Log, continue — recommendation row still inserted, card visible on next app open |
 | Confirm/snooze mutation fails on client | Show brief error message, leave card visible for retry |
 | `reset_user_data` storage deletion fails | Log for manual cleanup — DB deletion already committed, onboarding proceeds |
 
-Cron retries are always safe: `gdd_last_updated = today` guard skips already-processed users, and `weather_cache` PK prevents duplicate inserts.
+Cron retries are always safe: `weather_cache` PK prevents duplicate inserts, and `soil_temp_streaks` upsert is idempotent.
 
 ---
 
@@ -281,11 +227,9 @@ Cron retries are always safe: `gdd_last_updated = today` guard skips already-pro
 
 | What | How |
 |---|---|
-| GDD calculation | Unit tests — known tmax/tmin arrays → assert correct cumulative totals for both grass types |
-| Season reset logic | Unit tests — assert cumulative_gdd resets on Jan 1 (cool) and Mar 1 (warm) |
-| Mid-season backfill | Unit test with mocked Open-Meteo response — new user gets correct GDD on first run |
 | Weather deduplication | Unit test — assert Open-Meteo called once when two users share lat/lng |
-| Rule evaluation | Unit tests — each rule type fires at threshold, skips snoozed/confirmed users |
+| Streak tracking | Unit test — streak increments on warm days, resets on cold day |
+| Rule evaluation | Unit tests — each rule type fires at soil temp threshold, skips snoozed/confirmed users |
 | RecommendationCard | RNTL — renders question text, Yes/No tappable, calls correct mutation |
 | Confirm/snooze mutations | Integration tests against local Supabase — assert DB state after each action |
 | `reset_user_data` RPC | Integration test — assert all rows deleted, auth user preserved |
@@ -294,4 +238,4 @@ Cron retries are always safe: `gdd_last_updated = today` guard skips already-pro
 
 ## Open Items
 
-- GDD threshold ranges per rule type — to be provided by Farai before implementation begins
+- Soil temp threshold ranges per rule type — to be confirmed before Plan 3 (Edge Function) is implemented
