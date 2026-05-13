@@ -11,7 +11,8 @@ All FK references to `auth.users` use `ON DELETE CASCADE` so account deletion re
 | `task_completions` | `id`, `user_id` (RLS + CASCADE DELETE), `task_id`, `completed_at`, `week_of` |
 | `lawn_photos` | `id`, `user_id` (RLS + CASCADE DELETE), `storage_path`, `taken_at`, `week_number`, `season` |
 | `recommendation_events` | `id`, `user_id` (RLS + CASCADE DELETE), `type`, `status`, `snoozed_until`, `gdd_at_trigger`, `soil_temp_at_trigger`, `created_at`, `updated_at` |
-| `weather_cache` | `lat`, `lng`, `fetched_date` (PK composite), `soil_temp_6cm`, `soil_temp_18cm`, `tmax`, `tmin` |
+| `weather_cache` | `lat`, `lng`, `fetched_date` (PK composite), `soil_temp_6cm`, `tmax`, `tmin` |
+| `soil_temp_streaks` | `lat`, `lng` (PK composite), `streak_days`, `last_updated` |
 
 **Supabase Storage:** private bucket `lawn-photos`. Objects are stored at `{user_id}/{timestamp}-week-{n}.jpg`. Access is controlled by Storage policies — there is no public URL. The account deletion Edge Function must call `storage.remove()` on the user's folder in addition to relying on the cascade FK for row cleanup.
 
@@ -54,17 +55,11 @@ cumulative_gdd += GDD_today
 
 ### Soil temperature
 
-Fetch `soil_temperature_6cm` and `soil_temperature_18cm` from Open-Meteo and average them:
-
-```
-soil_temp = (soil_temperature_6cm + soil_temperature_18cm) / 2
-```
-
-This averages the upper root zone. Surface temperature (0cm) fluctuates too much with direct sunlight to be reliable for grass dormancy or pre-emergent timing.
+Fetch `soil_temperature_6cm` from Open-Meteo. This is the closest depth to the 2-inch threshold cited by university turfgrass research for pre-emergent timing. Surface temperature (0cm) fluctuates too much with direct sunlight to be reliable.
 
 ### Weather data (Open-Meteo)
 
-Open-Meteo is free, requires no API key, and provides soil temperature at exact 6cm and 18cm depths alongside daily temperature max/min. All temperatures are requested in °F (`temperature_unit=fahrenheit`).
+Open-Meteo is free, requires no API key, and provides soil temperature at 6cm depth alongside daily temperature max/min. All temperatures are requested in °F (`temperature_unit=fahrenheit`).
 
 **Deduplication:** Before calling Open-Meteo, the Edge Function groups users by lat/lng. Each unique location is fetched **once** per day regardless of how many users share it. Results are stored in `weather_cache` (keyed on `lat + lng + fetched_date`). If the cron retries, already-cached locations are skipped automatically.
 
@@ -107,7 +102,19 @@ One row per recommendation fired per user. The Edge Function inserts rows (servi
 
 ### weather_cache table
 
-Stores today's weather per unique lat/lng. Keyed on `(lat, lng, fetched_date)` so duplicate inserts are blocked by the primary key. No user access — service role only (RLS enabled, no policies).
+Stores today's weather per unique lat/lng. Columns: `soil_temp_6cm`, `tmax`, `tmin`. Keyed on `(lat, lng, fetched_date)` so duplicate inserts are blocked by the primary key. No user access — service role only (RLS enabled, no policies).
+
+### soil_temp_streaks table
+
+Tracks how many consecutive days each location's soil has been at or above 50°F. Keyed on `(lat, lng)` — same deduplication unit as `weather_cache`, so one row covers all users at the same coordinates.
+
+| Column | Purpose |
+|---|---|
+| `lat`, `lng` | Composite PK — one row per unique location |
+| `streak_days` | How many consecutive days `soil_temp_6cm >= 50°F`. Reset to 0 when a day falls below. |
+| `last_updated` | Date the Edge Function last wrote to this row — used to detect a skipped day and reset the streak. |
+
+The Edge Function upserts this table once per unique location per run, after writing to `weather_cache`. Rules that require a consecutive-day threshold (e.g. `pre_emergent` fires when `streak_days >= 3 AND soil_temp_6cm BETWEEN 50 AND 55`) read from this table directly. No user access — service role only (RLS enabled, no policies).
 
 ### Push notifications
 
