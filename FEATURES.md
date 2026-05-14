@@ -6,12 +6,12 @@ All FK references to `auth.users` use `ON DELETE CASCADE` so account deletion re
 
 | Table | Key columns |
 |---|---|
-| `user_profiles` | `user_id` (FK → auth.users CASCADE DELETE), `zip_code`, `lawn_size`, `grass_type`, `lat`, `lng`, `cumulative_gdd`, `gdd_last_updated`, `push_token`, `season_override`, `notifications_enabled`, `effort_level` |
+| `user_profiles` | `user_id` (FK → auth.users CASCADE DELETE), `zip_code`, `lawn_size`, `grass_type`, `lat`, `lng`, `push_token`, `season_override`, `notifications_enabled`, `effort_level` |
 | `tasks` | `id`, `title`, `subtitle`, `why_it_matters`, `estimated_minutes`, `recurrence`, `seasons text[]`, `grass_types text[]`, `min_effort_level` |
 | `task_completions` | `id`, `user_id` (RLS + CASCADE DELETE), `task_id`, `completed_at`, `week_of` |
 | `lawn_photos` | `id`, `user_id` (RLS + CASCADE DELETE), `storage_path`, `taken_at`, `week_number`, `season` |
-| `recommendation_events` | `id`, `user_id` (RLS + CASCADE DELETE), `type`, `status`, `snoozed_until`, `gdd_at_trigger`, `soil_temp_at_trigger`, `created_at`, `updated_at` |
-| `weather_cache` | `lat`, `lng`, `fetched_date` (PK composite), `soil_temp_6cm`, `tmax`, `tmin` |
+| `recommendation_events` | `id`, `user_id` (RLS + CASCADE DELETE), `type`, `status`, `snoozed_until`, `soil_temp_at_trigger`, `created_at`, `updated_at` |
+| `weather_cache` | `lat`, `lng`, `fetched_date` (PK composite), `soil_temp_6cm` |
 | `soil_temp_streaks` | `lat`, `lng` (PK composite), `streak_days`, `last_updated` |
 
 **Supabase Storage:** private bucket `lawn-photos`. Objects are stored at `{user_id}/{timestamp}-week-{n}.jpg`. Access is controlled by Storage policies — there is no public URL. The account deletion Edge Function must call `storage.remove()` on the user's folder in addition to relying on the cascade FK for row cleanup.
@@ -22,44 +22,25 @@ Types generated via: `supabase gen types typescript > src/types/supabase.ts`
 
 ## Recommendation Engine
 
-The recommendation engine decides what lawn care actions to recommend and when. It uses two primary data signals — soil temperature and cumulative Growing Degree Days (GDD) — to trigger time-sensitive recommendations. A fine-tuning layer of in-app Yes/No questions personalises each recommendation based on what the user is actually observing on their lawn.
+The recommendation engine decides what lawn care actions to recommend and when. It uses soil temperature as the primary signal to trigger time-sensitive recommendations. A fine-tuning layer of in-app Yes/No questions personalises each recommendation based on what the user is actually observing on their lawn.
 
 ### How it works
 
 1. A Supabase Edge Function (`recommendation-engine`) runs daily via pg_cron
-2. For each user it fetches weather data, updates their cumulative GDD, and checks rules
+2. For each unique location it fetches today's soil temperature and updates `soil_temp_streaks`
 3. When a rule fires, it inserts a row into `recommendation_events` and sends a push notification
 4. The user taps the notification → app opens → a task card appears on the Home screen
 5. The card asks a plain-English question ("Are you seeing green blades?") with Yes / Not yet buttons
 6. **Yes** → `status = confirmed` — task accepted
 7. **Not yet** → `status = snoozed` — hidden for 5 days, Edge Function rechecks after
 
-### GDD calculation
-
-Growing Degree Days measure accumulated heat over a season. They reset annually and are stored per user so the daily cron only needs to add today's increment — not recalculate from scratch.
-
-| Grass type | Base temp | Season start (annual reset) |
-|---|---|---|
-| Cool-season | 32°F | January 1 |
-| Warm-season | 50°F | March 1 |
-
-**Daily formula:**
-```
-GDD_today = max(((tmax + tmin) / 2) − base_temp, 0)
-cumulative_gdd += GDD_today
-```
-
-`cumulative_gdd` and `gdd_last_updated` are stored on `user_profiles`. If `gdd_last_updated < season_start_this_year` the value is reset to 0 before the new increment is added.
-
-**Mid-season signup:** New users (`gdd_last_updated IS NULL`) get a one-time backfill on their first cron run. The Edge Function fetches historical weather from season start to today, calculates the full cumulative GDD, and stores it. From the next day forward only today's increment is added. This means recommendations fire immediately at the correct GDD level for users who sign up part-way through the season.
-
 ### Soil temperature
 
-Fetch `soil_temperature_6cm` from Open-Meteo. This is the closest depth to the 2-inch threshold cited by university turfgrass research for pre-emergent timing. Surface temperature (0cm) fluctuates too much with direct sunlight to be reliable.
+Fetch `soil_temperature_6cm` from Open-Meteo. This is the closest depth to the 2-inch threshold cited by university turfgrass research for pre-emergent timing. Surface temperature (0cm) fluctuates too much with direct sunlight to be reliable for grass dormancy or pre-emergent timing.
 
 ### Weather data (Open-Meteo)
 
-Open-Meteo is free, requires no API key, and provides soil temperature at 6cm depth alongside daily temperature max/min. All temperatures are requested in °F (`temperature_unit=fahrenheit`).
+Open-Meteo is free, requires no API key, and provides soil temperature at 6cm depth. Temperatures are requested in °F (`temperature_unit=fahrenheit`).
 
 **Deduplication:** Before calling Open-Meteo, the Edge Function groups users by lat/lng. Each unique location is fetched **once** per day regardless of how many users share it. Results are stored in `weather_cache` (keyed on `lat + lng + fetched_date`). If the cron retries, already-cached locations are skipped automatically.
 
@@ -95,14 +76,13 @@ One row per recommendation fired per user. The Edge Function inserts rows (servi
 | `type` | Rule identifier, e.g. `pre_emergent`, `dormancy_break`, `spring_fertilize` |
 | `status` | `pending` → `confirmed` / `snoozed` / `dismissed` |
 | `snoozed_until` | Date set when user taps "Not yet" — Edge Function skips until this date passes |
-| `gdd_at_trigger` | Cumulative GDD when the rule fired (for debugging) |
-| `soil_temp_at_trigger` | Averaged soil temp when the rule fired (for debugging) |
+| `soil_temp_at_trigger` | Soil temp when the rule fired (for debugging) |
 
 **RLS:** Users may SELECT and UPDATE their own rows. INSERT is restricted to the Edge Function service role.
 
 ### weather_cache table
 
-Stores today's weather per unique lat/lng. Columns: `soil_temp_6cm`, `tmax`, `tmin`. Keyed on `(lat, lng, fetched_date)` so duplicate inserts are blocked by the primary key. No user access — service role only (RLS enabled, no policies).
+Stores today's soil temperature per unique lat/lng. Keyed on `(lat, lng, fetched_date)` so duplicate inserts are blocked by the primary key. No user access — service role only (RLS enabled, no policies).
 
 ### soil_temp_streaks table
 
@@ -128,7 +108,7 @@ Available in Settings. Warns the user that all lawn history, photos, and progres
 
 ### Open items
 
-- GDD threshold ranges per rule type — to be provided by Farai before Plan 3 (Edge Function) is implemented
+- Soil temp threshold ranges per rule type — to be confirmed before Plan 3 (Edge Function) is implemented
 
 ---
 
