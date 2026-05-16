@@ -6,9 +6,7 @@ Beginner lawn care app. Target audience: People with zero lawn experience. Every
 
 ## Session Memory
 
-At the start of every new session, read `MEMORY.md` and resume from where we left off.
-
-Throughout the session, keep `MEMORY.md` updated in real time — log every task started, decision made, problem hit, and what's next. Write enough detail that if the computer dies mid-session, reading `MEMORY.md` alone is enough to pick up exactly where we stopped.
+At the start of every new background or foreground ssession, keep `MEMORY.md` updated in real time — log every task started, decision made, problem hit, and what's next. Write enough detail that if the computer dies mid-session, reading `MEMORY.md` alone is enough to pick up exactly where we stopped.
 
 At the end of every completed task, ask: **"Do you want to keep or erase the contents of MEMORY.md?"**
 
@@ -81,6 +79,27 @@ These are non-negotiable. Don't work around them, don't ask if they apply.
 - **Validate all external input with Zod** before it touches app state or the service layer. (MASVS-CODE-4, MASWE-0079)
 - **Never expose internal errors to the UI.** Log to Sentry; show a generic user-facing message. (MASVS-CODE-4, MASWE-0087)
 - **No custom cryptography.** Delegate all crypto to Supabase Auth, expo-secure-store, and TLS. (MASVS-CRYPTO-1, MASWE-0019)
+
+---
+
+## Testing
+
+Write tests for any code that is critical to the app working correctly. "Critical" means: if this breaks silently, a user loses data, can't sign in, sees wrong information, or the core lawn-care loop stops working.
+
+**Always test:**
+- Auth flows — magic link submission, OTP verification, session routing (new user → onboarding, returning user → tabs)
+- Service functions that read or write to Supabase — verify the right query runs and errors are handled
+- Routing guards — unauthenticated users can't reach protected screens; authenticated users skip sign-in
+- Any function that makes a routing decision based on user state (e.g. `hasCompletedOnboarding`)
+- Recommendation logic — wrong triggers mean users get bad lawn advice
+- Zod validation schemas — ensure invalid input is rejected before it reaches the service layer
+
+**Don't bother testing:**
+- Styled-components (visual output — test with eyes, not assertions)
+- Simple display components with no logic
+- Wrappers that just pass props through
+
+**Test stack:** Jest + React Native Testing Library for unit/integration. Detox for E2E flows (sign-in, onboarding). Mock Supabase at the service boundary — never hit the real DB in unit tests.
 
 ---
 
