@@ -1,5 +1,6 @@
 import { Image } from 'expo-image';
-import { useRef, useState } from 'react';
+import { useLocalSearchParams } from 'expo-router';
+import { useEffect, useRef, useState } from 'react';
 import {
     Animated,
     Easing,
@@ -9,6 +10,7 @@ import {
     useWindowDimensions,
 } from 'react-native';
 import styled from 'styled-components/native';
+import { signInWithMagicLink } from '~/features/auth/services/authService';
 import { GlassCard } from '~/shared/components/GlassCard';
 import { ConfirmationPanel } from '../components/ConfirmationPanel';
 import { MagicLinkForm } from '../components/MagicLinkForm';
@@ -127,6 +129,16 @@ const DividerText = styled.Text`
   color: ${({ theme }) => theme.colors.textMutedOnDark};
 `;
 
+// ErrorText — the inline error that appears below the magic link form when
+// something goes wrong (submit failure) or when the user taps a link that
+// has already expired. Uses errorOnDark so it reads clearly on the glass card.
+const ErrorText = styled.Text`
+  font-size: ${({ theme }) => theme.typography.sizeSm}px;
+  color: ${({ theme }) => theme.colors.errorOnDark};
+  text-align: center;
+  margin-top: ${({ theme }) => theme.spacing.xs}px;
+`;
+
 export const SignInScreen = () => {
   const [email, setEmail] = useState('');
 
@@ -134,6 +146,26 @@ export const SignInScreen = () => {
   // can't reach hidden inputs — especially important on Android where
   // overflow: hidden alone doesn't block touches.
   const [isConfirming, setIsConfirming] = useState(false);
+
+  // isSubmitting tracks whether a magic link request is in flight.
+  // True while signInWithMagicLink is running so the button shows a spinner
+  // and stays disabled — prevents double-submits.
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // errorMessage holds the text shown below the form when something goes wrong.
+  // null means no error. Set by handleSubmit on failure or by the link-expired
+  // param when the user arrives back from a dead magic link.
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // error is the query param that auth/callback.tsx appends when the deep link
+  // token is invalid or expired: /sign-in?error=link-expired.
+  // We read it once on mount and translate it into a user-friendly message.
+  const { error: linkError } = useLocalSearchParams<{ error?: string }>();
+  useEffect(() => {
+    if (linkError === 'link-expired') {
+      setErrorMessage('Your link has expired. Please request a new one.');
+    }
+  }, [linkError]);
 
   // screenWidth drives the slide distance and each panel's explicit width.
   // useWindowDimensions re-runs on rotation so both stay correct after the
@@ -155,11 +187,29 @@ export const SignInScreen = () => {
       useNativeDriver: true,
     }).start(onDone);
 
-  // handleSubmit immediately disables the form (keyboard dismisses, stray taps
-  // blocked) then slides the confirmation panel in from the right.
-  const handleSubmit = () => {
-    setIsConfirming(true);
-    slide(-screenWidth);
+  // handleSubmit sends the magic link email then slides in the confirmation
+  // panel on success. On failure, we show a generic message — never the raw
+  // Supabase error — because exposing internal errors to the UI is a security
+  // concern (MASVS-CODE-4, MASWE-0087).
+  const handleSubmit = async () => {
+    setErrorMessage(null);
+    setIsSubmitting(true);
+    try {
+      await signInWithMagicLink(email);
+      setIsConfirming(true);
+      slide(-screenWidth);
+    } catch {
+      setErrorMessage('Something went wrong. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // handleEmailChange keeps the email state in sync and also clears any
+  // standing error so the user isn't staring at a red message while they type.
+  const handleEmailChange = (text: string) => {
+    setEmail(text);
+    if (errorMessage) setErrorMessage(null);
   };
 
   // handleReset slides the form back in, then clears the email and re-enables
@@ -169,6 +219,7 @@ export const SignInScreen = () => {
     slide(0, () => {
       setIsConfirming(false);
       setEmail('');
+      setErrorMessage(null);
     });
 
   return (
@@ -211,9 +262,14 @@ export const SignInScreen = () => {
                 <GlassCard>
                   <MagicLinkForm
                     email={email}
-                    onEmailChange={setEmail}
+                    onEmailChange={handleEmailChange}
                     onSubmit={handleSubmit}
+                    isLoading={isSubmitting}
                   />
+                  {/* Show the error message below the form when something went
+                      wrong with the magic link request, or when the user arrived
+                      here via an expired deep link. null = no error = nothing shown. */}
+                  {errorMessage && <ErrorText>{errorMessage}</ErrorText>}
                   <Divider>
                     <DividerLine />
                     <DividerText>or continue with</DividerText>

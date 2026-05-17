@@ -6,7 +6,7 @@ Beginner lawn care app. Target audience: People with zero lawn experience. Every
 
 ## Session Memory
 
-At the start of every new background or foreground ssession, keep `MEMORY.md` updated in real time — log every task started, decision made, problem hit, and what's next. Write enough detail that if the computer dies mid-session, reading `MEMORY.md` alone is enough to pick up exactly where we stopped.
+At the start of every new background or foreground ssession, keep `MEMORY.md` in the project root updated in real time — log every task started, decision made, problem hit, and what's next. Write enough detail that if the computer dies mid-session, reading `MEMORY.md` alone is enough to pick up exactly where we stopped.
 
 At the end of every completed task, ask: **"Do you want to keep or erase the contents of MEMORY.md?"**
 
