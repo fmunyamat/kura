@@ -3,6 +3,7 @@ import { useState } from 'react';
 import styled from 'styled-components/native';
 import { GrassTypeCard } from '~/features/onboarding/components/GrassTypeCard';
 import { OnboardingLayout } from '~/features/onboarding/components/OnboardingLayout';
+import { useOnboardingStore } from '../stores/onboardingStore';
 
 // EFFORT_OPTIONS — the three goal-based effort tiers the user picks from.
 // value maps to the smallint stored in user_profiles.effort_level (1 / 2 / 3).
@@ -66,9 +67,11 @@ const ButtonText = styled.Text`
 // is stored in user_profiles.effort_level and can be changed later in Settings.
 export const EffortLevel = () => {
   const [selected, setSelected] = useState<1 | 2 | 3 | null>(null);
+  const { setEffortLevel } = useOnboardingStore();
 
   const handleContinue = () => {
     if (!selected) return;
+    setEffortLevel(selected);
     router.push('/onboarding/photo-capture');
   };
 

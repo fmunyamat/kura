@@ -4,6 +4,7 @@ import styled from 'styled-components/native';
 import { GrassTypeCard } from '~/features/onboarding/components/GrassTypeCard';
 import { OnboardingLayout } from '~/features/onboarding/components/OnboardingLayout';
 import type { GrassTypeList } from '~/features/onboarding/types';
+import { useOnboardingStore } from '../stores/onboardingStore';
 
 // GRASS_OPTIONS — the three choices shown on this screen.
 const GRASS_OPTIONS: Array<{
@@ -58,9 +59,11 @@ const ButtonText = styled.Text`
 // from ZIP code server-side rather than storing a wrong value.
 export const GrassType = () => {
   const [selected, setSelected] = useState<GrassTypeList | null>(null);
+  const { setGrassType } = useOnboardingStore();
 
   const handleContinue = () => {
     if (!selected) return;
+    setGrassType(selected);
     router.push('/onboarding/effort-level');
   };
 
