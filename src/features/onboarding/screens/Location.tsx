@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Linking, useWindowDimensions } from 'react-native';
 import styled, { useTheme } from 'styled-components/native';
 import { OnboardingLayout } from '~/features/onboarding/components/OnboardingLayout';
+import { useOnboardingStore } from '../stores/onboardingStore';
 
 // FieldGroup — wraps a label + input pair with a small gap.
 const FieldGroup = styled.View`
@@ -137,10 +138,14 @@ export const Location = () => {
   const [zipFocused, setZipFocused] = useState(false);
   const [lawnFocused, setLawnFocused] = useState(false);
 
+  const { setZipCode: saveZipCode, setLawnSize: saveLawnSize } = useOnboardingStore();
+
   const isValid = zipCode.length === 5 && lawnSize.length > 0;
 
   const handleContinue = () => {
     if (!isValid) return;
+    saveZipCode(zipCode);
+    saveLawnSize(parseInt(lawnSize, 10));
     router.push('/onboarding/grass-type');
   };
 
