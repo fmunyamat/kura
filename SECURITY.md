@@ -34,6 +34,42 @@ export const supabase = createClient<Database>(
 | `AsyncStorage` | non-sensitive UI prefs only | anything sensitive |
 | External storage | **nothing** | all app data (MASWE-0007) |
 
+**Never persist the full Zustand state tree to AsyncStorage.** Zustand's `persist` middleware is convenient but dangerous if applied to the entire store — the auth slice (session, user, tokens) would be written to unencrypted AsyncStorage where it can be read on any rooted/jailbroken device.
+
+```ts
+// ❌ WRONG — persists session and user tokens to unencrypted AsyncStorage
+import { persist } from 'zustand/middleware';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const useStore = create(
+  persist(
+    (set) => ({ session: null, user: null, taskFilter: 'all', ... }),
+    { name: 'kura-store', storage: createJSONStorage(() => AsyncStorage) },
+  )
+);
+
+// ✅ CORRECT — only persist non-sensitive UI preferences; let Supabase client
+//              restore the session from expo-secure-store on launch
+const useUIStore = create(
+  persist(
+    (set) => ({ taskFilter: 'all', selectedTab: 'home' }),
+    { name: 'kura-ui-prefs', storage: createJSONStorage(() => AsyncStorage) },
+  )
+);
+// Auth state lives in a separate non-persisted store; the Supabase client
+// restores the session from expo-secure-store automatically via AuthProvider
+```
+
+**Never pass session data or tokens to Sentry, Crashlytics, or any crash-reporting SDK.** Error reports are transmitted off-device and stored on third-party servers. The Sentry `beforeSend` hook in `app/providers/SentryProvider.tsx` already strips email and IP — also ensure no `console.log(session)` or `captureException(error, { extra: { session } })` calls exist anywhere.
+
+```ts
+// ❌ WRONG — attaches raw session to a Sentry error report
+Sentry.captureException(err, { extra: { session, user } });
+
+// ✅ CORRECT — log only the non-sensitive identifier
+Sentry.captureException(err, { extra: { userId: user?.id, screen: 'HomeTab' } });
+```
+
 ---
 
 ## MASVS-STORAGE-2 — No sensitive data in logs or backups (MASWE-0001, 0003, 0004)
@@ -102,6 +138,51 @@ Additional auth rules:
 - **401 from Supabase** → clear session from SecureStore → navigate to AuthStack (MASWE-0038)
 - **Token refresh** is automatic via `autoRefreshToken: true`; do not implement manual refresh logic
 
+### OAuth2 + PKCE — Required for Any Social Auth Provider
+
+When the Google and Apple buttons in `SocialAuthButtons` are wired up, the OAuth2 flow **must use PKCE** (Proof of Key Code Exchange). Without PKCE, an intercepting app that captures the authorization code from the redirect URL can exchange it for an access token — PKCE makes the intercepted code useless without the original verifier.
+
+**How PKCE works:**
+1. App generates a `code_verifier` — a cryptographically random string
+2. App computes `code_challenge = base64url(SHA256(code_verifier))`
+3. App opens the authorization URL with `code_challenge` included
+4. After the user approves, the provider redirects with an authorization `code`
+5. App sends the original `code_verifier` alongside the `code` to exchange for tokens
+6. Provider verifies that `SHA256(code_verifier) == code_challenge` before issuing tokens
+
+Step 6 means a stolen authorization code is worthless — the attacker doesn't have the original `code_verifier`.
+
+```ts
+// ✅ CORRECT — use react-native-app-auth which implements PKCE natively
+// via the platform's AppAuth-iOS / AppAuth-Android SDK
+import { authorize } from 'react-native-app-auth';
+
+const config = {
+  issuer: 'https://accounts.google.com',
+  clientId: 'YOUR_GOOGLE_CLIENT_ID',     // public, not a secret
+  redirectUrl: 'com.kura.app:/oauth2redirect/google',
+  scopes: ['openid', 'profile', 'email'],
+  usePKCE: true,                          // PKCE on by default in react-native-app-auth
+};
+
+const result = await authorize(config);
+// result.accessToken is now safe to pass to supabase.auth.signInWithIdToken()
+
+// ❌ WRONG — never implement the OAuth redirect manually in a WebView.
+//            You lose PKCE, and the WebView can be inspected for tokens.
+// <WebView source={{ uri: googleOAuthUrl }} />
+```
+
+**Never use the implicit grant flow** (no `response_type=token` in the authorization URL). The implicit flow returns tokens directly in the redirect URL fragment, which is visible to any intercepting app and is not supported by PKCE. Supabase Auth enforces PKCE automatically for mobile OAuth flows — do not override it.
+
+```ts
+// ❌ WRONG — implicit flow embeds tokens directly in the redirect URL
+const authUrl = `https://accounts.google.com/o/oauth2/auth?response_type=token&...`;
+
+// ✅ CORRECT — authorization code flow with PKCE
+const authUrl = `https://accounts.google.com/o/oauth2/auth?response_type=code&code_challenge=...&code_challenge_method=S256&...`;
+```
+
 ---
 
 ## MASVS-CRYPTO-1 — No broken or custom cryptography (MASWE-0013, 0019, 0021, 0027)
@@ -159,6 +240,106 @@ Rules:
 - Never add user-supplied CAs to the trust store
 - TLS 1.0 and 1.1 are not permitted — Supabase enforces TLS 1.2+ server-side; iOS ATS and Android NSC enforce it client-side
 
+### SSL Pinning
+
+SSL pinning embeds a copy of the server's certificate (or its public key hash) in the app bundle. On each request, the app verifies the server's certificate matches the pinned copy. This prevents man-in-the-middle attacks where an attacker installs a rogue root CA on the device (corporate proxies, malware, or a malicious MDM profile) and intercepts HTTPS traffic.
+
+**Kura's current posture:** Standard TLS validation enforced by iOS ATS and Android NSC. SSL pinning is not yet implemented. Consider adding it before the first production release, particularly to protect the Supabase auth endpoint.
+
+**If implementing SSL pinning**, use a library that supports public key pinning (not full certificate pinning) so the pin survives a server-side certificate renewal without an app update:
+
+```ts
+// With react-native-ssl-public-key-pinning (community library)
+import { fetch as pinnedFetch } from 'react-native-ssl-public-key-pinning';
+
+const response = await pinnedFetch('https://pdpqvojftsusqvgzccax.supabase.co/auth/v1/token', {
+  method: 'POST',
+  pkPinning: {
+    'pdpqvojftsusqvgzccax.supabase.co': {
+      // Pin the Subject Public Key Info (SPKI) hash, not the leaf cert.
+      // You can get this with: openssl s_client -connect host:443 | openssl x509 -pubkey -noout | openssl pkey -pubin -outform der | openssl dgst -sha256 -binary | base64
+      includeSubdomains: true,
+      publicKeyHashes: ['base64-encoded-sha256-of-spki-hash'],
+    },
+  },
+});
+```
+
+**⚠️ Critical: Certificate rotation planning.** If you pin the leaf certificate instead of the public key hash, every time Supabase renews their TLS certificate (typically every 1–2 years) your app will refuse all requests until users update. Pin the **public key hash** (SPKI) instead — Supabase's key rarely rotates even when the certificate does. Always ship at least two pins (the current key + the next one) so you can rotate without an emergency app update.
+
+```ts
+// ✅ Pin two keys so a rotation doesn't break the app
+publicKeyHashes: [
+  'currentKeyHash=',   // active key
+  'backupKeyHash=',    // next key (obtained from Supabase support or cert transparency logs)
+]
+```
+
+If Supabase does rotate their key before your backup pin is set up, your app will be completely broken for all users until a new release reaches them through the App Store review process (typically 24–48 hours minimum). Here is how to plan for that scenario:
+
+**1. Monitor certificate transparency logs.**
+Every TLS certificate issued by a public CA is logged to Certificate Transparency (CT) logs, which are publicly searchable. Set up a free alert at [crt.sh](https://crt.sh) or Cert Spotter for `*.supabase.co` — you will receive an email the moment a new certificate is issued for Supabase's domain, typically days or weeks before it goes live. That is your window to ship a new backup pin before the old one stops working.
+
+```bash
+# Check current certificate fingerprints for your Supabase project manually:
+openssl s_client -connect pdpqvojftsusqvgzccax.supabase.co:443 2>/dev/null \
+  | openssl x509 -pubkey -noout \
+  | openssl pkey -pubin -outform der \
+  | openssl dgst -sha256 -binary \
+  | base64
+```
+
+**2. Use Expo EAS Update (OTA) to push pin updates without App Store review.**
+Expo's OTA update system can push a new JS bundle to all users in minutes — no App Store review required. The hardcoded pin hashes live in the JS bundle, so an OTA push is enough to update them. This shrinks the "broken window" from 24–48 hours of App Store review to the time it takes EAS Update to propagate (typically under 5 minutes for active users).
+
+```bash
+# Push an updated pin hash to all production users immediately
+eas update --channel production --message "Update SSL pin hashes for Supabase cert rotation"
+```
+
+The one catch: users who have not opened the app recently will get the update on next launch, not immediately. This is still far faster than an App Store release.
+
+**3. Serve pin hashes from your own backend (most robust).**
+Instead of hardcoding pins in the bundle, fetch the current valid pin hashes from a Supabase Edge Function on app launch and cache them in `expo-secure-store`. The bundle keeps a hardcoded fallback for the initial cold start (no network yet), but after launch the app always has server-fresh pins.
+
+```ts
+// On app launch — fetch current pins from your own server
+const fetchCurrentPins = async (): Promise<string[]> => {
+  try {
+    const { data } = await supabase.functions.invoke('get-ssl-pins');
+    if (data?.pins) {
+      await SecureStore.setItemAsync('ssl_pins', JSON.stringify(data.pins));
+      return data.pins;
+    }
+  } catch {
+    // Fall back to whatever is cached, or the hardcoded bundle default
+  }
+  const cached = await SecureStore.getItemAsync('ssl_pins');
+  return cached ? JSON.parse(cached) : HARDCODED_FALLBACK_PINS;
+};
+```
+
+This means you can rotate pins by updating the Edge Function alone — no app release, no OTA push needed.
+
+**4. Alert on pinning failures in Sentry before they cascade.**
+Configure your SSL pinning library to report failures to Sentry rather than silently failing or crashing. A spike in pinning failures across multiple users is an early signal that a key rotation is underway that you haven't accounted for yet.
+
+```ts
+try {
+  const response = await pinnedFetch(url, options);
+} catch (err) {
+  if (err.message?.includes('pin')) {
+    // SSL pinning failure — could be a legitimate key rotation
+    Sentry.captureException(err, {
+      tags: { type: 'ssl_pin_failure', host: new URL(url).hostname },
+    });
+  }
+  throw err;
+}
+```
+
+Set up a Sentry alert rule: if more than 5 `ssl_pin_failure` events fire within 10 minutes, send an immediate notification to the engineering channel. That is your real-time canary.
+
 ---
 
 ## MASVS-PLATFORM-1 & PLATFORM-2 — Safe platform interaction (MASWE-0054, 0055, 0058, 0117)
@@ -174,7 +355,7 @@ Rules:
 | `CONTACTS` | **Never** | No social features |
 | `MICROPHONE` | **Never** | No audio features |
 
-**Deep link validation** (MASWE-0058): All deep link paths must be defined in the React Navigation linking config. Unregistered paths silently do nothing.
+**Deep link validation** (MASWE-0058): All deep link paths must be defined in the Expo Router linking config. Unregistered paths silently do nothing.
 
 ```ts
 const linking: LinkingOptions<RootParamList> = {
@@ -186,6 +367,41 @@ const linking: LinkingOptions<RootParamList> = {
     },
   },
 };
+```
+
+**Deep links are not a secure channel — never embed sensitive data in them** (MASWE-0058):
+
+Custom URL schemes (`kura://`) have no centralized registry. Any app installed on the device can register `kura://` and silently intercept every deep link sent to it. On iOS the OS picks one app automatically with no user warning; on Android the user sees a disambiguation dialog but may still choose the wrong app. Because of this:
+
+```ts
+// ❌ WRONG — an intercepting app receives the long-lived API key in the URL
+router.push('kura://settings?apiKey=sk_live_abc123');
+
+// ❌ WRONG — embedding a session token in a notification deep link
+// The notification payload is stored on the device; the URL is logged by the OS
+router.push(`kura://auth?token=${sessionToken}`);
+
+// ✅ CORRECT — the auth callback uses short-lived Supabase tokens that are
+//              exchanged immediately in app/auth/callback.tsx and never stored
+// The tokens are valid for seconds, not hours, and are single-use
+Linking.openURL(`kura://auth/callback#access_token=${shortLivedToken}`);
+```
+
+The magic link callback (`app/auth/callback.tsx`) is the only place in Kura where tokens travel through a deep link URL. This is acceptable because:
+1. The `access_token` and `refresh_token` are generated by Supabase and are short-lived
+2. `createSessionFromUrl()` exchanges them immediately — the raw URL is never logged or persisted
+3. On failure the screen redirects to `/sign-in?error=link-expired` — no sensitive data in the error URL
+
+For any future OAuth2 flows (Google Sign-In, Apple Sign-In), use **Universal Links** (`https://app.kura.com/auth/callback`) on iOS and **Android App Links** (`https://app.kura.com/auth/callback`) on Android instead of custom schemes. These are verified against a server-hosted file (`/.well-known/apple-app-site-association` / `/.well-known/assetlinks.json`) and cannot be registered by a third-party app.
+
+```json
+// /.well-known/apple-app-site-association  (served from app.kura.com)
+{
+  "applinks": {
+    "apps": [],
+    "details": [{ "appID": "TEAM_ID.com.kura.app", "paths": ["/auth/callback"] }]
+  }
+}
 ```
 
 **Notifications must not expose PII** (MASWE-0054, MASTG-BEST-0027):
@@ -322,6 +538,45 @@ Sentry.init({
 - **Account deletion** triggers a Supabase Edge Function that: (1) cascade-deletes all rows via `ON DELETE CASCADE` FK; (2) calls `storage.remove()` on `{user_id}/` in the `lawn-photos` bucket — Storage objects are not covered by FK cascades. (MASWE-0113)
 - **Privacy policy** linked in Settings screen and App Store listing (MASWE-0111)
 - **App Store privacy nutrition label** must accurately declare data collection (MASWE-0112)
+
+---
+
+## Orchestration Layer — Never Call Third-Party APIs Directly from the App
+
+If Kura ever needs to call a third-party API that requires a secret key (weather data, SMS, payment processor, etc.), that call must go through a **Supabase Edge Function**, not from the app bundle directly. Any secret embedded in the app binary can be extracted by anyone who downloads the `.ipa` or `.apk`.
+
+```ts
+// ❌ WRONG — secret key is bundled in the app and extractable
+const weatherData = await fetch(
+  `https://api.openweathermap.org/data/2.5/weather?zip=${zip}&appid=SECRET_KEY_HERE`
+);
+
+// ✅ CORRECT — app calls your own Edge Function with the user's JWT;
+//              the Edge Function holds the third-party secret server-side
+const weatherData = await supabase.functions.invoke('get-weather', {
+  body: { zip },
+  // Supabase automatically attaches the user's JWT in the Authorization header
+});
+```
+
+```ts
+// supabase/functions/get-weather/index.ts  (runs server-side, secret never leaves server)
+import { serve } from 'https://deno.land/std/http/server.ts';
+
+serve(async (req) => {
+  // Verify the caller is authenticated before touching the third-party API
+  const authHeader = req.headers.get('Authorization');
+  if (!authHeader) return new Response('Unauthorized', { status: 401 });
+
+  const { zip } = await req.json();
+  const response = await fetch(
+    `https://api.openweathermap.org/data/2.5/weather?zip=${zip}&appid=${Deno.env.get('WEATHER_API_KEY')}`,
+  );
+  return new Response(await response.text(), { headers: { 'Content-Type': 'application/json' } });
+});
+```
+
+Rule: if you need to set an environment variable for a secret that is NOT `EXPO_PUBLIC_*`, it belongs in an Edge Function, not the app. `EXPO_PUBLIC_*` values are intentionally public (the Supabase anon key is rate-limited and RLS-protected by design). Private keys with billing or admin access must never leave the server.
 
 ---
 
