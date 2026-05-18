@@ -1,5 +1,6 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
+import { Pressable } from 'react-native';
 import styled from 'styled-components/native';
 import { GrassTypeCard } from '~/features/onboarding/components/GrassTypeCard';
 import { OnboardingLayout } from '~/features/onboarding/components/OnboardingLayout';
@@ -48,7 +49,7 @@ const HintText = styled.Text`
 `;
 
 // PrimaryButton — the Continue CTA. Disabled at 30% opacity until a card is selected.
-const PrimaryButton = styled.TouchableOpacity<{ $enabled: boolean }>`
+const PrimaryButton = styled(Pressable)<{ $enabled: boolean }>`
   background-color: ${({ theme }) => theme.colors.gradientMidLight};
   border-radius: ${({ theme }) => theme.radii.md}px;
   padding: ${({ theme }) => theme.spacing.md}px;

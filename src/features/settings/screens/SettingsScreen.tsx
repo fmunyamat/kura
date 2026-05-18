@@ -1,6 +1,6 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { useState } from 'react';
-import { ScrollView } from 'react-native';
+import { Pressable, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import styled from 'styled-components/native';
 import { GrassTypeCard } from '~/features/onboarding/components/GrassTypeCard';
@@ -91,7 +91,7 @@ const Card = styled.View`
 
 // SettingsRow — a tappable row inside a Card. Holds an icon, label + value,
 // and an optional action button on the right.
-const SettingsRow = styled.TouchableOpacity`
+const SettingsRow = styled(Pressable)`
   flex-direction: row;
   align-items: center;
   gap: ${({ theme }) => theme.spacing.sm}px;
@@ -162,7 +162,7 @@ const PickerArea = styled.View`
 `;
 
 // SaveButton — confirms the selected effort level and collapses the picker.
-const SaveButton = styled.TouchableOpacity`
+const SaveButton = styled(Pressable)`
   background-color: ${({ theme }) => theme.colors.gradientMidLight};
   border-radius: ${({ theme }) => theme.radii.md}px;
   padding: ${({ theme }) => theme.spacing.sm}px;
@@ -178,7 +178,7 @@ const SaveButtonText = styled.Text`
 
 // DangerCard — the "I've moved" reset row, visually separated from the rest
 // with a red tint to signal that this action is irreversible.
-const DangerCard = styled.TouchableOpacity`
+const DangerCard = styled(Pressable)`
   background-color: rgba(239, 68, 68, 0.06);
   border-radius: ${({ theme }) => theme.radii.lg}px;
   border-width: 1px;

@@ -1,4 +1,5 @@
 import { Image } from 'expo-image';
+import { Pressable } from 'react-native';
 import styled from 'styled-components/native';
 
 export interface SocialAuthButtonsProps {
@@ -11,7 +12,7 @@ const ButtonsWrapper = styled.View
   gap: ${({ theme }) => theme.spacing.sm}px;
 `;
 
-const SocialButton = styled.TouchableOpacity
+const SocialButton = styled(Pressable)
 `
     height: 44px;
     border-radius: ${({ theme }) => theme.radii.md}px;
@@ -43,7 +44,6 @@ export const SocialAuthButtons = ({
     <ButtonsWrapper>
         <SocialButton
             onPress={onGooglePress}
-            activeOpacity={0.75}
             accessibilityLabel="Continue with Google"
             accessibilityRole="button"
         >

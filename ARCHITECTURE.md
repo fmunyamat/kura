@@ -240,6 +240,224 @@ export const FEATURES = {
 
 ---
 
+## Error Handling
+
+Every error must be caught, logged with enough context to diagnose it, and — if it surfaces to the user — shown as a generic message. Silent failures are not acceptable. If something breaks and there is no Sentry event, we have no idea it happened.
+
+### The three layers where errors must be handled
+
+#### 1. Service layer — catch and rethrow with context
+
+Services are the only place that touches Supabase or external APIs. Wrap every call. Log the operation name, the user ID, and a safe summary of the input. Never log the raw Supabase error object directly — it can contain query strings or row data.
+
+```ts
+// features/tasks/services/tasks.service.ts
+export const tasksService = {
+  async completeTask(taskId: string, userId: string): Promise<void> {
+    taskIdSchema.parse(taskId); // validate input first (MASVS-CODE-4)
+
+    const { error } = await supabase
+      .from('task_completions')
+      .insert({ task_id: taskId, completed_at: new Date().toISOString() });
+
+    if (error) {
+      // Log with context so Sentry shows exactly what broke and for whom.
+      // userId is a non-sensitive identifier — safe to include (see SECURITY.md).
+      logger.error('tasksService.completeTask failed', {
+        operation: 'completeTask',
+        userId,
+        taskId,
+        supabaseCode: error.code, // error code only — not the full message
+      });
+      throw new Error('completeTask failed'); // generic message propagated upward
+    }
+  },
+};
+```
+
+Never swallow errors in services (`catch { return null }`). If the call failed, throw. Let the layer above decide how to show it.
+
+#### 2. Hook / TanStack Query layer — handle loading, error, and empty states explicitly
+
+Every `useQuery` and `useMutation` must handle its `isError` state. Do not leave it unhandled and let the component render stale or empty UI without explanation.
+
+```ts
+// features/tasks/hooks/useCompleteTask.ts
+export const useCompleteTask = () => {
+  const userId = useAuthStore((s) => s.user?.id);
+
+  return useMutation({
+    mutationFn: (taskId: string) => tasksService.completeTask(taskId, userId!),
+    onError: (error, taskId) => {
+      // Log at the hook layer so we know which mutation triggered it.
+      logger.error('useCompleteTask mutation failed', {
+        operation: 'useCompleteTask',
+        userId,
+        taskId,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+    },
+  });
+};
+```
+
+For queries, always destructure `isError` and handle it in the screen:
+
+```ts
+const { data, isLoading, isError } = useActiveRecommendations();
+
+if (isError) {
+  // Show the generic error UI — do not render a blank screen silently.
+  return <FullScreenError message="Couldn't load your tasks. Pull to refresh." />;
+}
+```
+
+#### 3. Screen / component layer — catch async handlers and form submissions
+
+`onPress` handlers that call async functions must be wrapped in try/catch. An unhandled promise rejection in a button press shows nothing to the user and logs nothing to Sentry.
+
+```tsx
+const handleSubmit = async () => {
+  try {
+    setIsSubmitting(true);
+    await someService.doSomething(input);
+  } catch {
+    // The service already logged to Sentry. The screen just needs to tell
+    // the user something went wrong without exposing the internals.
+    setErrorMessage('Something went wrong. Please try again.');
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+```
+
+---
+
+### React Error Boundary — catch rendering errors
+
+Wrap each major feature boundary in a React Error Boundary so a rendering crash in one feature doesn't take down the whole app. The boundary logs to Sentry and shows a fallback UI.
+
+```tsx
+// shared/components/ErrorBoundary/ErrorBoundary.tsx
+import * as Sentry from '@sentry/react-native';
+
+interface State { hasError: boolean }
+
+export class ErrorBoundary extends React.Component<
+  { children: React.ReactNode; fallback?: React.ReactNode; context: string },
+  State
+> {
+  state: State = { hasError: false };
+
+  static getDerivedStateFromError(): State {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: Error, info: React.ErrorInfo) {
+    // context tells us which feature tree crashed — 'HomeTab', 'OnboardingStack', etc.
+    Sentry.captureException(error, {
+      extra: { context: this.props.context, componentStack: info.componentStack },
+    });
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return this.props.fallback ?? <FullScreenError message="Something went wrong." />;
+    }
+    return this.props.children;
+  }
+}
+```
+
+Wrap each tab and each major stack at the navigator level:
+
+```tsx
+// In AppTabs or each tab screen
+<ErrorBoundary context="HomeTab">
+  <HomeStack />
+</ErrorBoundary>
+```
+
+---
+
+### Global unhandled rejection handler
+
+Some async errors fall outside React's tree entirely (background syncs, push token registration). Wire up a global handler in `App.tsx` so nothing is silently dropped.
+
+```ts
+// src/app/App.tsx — call once at startup
+import * as Sentry from '@sentry/react-native';
+
+const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
+  logger.error('Unhandled promise rejection', {
+    reason: event.reason instanceof Error ? event.reason.message : String(event.reason),
+  });
+};
+
+// React Native exposes this on the global ErrorUtils object
+if (global.ErrorUtils) {
+  const previousHandler = global.ErrorUtils.getGlobalHandler();
+  global.ErrorUtils.setGlobalHandler((error: Error, isFatal: boolean) => {
+    Sentry.captureException(error, { extra: { isFatal } });
+    previousHandler(error, isFatal);
+  });
+}
+```
+
+---
+
+### What context to always include when logging
+
+When you call `logger.error(...)`, the second argument must have enough detail to answer: *what operation was running, who was affected, and what input triggered it?*
+
+| Field | Why |
+|---|---|
+| `operation` | Which function or mutation failed — `'tasksService.completeTask'` |
+| `userId` | Which account is affected — non-PII identifier, safe to log |
+| `screen` | Which screen the user was on — `'HomeTab'`, `'PhotoCapture'` |
+| `supabaseCode` | Supabase error code only — never the full `.message` (may contain row data) |
+| Input identifiers | IDs like `taskId`, `zipCode` (not names, emails, or sizes) |
+
+Never log: raw Supabase error messages, JWT tokens, session objects, email addresses, user-entered text. See `SECURITY.md → MASVS-STORAGE-2` for the full list.
+
+---
+
+### Edge Function errors
+
+Edge Functions return HTTP status codes. The client must handle non-2xx responses explicitly — `supabase.functions.invoke` does not throw on 4xx/5xx by default.
+
+```ts
+const { data, error } = await supabase.functions.invoke('recommendation-engine');
+
+if (error || !data) {
+  logger.error('recommendation-engine invocation failed', {
+    operation: 'invokeRecommendationEngine',
+    userId,
+    errorMessage: error?.message,
+  });
+  throw new Error('recommendation-engine failed');
+}
+```
+
+Inside Edge Functions themselves, wrap the main handler in try/catch and return a structured error response — never let an exception bubble up to an unformatted 500:
+
+```ts
+// supabase/functions/recommendation-engine/index.ts
+Deno.serve(async (req) => {
+  try {
+    const result = await runEngine(req);
+    return new Response(JSON.stringify(result), { status: 200 });
+  } catch (err) {
+    console.error('[recommendation-engine] fatal error', { message: err.message });
+    return new Response(JSON.stringify({ error: 'internal error' }), { status: 500 });
+  }
+});
+```
+
+---
+
 ## Platform Handling
 
 | Concern | Approach |

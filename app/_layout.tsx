@@ -4,8 +4,8 @@ import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
 import { ThemeProvider } from 'styled-components/native';
 
-import { AuthProvider } from '@/src/app/providers/AuthProvider';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import AuthProvider from '@/src/app/providers/AuthProvider';
 import { darkTheme, lightTheme } from '@/src/config/theme';
 
 // RootLayout — the app's outermost shell. It sets up the two providers that

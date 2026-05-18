@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { ActivityIndicator } from 'react-native';
+import { ActivityIndicator, Pressable } from 'react-native';
 import styled from 'styled-components/native';
 import { useAuthStore } from '~/features/auth/stores/authStore';
 import { OnboardingLayout } from '~/features/onboarding/components/OnboardingLayout';
@@ -11,7 +11,7 @@ import { useOnboardingStore } from '../stores/onboardingStore';
 // CameraWell — the tappable area that will launch the camera.
 // Approximates a dashed-border well using a semi-transparent background
 // since React Native doesn't support native dashed borders on views.
-const CameraWell = styled.TouchableOpacity`
+const CameraWell = styled(Pressable)`
   background-color: ${({ theme }) => theme.colors.glassOnboardingInput};
   border-radius: ${({ theme }) => theme.radii.md}px;
   padding: ${({ theme }) => theme.spacing.xl}px;
@@ -33,7 +33,7 @@ const CameraLabel = styled.Text`
 
 // PrimaryButton — "Take photo" CTA. Opacity drops while the profile is being saved
 // so it's clear the button is not interactive during submission.
-const PrimaryButton = styled.TouchableOpacity<{ $disabled: boolean }>`
+const PrimaryButton = styled(Pressable)<{ $disabled: boolean }>`
   background-color: ${({ theme }) => theme.colors.gradientMidLight};
   border-radius: ${({ theme }) => theme.radii.md}px;
   padding: ${({ theme }) => theme.spacing.md}px;
@@ -48,7 +48,7 @@ const ButtonText = styled.Text`
 `;
 
 // SkipLink — secondary link beneath the button to skip photo capture.
-const SkipLink = styled.TouchableOpacity`
+const SkipLink = styled(Pressable)`
   align-items: center;
   padding: ${({ theme }) => theme.spacing.xs}px;
 `;

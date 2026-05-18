@@ -1,62 +1,113 @@
-# Kura — Session Memory
+# Error Handling Implementation — Phase Plan
 
-## Current task: Supabase auth setup (magic link OTP)
-
-Branch: `feat/supabase-auth-otp`
-
----
-
-## Phases complete
-
-| Phase | What was done |
-|---|---|
-| 1 | Installed `@supabase/supabase-js`, `expo-secure-store`, `zustand`, `expo-auth-session` |
-| 2 | Created `.env.example`; `.env.local` populated by user (git-ignored) |
-| 3 | Created `src/shared/lib/supabase.ts` — Supabase client with SecureStore session adapter |
-| 4 | Created `src/features/auth/stores/authStore.ts` — Zustand store (session, user, hasCompletedOnboarding, isLoading) |
-| 5 | Created `src/features/auth/services/authService.ts` — signInWithMagicLink, createSessionFromUrl, checkUserProfile, signOut |
-| 6 | Created `src/app/providers/AuthProvider.tsx` — restores session on launch, onAuthStateChange listener, AppState auto-refresh |
-| 7 | Restructured routes into `(auth)/` and `(app)/` segment groups; created group layouts with routing guards; removed root `index.tsx` |
-| 8 | Created `app/auth/callback.tsx` — deep link handler using `Linking.useLinkingURL()` + `createSessionFromUrl` |
-| 9 | Wired sign-in screen: `signInWithMagicLink` called on submit, `isSubmitting` spinner, generic error message on failure, link-expired query param handling; 6 new tests added |
-| 11 | Ran full DB schema migration on Supabase project "Kura Backend" (pdpqvojftsusqvgzccax): `user_profiles`, `tasks`, `task_completions`, `lawn_photos`, `recommendation_events`, `weather_cache`, `soil_temp_streaks` — all RLS enabled; private `lawn-photos` storage bucket |
-
-All changes committed on `feat/supabase-auth-otp`.
+Audit completed 2026-05-17. Full findings in session history.
+Build these phases in order — each one unblocks the next.
 
 ---
 
-## Phases remaining
+## Phase 1 — Logger + Sentry foundation (CRITICAL)
+**Everything else depends on this existing first.**
 
-### Phase 10 — Supabase dashboard config (manual — user must do this)
-In Supabase dashboard → Authentication → URL Configuration:
-- Add `kura://**` to Redirect URLs
-
-Without this, the magic link email will not be allowed to redirect back to the app.
-
----
-
-### Phase 12 — Confirm onboarding writes user_profiles
-When the user completes onboarding (after photo-capture or skip), the app must INSERT a row into `user_profiles`. This is what flips `hasCompletedOnboarding` to `true` and lets the routing guard stop redirecting to onboarding.
-
-This is a separate task — the auth setup assumes the row will be written during onboarding. The table exists and RLS is in place. Just need the INSERT wired up when onboarding completes.
+- [ ] Install `@sentry/react-native` and run `expo install`
+- [ ] Create `src/shared/utils/logger.ts` — `log(msg, data?)` and `error(msg, context)` methods; routes to `Sentry.captureException` in prod, `console.error` in dev
+- [ ] Create `src/app/providers/SentryProvider.tsx` — initialise Sentry, configure `beforeSend` to strip email and IP (see SECURITY.md)
+- [ ] Add `SentryProvider` to the provider tree in `app/_layout.tsx`
+- [ ] Add `SENTRY_DSN` to `.env` and `.env.example`
 
 ---
 
-## How auth routing works (for reference)
+## Phase 2 — Fix `checkUserProfile` silent swallow (CRITICAL)
+**Currently routes users back through onboarding if the DB call errors.**
 
+- [ ] `src/features/auth/services/authService.ts` — destructure `{ data, error }` in `checkUserProfile`; throw (with `logger.error`) if error is set
+- [ ] `src/app/providers/AuthProvider.tsx` lines 36 and 56 — wrap both `checkUserProfile` calls in try/catch; log and set `isLoading(false)` in the catch so the app doesn't hang
+
+---
+
+## Phase 3 — Add logging context to all service functions (HIGH)
+**Services throw but don't log. Production failures are invisible.**
+
+For every service function that touches Supabase or an external API, add before the throw:
+```ts
+logger.error('serviceName.functionName failed', {
+  operation: 'functionName',
+  userId,            // where available
+  supabaseCode: error.code,  // never error.message
+});
 ```
-App launch
-  └─ AuthProvider restores session from SecureStore
-       ├─ No session  →  (auth)/_layout.tsx redirects to /sign-in
-       └─ Session exists
-             ├─ No user_profiles row  →  (app)/_layout.tsx redirects to /onboarding
-             └─ user_profiles row exists  →  shows /(tabs) dashboard
 
-Magic link flow
-  1. User enters email on /sign-in
-  2. signInWithMagicLink() → Supabase sends email
-  3. User taps link → OS opens kura:// → Expo Router → app/auth/callback.tsx
-  4. createSessionFromUrl() exchanges tokens → session established
-  5. AuthProvider.onAuthStateChange fires → Zustand store updated
-  6. (app)/_layout.tsx re-renders → routes to /onboarding or /(tabs)
+Files:
+- [ ] `src/features/auth/services/authService.ts` — all four functions
+- [ ] `src/features/onboarding/services/onboardingService.ts` — both functions
+
+---
+
+## Phase 4 — React Error Boundary (HIGH)
+**A rendering crash in any feature currently crashes the whole app.**
+
+- [ ] Create `src/shared/components/ErrorBoundary/ErrorBoundary.tsx` — class component, `componentDidCatch` calls `Sentry.captureException` with `context` + `componentStack`; renders fallback UI
+- [ ] Create `src/shared/components/ErrorBoundary/index.tsx` — barrel export
+- [ ] Wrap each major route group in `app/_layout.tsx` with `<ErrorBoundary context="...">` 
+
+---
+
+## Phase 5 — Global unhandled error handler (HIGH)
+**Background async errors (push token, deep links, etc.) are silently dropped.**
+
+- [ ] `app/_layout.tsx` — add `global.ErrorUtils.setGlobalHandler` at startup, chain to previous handler, log fatal errors to Sentry via `logger.error`
+
+---
+
+## Phase 6 — try/catch on remaining screen handlers (MEDIUM)
+**`Location`, `GrassType`, and `EffortLevel` handlers have no error protection.**
+
+- [ ] `src/features/onboarding/screens/Location.tsx` — wrap `handleContinue` in try/catch; add `isSubmitting` + `errorMessage` state; add `finally` reset
+- [ ] `src/features/onboarding/screens/GrassType.tsx` — same pattern
+- [ ] `src/features/onboarding/screens/EffortLevel.tsx` — same pattern
+
+Pattern to match (already correct in `SignIn.tsx` and `PhotoCapture.tsx`):
+```ts
+const handleContinue = async () => {
+  if (!isValid) return;
+  setErrorMessage(null);
+  setIsSubmitting(true);
+  try {
+    // async work
+    router.push('/next');
+  } catch {
+    setErrorMessage('Something went wrong. Please try again.');
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 ```
+
+---
+
+## Phase 7 — Zod input validation on service parameters (MEDIUM)
+**Service functions accept raw strings with no schema check before hitting Supabase.**
+
+- [ ] Add `emailSchema` — validate before `signInWithMagicLink(email)`
+- [ ] Add `userIdSchema` — validate before `checkUserProfile(userId)`
+- [ ] Add `zipCodeSchema` (5-digit US ZIP) — validate before `geocodeZip(zipCode)`
+- [ ] Add `urlSchema` — validate before `createSessionFromUrl(url)`
+- [ ] Place schemas in `src/shared/utils/validation.ts` (already referenced in ARCHITECTURE.md)
+
+---
+
+## Phase 8 — TanStack Query + QueryProvider (MEDIUM)
+**Not installed yet. ARCHITECTURE.md and SettingsScreen both assume it exists.**
+
+- [ ] Install `@tanstack/react-query` and `@tanstack/react-query-devtools`
+- [ ] Create `src/app/providers/QueryProvider.tsx` — configure `QueryClient` with global `defaultOptions.mutations.onError` and `defaultOptions.queries.onError` safety nets that call `logger.error`
+- [ ] Add `QueryProvider` to provider tree in `app/_layout.tsx`
+- [ ] Wire `SettingsScreen` effort level mutation to a real `useUpdateEffortLevel` hook once service layer exists
+
+---
+
+## Already correct — do not change
+- `SignIn.tsx handleSubmit` — try/catch, generic message, finally block ✅
+- `PhotoCapture.tsx handleComplete` — try/catch, generic message, finally block ✅
+- `onboardingService.ts geocodeZip` — validates API response with Zod ✅
+- `supabase.ts` — validates env vars at startup with Zod, fails fast ✅
+- Secure token storage via `expo-secure-store` ✅
