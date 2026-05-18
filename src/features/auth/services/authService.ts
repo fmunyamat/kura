@@ -18,7 +18,10 @@ WebBrowser.maybeCompleteAuthSession();
 // Supabase sends an email with a link that, when tapped, opens the app at
 // this URI with access_token and refresh_token embedded in the URL.
 export const signInWithMagicLink = async (email: string): Promise<void> => {
-  const redirectTo = makeRedirectUri();
+  // 'auth/callback' must match the file at app/auth/callback.tsx exactly.
+  // Without the path, makeRedirectUri() returns kura:// (root), which the OS
+  // opens at the app root — the callback screen never mounts and tokens are lost.
+  const redirectTo = makeRedirectUri({ path: 'auth/callback' });
 
   const { error } = await supabase.auth.signInWithOtp({
     email,
