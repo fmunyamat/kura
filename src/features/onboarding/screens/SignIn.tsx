@@ -139,6 +139,13 @@ const ErrorText = styled.Text`
   margin-top: ${({ theme }) => theme.spacing.xs}px;
 `;
 
+// isValidEmail — checks that the string has the basic shape of an email address
+// (something@something.something). We intentionally keep this simple — the
+// Supabase service will reject malformed addresses anyway, so this is just a
+// first-pass check to catch obvious typos before a network request goes out.
+const isValidEmail = (value: string) =>
+  /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
+
 export const SignInScreen = () => {
   const [email, setEmail] = useState('');
 
@@ -192,6 +199,10 @@ export const SignInScreen = () => {
   // Supabase error — because exposing internal errors to the UI is a security
   // concern (MASVS-CODE-4, MASWE-0087).
   const handleSubmit = async () => {
+    if (!isValidEmail(email)) {
+      setErrorMessage('Please enter a valid email address (e.g. name@example.com).');
+      return;
+    }
     setErrorMessage(null);
     setIsSubmitting(true);
     try {
