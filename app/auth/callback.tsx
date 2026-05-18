@@ -29,7 +29,7 @@ export default function AuthCallbackScreen() {
     createSessionFromUrl(url).catch(() => {
       // Never show the raw error to the user — just redirect to sign-in
       // with a flag so it can display "Your link expired. Try again." (MASVS-CODE-4).
-      router.replace('/sign-in?error=link-expired');
+      router.replace('/(auth)/sign-in?error=link-expired');
     });
   }, [url]);
 
