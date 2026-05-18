@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Pressable, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import styled from 'styled-components/native';
+import { signOut } from '~/features/auth/services/authService';
 import { GrassTypeCard } from '~/features/onboarding/components/GrassTypeCard';
 
 // EFFORT_OPTIONS — same three tiers shown during onboarding, reused here so
@@ -176,6 +177,20 @@ const SaveButtonText = styled.Text`
   color: ${({ theme }) => theme.colors.white};
 `;
 
+// LogOutButton — full-width red button at the bottom of the screen.
+const LogOutButton = styled(Pressable)`
+  background-color: rgba(239, 68, 68, 0.85);
+  border-radius: ${({ theme }) => theme.radii.md}px;
+  padding: ${({ theme }) => theme.spacing.md}px;
+  align-items: center;
+`;
+
+const LogOutButtonText = styled.Text`
+  font-size: ${({ theme }) => theme.typography.sizeSm}px;
+  font-weight: ${({ theme }) => theme.typography.weightBold};
+  color: ${({ theme }) => theme.colors.white};
+`;
+
 // DangerCard — the "I've moved" reset row, visually separated from the rest
 // with a red tint to signal that this action is irreversible.
 const DangerCard = styled(Pressable)`
@@ -239,6 +254,19 @@ export const SettingsScreen = () => {
 
   const handleCancel = () => {
     setIsPickerOpen(false);
+  };
+
+  // handleSignOut — ends the Supabase session. AuthProvider's onAuthStateChange
+  // fires automatically, clears the Zustand store, and (app)/_layout.tsx redirects
+  // to sign-in — no manual navigation needed here.
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+    } catch {
+      // Sign-out failures are rare (network issues). Swallow silently — the user
+      // can try again and the session will eventually expire. Never surface the
+      // raw error to the UI (MASVS-CODE-4).
+    }
   };
 
   return (
@@ -333,6 +361,17 @@ export const SettingsScreen = () => {
                 <DangerDesc>Reset all lawn data and start fresh from onboarding</DangerDesc>
               </RowBody>
             </DangerCard>
+          </Section>
+
+          {/* ── Log out ────────────────────────────────────────────────── */}
+          <Section>
+            <LogOutButton
+              onPress={handleSignOut}
+              accessibilityRole="button"
+              accessibilityLabel="Log out of your account"
+            >
+              <LogOutButtonText>Log Out</LogOutButtonText>
+            </LogOutButton>
           </Section>
         </ScrollView>
       </Safe>
