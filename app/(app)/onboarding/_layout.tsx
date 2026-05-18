@@ -1,6 +1,6 @@
 import { router, usePathname } from 'expo-router';
 import { Stack } from 'expo-router';
-import { View } from 'react-native';
+import { Pressable, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import styled, { useTheme } from 'styled-components/native';
 import { OnboardingProgressBar } from '~/features/onboarding/components/OnboardingProgressBar';
@@ -27,11 +27,11 @@ const SHOWS_BACK = new Set([
 // 3px Segment + 8px padding-bottom on Bar = 11px total.
 const PROGRESS_BAR_HEIGHT = 11;
 
-// BackButton — 40×40 touchable rendered as an absolute overlay so it sits
+// BackButton — 40×40 pressable rendered as an absolute overlay so it sits
 // completely outside the Stack and never animates with screen transitions.
 // top and left are passed as inline style because they depend on useSafeAreaInsets
 // (a runtime value) — that's the one exception the rules allow for inline style.
-const BackButton = styled.TouchableOpacity`
+const BackButton = styled(Pressable)`
   position: absolute;
   width: 40px;
   height: 40px;

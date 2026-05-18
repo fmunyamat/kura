@@ -1,4 +1,5 @@
 import { Image } from 'expo-image';
+import { Pressable } from 'react-native';
 import styled from 'styled-components/native';
 
 export interface SocialAuthButtonsProps {
@@ -15,7 +16,7 @@ const ButtonsWrapper = styled.View`
 
 // SocialButton — flex: 1 makes each button claim half the available row width.
 // The glass-compatible background matches the card surface without being opaque.
-const SocialButton = styled.TouchableOpacity`
+const SocialButton = styled(Pressable)`
   flex: 1;
   height: 44px;
   border-radius: ${({ theme }) => theme.radii.md}px;
@@ -51,7 +52,7 @@ export const SocialAuthButtons = ({
   <ButtonsWrapper>
     <SocialButton
       onPress={onGooglePress}
-      activeOpacity={0.75}
+
       accessibilityLabel="Continue with Google"
       accessibilityRole="button"
     >
@@ -63,7 +64,7 @@ export const SocialAuthButtons = ({
     </SocialButton>
     <SocialButton
       onPress={onApplePress}
-      activeOpacity={0.75}
+
       accessibilityLabel="Continue with Apple"
       accessibilityRole="button"
     >

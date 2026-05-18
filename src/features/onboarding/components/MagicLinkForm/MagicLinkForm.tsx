@@ -1,5 +1,5 @@
 import { LinearGradient } from 'expo-linear-gradient';
-import { ActivityIndicator, TextInput } from 'react-native';
+import { ActivityIndicator, Pressable, TextInput } from 'react-native';
 import styled, { DefaultTheme, useTheme } from 'styled-components/native';
 
 interface MagicLinkFormProps {
@@ -30,7 +30,7 @@ const StyledTextInput = styled(TextInput)`
   color: ${({ theme }: { theme: DefaultTheme }) => theme.colors.textOnDark};
 `;
 
-const SubmitButton = styled.TouchableOpacity`
+const SubmitButton = styled(Pressable)`
   border-radius: ${({ theme }: { theme: DefaultTheme }) => theme.radii.md}px;
   overflow: hidden;
   margin-top: ${({ theme }: { theme: DefaultTheme }) => theme.spacing.md}px;
@@ -72,7 +72,6 @@ export const MagicLinkForm = ({
         <SubmitButton
             onPress={onSubmit}
             disabled={isLoading}
-            activeOpacity={0.85}
             accessibilityLabel={isLoading ? 'Sending magic link' : 'Send magic link'}
             accessibilityRole="button"
             accessibilityState={{ busy: isLoading, disabled: isLoading }}

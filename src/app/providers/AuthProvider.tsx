@@ -11,7 +11,7 @@ import { supabase } from '~/shared/lib/supabase';
 //   1. Restores any persisted session from SecureStore on launch
 //   2. Subscribes to future auth events (sign-in, sign-out, token refresh)
 //   3. Pauses/resumes the token auto-refresh when the app backgrounds/foregrounds
-export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const { setSession, setHasCompletedOnboarding, setIsLoading } = useAuthStore();
 
   useEffect(() => {
@@ -69,3 +69,5 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   return <>{children}</>;
 };
+
+export default AuthProvider;

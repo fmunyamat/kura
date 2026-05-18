@@ -1,3 +1,4 @@
+import { Pressable } from 'react-native';
 import styled from 'styled-components/native';
 
 interface GrassTypeCardProps {
@@ -11,7 +12,7 @@ interface GrassTypeCardProps {
 // CardTouchable — the tappable row for one grass type option.
 // Background shifts to the selected token when chosen — no border used,
 // depth comes from opacity contrast with the surrounding glass panel.
-const CardTouchable = styled.TouchableOpacity<{ $selected: boolean }>`
+const CardTouchable = styled(Pressable)<{ $selected: boolean }>`
   background-color: ${({ $selected, theme }) =>
     $selected
       ? theme.colors.glassOnboardingOptionSelected

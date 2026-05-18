@@ -1,62 +1,32 @@
-# Kura — Session Memory
+# Session Log — 2026-05-17
 
-## Current task: Supabase auth setup (magic link OTP)
+## Task: Convert TouchableOpacity → Pressable
 
-Branch: `feat/supabase-auth-otp`
+**Status:** Complete
 
----
+**What was done:**
+- Converted all `styled.TouchableOpacity` definitions to `styled(Pressable)` across 11 files
+- Added `Pressable` import from `react-native` to each affected file
+- Removed `activeOpacity` prop from JSX usage sites (not a valid Pressable prop) in:
+  - `MagicLinkForm.tsx` (was 0.85)
+  - `SocialAuthButtons.tsx` (was 0.75)
+  - `SocialAuthButtons.ios.tsx` (was 0.75)
+  - `collapsible.tsx` (was 0.8)
+- Updated `DESIGN.md` Component usage example to show `styled(Pressable)` pattern
+- Verified zero remaining `TouchableOpacity` references in main source
 
-## Phases complete
+**Files changed:**
+- `app/(app)/onboarding/_layout.tsx` — BackButton
+- `components/ui/collapsible.tsx` — direct JSX + import
+- `src/features/settings/screens/SettingsScreen.tsx` — SettingsRow, SaveButton, DangerCard
+- `src/features/onboarding/screens/GrassType.tsx` — PrimaryButton
+- `src/features/onboarding/screens/Location.tsx` — HintCard, PrimaryButton
+- `src/features/onboarding/screens/EffortLevel.tsx` — PrimaryButton
+- `src/features/onboarding/screens/PhotoCapture.tsx` — CameraWell, PrimaryButton, SkipLink
+- `src/features/onboarding/components/MagicLinkForm/MagicLinkForm.tsx` — SubmitButton
+- `src/features/onboarding/components/GrassTypeCard/GrassTypeCard.tsx` — CardTouchable
+- `src/features/onboarding/components/SocialAuthButtons/SocialAuthButtons.tsx` — SocialButton
+- `src/features/onboarding/components/SocialAuthButtons/SocialAuthButtons.ios.tsx` — SocialButton
+- `DESIGN.md` — updated example
 
-| Phase | What was done |
-|---|---|
-| 1 | Installed `@supabase/supabase-js`, `expo-secure-store`, `zustand`, `expo-auth-session` |
-| 2 | Created `.env.example`; `.env.local` populated by user (git-ignored) |
-| 3 | Created `src/shared/lib/supabase.ts` — Supabase client with SecureStore session adapter |
-| 4 | Created `src/features/auth/stores/authStore.ts` — Zustand store (session, user, hasCompletedOnboarding, isLoading) |
-| 5 | Created `src/features/auth/services/authService.ts` — signInWithMagicLink, createSessionFromUrl, checkUserProfile, signOut |
-| 6 | Created `src/app/providers/AuthProvider.tsx` — restores session on launch, onAuthStateChange listener, AppState auto-refresh |
-| 7 | Restructured routes into `(auth)/` and `(app)/` segment groups; created group layouts with routing guards; removed root `index.tsx` |
-| 8 | Created `app/auth/callback.tsx` — deep link handler using `Linking.useLinkingURL()` + `createSessionFromUrl` |
-| 9 | Wired sign-in screen: `signInWithMagicLink` called on submit, `isSubmitting` spinner, generic error message on failure, link-expired query param handling; 6 new tests added |
-| 11 | Ran full DB schema migration on Supabase project "Kura Backend" (pdpqvojftsusqvgzccax): `user_profiles`, `tasks`, `task_completions`, `lawn_photos`, `recommendation_events`, `weather_cache`, `soil_temp_streaks` — all RLS enabled; private `lawn-photos` storage bucket |
-
-All changes committed on `feat/supabase-auth-otp`.
-
----
-
-## Phases remaining
-
-### Phase 10 — Supabase dashboard config (manual — user must do this)
-In Supabase dashboard → Authentication → URL Configuration:
-- Add `kura://**` to Redirect URLs
-
-Without this, the magic link email will not be allowed to redirect back to the app.
-
----
-
-### Phase 12 — Confirm onboarding writes user_profiles
-When the user completes onboarding (after photo-capture or skip), the app must INSERT a row into `user_profiles`. This is what flips `hasCompletedOnboarding` to `true` and lets the routing guard stop redirecting to onboarding.
-
-This is a separate task — the auth setup assumes the row will be written during onboarding. The table exists and RLS is in place. Just need the INSERT wired up when onboarding completes.
-
----
-
-## How auth routing works (for reference)
-
-```
-App launch
-  └─ AuthProvider restores session from SecureStore
-       ├─ No session  →  (auth)/_layout.tsx redirects to /sign-in
-       └─ Session exists
-             ├─ No user_profiles row  →  (app)/_layout.tsx redirects to /onboarding
-             └─ user_profiles row exists  →  shows /(tabs) dashboard
-
-Magic link flow
-  1. User enters email on /sign-in
-  2. signInWithMagicLink() → Supabase sends email
-  3. User taps link → OS opens kura:// → Expo Router → app/auth/callback.tsx
-  4. createSessionFromUrl() exchanges tokens → session established
-  5. AuthProvider.onAuthStateChange fires → Zustand store updated
-  6. (app)/_layout.tsx re-renders → routes to /onboarding or /(tabs)
-```
+**Note for next session:** Pressable has no built-in press opacity (unlike TouchableOpacity's default 0.2 dimming). To add press feedback, use `style={({ pressed }) => pressed && { opacity: 0.8 }}` on individual Pressables if needed.

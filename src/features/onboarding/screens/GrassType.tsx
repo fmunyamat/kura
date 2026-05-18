@@ -1,5 +1,6 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
+import { Pressable } from 'react-native';
 import styled from 'styled-components/native';
 import { GrassTypeCard } from '~/features/onboarding/components/GrassTypeCard';
 import { OnboardingLayout } from '~/features/onboarding/components/OnboardingLayout';
@@ -39,7 +40,7 @@ const OptionList = styled.View`
 `;
 
 // PrimaryButton — the Continue CTA.
-const PrimaryButton = styled.TouchableOpacity<{ $enabled: boolean }>`
+const PrimaryButton = styled(Pressable)<{ $enabled: boolean }>`
   background-color: ${({ theme }) => theme.colors.gradientMidLight};
   border-radius: ${({ theme }) => theme.radii.md}px;
   padding: ${({ theme }) => theme.spacing.md}px;

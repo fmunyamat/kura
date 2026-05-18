@@ -57,9 +57,10 @@ declare module 'styled-components/native' {
 ### Component usage
 
 ```tsx
+import { Pressable } from 'react-native';
 import styled from 'styled-components/native';
 
-const Container = styled.TouchableOpacity`
+const Container = styled(Pressable)`
   background-color: ${({ theme }) => theme.colors.surface};
   border-radius:    ${({ theme }) => theme.radii.md}px;
   padding:          ${({ theme }) => theme.spacing.md}px;
