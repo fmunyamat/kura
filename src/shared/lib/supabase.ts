@@ -24,12 +24,12 @@ const EnvSchema = z.object({
     .string()
     .url()
     .refine((s) => s.startsWith('https://'), 'Supabase URL must use https://'),
-  EXPO_PUBLIC_SUPABASE_ANON_KEY: z.string().min(1),
+  EXPO_PUBLIC_SUPABASE_KEY: z.string().min(1),
 });
 
 const env = EnvSchema.safeParse({
   EXPO_PUBLIC_SUPABASE_URL: process.env.EXPO_PUBLIC_SUPABASE_URL,
-  EXPO_PUBLIC_SUPABASE_ANON_KEY: process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY,
+  EXPO_PUBLIC_SUPABASE_KEY: process.env.EXPO_PUBLIC_SUPABASE_KEY,
 });
 
 if (!env.success) {
@@ -38,14 +38,14 @@ if (!env.success) {
   );
 }
 
-const { EXPO_PUBLIC_SUPABASE_URL: supabaseUrl, EXPO_PUBLIC_SUPABASE_ANON_KEY: supabaseAnonKey } =
+const { EXPO_PUBLIC_SUPABASE_URL: supabaseUrl, EXPO_PUBLIC_SUPABASE_KEY: supabaseKey } =
   env.data;
 
 // supabase — the single shared client instance for the whole app.
 // detectSessionInUrl is false because Expo Router handles deep links
 // manually via app/auth/callback.tsx — we don't want Supabase trying
 // to parse the URL itself on native where there is no real browser URL.
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+export const supabase = createClient(supabaseUrl, supabaseKey, {
   auth: {
     storage: ExpoSecureStoreAdapter,
     autoRefreshToken: true,

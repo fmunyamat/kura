@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Linking, useWindowDimensions } from 'react-native';
+import { Linking, Pressable, useWindowDimensions } from 'react-native';
 import styled, { useTheme } from 'styled-components/native';
 import { OnboardingLayout } from '~/features/onboarding/components/OnboardingLayout';
 import { useOnboardingStore } from '../stores/onboardingStore';
@@ -66,7 +66,7 @@ const UnitText = styled.Text<{ $isTablet: boolean }>`
 `;
 
 // HintCard — tappable card that opens the lawn measurement tool in the browser.
-const HintCard = styled.TouchableOpacity`
+const HintCard = styled(Pressable)`
   background-color: ${({ theme }) => theme.colors.glassOnboardingHint};
   border-radius: ${({ theme }) => theme.radii.md}px;
   padding: ${({ theme }) => theme.spacing.sm}px ${({ theme }) => theme.spacing.md}px;
@@ -98,7 +98,7 @@ const HintLink = styled.Text`
 // PrimaryButton — the Continue CTA wrapper. Opacity drops when inputs are
 // empty to show it is not yet tappable. overflow: hidden clips the LinearGradient
 // to the button's rounded corners on both iOS and Android.
-const PrimaryButton = styled.TouchableOpacity<{ $enabled: boolean }>`
+const PrimaryButton = styled(Pressable)<{ $enabled: boolean }>`
   border-radius: ${({ theme }) => theme.radii.md}px;
   overflow: hidden;
   opacity: ${({ $enabled }) => ($enabled ? 1 : 0.3)};
