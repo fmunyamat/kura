@@ -5,10 +5,18 @@ import {
     Animated,
     Easing,
     ImageBackground,
+    Keyboard,
     KeyboardAvoidingView,
+    LayoutAnimation,
     Platform,
+    UIManager,
     useWindowDimensions,
 } from 'react-native';
+
+// LayoutAnimation requires this flag on Android (no-op on iOS).
+if (Platform.OS === 'android') {
+  UIManager.setLayoutAnimationEnabledExperimental?.(true);
+}
 import styled from 'styled-components/native';
 import { sendOtpCode, verifyOtpCode } from '~/features/auth/services/authService';
 import { GlassCard } from '~/shared/components/GlassCard';
@@ -169,6 +177,34 @@ export const SignInScreen = () => {
   // the code input whenever a new code goes out (initial send or resend).
   const [codeSentAt, setCodeSentAt] = useState(0);
 
+  // keyboardVisible tracks whether the software keyboard is up. When true, the
+  // GlassHero (logo/wordmark) is hidden so the full screen height above the
+  // keyboard is available to the auth panel — the OTP card is tall and would
+  // otherwise be clipped.
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
+
+  useEffect(() => {
+    // keyboardWillShow/Hide fires before the animation on iOS — the hero
+    // collapses in sync with the keyboard sliding up, so there's no visual jump.
+    // On Android, keyboardDidShow/Hide fires after the keyboard appears.
+    const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
+    const hideEvent = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
+
+    const show = Keyboard.addListener(showEvent, () => {
+      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+      setKeyboardVisible(true);
+    });
+    const hide = Keyboard.addListener(hideEvent, () => {
+      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+      setKeyboardVisible(false);
+    });
+
+    return () => {
+      show.remove();
+      hide.remove();
+    };
+  }, []);
+
   // error is the query param that old magic link deep links append on failure.
   // Kept so any cached links still produce a friendly message if tapped.
   const { error: linkError } = useLocalSearchParams<{ error?: string }>();
@@ -282,16 +318,23 @@ export const SignInScreen = () => {
         resizeMode="cover"
       >
         <TintOverlay>
-          <GlassHero>
-            <LogoImage
-              $isTablet={isTablet}
-              accessibilityLabel="Kura logo"
-              source={require('../../../../assets/images/kura-logo.svg')}
-              contentFit="contain"
-            />
-            <Wordmark $isTablet={isTablet}>kura</Wordmark>
-            <Tagline $isTablet={isTablet}>Lawn care, simplified</Tagline>
-          </GlassHero>
+          {/* GlassHero is hidden when the keyboard is up. The hero section takes
+              ~192px of minimum height (due to paddingTop), which leaves too little
+              room for the OTP verify card above the keyboard. Collapsing it gives
+              the panel the full screen height above the keyboard. LayoutAnimation
+              (configured in the keyboard event listener) animates the transition. */}
+          {!keyboardVisible && (
+            <GlassHero>
+              <LogoImage
+                $isTablet={isTablet}
+                accessibilityLabel="Kura logo"
+                source={require('../../../../assets/images/kura-logo.svg')}
+                contentFit="contain"
+              />
+              <Wordmark $isTablet={isTablet}>kura</Wordmark>
+              <Tagline $isTablet={isTablet}>Lawn care, simplified</Tagline>
+            </GlassHero>
+          )}
 
           <PanelHost>
             {/* PanelRow holds both panels in a horizontal row.
