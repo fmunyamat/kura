@@ -215,14 +215,10 @@ export const SignInScreen = () => {
       setIsConfirming(true);
       slide(-screenWidth);
     } catch (err) {
+      // Log to console in dev so rate-limit and config errors are visible to
+      // developers without ever exposing them in the UI (MASVS-CODE-4, MASWE-0087).
       if (__DEV__) console.log('[SignIn] sendOtpCode error:', err);
-      // In dev, show the real error so rate-limit and config issues are visible.
-      // In production, never expose internal error details to the UI (MASVS-CODE-4).
-      setSendError(
-        __DEV__ && err instanceof Error
-          ? err.message
-          : 'Something went wrong. Please try again.',
-      );
+      setSendError('Something went wrong. Please try again.');
     } finally {
       setIsSubmitting(false);
     }

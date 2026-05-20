@@ -296,7 +296,6 @@ export const OtpVerifyPanel = ({
                 focuses the hidden input below, bringing up the number-pad keyboard. */}
             <CodeBoxRow
               onPress={() => inputRef.current?.focus()}
-              accessibilityLabel="6-digit verification code"
               accessibilityRole="none"
             >
               {Array.from({ length: CODE_LENGTH }).map((_, i) => {
@@ -327,6 +326,7 @@ export const OtpVerifyPanel = ({
               maxLength={CODE_LENGTH}
               caretHidden
               accessibilityLabel="6-digit verification code"
+              testID="otp-code-input"
               onFocus={() => setIsFocused(true)}
               onBlur={() => setIsFocused(false)}
             />
@@ -336,6 +336,7 @@ export const OtpVerifyPanel = ({
             $isDisabled={isVerifyDisabled}
             onPress={() => onVerify(code)}
             disabled={isVerifyDisabled}
+            testID="otp-verify-button"
             accessibilityLabel={isVerifying ? 'Verifying code' : 'Sign in'}
             accessibilityRole="button"
             accessibilityState={{ busy: isVerifying, disabled: isVerifyDisabled }}
