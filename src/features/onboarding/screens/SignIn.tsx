@@ -9,14 +9,8 @@ import {
     KeyboardAvoidingView,
     LayoutAnimation,
     Platform,
-    UIManager,
     useWindowDimensions,
 } from 'react-native';
-
-// LayoutAnimation requires this flag on Android (no-op on iOS).
-if (Platform.OS === 'android') {
-  UIManager.setLayoutAnimationEnabledExperimental?.(true);
-}
 import styled from 'styled-components/native';
 import { sendOtpCode, verifyOtpCode } from '~/features/auth/services/authService';
 import { GlassCard } from '~/shared/components/GlassCard';
