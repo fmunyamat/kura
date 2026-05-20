@@ -169,9 +169,8 @@ export const SignInScreen = () => {
   // the code input whenever a new code goes out (initial send or resend).
   const [codeSentAt, setCodeSentAt] = useState(0);
 
-  // error is the query param that auth/callback.tsx would append on a failed
-  // deep link. Kept for backwards-compatibility in case old links are tapped,
-  // but will no longer be generated once the callback screen is removed.
+  // error is the query param that old magic link deep links append on failure.
+  // Kept so any cached links still produce a friendly message if tapped.
   const { error: linkError } = useLocalSearchParams<{ error?: string }>();
   useEffect(() => {
     if (linkError === 'link-expired') {

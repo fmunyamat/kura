@@ -31,13 +31,12 @@ Sentry.init({
 });
 
 // RootLayout — the app's outermost shell. It sets up the two providers that
-// every screen needs (theme + auth) and registers the three top-level route
+// every screen needs (theme + auth) and registers the two top-level route
 // segments with the Stack navigator.
 //
 // Route structure:
-//   (auth)        — unauthenticated screens (sign-in). Guard: redirect to (app) if session exists.
-//   (app)         — authenticated screens (tabs, onboarding). Guard: redirect to (auth) if no session.
-//   auth/callback — deep link handler for magic link token exchange. No guard needed.
+//   (auth) — unauthenticated screens (sign-in). Guard: redirect to (app) if session exists.
+//   (app)  — authenticated screens (tabs, onboarding). Guard: redirect to (auth) if no session.
 export default Sentry.wrap(function RootLayout() {
   const colorScheme = useColorScheme();
 
@@ -48,7 +47,6 @@ export default Sentry.wrap(function RootLayout() {
           <Stack>
             <Stack.Screen name="(auth)" options={{ headerShown: false }} />
             <Stack.Screen name="(app)" options={{ headerShown: false }} />
-            <Stack.Screen name="auth/callback" options={{ headerShown: false }} />
           </Stack>
           <StatusBar style="auto" />
         </AuthProvider>
