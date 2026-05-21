@@ -1,1 +1,0 @@
-export { MagicLinkForm } from './MagicLinkForm';
