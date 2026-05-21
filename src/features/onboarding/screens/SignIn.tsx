@@ -7,7 +7,6 @@ import {
     ImageBackground,
     Keyboard,
     KeyboardAvoidingView,
-    LayoutAnimation,
     Platform,
     useWindowDimensions,
 } from 'react-native';
@@ -18,37 +17,48 @@ import { OtpRequestForm } from '../components/OtpRequestForm/OtpRequestForm';
 import { OtpVerifyPanel } from '../components/OtpVerifyPanel/OtpVerifyPanel';
 import { SocialAuthButtons } from '../components/SocialAuthButtons';
 
-// Use padding behavior on both platforms so the layout shrinks above the keyboard.
-// On Android the OS already resizes the window (adjustResize), making the effective
-// keyboard inset 0, so this is a no-op there but keeps behavior consistent.
 const KEYBOARD_BEHAVIOR = 'padding' as const;
 
-// Screen — full-screen KeyboardAvoidingView. Adds paddingBottom equal to the
-// keyboard height so the auth panel stays fully above the keyboard on both
-// iOS and Android.
-const Screen = styled(KeyboardAvoidingView)`
+// Screen — root container, fills the full screen. Does NOT wrap the photo/tint
+// layers so they are never constrained by keyboard insets (which would leave a
+// black gap at the bottom when the keyboard dismisses).
+const Screen = styled.View`
   flex: 1;
 `;
 
-// PhotoBackground — the mowing photo covers the entire screen. Both the hero
-// area and the auth panel sit on top of this single image so the glass card
-// has a real photo to blur and the two sections read as one unified background.
+// PhotoBackground — absolutely fills the screen so it's independent of the
+// KeyboardAvoidingView below. The photo always covers the full display regardless
+// of keyboard state.
 const PhotoBackground = styled(ImageBackground)`
-  flex: 1;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
 `;
 
-// TintOverlay — a semi-transparent dark layer over the photo that brings
-// the overall luminance down so text and the glass card are legible against
-// the greenery without losing the sense of depth from the photo.
+// TintOverlay — same absolute fill as PhotoBackground. The dark tint always
+// covers the full screen so there is no uncovered gap when the keyboard dismisses.
 const TintOverlay = styled.View`
-  flex: 1;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   background-color: rgba(5, 12, 5, 0.58);
 `;
 
+// ContentKAV — the only layer that participates in keyboard avoidance. Sits on
+// top of the absolute background layers and adds paddingBottom = keyboard height
+// so the hero and panel slide above the keyboard without affecting the photo.
+const ContentKAV = styled(KeyboardAvoidingView)`
+  flex: 1;
+`;
+
 // GlassHero — the logo, wordmark, and tagline at the top of the sign-in screen.
-// When the keyboard is up, padding-top and logo size shrink so the panel below
-// gains room without the hero disappearing. LayoutAnimation (triggered in the
-// keyboard listeners) makes the size change animate in sync with the keyboard slide.
+// When the keyboard is up, padding-top shrinks and the logo downsizes so the
+// panel below gains room without the hero disappearing. The resize is instant;
+// the smooth slide upward is handled by KeyboardAvoidingView's padding animation.
 const GlassHero = styled.View<{ $keyboardVisible: boolean }>`
   flex: 1;
   align-items: center;
@@ -190,17 +200,13 @@ export const SignInScreen = () => {
     const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
     const hideEvent = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
 
-    // LayoutAnimation animates the hero size change (padding + logo) in sync
-    // with the keyboard slide. It must be called before the state update so the
-    // layout diff from setKeyboardVisible is included in the animation batch.
-    const show = Keyboard.addListener(showEvent, () => {
-      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-      setKeyboardVisible(true);
-    });
-    const hide = Keyboard.addListener(hideEvent, () => {
-      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-      setKeyboardVisible(false);
-    });
+    // State-only updates — no LayoutAnimation here. KeyboardAvoidingView owns
+    // its own paddingBottom animation; calling LayoutAnimation.configureNext
+    // in the same frame intercepts that animation and leaves a black gap at the
+    // bottom of the screen when the keyboard dismisses. The hero resize is
+    // instant; the smooth slide is provided by KeyboardAvoidingView.
+    const show = Keyboard.addListener(showEvent, () => setKeyboardVisible(true));
+    const hide = Keyboard.addListener(hideEvent, () => setKeyboardVisible(false));
 
     return () => {
       show.remove();
@@ -312,19 +318,22 @@ export const SignInScreen = () => {
     });
 
   return (
-    <Screen behavior={KEYBOARD_BEHAVIOR}>
-      {/* PhotoBackground covers the full screen so the glass card blurs a real
-          photo rather than a flat colour. resizeMode="cover" fills any screen
-          aspect ratio without letterboxing. */}
+    <Screen>
+      {/* Photo and tint are absolutely positioned so they always fill the full
+          screen and are never affected by the keyboard insets below. */}
       <PhotoBackground
         source={require('../../../../assets/images/mowing-photo.jpg')}
         resizeMode="cover"
-      >
-        <TintOverlay>
+      />
+      <TintOverlay />
+
+      {/* ContentKAV is the only keyboard-aware layer. Its paddingBottom grows
+          when the keyboard appears, sliding the hero and panel above it. */}
+      <ContentKAV behavior={KEYBOARD_BEHAVIOR}>
           {/* GlassHero shrinks (logo + padding) when the keyboard is up so the
-              auth panel has more room. KeyboardAvoidingView slides the whole
-              layout above the keyboard; LayoutAnimation animates the hero resize
-              in the same frame so both motions stay in sync. */}
+              auth panel has more room above the keyboard. KeyboardAvoidingView
+              animates the upward slide; the hero resize happens instantly on
+              the same frame without interfering with that animation. */}
           <GlassHero $keyboardVisible={keyboardVisible}>
             <LogoImage
               $isTablet={isTablet}
@@ -386,8 +395,7 @@ export const SignInScreen = () => {
               />
             </PanelRow>
           </PanelHost>
-        </TintOverlay>
-      </PhotoBackground>
+      </ContentKAV>
     </Screen>
   );
 };
