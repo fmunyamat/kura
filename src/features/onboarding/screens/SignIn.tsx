@@ -18,13 +18,14 @@ import { OtpRequestForm } from '../components/OtpRequestForm/OtpRequestForm';
 import { OtpVerifyPanel } from '../components/OtpVerifyPanel/OtpVerifyPanel';
 import { SocialAuthButtons } from '../components/SocialAuthButtons';
 
-const KEYBOARD_BEHAVIOR = Platform.select<'padding' | undefined>({
-  ios: 'padding',
-  default: undefined,
-});
+// Use padding behavior on both platforms so the layout shrinks above the keyboard.
+// On Android the OS already resizes the window (adjustResize), making the effective
+// keyboard inset 0, so this is a no-op there but keeps behavior consistent.
+const KEYBOARD_BEHAVIOR = 'padding' as const;
 
-// Screen — full-screen KeyboardAvoidingView. On iOS, shifts the layout up
-// when the keyboard appears so the email input stays visible.
+// Screen — full-screen KeyboardAvoidingView. Adds paddingBottom equal to the
+// keyboard height so the auth panel stays fully above the keyboard on both
+// iOS and Android.
 const Screen = styled(KeyboardAvoidingView)`
   flex: 1;
 `;
@@ -44,21 +45,26 @@ const TintOverlay = styled.View`
   background-color: rgba(5, 12, 5, 0.58);
 `;
 
-// GlassHero — the upper quarter of the screen. The logo, wordmark, and
-// tagline sit here, floating directly over the tinted photo.
-const GlassHero = styled.View`
+// GlassHero — the logo, wordmark, and tagline at the top of the sign-in screen.
+// When the keyboard is up, padding-top and logo size shrink so the panel below
+// gains room without the hero disappearing. LayoutAnimation (triggered in the
+// keyboard listeners) makes the size change animate in sync with the keyboard slide.
+const GlassHero = styled.View<{ $keyboardVisible: boolean }>`
   flex: 1;
   align-items: center;
   justify-content: center;
-  padding-top: ${({ theme }) => theme.spacing.xxl*4}px;
+  padding-top: ${({ $keyboardVisible, theme }) =>
+    $keyboardVisible ? theme.spacing.md : theme.spacing.xxl * 4}px;
   gap: ${({ theme }) => theme.spacing.xs}px;
 `;
 
-// LogoImage — the kura SVG mark rendered via expo-image for reliable SVG
-// support across iOS and Android. Size scales up on tablets.
-const LogoImage = styled(Image)<{ $isTablet: boolean }>`
-  width: ${({ $isTablet }) => ($isTablet ? 150 : 120)}px;
-  height: ${({ $isTablet }) => ($isTablet ? 150 : 120)}px;
+// LogoImage — the kura SVG mark. Shrinks when the keyboard is up to give the
+// hero a more compact footprint while remaining visible.
+const LogoImage = styled(Image)<{ $isTablet: boolean; $keyboardVisible: boolean }>`
+  width: ${({ $isTablet, $keyboardVisible }) =>
+    $keyboardVisible ? 48 : $isTablet ? 150 : 120}px;
+  height: ${({ $isTablet, $keyboardVisible }) =>
+    $keyboardVisible ? 48 : $isTablet ? 150 : 120}px;
   margin-bottom: ${({ theme }) => theme.spacing.xs}px;
 `;
 
@@ -184,6 +190,9 @@ export const SignInScreen = () => {
     const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
     const hideEvent = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
 
+    // LayoutAnimation animates the hero size change (padding + logo) in sync
+    // with the keyboard slide. It must be called before the state update so the
+    // layout diff from setKeyboardVisible is included in the animation batch.
     const show = Keyboard.addListener(showEvent, () => {
       LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
       setKeyboardVisible(true);
@@ -312,23 +321,21 @@ export const SignInScreen = () => {
         resizeMode="cover"
       >
         <TintOverlay>
-          {/* GlassHero is hidden when the keyboard is up. The hero section takes
-              ~192px of minimum height (due to paddingTop), which leaves too little
-              room for the OTP verify card above the keyboard. Collapsing it gives
-              the panel the full screen height above the keyboard. LayoutAnimation
-              (configured in the keyboard event listener) animates the transition. */}
-          {!keyboardVisible && (
-            <GlassHero>
-              <LogoImage
-                $isTablet={isTablet}
-                accessibilityLabel="Kura logo"
-                source={require('../../../../assets/images/kura-logo.svg')}
-                contentFit="contain"
-              />
-              <Wordmark $isTablet={isTablet}>kura</Wordmark>
-              <Tagline $isTablet={isTablet}>Lawn care, simplified</Tagline>
-            </GlassHero>
-          )}
+          {/* GlassHero shrinks (logo + padding) when the keyboard is up so the
+              auth panel has more room. KeyboardAvoidingView slides the whole
+              layout above the keyboard; LayoutAnimation animates the hero resize
+              in the same frame so both motions stay in sync. */}
+          <GlassHero $keyboardVisible={keyboardVisible}>
+            <LogoImage
+              $isTablet={isTablet}
+              $keyboardVisible={keyboardVisible}
+              accessibilityLabel="Kura logo"
+              source={require('../../../../assets/images/kura-logo.svg')}
+              contentFit="contain"
+            />
+            <Wordmark $isTablet={isTablet}>kura</Wordmark>
+            <Tagline $isTablet={isTablet}>Lawn care, simplified</Tagline>
+          </GlassHero>
 
           <PanelHost>
             {/* PanelRow holds both panels in a horizontal row.

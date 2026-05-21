@@ -1,6 +1,6 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Pressable, TextInput, useWindowDimensions } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, TextInput, useWindowDimensions } from 'react-native';
 import styled, { DefaultTheme, useTheme } from 'styled-components/native';
 import { GlassCard } from '~/shared/components/GlassCard';
 
@@ -277,6 +277,14 @@ export const OtpVerifyPanel = ({
 
   return (
     <Panel $width={width} $isTablet={isTablet}>
+      {/* ScrollView allows the content to scroll when the panel is height-constrained
+          by the compact hero + keyboard. keyboardShouldPersistTaps="handled" ensures
+          taps on the CodeBoxRow still reach it even when the keyboard is up. */}
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={{ flexGrow: 1 }}
+      >
       <GlassCard>
         <GlassContent $isTablet={isTablet}>
           <IconCircle $isTablet={isTablet}>
@@ -377,6 +385,7 @@ export const OtpVerifyPanel = ({
           </ResetLink>
         </GlassContent>
       </GlassCard>
+      </ScrollView>
     </Panel>
   );
 };

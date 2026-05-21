@@ -5,7 +5,6 @@ import styled, { useTheme } from 'styled-components/native';
 import { OnboardingLayout } from '~/features/onboarding/components/OnboardingLayout';
 import { useOnboardingStore } from '../stores/onboardingStore';
 
-
 // FieldGroup — wraps a label + input pair with a small gap.
 const FieldGroup = styled.View`
   gap: ${({ theme }) => theme.spacing.sm}px;
