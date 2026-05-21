@@ -42,9 +42,8 @@ const { EXPO_PUBLIC_SUPABASE_URL: supabaseUrl, EXPO_PUBLIC_SUPABASE_KEY: supabas
   env.data;
 
 // supabase — the single shared client instance for the whole app.
-// detectSessionInUrl is false because Expo Router handles deep links
-// manually via app/auth/callback.tsx — we don't want Supabase trying
-// to parse the URL itself on native where there is no real browser URL.
+// detectSessionInUrl is false because OTP verification is handled in-app via
+// verifyOtp() — there is no redirect URL to parse on native.
 export const supabase = createClient(supabaseUrl, supabaseKey, {
   auth: {
     storage: ExpoSecureStoreAdapter,

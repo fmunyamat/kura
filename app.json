@@ -9,6 +9,7 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
+      "bundleIdentifier": "com.fmatangira.kura",
       "supportsTablet": true,
       "infoPlist": {
         "NSAppTransportSecurity": {
@@ -25,7 +26,8 @@
         "monochromeImage": "./assets/images/kura-logo.png"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.fmatangira.kura"
     },
     "web": {
       "output": "static",
@@ -53,10 +55,25 @@
             "usesCleartextTraffic": false
           }
         }
+      ],
+      "@sentry/react-native",
+      [
+        "@sentry/react-native/expo",
+        {
+          "url": "https://sentry.io/",
+          "project": "react-native",
+          "organization": "kura-zm"
+        }
       ]
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": { "root": "app" },
+      "eas": {
+        "projectId": "9221ff6a-e211-4b47-a6d6-5c7802d27239"
+      }
     }
   }
 }

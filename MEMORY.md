@@ -105,6 +105,12 @@ const handleContinue = async () => {
 
 ---
 
+## TODO — Settings screen
+
+- [ ] Make the **"I've moved"** button functional: delete the `user_profiles` row for the current user, set `hasCompletedOnboarding(false)` in the auth store, and show a confirmation alert before doing anything destructive. The `(app)/_layout.tsx` guard will redirect to `/onboarding` automatically once the flag is cleared.
+
+---
+
 ## Already correct — do not change
 - `SignIn.tsx handleSubmit` — try/catch, generic message, finally block ✅
 - `PhotoCapture.tsx handleComplete` — try/catch, generic message, finally block ✅

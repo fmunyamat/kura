@@ -1,56 +1,25 @@
-import { makeRedirectUri } from 'expo-auth-session';
-// QueryParams is the officially documented import path from Supabase's React
-// Native deep-linking guide — it handles both query params and hash fragments
-// from magic link URLs, which plain URL parsing misses.
-import * as QueryParams from 'expo-auth-session/build/QueryParams';
-import * as WebBrowser from 'expo-web-browser';
-
 import { supabase } from '~/shared/lib/supabase';
 
-// Required for expo-auth-session to cleanly close the in-app browser on
-// redirect back to the app — harmless on native, necessary for web.
-WebBrowser.maybeCompleteAuthSession();
-
-// signInWithMagicLink — sends a one-time magic link to the given email.
-// makeRedirectUri() generates the correct deep link for the current platform:
-//   native → kura://  (the scheme registered in app.json)
-//   Expo Go → exp://...
-// Supabase sends an email with a link that, when tapped, opens the app at
-// this URI with access_token and refresh_token embedded in the URL.
-export const signInWithMagicLink = async (email: string): Promise<void> => {
-  const redirectTo = makeRedirectUri();
-
-  const { error } = await supabase.auth.signInWithOtp({
-    email,
-    options: { emailRedirectTo: redirectTo },
-  });
+// sendOtpCode — sends a 6-digit OTP email to the user.
+// Omitting emailRedirectTo is what tells Supabase to send a numeric code
+// instead of a clickable magic link. The user enters the code in-app
+// rather than tapping a deep link.
+export const sendOtpCode = async (email: string): Promise<void> => {
+  const { error } = await supabase.auth.signInWithOtp({ email });
 
   // Throw raw error so callers can catch it — but callers must never forward
   // the message to the UI. Show a generic message instead (MASVS-CODE-4).
   if (error) throw error;
 };
 
-// createSessionFromUrl — parses the magic link deep link URL and establishes
-// a Supabase session from the tokens embedded in it. Called from the
-// app/auth/callback.tsx screen as soon as the deep link URL is available.
-// getQueryParams handles both query-string and hash-fragment token formats
-// so this works regardless of which format Supabase sends for this project.
-export const createSessionFromUrl = async (url: string): Promise<void> => {
-  const { params, errorCode } = QueryParams.getQueryParams(url);
-
-  if (errorCode) throw new Error(errorCode);
-
-  const { access_token, refresh_token } = params;
-
-  // No tokens in the URL — nothing to do. This can happen if the deep link
-  // was triggered by something other than a magic link (e.g. a typo URL).
-  if (!access_token) return;
-
-  const { error } = await supabase.auth.setSession({ access_token, refresh_token });
+// verifyOtpCode — exchanges the 6-digit code the user typed for a live session.
+// Supabase sets the session internally and fires onAuthStateChange.
+// AuthProvider's listener picks that up, updates the Zustand store, and
+// the routing guard in (auth)/_layout.tsx redirects to "/" automatically —
+// no explicit navigation call needed here.
+export const verifyOtpCode = async (email: string, token: string): Promise<void> => {
+  const { error } = await supabase.auth.verifyOtp({ email, token, type: 'email' });
   if (error) throw error;
-
-  // Session is now set. AuthProvider's onAuthStateChange listener will fire,
-  // update the Zustand store, and let the routing guard redirect automatically.
 };
 
 // checkUserProfile — returns true if a user_profiles row exists for this user,

@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Linking, Pressable, useWindowDimensions } from 'react-native';
 import styled, { useTheme } from 'styled-components/native';
 import { OnboardingLayout } from '~/features/onboarding/components/OnboardingLayout';
@@ -154,6 +154,9 @@ export const Location = () => {
     Linking.openURL('https://www.organolawn.com/measure-your-lawn');
   };
 
+useEffect(() => {
+    // signOut();
+}, []);
   return (
     <OnboardingLayout
       heroIcon="📍"
