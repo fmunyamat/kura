@@ -235,12 +235,17 @@ export const SignInScreen = () => {
 
   // slide animates the panel row to any target offset using an ease-out-cubic
   // curve so the motion feels physical rather than mechanical.
+  // useNativeDriver: false is intentional — native-driver transforms update only
+  // the GPU render position, not the JS layout. After translation, touch hit-test
+  // areas stay at the original off-screen coordinates, so taps and scroll
+  // gestures on the OTP verify panel would miss. JS-driven animation keeps
+  // layout and hit-testing in sync with the visual position.
   const slide = (toValue: number, onDone?: () => void) =>
     Animated.timing(slideAnim, {
       toValue,
       duration: 320,
       easing: Easing.out(Easing.cubic),
-      useNativeDriver: true,
+      useNativeDriver: false,
     }).start(onDone);
 
   // handleSubmit sends the OTP code email then slides in the verify panel on
@@ -392,6 +397,7 @@ export const SignInScreen = () => {
                 onResend={handleResend}
                 isVerifying={isVerifying}
                 errorMessage={verifyError}
+                // keyboardVisible={keyboardVisible}
               />
             </PanelRow>
           </PanelHost>

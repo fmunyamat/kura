@@ -1,4 +1,8 @@
-jest.mock('expo-blur', () => ({ BlurView: 'BlurView' }));
+jest.mock('@shopify/react-native-skia', () => ({
+  Canvas: 'Canvas',
+  BackdropBlur: 'BackdropBlur',
+  Fill: 'Fill',
+}));
 
 import React from 'react';
 import { Text } from 'react-native';
@@ -12,7 +16,7 @@ const Wrapper = ({ children }: { children: React.ReactNode }) => (
 );
 
 describe('GlassCard', () => {
-  it('renders children inside the blur card', () => {
+  it('renders children inside the glass card', () => {
     const { getByText } = render(
       <GlassCard><Text>hello</Text></GlassCard>,
       { wrapper: Wrapper }
@@ -20,14 +24,11 @@ describe('GlassCard', () => {
     expect(getByText('hello')).toBeTruthy();
   });
 
-  // Verify that passing a custom intensity value does not cause an error.
-  // The BlurView mock is a string component so we cannot inspect the prop
-  // directly, but if the intensity prop were rejected or caused a crash this
-  // test would throw and fail.
-  it('renders without error when a custom intensity is supplied', () => {
+  // Verify that passing a custom blur sigma does not cause an error.
+  it('renders without error when a custom blur value is supplied', () => {
     expect(() =>
       render(
-        <GlassCard intensity={30}><Text>custom intensity</Text></GlassCard>,
+        <GlassCard blur={20}><Text>custom blur</Text></GlassCard>,
         { wrapper: Wrapper }
       )
     ).not.toThrow();
