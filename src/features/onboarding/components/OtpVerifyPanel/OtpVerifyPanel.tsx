@@ -11,6 +11,11 @@ import { GlassCard } from '~/shared/components/GlassCard';
 //
 // codeSentAt is a Date.now() timestamp that resets whenever a new code is sent —
 // the panel uses it to restart the 60-second resend cooldown and clear the input.
+//
+// keyboardVisible mirrors the keyboard state from SignInScreen. When true, the
+// icon is hidden and gaps shrink so all interactive elements (boxes + button)
+// remain visible above the keyboard without scrolling — matching the hero
+// collapse behaviour on the request-form panel.
 interface OtpVerifyPanelProps {
   email: string;
   codeSentAt: number;
@@ -19,26 +24,31 @@ interface OtpVerifyPanelProps {
   onResend: () => void;
   isVerifying?: boolean;
   errorMessage: string | null;
+  keyboardVisible: boolean;
 }
 
 const RESEND_COOLDOWN_SECONDS = 60;
 const CODE_LENGTH = 6;
 
 // Panel — outer container that occupies one screen-width slot in the horizontal
-// PanelRow in SignInScreen. justify-content: center vertically centres the card.
-const Panel = styled.View<{ $width: number; $isTablet: boolean }>`
+// PanelRow in SignInScreen. justify-content switches to flex-start when the
+// keyboard is visible so the card anchors to the top of the reduced space and
+// the ScrollView can push content upward rather than centring a card that no
+// longer fits.
+const Panel = styled.View<{ $width: number; $isTablet: boolean; $keyboardVisible: boolean }>`
   width: ${({ $width }) => $width}px;
   flex: 1;
-  padding: ${({ $isTablet, theme }) =>
-    $isTablet ? theme.spacing.xl : theme.spacing.md}px;
-  justify-content: center;
+  padding: ${({ $isTablet, $keyboardVisible, theme }) =>
+    $keyboardVisible ? theme.spacing.xs : $isTablet ? theme.spacing.xl : theme.spacing.md}px;
+  justify-content: ${({ $keyboardVisible }) => ($keyboardVisible ? 'flex-start' : 'center')};
 `;
 
 // GlassContent — centres all panel elements in a column with consistent spacing.
-const GlassContent = styled.View<{ $isTablet: boolean }>`
+// Gaps shrink when the keyboard is visible to help everything fit above it.
+const GlassContent = styled.View<{ $isTablet: boolean; $keyboardVisible: boolean }>`
   align-items: center;
-  gap: ${({ $isTablet, theme }) =>
-    $isTablet ? theme.spacing.xl : theme.spacing.lg}px;
+  gap: ${({ $isTablet, $keyboardVisible, theme }) =>
+    $keyboardVisible ? theme.spacing.sm : $isTablet ? theme.spacing.xl : theme.spacing.lg}px;
 `;
 
 // IconCircle — circular badge behind the lock emoji icon.
@@ -71,14 +81,9 @@ const BodyText = styled.Text<{ $isTablet: boolean }>`
   text-align: center;
 `;
 
-const EmailPillWrapper = styled.View`
-  background-color: ${({ theme }: { theme: DefaultTheme }) => theme.colors.inputBackgroundDark};
-  border-width: 1px;
-  border-color: ${({ theme }: { theme: DefaultTheme }) => theme.colors.inputBorderDark};
-  border-radius: ${({ theme }: { theme: DefaultTheme }) => theme.radii.md}px;
-  padding: ${({ theme }: { theme: DefaultTheme }) => theme.spacing.xs}px
-    ${({ theme }: { theme: DefaultTheme }) => theme.spacing.sm}px;
-`;
+// EmailPillWrapper — no background or border; the lime text colour alone
+// carries enough contrast to identify the address as a distinct element.
+const EmailPillWrapper = styled.View``;
 
 const EmailPillText = styled.Text`
   color: ${({ theme }: { theme: DefaultTheme }) => theme.colors.lime};
@@ -195,6 +200,7 @@ export const OtpVerifyPanel = ({
   onResend,
   isVerifying = false,
   errorMessage,
+  keyboardVisible,
 }: OtpVerifyPanelProps) => {
   const theme = useTheme();
   const { width, height } = useWindowDimensions();
@@ -276,20 +282,25 @@ export const OtpVerifyPanel = ({
   };
 
   return (
-    <Panel $width={width} $isTablet={isTablet}>
-      {/* ScrollView allows the content to scroll when the panel is height-constrained
-          by the compact hero + keyboard. keyboardShouldPersistTaps="handled" ensures
-          taps on the CodeBoxRow still reach it even when the keyboard is up. */}
+    <Panel $width={width} $isTablet={isTablet} $keyboardVisible={keyboardVisible}>
+      {/* ScrollView handles any remaining overflow when the keyboard reduces the
+          available height. keyboardShouldPersistTaps="handled" ensures taps on
+          the CodeBoxRow still reach it even when the keyboard is up. */}
       <ScrollView
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={{ flexGrow: 1 }}
       >
       <GlassCard>
-        <GlassContent $isTablet={isTablet}>
-          <IconCircle $isTablet={isTablet}>
-            <IconText $isTablet={isTablet}>🔐</IconText>
-          </IconCircle>
+        <GlassContent $isTablet={isTablet} $keyboardVisible={keyboardVisible}>
+          {/* Hide the icon when the keyboard is visible — it saves ~56px
+              (icon + one gap) which is enough to keep all interactive elements
+              above the keyboard without scrolling. */}
+          {!keyboardVisible && (
+            <IconCircle $isTablet={isTablet}>
+              <IconText $isTablet={isTablet}>🔐</IconText>
+            </IconCircle>
+          )}
 
           <Heading $isTablet={isTablet}>Check your email</Heading>
 

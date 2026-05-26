@@ -21,6 +21,7 @@ const Container = styled.View`
 // autoCapitalize="none" prevents iOS from uppercasing the first letter of the address.
 const StyledTextInput = styled(TextInput)`
   border-width: 1px;
+  height: 50px;
   border-color: ${({ theme }: { theme: DefaultTheme }) => theme.colors.inputBorderDark};
   background-color: ${({ theme }: { theme: DefaultTheme }) => theme.colors.inputBackgroundDark};
   border-radius: ${({ theme }: { theme: DefaultTheme }) => theme.radii.md}px;
