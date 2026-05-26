@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { Linking, Pressable, useWindowDimensions } from 'react-native';
 import styled, { useTheme } from 'styled-components/native';
 import { OnboardingLayout } from '~/features/onboarding/components/OnboardingLayout';
+import { signOut } from '../../auth/services/authService';
 import { useOnboardingStore } from '../stores/onboardingStore';
 
 // FieldGroup — wraps a label + input pair with a small gap.
@@ -155,7 +156,7 @@ export const Location = () => {
   };
 
 useEffect(() => {
-    // signOut();
+    signOut();
 }, []);
   return (
     <OnboardingLayout
