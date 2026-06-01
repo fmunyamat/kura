@@ -26,11 +26,17 @@ src/
 │   │   │   ├── geocoding.service.ts    # ZIP → lat/lng via Zippopotam.us (called once at onboarding)
 │   │   │   └── onboarding.service.ts   # saves complete profile to user_profiles at end of onboarding
 │   │   └── types.ts
+│   ├── home/
+│   │   ├── screens/
+│   │   │   └── HomeScreen.tsx          # Focus Card dashboard — owns focusedId state
+│   │   └── components/
+│   │       ├── FocusTaskRow/           # compact overview row (icon · name · meta · time pill · chevron)
+│   │       ├── FocusTaskDetail/        # expanded detail (why it matters / steps / CTA)
+│   │       └── CompletedTaskRow/       # struck-through row with filled check circle
 │   ├── recommendations/
-│   │   ├── components/RecommendationCard/  # task card with Yes / Not yet buttons
-│   │   ├── constants/recommendationContent.ts  # maps recommendation type → display copy
+│   │   ├── constants/recommendationContent.ts  # maps recommendation type → icon, copy, steps
 │   │   ├── hooks/
-│   │   │   ├── useActiveRecommendations.ts  # TanStack Query — fetches status=pending rows
+│   │   │   ├── useActiveRecommendations.ts  # TanStack Query — fetches status=pending rows joined with tasks
 │   │   │   ├── useConfirmRecommendation.ts  # mutation — status → confirmed
 │   │   │   └── useSnoozeRecommendation.ts   # mutation — status → snoozed + snoozed_until
 │   │   ├── services/recommendations.service.ts
@@ -39,11 +45,7 @@ src/
 │   │   ├── screens/SettingsScreen.tsx  # change grass type, change effort level, "I've moved" data reset
 │   │   └── hooks/useUpdateEffortLevel.ts  # (to implement) mutation — updates user_profiles.effort_level
 │   ├── tasks/
-│   │   ├── screens/               # TaskList, TaskDetail
-│   │   ├── components/TaskCard/   # TaskCard.tsx + TaskCard.test.tsx + index.tsx
-│   │   ├── components/TaskList/
-│   │   ├── hooks/                 # useTaskList.ts, useCompleteTask.ts
-│   │   ├── services/tasks.service.ts
+│   │   ├── services/tasks.service.ts   # fetches tasks table for display metadata (estimated_minutes, etc.)
 │   │   └── types.ts
 │   ├── notifications/
 │   │   ├── hooks/
@@ -209,7 +211,7 @@ RootNavigator
   ├── OnboardingStack    — session exists but user profile not yet created
   │   └── Location → GrassType → EffortLevel → PhotoCapture
   └── AppTabs            — session exists and profile is complete
-      ├── HomeStack:     TaskList → TaskDetail
+      ├── HomeStack:     HomeScreen (Focus Card dashboard — single screen, no push navigation)
       ├── ProgressStack: LawnProgress → PhotoCapture
       └── SettingsScreen
 ```
@@ -219,8 +221,9 @@ RootNavigator
 **Profile gate:** `RootNavigator` queries `profiles` (RLS-protected, `auth.uid()`) on session change. A missing row means first-time user → onboarding. A present row means returning user → tabs. Zustand stores the resolved state so the gate only queries Supabase once per session.
 
 - All param lists typed in `src/types/navigation.ts` — no untyped `route.navigate()` calls
-- Notification taps deep-link to `HomeStack > TaskList` via registered `kura://` scheme
-- Photo reminder notification taps deep-link to `ProgressStack > PhotoCapture` via `kura://progress/capture`
+- Notification taps deep-link to `kura://home` — `HomeScreen` refetches on focus so any pending recommendation card is already visible
+- Recommendation deep links do not push a new screen — `HomeScreen` handles all states inline
+- Photo reminder notifications deep-link to `kura://progress/capture` → `ProgressStack > PhotoCapture`
 - All deep link paths validated against the registered scheme — unrecognized paths are silently dropped (MASWE-0058)
 
 ---

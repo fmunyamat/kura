@@ -279,3 +279,154 @@ CREATE POLICY "own_photos_delete"
 ### Account deletion
 
 The account deletion Edge Function must explicitly delete all objects under `{user_id}/` in the `lawn-photos` bucket before removing the user record. The `ON DELETE CASCADE` FK on `lawn_photos` handles row deletion automatically, but Supabase Storage objects require a separate `storage.remove()` call.
+
+---
+
+## Focus Card Dashboard (Home Tab — MVP)
+
+The Home tab is a single screen that shows the user's active lawn care recommendations and lets them act on each one without leaving the screen. There is no separate detail screen — tapping a task row expands it inline.
+
+### Three states
+
+#### State 1 — Overview
+
+The default state when the user opens the app. Shows a compact list of today's active recommendations plus any upcoming (future-season) tasks.
+
+**Hero zone** (top, `flex: 1`):
+- Step label: current day and date (e.g. "Saturday, May 31")
+- Title: plain-English summary of the day — "Two things for your lawn today" / "All caught up" / "Nothing needed right now"
+- Subtitle: one-line context in lime accent when relevant ("Your soil has been warm for 3 days")
+
+**Glass panel** (bottom, `flex: 3`):
+- One `FocusTaskRow` per active recommendation, ordered by priority
+- Each row: icon · task name · contextual meta (e.g. "3 days without water") · time pill · chevron ›
+- Active row background: `glassOnboardingOptionSelected` (`rgba(19,86,51,0.18)`)
+- Upcoming (future-season) rows: `opacity: 0.40` with a dimmed season label instead of time
+- Tapping a row transitions to State 2
+
+#### State 2 — Focused
+
+Triggered when the user taps a task row. The hero collapses and the glass panel expands to fill the available space. No screen navigation — the transition is an inline `LayoutAnimation`.
+
+**Hero zone** (slim, `flex: 0` — sizes to content):
+- Back button: "‹ Today"
+- Step label: "TODAY'S TASK"
+- Title: the task name ("Water your lawn")
+- Subtitle: the trigger context in lime ("3 days without water · 94°F forecast")
+
+**Glass panel** (expanded, `flex: 1`):
+- "Why this matters" section label + one paragraph of plain-English reasoning
+- Divider
+- "How to do it" section label + numbered steps (1–3, kept brief)
+- Chips row: ⏱ estimated time · 📍 where to do it
+- CTA button: "Mark as done" (calls `useConfirmRecommendation`)
+- Hint text: "Remind me later" (calls `useSnoozeRecommendation`, snoozes 5 days)
+
+#### State 3 — After Completion
+
+After the user marks a task done, the view returns to the overview layout. The glass panel shows two sections:
+
+- **Done** — struck-through task name, `primaryDeep` filled check circle
+- Divider
+- **Still to do** — remaining active tasks in their normal compact rows
+
+If all tasks are done, the glass panel shows a single "You're all caught up" message with a green check.
+
+### Component structure
+
+```
+features/home/
+├── screens/
+│   └── HomeScreen.tsx          # top-level screen; owns focusedId state
+├── components/
+│   ├── FocusTaskRow/           # compact overview row; tappable
+│   │   ├── index.tsx
+│   │   ├── FocusTaskRow.tsx
+│   │   └── FocusTaskRow.test.tsx
+│   ├── FocusTaskDetail/        # expanded detail view (why / steps / CTA)
+│   │   ├── index.tsx
+│   │   └── FocusTaskDetail.tsx
+│   └── CompletedTaskRow/       # struck-through row with check circle
+│       ├── index.tsx
+│       └── CompletedTaskRow.tsx
+```
+
+`HomeScreen` owns one piece of state: `focusedId: string | null`. When `null`, it renders the Overview layout. When set to a recommendation ID, it renders the Focused layout for that recommendation.
+
+The hooks `useActiveRecommendations`, `useConfirmRecommendation`, and `useSnoozeRecommendation` from `features/recommendations/hooks/` supply all data — `HomeScreen` does not call Supabase directly.
+
+### Recommendation display content
+
+Each `recommendation_events` row has a `type` field (e.g. `pre_emergent`, `dormancy_break`, `spring_fertilize`). The static display copy for each type lives in:
+
+```
+features/recommendations/constants/recommendationContent.ts
+```
+
+This file maps each `type` to: icon, task name, contextual meta template, why-it-matters paragraph, and numbered how-to steps. Time estimate and lawn scope come from the joined `tasks` row (`estimated_minutes`).
+
+### Data flow
+
+```
+recommendation_events (status = 'pending')
+  └─ joined with tasks (for estimated_minutes, grass_types, seasons)
+        └─ mapped to recommendationContent (for icon, why, steps)
+              └─ rendered in HomeScreen via useActiveRecommendations
+```
+
+### Layout mechanics (React Native)
+
+The hero-shrink / panel-expand is a layout animation, not navigation. Hero and glass panel are siblings in a flex column. Changing their `flex` value triggers a smooth `LayoutAnimation`.
+
+```
+ContentArea (flex: 1, flexDirection: 'column')
+  ├── Hero        (flex: 1  →  flex: 0 when focused)
+  └── GlassPanel  (flex: 3  →  flex: 1 when focused)
+```
+
+Wrap the `focusedId` state update in `LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut)` to animate the transition. The Home screen has no keyboard input so this is safe — there is no `KeyboardAvoidingView` to conflict with (unlike `SignIn.tsx`).
+
+### Empty and error states
+
+| Situation | Hero title | Glass panel content |
+|---|---|---|
+| No active recommendations | "Your lawn is all caught up" | "Check back tomorrow — the engine runs daily." |
+| All recommendations snoozed | "Nothing to do today" | Snoozed tasks listed with their resume date |
+| Offline / query error | "Can't load your lawn data" | Retry button |
+
+### Accessibility
+
+- Each `FocusTaskRow` uses `accessibilityRole="button"` and `accessibilityLabel` = task name + time estimate
+- Completed rows use `accessibilityState={{ disabled: true }}`
+- "Mark as done" button uses `accessibilityState={{ busy: isConfirming }}` while the mutation runs
+
+---
+
+## Coach — AI Lawn Advisor (Post-MVP)
+
+A conversational interface where Kura speaks to the user like a knowledgeable friend instead of presenting a task list. Recommendations arrive as short chat messages with an embedded action card. Users can ask follow-up questions in plain English.
+
+### What changes from MVP
+
+| MVP (Focus Card dashboard) | Coach |
+|---|---|
+| Today screen shows a scannable task list | Today screen is a chat thread |
+| Tap a card → expands with steps | Kura sends the context as messages, action card embedded inline |
+| Static "why it matters" copy per task | User can ask follow-up questions ("what if it rains?", "why does this matter?") |
+| No personalised dialogue | Greeting and tone adapt to the user's name, lawn, and season |
+
+### UX pattern
+
+1. User opens the app — Kura greets them by name and delivers the day's situation in 2–3 short messages ("It's been 3 days since your last watering, and today hits 94°F.")
+2. The recommendation arrives as an embedded action card — task name, time estimate, **Done** and **Skip** buttons
+3. Marking done triggers a brief acknowledgement from Kura before the next recommendation appears
+4. An input bar lets the user type free-form questions; Claude API answers grounded in the user's lawn profile
+
+### Implementation notes (for when this is built)
+
+- The Coach is a new tab (or replaces the Today tab) — the existing Focus Card dashboard is kept as a simpler alternative or removed
+- Chat messages from Kura are stored locally (not server-side) and regenerated on each app launch — only task completion status writes to the DB
+- Claude API (`claude-haiku-4-5-20251001` for cost) powers free-form Q&A; the system prompt is grounded with the user's grass type, location, season, recent completions, and today's `recommendation_events`
+- The action card is the existing task card component with a different layout wrapper — no new data model needed
+- Existing `recommendation_events` table drives what Kura says — the Coach just presents it differently
+- Apply prompt caching on the system prompt (lawn profile + season context) to reduce API costs on repeated opens
