@@ -180,6 +180,142 @@ export const effortLevelSchema = z.union([
 
 ---
 
+## Welcome Flow
+
+A 4-screen tutorial shown once, immediately after onboarding completes, before the user reaches the main app. It introduces Kura and orients the user to the four tabs. The flow persists on every app open until "Start Growing" is tapped on the final screen — after that it is never shown again.
+
+### The four screens
+
+| # | Label | Content |
+|---|---|---|
+| 1 | Welcome | Greeting by first name · "Your journey starts today" glass card · "Let's go →" CTA |
+| 2 | Today Feature | "Each morning, one task." · Sample task preview card showing what the Today tab looks like · explanatory caption |
+| 3 | Navigation | "Four tabs, four tools." · One pill card per tab with a one-line description · live tab bar at the bottom so the user can see what they're about to use |
+| 4 | All Set | Checkmark circle · "You're all set." · "Start Growing" CTA (only exit from the flow) |
+
+All screens share: Dynamic Island, status bar, progress dots (`Quick Tour · X of 4` label) pinned to the top.
+
+### Persistence
+
+The flow stays until "Start Growing" is tapped. Backgrounding or force-quitting the app returns the user to screen 1 of the flow, not wherever they left off. The dismissal is stored server-side so it survives reinstalls.
+
+| Flag | Location | Default |
+|---|---|---|
+| `has_seen_welcome` | `user_profiles` column (`boolean NOT NULL DEFAULT false`) | `false` — new users always see the flow |
+
+`welcomeService.markWelcomeSeen()` PATCHes this to `true` when "Start Growing" is tapped. The Zustand auth store is updated immediately after the write succeeds, which triggers `RootNavigator` to re-evaluate and route to `AppTabs`. Do not route until the write is confirmed.
+
+**Schema migration:**
+
+```sql
+-- Records that the user has completed the one-time welcome flow.
+-- Defaults false so all new users see it; existing rows are unaffected.
+ALTER TABLE user_profiles
+  ADD COLUMN has_seen_welcome boolean NOT NULL DEFAULT false;
+```
+
+### Routing order
+
+`RootNavigator` evaluates on every session change:
+
+1. No session → `AuthStack`
+2. Session + no profile row → `OnboardingStack`
+3. Session + profile + `has_seen_welcome = false` → `WelcomeFlow`
+4. Session + profile + `has_seen_welcome = true` → `AppTabs`
+
+`WelcomeFlow` is a full-screen non-dismissible stack. No back gesture, no hardware back escape — the only path to `AppTabs` is tapping "Start Growing."
+
+### Visual design
+
+The welcome flow uses the **blurred grass photo background** design from `mockups/welcome-flow.html` — not the onboarding gradient. The full visual spec lives in that file. Key implementation tokens:
+
+| Element | Dark (`t4d`) | Light (`t4l`) |
+|---|---|---|
+| Photo layer | `blur(18px) saturate(0.85)` | `blur(18px) saturate(1.15) brightness(1.05)` |
+| Colour overlay | `rgba(10,28,10,0.60)` | `rgba(210,255,225,0.36)` |
+| Glass cards | `rgba(255,255,255,0.44)` | `rgba(255,255,255,0.88)` |
+| CTA button background | `rgba(8,20,8,0.88)` | `#4F9D69` |
+| CTA button text | `#D6EFD8` | `#BEE6CE` |
+| Progress dot (inactive) | `rgba(255,255,255,0.22)` | `rgba(14,42,14,0.14)` |
+| Progress dot (active) | `rgba(255,255,255,0.72)` · 18 × 5 px pill | `rgba(14,42,14,0.52)` · 18 × 5 px pill |
+
+**Font styles** are copied from the onboarding screens — system sans-serif, no custom font families:
+
+| Role | Size token | Weight token |
+|---|---|---|
+| Screen heading | `theme.typography.sizeXl` (24) | `theme.typography.weightBlack` ('900') |
+| Step label pill | `theme.typography.sizeXs` (12) | `theme.typography.weightBold` ('700') |
+| Body / caption | `theme.typography.sizeXs` (12) | `theme.typography.weightMedium` ('500') |
+| Card title | `theme.typography.sizeSm` (14) | `theme.typography.weightBold` ('700') |
+| Card body | `theme.typography.sizeXs` (12) | `theme.typography.weightRegular` ('400') |
+| CTA button | `theme.typography.sizeSm` (14) | `theme.typography.weightBold` ('700') |
+
+### Folder structure
+
+```
+features/welcome/
+  screens/
+    WelcomeFlow.tsx        # pager container — owns currentStep state (0–3)
+  components/
+    WelcomeStep1.tsx       # Welcome + "Let's go →"
+    WelcomeStep2.tsx       # Today Feature + sample task preview
+    WelcomeStep3.tsx       # Navigation pills + live tab bar
+    WelcomeStep4.tsx       # All Set + "Start Growing"
+    WelcomeDots.tsx        # progress dot row (total + active index props)
+    WelcomeStepLabel.tsx   # "Quick Tour · X of 4" pill
+  services/
+    welcome.service.ts     # markWelcomeSeen()
+```
+
+### Service
+
+```ts
+// features/welcome/services/welcome.service.ts
+export const welcomeService = {
+  // markWelcomeSeen — sets has_seen_welcome = true for the current user.
+  // Only called when the user taps "Start Growing" on screen 4.
+  // Throws on Supabase error so the caller can catch and show an error
+  // without routing the user into AppTabs prematurely.
+  async markWelcomeSeen(): Promise<void> {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('Not authenticated');
+
+    const { error } = await supabase
+      .from('user_profiles')
+      .update({ has_seen_welcome: true })
+      .eq('user_id', user.id);
+
+    if (error) {
+      logger.error('welcomeService.markWelcomeSeen failed', {
+        operation: 'markWelcomeSeen',
+        userId: user.id,
+        supabaseCode: error.code,
+      });
+      throw new Error('markWelcomeSeen failed');
+    }
+  },
+};
+```
+
+### WelcomeStep4 — error handling pattern
+
+```ts
+const handleStartGrowing = async () => {
+  setErrorMessage(null);
+  setIsSubmitting(true);
+  try {
+    await welcomeService.markWelcomeSeen();
+    useAuthStore.getState().setHasSeenWelcome(true); // RootNavigator re-evaluates
+  } catch {
+    setErrorMessage('Something went wrong. Please try again.');
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+```
+
+---
+
 ## Lawn Progress Photos
 
 Users take a "before" photo of their lawn at the end of onboarding, then receive push reminders at fixed intervals throughout the season to capture update shots. The Progress tab shows a scrollable before→now timeline so they can see how far their lawn has come.
