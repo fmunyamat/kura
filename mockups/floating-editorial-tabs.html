@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Kura — Floating Layers · All Tabs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { background:#040a05; padding:64px 44px 100px; font-family:'Plus Jakarta Sans',sans-serif; -webkit-font-smoothing:antialiased; }
+
+    /* ── Page header ── */
+    .page-header { text-align:center; margin-bottom:64px; }
+    .eyebrow { font-size:10px; font-weight:700; letter-spacing:0.24em; text-transform:uppercase; color:rgba(184,229,106,0.44); margin-bottom:12px; }
+    .pg-title { font-family:'Syne',sans-serif; font-size:38px; font-weight:800; color:rgba(255,255,255,0.90); letter-spacing:-0.5px; margin-bottom:8px; }
+    .pg-sub { font-size:14px; color:rgba(255,255,255,0.26); font-weight:400; }
+
+    /* ── Row labels ── */
+    .row-label { display:flex; align-items:center; gap:14px; margin-bottom:24px; }
+    .row-label-txt { font-family:'Syne',sans-serif; font-size:18px; font-weight:800; color:rgba(255,255,255,0.70); }
+    .row-label-rule { flex:1; height:1px; background:rgba(255,255,255,0.07); }
+    .row-label-badge { font-size:9px; font-weight:800; letter-spacing:0.16em; text-transform:uppercase; padding:4px 10px; border-radius:999px; color:rgba(184,229,106,0.80); }
+
+    /* ── 4-col grid ── */
+    .grid { display:grid; grid-template-columns:repeat(4,280px); gap:60px 20px; justify-content:center; }
+    .section { margin-bottom:72px; }
+
+    /* ── Mockup ── */
+    .mockup { display:flex; flex-direction:column; align-items:center; gap:18px; animation:rise 0.5s ease-out both; }
+    .mockup:nth-child(1){animation-delay:0.04s} .mockup:nth-child(2){animation-delay:0.10s}
+    .mockup:nth-child(3){animation-delay:0.17s} .mockup:nth-child(4){animation-delay:0.24s}
+    @keyframes rise { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+    .tab-label { font-size:9px; font-weight:800; letter-spacing:0.20em; text-transform:uppercase; color:rgba(255,255,255,0.24); text-align:center; }
+
+    /* ── Phone frame ── */
+    .phone { width:280px; background:#1B1B1D; border-radius:48px; padding:11px;
+      box-shadow:0 0 0 1px #272729, inset 0 0 0 1px #343437, 0 60px 100px -8px rgba(0,0,0,1), 0 20px 40px -12px rgba(0,0,0,0.70);
+      position:relative; }
+    .phone::before { content:''; position:absolute; top:116px; right:-3px; width:3px; height:52px;
+      background:linear-gradient(to bottom,#2C2C2E,#46464A,#2C2C2E); border-radius:2px; }
+
+    /* ── Screen ── */
+    .screen { width:100%; height:560px; border-radius:39px; overflow:hidden; display:flex; flex-direction:column; position:relative;
+      background:linear-gradient(168deg,#1A5319 0%,#2D6528 33%,#508D4E 67%,#6B9B67 100%); }
+
+    /* Dynamic Island */
+    .di { position:absolute; top:10px; left:50%; transform:translateX(-50%); width:88px; height:26px; background:#000; border-radius:13px; z-index:200; }
+
+
+    /* ════════════════════════════════════════════════════════════
+       T4 — FLOATING LAYERS
+       Palette: #D6EFD8 · #80AF81 · #508D4E · #1A5319
+       Neutrals: rgba(255,255,255,x) glass · rgba(0,0,0,x) shadows
+    ════════════════════════════════════════════════════════════ */
+
+    /* Status bar */
+    .t4 .st { display:flex; justify-content:space-between; align-items:center; padding:13px 18px 4px; font-size:10px; font-weight:700; color:rgba(255,255,255,0.75); flex-shrink:0; }
+
+    /* App header — text on gradient */
+    .t4 .ah { display:flex; align-items:center; justify-content:space-between; padding:0 18px 10px; flex-shrink:0; }
+    .t4 .at { font-size:23px; font-weight:800; color:rgba(255,255,255,0.94); letter-spacing:-0.4px; }
+    .t4 .hax { display:flex; gap:7px; }
+    .t4 .hb { width:31px; height:31px; border-radius:50%; background:rgba(255,255,255,0.14); display:flex; align-items:center; justify-content:center; font-size:13px; position:relative; }
+    .t4 .nd { position:absolute; top:-2px; right:-1px; width:8px; height:8px; border-radius:50%; background:#80AF81; }
+
+    /* Content zone */
+    .t4 .cnt { flex:1; overflow:hidden; display:flex; flex-direction:column; padding:0 18px 6px; gap:9px; }
+
+    /* Section label — muted palette mid */
+    .t4 .sl { font-size:8px; font-weight:800; text-transform:uppercase; letter-spacing:0.18em; color:rgba(128,175,129,0.90); flex-shrink:0; }
+
+    /* Glass card base — neutral white glass */
+    .t4 .gc { background:rgba(255,255,255,0.44); border-radius:16px; box-shadow:0 6px 24px rgba(0,0,0,0.20); flex-shrink:0; }
+
+    /* Greeting */
+    .t4 .greet { padding:12px 14px; display:flex; align-items:center; justify-content:space-between; }
+    .t4 .gt { font-size:17px; font-weight:800; color:rgba(26,83,25,0.88); line-height:1.22; letter-spacing:-0.3px; }
+    .t4 .gi { font-size:28px; }
+
+    /* Task rows inside glass card */
+    .t4 .tr { display:flex; align-items:center; gap:9px; padding:9px 14px; background:rgba(80,141,78,0.10); border-radius:9px; flex-shrink:0; }
+    .t4 .tr+.tr { margin-top:6px; }
+    .t4 .tr.act { background:rgba(80,141,78,0.20); }
+    .t4 .tr.done { opacity:0.42; }
+    .t4 .ti2 { font-size:17px; flex-shrink:0; }
+    .t4 .tb { flex:1; min-width:0; }
+    .t4 .tn { font-size:12px; font-weight:700; color:rgba(26,83,25,0.86); line-height:1.2; }
+    .t4 .ts { font-size:9.5px; color:rgba(26,83,25,0.50); margin-top:1px; }
+    .t4 .tpill { font-size:8.5px; font-weight:700; color:rgba(26,83,25,0.56); background:rgba(80,141,78,0.12); border-radius:5px; padding:2px 7px; flex-shrink:0; }
+    .t4 .tchk { width:18px; height:18px; border-radius:9px; background:#1A5319; display:flex; align-items:center; justify-content:center; font-size:9px; font-weight:900; color:#D6EFD8; flex-shrink:0; }
+
+    /* Rows wrapper for card padding */
+    .t4 .rows { padding:10px 14px; display:flex; flex-direction:column; gap:6px; }
+
+    /* Stats */
+    .t4 .srow { display:flex; padding:11px 8px; }
+    .t4 .sc { flex:1; text-align:center; display:flex; flex-direction:column; gap:2px; align-items:center; }
+    .t4 .sc+.sc { }
+    .t4 .sv { font-size:11.5px; font-weight:800; color:rgba(26,83,25,0.86); }
+    .t4 .sk { font-size:7.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:rgba(26,83,25,0.38); }
+    .t4 .stk { display:flex; align-items:center; justify-content:center; gap:5px; padding:7px 12px; }
+    .t4 .stxt { font-size:10.5px; font-weight:700; color:rgba(26,83,25,0.70); }
+    .t4 .stxt span { color:#508D4E; }
+
+    /* Chips — neutral inactive, palette active */
+    .t4 .chips { display:flex; gap:6px; overflow:hidden; flex-shrink:0; }
+    .t4 .chip { border-radius:999px; padding:4px 11px; font-size:10.5px; font-weight:700; color:rgba(255,255,255,0.58); flex-shrink:0; background:rgba(255,255,255,0.10); }
+    .t4 .chip.on { background:rgba(128,175,129,0.24); color:#D6EFD8; }
+
+    /* Search bar */
+    .t4 .srch { padding:9px 13px; display:flex; align-items:center; gap:8px; }
+    .t4 .srch-ph { font-size:12px; color:rgba(26,83,25,0.36); font-weight:500; }
+
+    /* Featured card */
+    .t4 .feat { padding:12px 14px; }
+    .t4 .ftag { font-size:7.5px; font-weight:800; letter-spacing:0.12em; text-transform:uppercase; color:rgba(26,83,25,0.38); margin-bottom:5px; }
+    .t4 .ftit { font-size:14px; font-weight:800; color:rgba(26,83,25,0.88); line-height:1.22; letter-spacing:-0.2px; margin-bottom:4px; }
+    .t4 .fsub { font-size:9.5px; color:rgba(26,83,25,0.50); line-height:1.5; }
+    .t4 .fmeta { margin-top:8px; font-size:9px; font-weight:700; color:rgba(26,83,25,0.38); }
+    .t4 .fcta { margin-top:10px; background:#508D4E; border-radius:8px; padding:7px 10px; text-align:center; font-size:11px; font-weight:700; color:#D6EFD8; }
+
+    /* Cat grid */
+    .t4 .cats { display:grid; grid-template-columns:1fr 1fr; gap:8px; flex-shrink:0; }
+    .t4 .cat { padding:10px 12px; display:flex; flex-direction:column; gap:3px; }
+    .t4 .cat-i { font-size:20px; }
+    .t4 .cat-n { font-size:12px; font-weight:800; color:rgba(26,83,25,0.86); }
+    .t4 .cat-c { font-size:9px; color:rgba(26,83,25,0.42); font-weight:600; }
+
+    /* Profile */
+    .t4 .prof { padding:12px 14px; display:flex; align-items:center; gap:12px; }
+    .t4 .av { width:44px; height:44px; border-radius:50%; background:rgba(80,141,78,0.26); display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0; }
+    .t4 .pn { font-size:17px; font-weight:800; color:rgba(26,83,25,0.88); letter-spacing:-0.2px; }
+    .t4 .ps { font-size:10px; color:rgba(26,83,25,0.50); font-weight:500; margin-top:2px; }
+
+    /* Settings rows */
+    .t4 .sr { display:flex; align-items:center; justify-content:space-between; padding:9px 14px; }
+    .t4 .sr+.sr { }
+    .t4 .srl { display:flex; align-items:center; gap:9px; }
+    .t4 .sri { font-size:15px; }
+    .t4 .srn { font-size:12.5px; font-weight:700; color:rgba(26,83,25,0.86); }
+    .t4 .srv { font-size:10.5px; color:rgba(26,83,25,0.42); font-weight:500; }
+    .t4 .src { font-size:12px; color:rgba(26,83,25,0.24); }
+    .t4 .tog { width:34px; height:20px; border-radius:10px; background:#508D4E; position:relative; }
+    .t4 .tog-k { position:absolute; top:2px; right:2px; width:14px; height:14px; border-radius:50%; background:#fff; }
+
+    /* Divider inside glass card — neutral */
+    .t4 .dv { height:1px; background:rgba(0,0,0,0.07); margin:0 14px; flex-shrink:0; }
+
+    /* Pill tab bar — near-black neutral, palette active state */
+    .t4 .tw { padding:0 16px 14px; flex-shrink:0; }
+    .t4 .tbar { display:flex; justify-content:space-around; align-items:center; padding:6px 6px; background:rgba(8,20,8,0.88); border-radius:999px; }
+    .t4 .tab { display:flex; flex-direction:column; align-items:center; gap:1px; }
+    .t4 .tpi { font-size:15px; padding:4px 13px; border-radius:999px; }
+    .t4 .tab.on .tpi { background:rgba(214,239,216,0.18); }
+    .t4 .tl { font-size:7.5px; font-weight:700; color:rgba(255,255,255,0.28); letter-spacing:0.04em; text-transform:uppercase; }
+    .t4 .tab.on .tl { color:#D6EFD8; }
+
+    /* CTA — palette solid */
+    .t4 .cta { background:#80AF81; border-radius:9px; padding:9px 12px; text-align:center; font-size:11.5px; font-weight:800; color:#1A5319; flex-shrink:0; margin:0 14px 10px; }
+
+    /* T4D — floating layers, photo background, dark/night */
+    .screen.t4d { background:none; }
+    .screen.t4d::before { content:''; position:absolute; inset:-20px; background:url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=600&q=80') center/cover no-repeat; filter:blur(18px) saturate(0.85); z-index:0; }
+    .screen.t4d::after  { content:''; position:absolute; inset:0; background:rgba(10,28,10,0.60); z-index:1; }
+    .t4d .st, .t4d .ah, .t4d .cnt, .t4d .tw { position:relative; z-index:2; }
+    .t4d .ah  { padding:18px 18px 26px; }
+
+    /* T4L — floating layers, photo background, light/day */
+    .screen.t4l { background:none; }
+    .screen.t4l::before { content:''; position:absolute; inset:-20px; background:url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=600&q=80') center/cover no-repeat; filter:blur(18px) saturate(1.15) brightness(1.05); z-index:0; }
+    .screen.t4l::after  { content:''; position:absolute; inset:0; background:rgba(210,255,225,0.36); z-index:1; }
+    .t4l .st, .t4l .ah, .t4l .cnt, .t4l .tw { position:relative; z-index:2; }
+
+    /* T4L color overrides — palette: #BEE6CE · #BCFFDB · #8DFFCD · #68D89B · #4F9D69 */
+    .t4l .st  { color:rgba(14,42,14,0.62); }
+    .t4l .at  { color:rgba(14,42,14,0.88); }
+    .t4l .ah  { padding:18px 18px 26px; }
+    .t4l .hb  { background:rgba(0,0,0,0.10); }
+    .t4l .nd  { background:#4F9D69; }
+    .t4l .sl  { color:rgba(79,157,105,0.72); }
+    .t4l .gc  { background:rgba(255,255,255,0.88); }
+    .t4l .chip { background:rgba(0,0,0,0.05); color:rgba(14,42,14,0.52); }
+    .t4l .chip.on { background:rgba(141,255,205,0.46); color:rgba(14,42,14,0.86); }
+    .t4l .srch-ph { color:rgba(14,42,14,0.36); }
+    .t4l .tog { background:#68D89B; }
+    .t4l .tbar { background:rgba(255,255,255,0.28); }
+    .t4l .tl  { color:rgba(58,107,57,0.55); }
+    .t4l .tab.on .tl { color:rgb(58,107,57); }
+    .t4l .tab.on .tpi { background:rgba(58,107,57,0.12); }
+    .t4l .tchk { background:#4F9D69; }
+    .t4l .tpill { color:#4F9D69; background:rgba(79,157,105,0.16); }
+    .t4l .cta { background:#4F9D69; color:#BEE6CE; }
+
+    /* Shared simplified components — used by T4D + T4L */
+    .t4 .tchev { font-size:13px; color:rgba(26,83,25,0.22); flex-shrink:0; }
+    /* Primary task card — dominant action, large tap target */
+    .t4 .ptask { background:rgba(255,255,255,0.54); border-radius:14px; padding:14px; display:flex; align-items:center; gap:11px; box-shadow:0 4px 20px rgba(0,0,0,0.14); flex-shrink:0; }
+    .t4 .ptask-ico { font-size:28px; flex-shrink:0; }
+    .t4 .ptask-txt { flex:1; min-width:0; }
+    .t4 .ptask-name { font-size:14px; font-weight:800; color:rgba(26,83,25,0.90); letter-spacing:-0.2px; line-height:1.2; }
+    .t4 .ptask-sub  { font-size:9px; font-weight:600; color:rgba(26,83,25,0.50); margin-top:2px; }
+    .t4 .ptask-arr  { font-size:20px; color:rgba(26,83,25,0.30); flex-shrink:0; }
+    /* Compact secondary task rows (inside glass card) */
+    .t4 .mini-tr { display:flex; align-items:center; gap:9px; padding:6px 14px; flex-shrink:0; }
+    .t4 .mini-tr.done { opacity:0.40; }
+    /* Streak nudge — floats on photo bg between content and tab bar */
+    .t4 .streak-row { display:flex; align-items:center; gap:7px; padding:7px 13px; background:rgba(255,255,255,0.18); border-radius:10px; flex-shrink:0; }
+    .t4 .streak-txt { font-size:10px; font-weight:600; color:rgba(255,255,255,0.80); }
+    .t4 .streak-txt b { color:#80AF81; }
+    /* Lawn context chips inside profile glass card */
+    .t4 .hchips { display:flex; gap:6px; padding:4px 14px 8px; overflow:hidden; flex-wrap:wrap; }
+    .t4 .hchip { background:rgba(80,141,78,0.12); border-radius:999px; padding:3px 9px; font-size:8.5px; font-weight:700; color:rgba(26,83,25,0.72); white-space:nowrap; }
+
+    /* T4L overrides for simplified components */
+    .t4l .ptask { background:rgba(255,255,255,0.88); }
+    .t4l .streak-row { background:rgba(104,216,155,0.18); }
+    .t4l .streak-txt { color:rgba(14,42,14,0.68); }
+    .t4l .streak-txt b { color:#4F9D69; }
+    .t4l .hchip { background:rgba(104,216,155,0.28); color:rgba(14,42,14,0.70); }
+
+    /* Article reader — floating layers variant */
+    .t4 .art-back { display:flex; align-items:center; gap:7px; }
+    .t4 .art-back-ico { font-size:16px; color:rgba(255,255,255,0.65); line-height:1; }
+    .t4 .art-readtime { font-size:9px; font-weight:700; color:rgba(255,255,255,0.38); letter-spacing:0.10em; text-transform:uppercase; }
+    /* Progress bar sits between header and content, z-index keeps it above photo layers */
+    .t4 .art-prog { height:2px; background:rgba(255,255,255,0.12); border-radius:2px; flex-shrink:0; position:relative; z-index:2; margin:0 18px 2px; }
+    .t4 .art-prog-fill { height:100%; width:35%; background:#80AF81; border-radius:2px; }
+    .t4 .art-card { padding:14px; display:flex; flex-direction:column; gap:8px; }
+    .t4 .art-tags { display:flex; gap:6px; flex-wrap:wrap; }
+    .t4 .art-tag { font-size:8px; font-weight:800; text-transform:uppercase; letter-spacing:0.12em; color:rgba(26,83,25,0.50); background:rgba(80,141,78,0.12); padding:3px 8px; border-radius:999px; }
+    .t4 .art-ttl { font-size:17px; font-weight:800; color:rgba(26,83,25,0.90); letter-spacing:-0.3px; line-height:1.2; }
+    .t4 .art-meta { font-size:9px; font-weight:600; color:rgba(26,83,25,0.40); }
+    .t4 .art-body { font-size:10.5px; line-height:1.6; color:rgba(26,83,25,0.70); }
+    .t4 .art-body b { font-weight:800; color:rgba(26,83,25,0.86); }
+    .t4 .art-helpful { padding:10px 14px; display:flex; align-items:center; justify-content:space-between; flex-shrink:0; }
+    .t4 .art-hlbl { font-size:11px; font-weight:700; color:rgba(26,83,25,0.62); }
+    .t4 .art-hbts { display:flex; gap:8px; }
+    .t4 .art-hbt { background:rgba(80,141,78,0.10); border-radius:8px; padding:5px 10px; font-size:13px; }
+
+    /* T4L article reader overrides */
+    .t4l .art-back-ico { color:rgba(14,42,14,0.55); }
+    .t4l .art-readtime { color:rgba(14,42,14,0.38); }
+    .t4l .art-prog { background:rgba(0,0,0,0.08); }
+    .t4l .art-prog-fill { background:#4F9D69; }
+
+  </style>
+</head>
+<body>
+
+  <div class="page-header">
+    <div class="eyebrow">Kura · Design Exploration</div>
+    <div class="pg-title">Floating Layers</div>
+    <div class="pg-sub">Dark &amp; Light · blurred grass photo background</div>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════
+       ROW 1 — FLOATING LAYERS · DARK / NIGHT
+  ═══════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="row-label">
+      <div class="row-label-rule"></div>
+      <div class="row-label-txt">Floating Layers — Dark</div>
+      <div class="row-label-badge">Level 4 · Night</div>
+      <div class="row-label-rule"></div>
+    </div>
+    <div class="grid">
+
+      <!-- T4D · TODAY -->
+      <div class="mockup">
+        <div class="phone"><div class="screen t4 t4d">
+          <div class="di"></div>
+          <div class="st"><span>9:41</span><span>▲▲▲</span><span>🔋</span></div>
+          <div class="ah">
+            <div>
+              <div class="at">2 tasks today</div>
+              <div style="font-size:9px;font-weight:700;color:rgba(255,255,255,0.48);letter-spacing:0.08em;text-transform:uppercase;margin-top:2px">Tuesday, June 2</div>
+            </div>
+            <div class="hax"><div class="hb">🔔<div class="nd"></div></div></div>
+          </div>
+          <div class="cnt">
+            <div class="ptask">
+              <div class="ptask-ico">💧</div>
+              <div class="ptask-txt">
+                <div class="ptask-name">Water the lawn</div>
+                <div class="ptask-sub">Due today · ~15 min · Most urgent</div>
+              </div>
+              <div class="ptask-arr">›</div>
+            </div>
+            <div class="sl">Also this week</div>
+            <div class="gc">
+              <div class="mini-tr"><div class="ti2">✂️</div><div class="tb"><div class="tn">Mow the backyard</div><div class="ts">Tomorrow · 30 min</div></div><div class="tchev">›</div></div>
+              <div class="dv"></div>
+              <div class="mini-tr done"><div class="tchk">✓</div><div class="tb"><div class="tn" style="text-decoration:line-through">Check for grubs</div><div class="ts">Completed</div></div></div>
+            </div>
+            <div style="flex:1"></div>
+            <div class="streak-row"><span>🔥</span><div class="streak-txt"><b>4-week streak</b> — keep it up!</div></div>
+            <div class="cta" style="margin:0">Start: Water the lawn →</div>
+          </div>
+          <div class="tw"><div class="tbar">
+            <div class="tab on"><div class="tpi">🏠</div><div class="tl">Today</div></div>
+            <div class="tab"><div class="tpi">✅</div><div class="tl">Tasks</div></div>
+            <div class="tab"><div class="tpi">📚</div><div class="tl">Learn</div></div>
+            <div class="tab"><div class="tpi">⚙️</div><div class="tl">Profile</div></div>
+          </div></div>
+        </div></div>
+        <div class="tab-label">Today</div>
+      </div>
+
+      <!-- T4D · TASKS -->
+      <div class="mockup">
+        <div class="phone"><div class="screen t4 t4d">
+          <div class="di"></div>
+          <div class="st"><span>9:41</span><span>▲▲▲</span><span>🔋</span></div>
+          <div class="ah">
+            <div>
+              <div class="at">My Tasks</div>
+              <div style="font-size:9px;font-weight:700;color:rgba(255,255,255,0.48);letter-spacing:0.06em;margin-top:2px">1 done · 3 remaining</div>
+            </div>
+            <div class="hax"><div class="hb">🔔</div></div>
+          </div>
+          <div class="cnt">
+            <div class="chips">
+              <div class="chip on">All</div>
+              <div class="chip">Today</div>
+              <div class="chip">Upcoming</div>
+              <div class="chip">Done</div>
+            </div>
+            <div class="gc rows">
+              <div class="tr act"><div class="ti2">💧</div><div class="tb"><div class="tn">Water the lawn</div><div class="ts">Due today · 15 min</div></div><div class="tpill">TODAY</div></div>
+              <div class="tr"><div class="ti2">✂️</div><div class="tb"><div class="tn">Mow the backyard</div><div class="ts">Tomorrow · 30 min</div></div><div class="tpill">SOON</div></div>
+              <div class="tr"><div class="ti2">🌿</div><div class="tb"><div class="tn">Apply pre-emergent</div><div class="ts">June 5 · 20 min</div></div><div class="tpill">JUN 5</div></div>
+              <div class="dv"></div>
+              <div class="tr done"><div class="tchk">✓</div><div class="tb"><div class="tn" style="text-decoration:line-through;opacity:0.6">Check for grubs</div><div class="ts">Completed · June 1</div></div></div>
+            </div>
+          </div>
+          <div class="tw"><div class="tbar">
+            <div class="tab"><div class="tpi">🏠</div><div class="tl">Today</div></div>
+            <div class="tab on"><div class="tpi">✅</div><div class="tl">Tasks</div></div>
+            <div class="tab"><div class="tpi">📚</div><div class="tl">Learn</div></div>
+            <div class="tab"><div class="tpi">⚙️</div><div class="tl">Profile</div></div>
+          </div></div>
+        </div></div>
+        <div class="tab-label">Tasks</div>
+      </div>
+
+      <!-- T4D · LEARN — search as first glass card, immediately visible -->
+      <div class="mockup">
+        <div class="phone"><div class="screen t4 t4d">
+          <div class="di"></div>
+          <div class="st"><span>9:41</span><span>▲▲▲</span><span>🔋</span></div>
+          <div class="ah">
+            <div class="at">Learn</div>
+          </div>
+          <div class="cnt">
+            <div class="gc srch"><span style="font-size:14px;opacity:0.4">🔍</span><div class="srch-ph">Search lawn topics...</div></div>
+            <div class="sl">Featured</div>
+            <div class="gc feat">
+              <div class="ftag">Beginner guide</div>
+              <div class="ftit">Why your grass turns yellow</div>
+              <div class="fsub">Most yellowing has one of three causes. Here's how to tell which you have.</div>
+              <div class="fmeta">5 min read · Lawn Health</div>
+            </div>
+            <div class="sl">Browse topics</div>
+            <div class="cats">
+              <div class="gc cat"><div class="cat-i">💧</div><div class="cat-n">Watering</div><div class="cat-c">12 articles</div></div>
+              <div class="gc cat"><div class="cat-i">✂️</div><div class="cat-n">Mowing</div><div class="cat-c">8 articles</div></div>
+              <div class="gc cat"><div class="cat-i">🧪</div><div class="cat-n">Fertilizing</div><div class="cat-c">10 articles</div></div>
+              <div class="gc cat"><div class="cat-i">🐛</div><div class="cat-n">Pests</div><div class="cat-c">6 articles</div></div>
+            </div>
+          </div>
+          <div class="tw"><div class="tbar">
+            <div class="tab"><div class="tpi">🏠</div><div class="tl">Today</div></div>
+            <div class="tab"><div class="tpi">✅</div><div class="tl">Tasks</div></div>
+            <div class="tab on"><div class="tpi">📚</div><div class="tl">Learn</div></div>
+            <div class="tab"><div class="tpi">⚙️</div><div class="tl">Profile</div></div>
+          </div></div>
+        </div></div>
+        <div class="tab-label">Learn</div>
+      </div>
+
+      <!-- T4D · PROFILE — chips in profile card, no redundant "Your Lawn" section -->
+      <div class="mockup">
+        <div class="phone"><div class="screen t4 t4d">
+          <div class="di"></div>
+          <div class="st"><span>9:41</span><span>▲▲▲</span><span>🔋</span></div>
+          <div class="ah">
+            <div class="at">Profile</div>
+          </div>
+          <div class="cnt">
+            <div class="gc">
+              <div class="prof"><div class="av">🌿</div><div><div class="pn">Farai M.</div><div class="ps">Member since May 2026</div></div></div>
+              <div class="hchips">
+                <div class="hchip">🌱 Cool-season</div>
+                <div class="hchip">📍 Chicago</div>
+                <div class="hchip">⚡ Just Alive</div>
+              </div>
+            </div>
+            <div class="sl">Preferences</div>
+            <div class="gc">
+              <div class="sr"><div class="srl"><div class="sri">🔔</div><div class="srn">Notifications</div></div><div class="tog"><div class="tog-k"></div></div></div>
+              <div class="dv"></div>
+              <div class="sr"><div class="srl"><div class="sri">🌙</div><div class="srn">Dark mode</div></div><div class="tog"><div class="tog-k"></div></div></div>
+              <div class="dv"></div>
+              <div class="sr"><div class="srl"><div class="sri">🔒</div><div class="srn">App lock</div></div><div class="tog"><div class="tog-k" style="left:2px;right:auto"></div></div></div>
+            </div>
+            <div class="sl">Account</div>
+            <div class="gc">
+              <div class="sr"><div class="srl"><div class="sri">📍</div><div class="srn" style="color:rgba(220,60,60,0.85)">I've moved</div></div><div class="src">›</div></div>
+              <div class="dv"></div>
+              <div class="sr"><div class="srl"><div class="sri">🚪</div><div class="srn">Sign out</div></div><div class="src">›</div></div>
+            </div>
+          </div>
+          <div class="tw"><div class="tbar">
+            <div class="tab"><div class="tpi">🏠</div><div class="tl">Today</div></div>
+            <div class="tab"><div class="tpi">✅</div><div class="tl">Tasks</div></div>
+            <div class="tab"><div class="tpi">📚</div><div class="tl">Learn</div></div>
+            <div class="tab on"><div class="tpi">⚙️</div><div class="tl">Profile</div></div>
+          </div></div>
+        </div></div>
+        <div class="tab-label">Profile</div>
+      </div>
+
+      <!-- T4D · ARTICLE READER -->
+      <div class="mockup">
+        <div class="phone"><div class="screen t4 t4d">
+          <div class="di"></div>
+          <div class="st"><span>9:41</span><span>▲▲▲</span><span>🔋</span></div>
+          <div class="ah">
+            <div class="art-back">
+              <div class="art-back-ico">←</div>
+              <div class="at" style="font-size:15px">Lawn Health</div>
+            </div>
+            <div class="art-readtime">5 min read</div>
+          </div>
+          <div class="art-prog"><div class="art-prog-fill"></div></div>
+          <div class="cnt" style="padding-top:6px">
+            <div class="gc art-card">
+              <div class="art-tags">
+                <div class="art-tag">Beginner</div>
+                <div class="art-tag">Watering</div>
+              </div>
+              <div class="art-ttl">Why your grass turns yellow</div>
+              <div class="art-meta">5 min read · June 2, 2026</div>
+              <div class="dv" style="margin:0"></div>
+              <div class="art-body">If your grass is turning yellow, don't panic — it's one of the most common problems and almost always fixable.</div>
+              <div class="art-body">The three main causes are: not enough water, too much nitrogen in fertilizer, or grubs underneath the surface.</div>
+              <div class="art-body"><b>To figure out which one you have:</b> Pull up a small patch near the yellow area and look at the roots...</div>
+            </div>
+            <div class="gc art-helpful">
+              <div class="art-hlbl">Was this helpful?</div>
+              <div class="art-hbts">
+                <div class="art-hbt">👍</div>
+                <div class="art-hbt">👎</div>
+              </div>
+            </div>
+          </div>
+          <div class="tw"><div class="tbar">
+            <div class="tab"><div class="tpi">🏠</div><div class="tl">Today</div></div>
+            <div class="tab"><div class="tpi">✅</div><div class="tl">Tasks</div></div>
+            <div class="tab on"><div class="tpi">📚</div><div class="tl">Learn</div></div>
+            <div class="tab"><div class="tpi">⚙️</div><div class="tl">Profile</div></div>
+          </div></div>
+        </div></div>
+        <div class="tab-label">Article</div>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════
+       ROW 1B — FLOATING LAYERS · LIGHT / DAY
+  ═══════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="row-label">
+      <div class="row-label-rule"></div>
+      <div class="row-label-txt">Floating Layers — Light</div>
+      <div class="row-label-badge">Level 4 · Day</div>
+      <div class="row-label-rule"></div>
+    </div>
+    <div class="grid">
+
+      <!-- T4L · TODAY -->
+      <div class="mockup">
+        <div class="phone"><div class="screen t4 t4l">
+          <div class="di"></div>
+          <div class="st"><span>9:41</span><span>▲▲▲</span><span>🔋</span></div>
+          <div class="ah">
+            <div>
+              <div class="at">2 tasks today</div>
+              <div style="font-size:9px;font-weight:700;color:rgba(14,42,14,0.44);letter-spacing:0.08em;text-transform:uppercase;margin-top:2px">Tuesday, June 2</div>
+            </div>
+            <div class="hax"><div class="hb">🔔<div class="nd"></div></div></div>
+          </div>
+          <div class="cnt">
+            <div class="ptask">
+              <div class="ptask-ico">💧</div>
+              <div class="ptask-txt">
+                <div class="ptask-name">Water the lawn</div>
+                <div class="ptask-sub">Due today · ~15 min · Most urgent</div>
+              </div>
+              <div class="ptask-arr">›</div>
+            </div>
+            <div class="sl">Also this week</div>
+            <div class="gc">
+              <div class="mini-tr"><div class="ti2">✂️</div><div class="tb"><div class="tn">Mow the backyard</div><div class="ts">Tomorrow · 30 min</div></div><div class="tchev">›</div></div>
+              <div class="dv"></div>
+              <div class="mini-tr done"><div class="tchk">✓</div><div class="tb"><div class="tn" style="text-decoration:line-through">Check for grubs</div><div class="ts">Completed</div></div></div>
+            </div>
+            <div style="flex:1"></div>
+            <div class="streak-row"><span>🔥</span><div class="streak-txt"><b>4-week streak</b> — keep it up!</div></div>
+            <div class="cta" style="margin:0">Start: Water the lawn →</div>
+          </div>
+          <div class="tw"><div class="tbar">
+            <div class="tab on"><div class="tpi">🏠</div><div class="tl">Today</div></div>
+            <div class="tab"><div class="tpi">✅</div><div class="tl">Tasks</div></div>
+            <div class="tab"><div class="tpi">📚</div><div class="tl">Learn</div></div>
+            <div class="tab"><div class="tpi">⚙️</div><div class="tl">Profile</div></div>
+          </div></div>
+        </div></div>
+        <div class="tab-label">Today</div>
+      </div>
+
+      <!-- T4L · TASKS -->
+      <div class="mockup">
+        <div class="phone"><div class="screen t4 t4l">
+          <div class="di"></div>
+          <div class="st"><span>9:41</span><span>▲▲▲</span><span>🔋</span></div>
+          <div class="ah">
+            <div>
+              <div class="at">My Tasks</div>
+              <div style="font-size:9px;font-weight:700;color:rgba(14,42,14,0.44);letter-spacing:0.06em;margin-top:2px">1 done · 3 remaining</div>
+            </div>
+            <div class="hax"><div class="hb">🔔</div></div>
+          </div>
+          <div class="cnt">
+            <div class="chips">
+              <div class="chip on">All</div>
+              <div class="chip">Today</div>
+              <div class="chip">Upcoming</div>
+              <div class="chip">Done</div>
+            </div>
+            <div class="gc rows">
+              <div class="tr act"><div class="ti2">💧</div><div class="tb"><div class="tn">Water the lawn</div><div class="ts">Due today · 15 min</div></div><div class="tpill">TODAY</div></div>
+              <div class="tr"><div class="ti2">✂️</div><div class="tb"><div class="tn">Mow the backyard</div><div class="ts">Tomorrow · 30 min</div></div><div class="tpill">SOON</div></div>
+              <div class="tr"><div class="ti2">🌿</div><div class="tb"><div class="tn">Apply pre-emergent</div><div class="ts">June 5 · 20 min</div></div><div class="tpill">JUN 5</div></div>
+              <div class="dv"></div>
+              <div class="tr done"><div class="tchk">✓</div><div class="tb"><div class="tn" style="text-decoration:line-through;opacity:0.6">Check for grubs</div><div class="ts">Completed · June 1</div></div></div>
+            </div>
+          </div>
+          <div class="tw"><div class="tbar">
+            <div class="tab"><div class="tpi">🏠</div><div class="tl">Today</div></div>
+            <div class="tab on"><div class="tpi">✅</div><div class="tl">Tasks</div></div>
+            <div class="tab"><div class="tpi">📚</div><div class="tl">Learn</div></div>
+            <div class="tab"><div class="tpi">⚙️</div><div class="tl">Profile</div></div>
+          </div></div>
+        </div></div>
+        <div class="tab-label">Tasks</div>
+      </div>
+
+      <!-- T4L · LEARN -->
+      <div class="mockup">
+        <div class="phone"><div class="screen t4 t4l">
+          <div class="di"></div>
+          <div class="st"><span>9:41</span><span>▲▲▲</span><span>🔋</span></div>
+          <div class="ah">
+            <div class="at">Learn</div>
+          </div>
+          <div class="cnt">
+            <div class="gc srch"><span style="font-size:14px;opacity:0.35">🔍</span><div class="srch-ph">Search lawn topics...</div></div>
+            <div class="sl">Featured</div>
+            <div class="gc feat">
+              <div class="ftag">Beginner guide</div>
+              <div class="ftit">Why your grass turns yellow</div>
+              <div class="fsub">Most yellowing has one of three causes. Here's how to tell which you have.</div>
+              <div class="fmeta">5 min read · Lawn Health</div>
+            </div>
+            <div class="sl">Browse topics</div>
+            <div class="cats">
+              <div class="gc cat"><div class="cat-i">💧</div><div class="cat-n">Watering</div><div class="cat-c">12 articles</div></div>
+              <div class="gc cat"><div class="cat-i">✂️</div><div class="cat-n">Mowing</div><div class="cat-c">8 articles</div></div>
+              <div class="gc cat"><div class="cat-i">🧪</div><div class="cat-n">Fertilizing</div><div class="cat-c">10 articles</div></div>
+              <div class="gc cat"><div class="cat-i">🐛</div><div class="cat-n">Pests</div><div class="cat-c">6 articles</div></div>
+            </div>
+          </div>
+          <div class="tw"><div class="tbar">
+            <div class="tab"><div class="tpi">🏠</div><div class="tl">Today</div></div>
+            <div class="tab"><div class="tpi">✅</div><div class="tl">Tasks</div></div>
+            <div class="tab on"><div class="tpi">📚</div><div class="tl">Learn</div></div>
+            <div class="tab"><div class="tpi">⚙️</div><div class="tl">Profile</div></div>
+          </div></div>
+        </div></div>
+        <div class="tab-label">Learn</div>
+      </div>
+
+      <!-- T4L · PROFILE -->
+      <div class="mockup">
+        <div class="phone"><div class="screen t4 t4l">
+          <div class="di"></div>
+          <div class="st"><span>9:41</span><span>▲▲▲</span><span>🔋</span></div>
+          <div class="ah">
+            <div class="at">Profile</div>
+          </div>
+          <div class="cnt">
+            <div class="gc">
+              <div class="prof"><div class="av">🌿</div><div><div class="pn">Farai M.</div><div class="ps">Member since May 2026</div></div></div>
+              <div class="hchips">
+                <div class="hchip">🌱 Cool-season</div>
+                <div class="hchip">📍 Chicago</div>
+                <div class="hchip">⚡ Just Alive</div>
+              </div>
+            </div>
+            <div class="sl">Preferences</div>
+            <div class="gc">
+              <div class="sr"><div class="srl"><div class="sri">🔔</div><div class="srn">Notifications</div></div><div class="tog"><div class="tog-k"></div></div></div>
+              <div class="dv"></div>
+              <div class="sr"><div class="srl"><div class="sri">🌙</div><div class="srn">Dark mode</div></div><div class="tog"><div class="tog-k"></div></div></div>
+              <div class="dv"></div>
+              <div class="sr"><div class="srl"><div class="sri">🔒</div><div class="srn">App lock</div></div><div class="tog"><div class="tog-k" style="left:2px;right:auto"></div></div></div>
+            </div>
+            <div class="sl">Account</div>
+            <div class="gc">
+              <div class="sr"><div class="srl"><div class="sri">📍</div><div class="srn" style="color:rgba(180,30,30,0.80)">I've moved</div></div><div class="src">›</div></div>
+              <div class="dv"></div>
+              <div class="sr"><div class="srl"><div class="sri">🚪</div><div class="srn">Sign out</div></div><div class="src">›</div></div>
+            </div>
+          </div>
+          <div class="tw"><div class="tbar">
+            <div class="tab"><div class="tpi">🏠</div><div class="tl">Today</div></div>
+            <div class="tab"><div class="tpi">✅</div><div class="tl">Tasks</div></div>
+            <div class="tab"><div class="tpi">📚</div><div class="tl">Learn</div></div>
+            <div class="tab on"><div class="tpi">⚙️</div><div class="tl">Profile</div></div>
+          </div></div>
+        </div></div>
+        <div class="tab-label">Profile</div>
+      </div>
+
+      <!-- T4L · ARTICLE READER -->
+      <div class="mockup">
+        <div class="phone"><div class="screen t4 t4l">
+          <div class="di"></div>
+          <div class="st"><span>9:41</span><span>▲▲▲</span><span>🔋</span></div>
+          <div class="ah">
+            <div class="art-back">
+              <div class="art-back-ico">←</div>
+              <div class="at" style="font-size:15px">Lawn Health</div>
+            </div>
+            <div class="art-readtime">5 min read</div>
+          </div>
+          <div class="art-prog"><div class="art-prog-fill"></div></div>
+          <div class="cnt" style="padding-top:6px">
+            <div class="gc art-card">
+              <div class="art-tags">
+                <div class="art-tag">Beginner</div>
+                <div class="art-tag">Watering</div>
+              </div>
+              <div class="art-ttl">Why your grass turns yellow</div>
+              <div class="art-meta">5 min read · June 2, 2026</div>
+              <div class="dv" style="margin:0"></div>
+              <div class="art-body">If your grass is turning yellow, don't panic — it's one of the most common problems and almost always fixable.</div>
+              <div class="art-body">The three main causes are: not enough water, too much nitrogen in fertilizer, or grubs underneath the surface.</div>
+              <div class="art-body"><b>To figure out which one you have:</b> Pull up a small patch near the yellow area and look at the roots...</div>
+            </div>
+            <div class="gc art-helpful">
+              <div class="art-hlbl">Was this helpful?</div>
+              <div class="art-hbts">
+                <div class="art-hbt">👍</div>
+                <div class="art-hbt">👎</div>
+              </div>
+            </div>
+          </div>
+          <div class="tw"><div class="tbar">
+            <div class="tab"><div class="tpi">🏠</div><div class="tl">Today</div></div>
+            <div class="tab"><div class="tpi">✅</div><div class="tl">Tasks</div></div>
+            <div class="tab on"><div class="tpi">📚</div><div class="tl">Learn</div></div>
+            <div class="tab"><div class="tpi">⚙️</div><div class="tl">Profile</div></div>
+          </div></div>
+        </div></div>
+        <div class="tab-label">Article</div>
+      </div>
+
+    </div>
+  </div>
+
+</body>
+</html>
