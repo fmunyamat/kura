@@ -89,3 +89,46 @@ const Title = styled.Text<{ $isTablet: boolean }>`
 ```
 
 Note: `flex: 0` in React Native sets `flexBasis: 0`, collapsing a view to zero height. To let a view size to its content without expanding, omit `flex` entirely — React Native defaults to `flexBasis: auto`.
+
+---
+
+## Green gradient + glassmorphism (Home tab)
+
+The Home tab uses the same visual language as the onboarding screens: the four-stop green gradient background and a `GlassCard` (or `GlassPanel`) floating above it. This makes the app feel visually continuous from sign-in through onboarding and into the main experience.
+
+**Background:** same `LinearGradient` as `OnboardingLayout` — `#0c3520 → #135633 → #1e6b3c → #3d7d35`, angle `168°`.
+
+**Glass panel tokens:**
+- Background: `glassOnboardingPanel` (`rgba(255,255,255,0.46)`) + `BackdropBlur`
+- Task row default: `glassOnboardingOption` (`rgba(19,86,51,0.08)`)
+- Task row active/selected: `glassOnboardingOptionSelected` (`rgba(19,86,51,0.18)`)
+- Text: `textOnGlass` (`rgba(14,42,14,0.85)`), muted: `textMutedOnGlass` (`rgba(14,42,14,0.52)`)
+- Lime accent (subtitles, highlights): `lime` (`rgba(184,229,106,0.92)`)
+
+### Hero-collapse / panel-expand pattern
+
+Used in `HomeScreen` to transition between the overview list and the focused task detail without any screen navigation.
+
+```
+ContentArea (flex: 1, flexDirection: 'column')
+  ├── Hero       — overview: flex 1  |  focused: omit flex (sizes to content)
+  └── GlassPanel — overview: flex 3  |  focused: flex 1
+```
+
+Wrap the state update in `LayoutAnimation.configureNext` so the flex change animates smoothly:
+
+```tsx
+import { LayoutAnimation, Platform, UIManager } from 'react-native';
+
+// Android requires this opt-in for LayoutAnimation to work
+if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
+
+const handleFocus = (id: string) => {
+  LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+  setFocusedId(id);
+};
+```
+
+**Do not use this pattern with `KeyboardAvoidingView`** — the two animation systems conflict and leave a black gap when the keyboard dismisses. `HomeScreen` has no keyboard input, so this is safe there. See the comment in `SignIn.tsx` for the workaround used on the sign-in screen.

@@ -180,6 +180,142 @@ export const effortLevelSchema = z.union([
 
 ---
 
+## Welcome Flow
+
+A 4-screen tutorial shown once, immediately after onboarding completes, before the user reaches the main app. It introduces Kura and orients the user to the four tabs. The flow persists on every app open until "Start Growing" is tapped on the final screen — after that it is never shown again.
+
+### The four screens
+
+| # | Label | Content |
+|---|---|---|
+| 1 | Welcome | Greeting by first name · "Your journey starts today" glass card · "Let's go →" CTA |
+| 2 | Today Feature | "Each morning, one task." · Sample task preview card showing what the Today tab looks like · explanatory caption |
+| 3 | Navigation | "Four tabs, four tools." · One pill card per tab with a one-line description · live tab bar at the bottom so the user can see what they're about to use |
+| 4 | All Set | Checkmark circle · "You're all set." · "Start Growing" CTA (only exit from the flow) |
+
+All screens share: Dynamic Island, status bar, progress dots (`Quick Tour · X of 4` label) pinned to the top.
+
+### Persistence
+
+The flow stays until "Start Growing" is tapped. Backgrounding or force-quitting the app returns the user to screen 1 of the flow, not wherever they left off. The dismissal is stored server-side so it survives reinstalls.
+
+| Flag | Location | Default |
+|---|---|---|
+| `has_seen_welcome` | `user_profiles` column (`boolean NOT NULL DEFAULT false`) | `false` — new users always see the flow |
+
+`welcomeService.markWelcomeSeen()` PATCHes this to `true` when "Start Growing" is tapped. The Zustand auth store is updated immediately after the write succeeds, which triggers `RootNavigator` to re-evaluate and route to `AppTabs`. Do not route until the write is confirmed.
+
+**Schema migration:**
+
+```sql
+-- Records that the user has completed the one-time welcome flow.
+-- Defaults false so all new users see it; existing rows are unaffected.
+ALTER TABLE user_profiles
+  ADD COLUMN has_seen_welcome boolean NOT NULL DEFAULT false;
+```
+
+### Routing order
+
+`RootNavigator` evaluates on every session change:
+
+1. No session → `AuthStack`
+2. Session + no profile row → `OnboardingStack`
+3. Session + profile + `has_seen_welcome = false` → `WelcomeFlow`
+4. Session + profile + `has_seen_welcome = true` → `AppTabs`
+
+`WelcomeFlow` is a full-screen non-dismissible stack. No back gesture, no hardware back escape — the only path to `AppTabs` is tapping "Start Growing."
+
+### Visual design
+
+The welcome flow uses the **blurred grass photo background** design from `mockups/welcome-flow.html` — not the onboarding gradient. The full visual spec lives in that file. Key implementation tokens:
+
+| Element | Dark (`t4d`) | Light (`t4l`) |
+|---|---|---|
+| Photo layer | `blur(18px) saturate(0.85)` | `blur(18px) saturate(1.15) brightness(1.05)` |
+| Colour overlay | `rgba(10,28,10,0.60)` | `rgba(210,255,225,0.36)` |
+| Glass cards | `rgba(255,255,255,0.44)` | `rgba(255,255,255,0.88)` |
+| CTA button background | `rgba(8,20,8,0.88)` | `#4F9D69` |
+| CTA button text | `#D6EFD8` | `#BEE6CE` |
+| Progress dot (inactive) | `rgba(255,255,255,0.22)` | `rgba(14,42,14,0.14)` |
+| Progress dot (active) | `rgba(255,255,255,0.72)` · 18 × 5 px pill | `rgba(14,42,14,0.52)` · 18 × 5 px pill |
+
+**Font styles** are copied from the onboarding screens — system sans-serif, no custom font families:
+
+| Role | Size token | Weight token |
+|---|---|---|
+| Screen heading | `theme.typography.sizeXl` (24) | `theme.typography.weightBlack` ('900') |
+| Step label pill | `theme.typography.sizeXs` (12) | `theme.typography.weightBold` ('700') |
+| Body / caption | `theme.typography.sizeXs` (12) | `theme.typography.weightMedium` ('500') |
+| Card title | `theme.typography.sizeSm` (14) | `theme.typography.weightBold` ('700') |
+| Card body | `theme.typography.sizeXs` (12) | `theme.typography.weightRegular` ('400') |
+| CTA button | `theme.typography.sizeSm` (14) | `theme.typography.weightBold` ('700') |
+
+### Folder structure
+
+```
+features/welcome/
+  screens/
+    WelcomeFlow.tsx        # pager container — owns currentStep state (0–3)
+  components/
+    WelcomeStep1.tsx       # Welcome + "Let's go →"
+    WelcomeStep2.tsx       # Today Feature + sample task preview
+    WelcomeStep3.tsx       # Navigation pills + live tab bar
+    WelcomeStep4.tsx       # All Set + "Start Growing"
+    WelcomeDots.tsx        # progress dot row (total + active index props)
+    WelcomeStepLabel.tsx   # "Quick Tour · X of 4" pill
+  services/
+    welcome.service.ts     # markWelcomeSeen()
+```
+
+### Service
+
+```ts
+// features/welcome/services/welcome.service.ts
+export const welcomeService = {
+  // markWelcomeSeen — sets has_seen_welcome = true for the current user.
+  // Only called when the user taps "Start Growing" on screen 4.
+  // Throws on Supabase error so the caller can catch and show an error
+  // without routing the user into AppTabs prematurely.
+  async markWelcomeSeen(): Promise<void> {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('Not authenticated');
+
+    const { error } = await supabase
+      .from('user_profiles')
+      .update({ has_seen_welcome: true })
+      .eq('user_id', user.id);
+
+    if (error) {
+      logger.error('welcomeService.markWelcomeSeen failed', {
+        operation: 'markWelcomeSeen',
+        userId: user.id,
+        supabaseCode: error.code,
+      });
+      throw new Error('markWelcomeSeen failed');
+    }
+  },
+};
+```
+
+### WelcomeStep4 — error handling pattern
+
+```ts
+const handleStartGrowing = async () => {
+  setErrorMessage(null);
+  setIsSubmitting(true);
+  try {
+    await welcomeService.markWelcomeSeen();
+    useAuthStore.getState().setHasSeenWelcome(true); // RootNavigator re-evaluates
+  } catch {
+    setErrorMessage('Something went wrong. Please try again.');
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+```
+
+---
+
 ## Lawn Progress Photos
 
 Users take a "before" photo of their lawn at the end of onboarding, then receive push reminders at fixed intervals throughout the season to capture update shots. The Progress tab shows a scrollable before→now timeline so they can see how far their lawn has come.
@@ -279,3 +415,154 @@ CREATE POLICY "own_photos_delete"
 ### Account deletion
 
 The account deletion Edge Function must explicitly delete all objects under `{user_id}/` in the `lawn-photos` bucket before removing the user record. The `ON DELETE CASCADE` FK on `lawn_photos` handles row deletion automatically, but Supabase Storage objects require a separate `storage.remove()` call.
+
+---
+
+## Focus Card Dashboard (Home Tab — MVP)
+
+The Home tab is a single screen that shows the user's active lawn care recommendations and lets them act on each one without leaving the screen. There is no separate detail screen — tapping a task row expands it inline.
+
+### Three states
+
+#### State 1 — Overview
+
+The default state when the user opens the app. Shows a compact list of today's active recommendations plus any upcoming (future-season) tasks.
+
+**Hero zone** (top, `flex: 1`):
+- Step label: current day and date (e.g. "Saturday, May 31")
+- Title: plain-English summary of the day — "Two things for your lawn today" / "All caught up" / "Nothing needed right now"
+- Subtitle: one-line context in lime accent when relevant ("Your soil has been warm for 3 days")
+
+**Glass panel** (bottom, `flex: 3`):
+- One `FocusTaskRow` per active recommendation, ordered by priority
+- Each row: icon · task name · contextual meta (e.g. "3 days without water") · time pill · chevron ›
+- Active row background: `glassOnboardingOptionSelected` (`rgba(19,86,51,0.18)`)
+- Upcoming (future-season) rows: `opacity: 0.40` with a dimmed season label instead of time
+- Tapping a row transitions to State 2
+
+#### State 2 — Focused
+
+Triggered when the user taps a task row. The hero collapses and the glass panel expands to fill the available space. No screen navigation — the transition is an inline `LayoutAnimation`.
+
+**Hero zone** (slim, `flex: 0` — sizes to content):
+- Back button: "‹ Today"
+- Step label: "TODAY'S TASK"
+- Title: the task name ("Water your lawn")
+- Subtitle: the trigger context in lime ("3 days without water · 94°F forecast")
+
+**Glass panel** (expanded, `flex: 1`):
+- "Why this matters" section label + one paragraph of plain-English reasoning
+- Divider
+- "How to do it" section label + numbered steps (1–3, kept brief)
+- Chips row: ⏱ estimated time · 📍 where to do it
+- CTA button: "Mark as done" (calls `useConfirmRecommendation`)
+- Hint text: "Remind me later" (calls `useSnoozeRecommendation`, snoozes 5 days)
+
+#### State 3 — After Completion
+
+After the user marks a task done, the view returns to the overview layout. The glass panel shows two sections:
+
+- **Done** — struck-through task name, `primaryDeep` filled check circle
+- Divider
+- **Still to do** — remaining active tasks in their normal compact rows
+
+If all tasks are done, the glass panel shows a single "You're all caught up" message with a green check.
+
+### Component structure
+
+```
+features/home/
+├── screens/
+│   └── HomeScreen.tsx          # top-level screen; owns focusedId state
+├── components/
+│   ├── FocusTaskRow/           # compact overview row; tappable
+│   │   ├── index.tsx
+│   │   ├── FocusTaskRow.tsx
+│   │   └── FocusTaskRow.test.tsx
+│   ├── FocusTaskDetail/        # expanded detail view (why / steps / CTA)
+│   │   ├── index.tsx
+│   │   └── FocusTaskDetail.tsx
+│   └── CompletedTaskRow/       # struck-through row with check circle
+│       ├── index.tsx
+│       └── CompletedTaskRow.tsx
+```
+
+`HomeScreen` owns one piece of state: `focusedId: string | null`. When `null`, it renders the Overview layout. When set to a recommendation ID, it renders the Focused layout for that recommendation.
+
+The hooks `useActiveRecommendations`, `useConfirmRecommendation`, and `useSnoozeRecommendation` from `features/recommendations/hooks/` supply all data — `HomeScreen` does not call Supabase directly.
+
+### Recommendation display content
+
+Each `recommendation_events` row has a `type` field (e.g. `pre_emergent`, `dormancy_break`, `spring_fertilize`). The static display copy for each type lives in:
+
+```
+features/recommendations/constants/recommendationContent.ts
+```
+
+This file maps each `type` to: icon, task name, contextual meta template, why-it-matters paragraph, and numbered how-to steps. Time estimate and lawn scope come from the joined `tasks` row (`estimated_minutes`).
+
+### Data flow
+
+```
+recommendation_events (status = 'pending')
+  └─ joined with tasks (for estimated_minutes, grass_types, seasons)
+        └─ mapped to recommendationContent (for icon, why, steps)
+              └─ rendered in HomeScreen via useActiveRecommendations
+```
+
+### Layout mechanics (React Native)
+
+The hero-shrink / panel-expand is a layout animation, not navigation. Hero and glass panel are siblings in a flex column. Changing their `flex` value triggers a smooth `LayoutAnimation`.
+
+```
+ContentArea (flex: 1, flexDirection: 'column')
+  ├── Hero        (flex: 1  →  flex: 0 when focused)
+  └── GlassPanel  (flex: 3  →  flex: 1 when focused)
+```
+
+Wrap the `focusedId` state update in `LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut)` to animate the transition. The Home screen has no keyboard input so this is safe — there is no `KeyboardAvoidingView` to conflict with (unlike `SignIn.tsx`).
+
+### Empty and error states
+
+| Situation | Hero title | Glass panel content |
+|---|---|---|
+| No active recommendations | "Your lawn is all caught up" | "Check back tomorrow — the engine runs daily." |
+| All recommendations snoozed | "Nothing to do today" | Snoozed tasks listed with their resume date |
+| Offline / query error | "Can't load your lawn data" | Retry button |
+
+### Accessibility
+
+- Each `FocusTaskRow` uses `accessibilityRole="button"` and `accessibilityLabel` = task name + time estimate
+- Completed rows use `accessibilityState={{ disabled: true }}`
+- "Mark as done" button uses `accessibilityState={{ busy: isConfirming }}` while the mutation runs
+
+---
+
+## Coach — AI Lawn Advisor (Post-MVP)
+
+A conversational interface where Kura speaks to the user like a knowledgeable friend instead of presenting a task list. Recommendations arrive as short chat messages with an embedded action card. Users can ask follow-up questions in plain English.
+
+### What changes from MVP
+
+| MVP (Focus Card dashboard) | Coach |
+|---|---|
+| Today screen shows a scannable task list | Today screen is a chat thread |
+| Tap a card → expands with steps | Kura sends the context as messages, action card embedded inline |
+| Static "why it matters" copy per task | User can ask follow-up questions ("what if it rains?", "why does this matter?") |
+| No personalised dialogue | Greeting and tone adapt to the user's name, lawn, and season |
+
+### UX pattern
+
+1. User opens the app — Kura greets them by name and delivers the day's situation in 2–3 short messages ("It's been 3 days since your last watering, and today hits 94°F.")
+2. The recommendation arrives as an embedded action card — task name, time estimate, **Done** and **Skip** buttons
+3. Marking done triggers a brief acknowledgement from Kura before the next recommendation appears
+4. An input bar lets the user type free-form questions; Claude API answers grounded in the user's lawn profile
+
+### Implementation notes (for when this is built)
+
+- The Coach is a new tab (or replaces the Today tab) — the existing Focus Card dashboard is kept as a simpler alternative or removed
+- Chat messages from Kura are stored locally (not server-side) and regenerated on each app launch — only task completion status writes to the DB
+- Claude API (`claude-haiku-4-5-20251001` for cost) powers free-form Q&A; the system prompt is grounded with the user's grass type, location, season, recent completions, and today's `recommendation_events`
+- The action card is the existing task card component with a different layout wrapper — no new data model needed
+- Existing `recommendation_events` table drives what Kura says — the Coach just presents it differently
+- Apply prompt caching on the system prompt (lawn profile + season context) to reduce API costs on repeated opens

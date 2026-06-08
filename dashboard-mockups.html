@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Kura — Focus Card Dashboard</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #070E08;
+      padding: 64px 40px 96px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ─── Page header ─── */
+    .page-header { text-align: center; margin-bottom: 72px; }
+    .eyebrow {
+      font-size: 10px; font-weight: 700;
+      letter-spacing: 0.22em; text-transform: uppercase;
+      color: rgba(184,229,106,0.5); margin-bottom: 12px;
+    }
+    .pg-title {
+      font-size: 32px; font-weight: 900;
+      color: rgba(255,255,255,0.88);
+      letter-spacing: -0.4px; margin-bottom: 10px;
+    }
+    .pg-sub { font-size: 14px; color: rgba(255,255,255,0.28); font-weight: 300; }
+
+    /* ─── Three phones in a row ─── */
+    .phones {
+      display: flex; justify-content: center;
+      gap: 48px; flex-wrap: wrap; align-items: flex-start;
+    }
+    .mockup {
+      display: flex; flex-direction: column;
+      align-items: center; gap: 26px;
+      animation: rise 0.65s ease-out both;
+    }
+    .mockup:nth-child(1) { animation-delay: 0.06s; }
+    .mockup:nth-child(2) { animation-delay: 0.18s; }
+    .mockup:nth-child(3) { animation-delay: 0.30s; }
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ─── Phone frame ─── */
+    .phone {
+      width: 360px;
+      background: #1C1C1E;
+      border-radius: 54px;
+      padding: 14px;
+      box-shadow:
+        0 0 0 1px #2A2A2C,
+        inset 0 0 0 1px #363638,
+        0 80px 120px -10px rgba(0,0,0,0.98),
+        0 30px 50px -20px rgba(0,0,0,0.5);
+      position: relative;
+    }
+    .phone::before {
+      content: '';
+      position: absolute; top: 130px; right: -3px;
+      width: 3px; height: 64px;
+      background: linear-gradient(to bottom, #2C2C2E, #48484A, #2C2C2E);
+      border-radius: 2px;
+    }
+
+    /* ─── Screen — same 4-stop gradient as OnboardingLayout ─── */
+    .screen {
+      width: 100%; height: 724px;
+      border-radius: 42px; overflow: hidden;
+      background: linear-gradient(168deg, #0c3520 0%, #135633 33%, #1e6b3c 67%, #3d7d35 100%);
+      display: flex; flex-direction: column;
+      position: relative;
+    }
+
+    /* Dynamic Island */
+    .di {
+      position: absolute; top: 14px; left: 50%;
+      transform: translateX(-50%);
+      width: 116px; height: 34px;
+      background: #000; border-radius: 17px; z-index: 200;
+    }
+
+    /* ─── Status bar ─── */
+    .status {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 18px 26px 0;
+      font-size: 13px; font-weight: 600;
+      color: rgba(255,255,255,0.85);
+      flex-shrink: 0;
+    }
+
+    /* ─── Back button (focused state only) ─── */
+    .back {
+      padding: 10px 24px 0;
+      font-size: 15px; font-weight: 600;
+      color: rgba(255,255,255,0.65);
+      flex-shrink: 0;
+    }
+
+    /* ─── Hero zone ─── */
+    /* Default: flex:1 fills space above glass panel, like OnboardingLayout HeroZone */
+    .hero {
+      flex: 1;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 0 24px 8px;
+      gap: 5px; text-align: center;
+    }
+    /* Slim variant: collapses hero when card is expanded */
+    .hero.slim { flex: 0; padding: 8px 24px 10px; }
+
+    .hero-icon { font-size: 30px; margin-bottom: 2px; }
+    /* StepLabel: sizeXs=12, weightBold=700, letterSpacing=2px, rgba(255,255,255,0.65) */
+    .hero-step {
+      font-size: 12px; font-weight: 700;
+      letter-spacing: 2px; text-transform: uppercase;
+      color: rgba(255,255,255,0.65);
+    }
+    /* Title: sizeXl=24, weightBlack=900, letterSpacingTight=-0.3 */
+    .hero-title {
+      font-size: 25px; font-weight: 900;
+      color: rgba(255,255,255,0.96);
+      letter-spacing: -0.3px; line-height: 1.2;
+    }
+    /* Subtitle: sizeXs=12, rgba(255,255,255,0.68) */
+    .hero-sub {
+      font-size: 12px; color: rgba(255,255,255,0.68); line-height: 18px;
+    }
+    /* lime = rgba(184,229,106,0.92) */
+    .lime { color: rgba(184,229,106,0.92); }
+
+    /* ─── Glass panel ─── */
+    /* GlassPanelShadow */
+    .glass-outer {
+      margin: 0 16px 16px;
+      border-radius: 16px;
+      box-shadow: 0px 16px 28px rgba(0,0,0,0.55);
+      flex-shrink: 0;
+    }
+    /* When card is focused, glass panel fills all remaining space */
+    .glass-outer.fill { flex: 1; margin-bottom: 0; flex-shrink: 1; }
+
+    /* GlassPanelClip */
+    .glass-clip {
+      border-radius: 16px; overflow: hidden;
+    }
+    .glass-clip.fill { height: 100%; }
+
+    /* GlassPanelContent: glassOnboardingPanel = rgba(255,255,255,0.46), padding = md = 16px */
+    .glass-body {
+      background: rgba(255,255,255,0.46);
+      backdrop-filter: blur(22px); -webkit-backdrop-filter: blur(22px);
+      border: 1px solid rgba(255,255,255,0.28);
+      padding: 14px;
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .glass-clip.fill .glass-body { min-height: 100%; }
+
+    /* ─── Section label inside glass panel ─── */
+    /* textMutedOnGlass = rgba(14,42,14,0.52) */
+    .sec-lbl {
+      font-size: 10px; font-weight: 700;
+      letter-spacing: 1.5px; text-transform: uppercase;
+      color: rgba(14,42,14,0.42);
+      padding: 2px 2px 0;
+    }
+
+    /* ─── Compact task row (overview + progress states) ─── */
+    /* GrassTypeCard pattern: glassOnboardingOption = rgba(19,86,51,0.08) */
+    .task-row {
+      background: rgba(19,86,51,0.08);
+      border-radius: 8px;
+      padding: 10px 12px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    /* glassOnboardingOptionSelected = rgba(19,86,51,0.18) */
+    .task-row.active  { background: rgba(19,86,51,0.18); }
+    .task-row.done    { background: rgba(19,86,51,0.12); opacity: 0.65; }
+    .task-row.upcoming { opacity: 0.40; }
+
+    .t-icon { font-size: 20px; flex-shrink: 0; }
+    .t-body { flex: 1; min-width: 0; }
+    /* sizeSm=14, weightBold=700, textOnGlass=rgba(14,42,14,0.85) */
+    .t-name { font-size: 14px; font-weight: 700; color: rgba(14,42,14,0.85); }
+    .t-name.struck { text-decoration: line-through; }
+    /* sizeXs=12, textMutedOnGlass=rgba(14,42,14,0.52) */
+    .t-meta { font-size: 12px; color: rgba(14,42,14,0.52); line-height: 17px; }
+    .t-right { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+    .t-pill {
+      font-size: 11px; font-weight: 600;
+      color: rgba(14,42,14,0.42);
+      background: rgba(19,86,51,0.08);
+      border-radius: 6px; padding: 2px 7px;
+    }
+    .t-chev { font-size: 18px; color: rgba(14,42,14,0.28); }
+    /* CheckCircle: primaryDeep = #0c3520 */
+    .t-check {
+      width: 20px; height: 20px; border-radius: 10px;
+      background: #0c3520;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 900; color: #fff;
+      flex-shrink: 0;
+    }
+
+    /* ─── Thin divider ─── */
+    .divider { height: 1px; background: rgba(14,42,14,0.08); }
+
+    /* ─── Expanded detail — focused state ─── */
+
+    /* Why paragraph: sizeSm=14, textOnGlass-ish */
+    .why {
+      font-size: 14px; font-weight: 400;
+      color: rgba(14,42,14,0.72);
+      line-height: 1.65;
+    }
+
+    /* Step rows — same weight as task rows but numbered */
+    .steps { display: flex; flex-direction: column; gap: 4px; }
+    .step {
+      background: rgba(19,86,51,0.08);
+      border-radius: 8px;
+      padding: 9px 12px;
+      display: flex; gap: 9px; align-items: flex-start;
+    }
+    /* Number circle: primaryDeep = #0c3520 */
+    .step-n {
+      min-width: 20px; height: 20px;
+      background: #0c3520; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px; font-weight: 900; color: #fff;
+      margin-top: 1px; flex-shrink: 0;
+    }
+    /* sizeSm=14, weightBold, textOnGlass */
+    .step-t { font-size: 13px; font-weight: 600; color: rgba(14,42,14,0.85); line-height: 1.5; }
+
+    /* Meta chips */
+    .chips { display: flex; gap: 6px; }
+    .chip {
+      font-size: 12px; font-weight: 600;
+      color: rgba(14,42,14,0.52);
+      background: rgba(19,86,51,0.08);
+      border-radius: 6px; padding: 4px 10px;
+    }
+
+    /* CTA button — PrimaryButton: gradientMidLight = #1e6b3c, radius = md = 8 */
+    .cta {
+      background: #1e6b3c; border: none; border-radius: 8px;
+      padding: 15px; width: 100%;
+      font-family: inherit; font-size: 15px; font-weight: 700;
+      color: #fff; text-align: center; cursor: pointer;
+    }
+    .cta.muted { opacity: 0.3; }
+
+    /* Hint text — HintText: sizeXs, textMutedOnGlass */
+    .hint {
+      font-size: 12px; color: rgba(14,42,14,0.45);
+      text-align: center; line-height: 17px;
+    }
+
+    /* ─── Tab bar ─── */
+    .tabs {
+      flex-shrink: 0;
+      display: flex; justify-content: space-around; align-items: center;
+      padding: 10px 8px 20px;
+      background: rgba(5,20,10,0.72);
+      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      border-top: 1px solid rgba(255,255,255,0.07);
+    }
+    .tab {
+      display: flex; flex-direction: column; align-items: center; gap: 3px;
+      font-size: 10px; font-weight: 600;
+      letter-spacing: 0.4px; text-transform: uppercase;
+      color: rgba(255,255,255,0.28);
+    }
+    .tab.on { color: rgba(184,229,106,0.92); }
+    .ti { font-size: 20px; }
+
+    /* ─── Phone labels ─── */
+    .phone-lbl { text-align: center; }
+    .state-pill {
+      display: inline-block;
+      font-size: 10px; font-weight: 700;
+      letter-spacing: 0.14em; text-transform: uppercase;
+      background: rgba(184,229,106,0.1);
+      border: 1px solid rgba(184,229,106,0.2);
+      color: rgba(184,229,106,0.75);
+      padding: 4px 12px; border-radius: 999px; margin-bottom: 9px;
+    }
+    .lbl-title { font-size: 17px; font-weight: 700; color: rgba(255,255,255,0.78); margin-bottom: 4px; }
+    .lbl-sub { font-size: 13px; color: rgba(255,255,255,0.28); font-weight: 300; max-width: 240px; }
+
+    /* ─── Arrow annotation between phones ─── */
+    .arrow-col {
+      display: flex; flex-direction: column;
+      justify-content: center; align-items: center;
+      padding-top: 340px; /* vertically centre in the phone area */
+    }
+    .arrow-label {
+      font-size: 11px; font-weight: 600;
+      color: rgba(255,255,255,0.2);
+      letter-spacing: 0.08em; text-align: center; margin-bottom: 6px;
+    }
+    .arrow { font-size: 22px; color: rgba(184,229,106,0.3); }
+  </style>
+</head>
+<body>
+
+  <div class="page-header">
+    <div class="eyebrow">Kura · Dashboard</div>
+    <div class="pg-title">Focus Card</div>
+    <div class="pg-sub">Tap a task to expand it · complete it · move to the next one</div>
+  </div>
+
+  <div class="phones">
+
+    <!-- ════════════════════════════════════════
+         STATE 1 — Overview
+         Compact scannable list. Tap any row
+         to expand it into the focus view.
+    ════════════════════════════════════════ -->
+    <div class="mockup">
+      <div class="phone">
+        <div class="screen">
+          <div class="di"></div>
+
+          <div class="status">
+            <span>9:41</span>
+            <span style="font-size:11px;">▲▲▲ 🔋</span>
+          </div>
+
+          <!-- Hero: general context, not task-specific -->
+          <div class="hero">
+            <div class="hero-icon">🌿</div>
+            <div class="hero-step">Saturday, May 31</div>
+            <div class="hero-title">Two things for<br>your lawn today</div>
+            <div class="hero-sub">Best done before noon<br><span class="lime">Austin, TX · 94°F forecast</span></div>
+          </div>
+
+          <!-- Glass panel: compact, scannable task list -->
+          <div class="glass-outer">
+            <div class="glass-clip">
+              <div class="glass-body">
+
+                <div class="sec-lbl">Tap a task to get started</div>
+
+                <!-- Active tasks — full opacity, tappable -->
+                <div class="task-row active">
+                  <div class="t-icon">💧</div>
+                  <div class="t-body">
+                    <div class="t-name">Water your lawn</div>
+                    <div class="t-meta">3 days without water · urgent</div>
+                  </div>
+                  <div class="t-right">
+                    <div class="t-pill">30 min</div>
+                    <div class="t-chev">›</div>
+                  </div>
+                </div>
+
+                <div class="task-row">
+                  <div class="t-icon">🪲</div>
+                  <div class="t-body">
+                    <div class="t-name">Check for grubs</div>
+                    <div class="t-meta">Early summer grub season</div>
+                  </div>
+                  <div class="t-right">
+                    <div class="t-pill">10 min</div>
+                    <div class="t-chev">›</div>
+                  </div>
+                </div>
+
+                <!-- Coming up — dimmed, not actionable today -->
+                <div class="task-row upcoming">
+                  <div class="t-icon">✂️</div>
+                  <div class="t-body">
+                    <div class="t-name">Mow when dry</div>
+                    <div class="t-meta">Coming up · in 2 days</div>
+                  </div>
+                  <div class="t-right">
+                    <div class="t-pill">20 min</div>
+                    <div class="t-chev">›</div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+          <div class="tabs">
+            <div class="tab on"><span class="ti">🌿</span><span>Today</span></div>
+            <div class="tab"><span class="ti">🌱</span><span>My Lawn</span></div>
+            <div class="tab"><span class="ti">📋</span><span>History</span></div>
+            <div class="tab"><span class="ti">⚙️</span><span>Settings</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="phone-lbl">
+        <div class="state-pill">State 1 — Overview</div>
+        <div class="lbl-title">Compact task list</div>
+        <div class="lbl-sub">Tap any row to expand it into the focus view</div>
+      </div>
+    </div>
+
+    <!-- arrow -->
+    <div class="arrow-col">
+      <div class="arrow-label">tap row</div>
+      <div class="arrow">→</div>
+    </div>
+
+    <!-- ════════════════════════════════════════
+         STATE 2 — Card focused
+         User tapped the first row. Hero shrinks,
+         glass panel expands with full detail,
+         why + steps + CTA all visible.
+    ════════════════════════════════════════ -->
+    <div class="mockup">
+      <div class="phone">
+        <div class="screen">
+          <div class="di"></div>
+
+          <div class="status">
+            <span>9:41</span>
+            <span style="font-size:11px;">▲▲▲ 🔋</span>
+          </div>
+
+          <!-- Back nav — collapses back to the list -->
+          <div class="back">‹ Today</div>
+
+          <!-- Hero shrinks to show task context — more room for the glass panel -->
+          <div class="hero slim">
+            <div class="hero-icon">💧</div>
+            <div class="hero-step">Today's task</div>
+            <div class="hero-title">Water your lawn</div>
+            <div class="hero-sub">3 days without water · <span class="lime">94°F forecast</span></div>
+          </div>
+
+          <!-- Glass panel fills the remaining space with full detail -->
+          <div class="glass-outer fill">
+            <div class="glass-clip fill">
+              <div class="glass-body">
+
+                <div class="sec-lbl">Why this matters</div>
+                <div class="why">Your grass has gone 3 days without water and today's forecast hits 94°F. Morning is the best window — roots absorb before the heat arrives.</div>
+
+                <div class="divider"></div>
+
+                <div class="sec-lbl">How to do it</div>
+                <div class="steps">
+                  <div class="step">
+                    <div class="step-n">1</div>
+                    <div class="step-t">Set your sprinkler to run for 30 minutes</div>
+                  </div>
+                  <div class="step">
+                    <div class="step-n">2</div>
+                    <div class="step-t">Water before 10am — afternoon sun burns wet grass</div>
+                  </div>
+                  <div class="step">
+                    <div class="step-n">3</div>
+                    <div class="step-t">Check it soaks in — no puddles on the surface</div>
+                  </div>
+                </div>
+
+                <div class="chips">
+                  <div class="chip">⏱ 30 min</div>
+                  <div class="chip">📍 Front &amp; back yard</div>
+                </div>
+
+                <!-- PrimaryButton: #1e6b3c, radius md = 8, padding md = 16 -->
+                <button class="cta">Mark as done ✓</button>
+                <div class="hint">You can skip this and come back to it later.</div>
+
+              </div>
+            </div>
+          </div>
+
+          <div class="tabs">
+            <div class="tab on"><span class="ti">🌿</span><span>Today</span></div>
+            <div class="tab"><span class="ti">🌱</span><span>My Lawn</span></div>
+            <div class="tab"><span class="ti">📋</span><span>History</span></div>
+            <div class="tab"><span class="ti">⚙️</span><span>Settings</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="phone-lbl">
+        <div class="state-pill">State 2 — Focused</div>
+        <div class="lbl-title">Card expanded</div>
+        <div class="lbl-sub">Hero shrinks · glass panel fills with why + steps + action</div>
+      </div>
+    </div>
+
+    <!-- arrow -->
+    <div class="arrow-col">
+      <div class="arrow-label">mark done</div>
+      <div class="arrow">→</div>
+    </div>
+
+    <!-- ════════════════════════════════════════
+         STATE 3 — After completion
+         Back to the list. First task is ticked,
+         second is now active and ready to tap.
+    ════════════════════════════════════════ -->
+    <div class="mockup">
+      <div class="phone">
+        <div class="screen">
+          <div class="di"></div>
+
+          <div class="status">
+            <span>9:41</span>
+            <span style="font-size:11px;">▲▲▲ 🔋</span>
+          </div>
+
+          <!-- Hero updates to reflect progress -->
+          <div class="hero">
+            <div class="hero-icon">🌿</div>
+            <div class="hero-step">Saturday, May 31</div>
+            <div class="hero-title">One down,<br>one to go</div>
+            <div class="hero-sub">Good timing on the watering</div>
+          </div>
+
+          <div class="glass-outer">
+            <div class="glass-clip">
+              <div class="glass-body">
+
+                <!-- Completed section -->
+                <div class="sec-lbl">Done</div>
+
+                <div class="task-row done">
+                  <div class="t-icon">💧</div>
+                  <div class="t-body">
+                    <div class="t-name struck">Water your lawn</div>
+                    <div class="t-meta">Done at 9:12am</div>
+                  </div>
+                  <div class="t-check">✓</div>
+                </div>
+
+                <div class="divider"></div>
+
+                <!-- Remaining tasks -->
+                <div class="sec-lbl">Still to do</div>
+
+                <div class="task-row active">
+                  <div class="t-icon">🪲</div>
+                  <div class="t-body">
+                    <div class="t-name">Check for grubs</div>
+                    <div class="t-meta">Early summer grub season</div>
+                  </div>
+                  <div class="t-right">
+                    <div class="t-pill">10 min</div>
+                    <div class="t-chev">›</div>
+                  </div>
+                </div>
+
+                <div class="task-row upcoming">
+                  <div class="t-icon">✂️</div>
+                  <div class="t-body">
+                    <div class="t-name">Mow when dry</div>
+                    <div class="t-meta">Coming up · in 2 days</div>
+                  </div>
+                  <div class="t-right">
+                    <div class="t-pill">20 min</div>
+                    <div class="t-chev">›</div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+          <div class="tabs">
+            <div class="tab on"><span class="ti">🌿</span><span>Today</span></div>
+            <div class="tab"><span class="ti">🌱</span><span>My Lawn</span></div>
+            <div class="tab"><span class="ti">📋</span><span>History</span></div>
+            <div class="tab"><span class="ti">⚙️</span><span>Settings</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="phone-lbl">
+        <div class="state-pill">State 3 — Progress</div>
+        <div class="lbl-title">After completion</div>
+        <div class="lbl-sub">Completed task stays visible · next one is active and ready</div>
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>

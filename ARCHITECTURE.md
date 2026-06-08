@@ -12,10 +12,11 @@ src/
 │   │   ├── ThemeProvider.tsx      # styled-components ThemeProvider
 │   │   └── SentryProvider.tsx     # error tracking with PII scrubbing
 │   └── navigation/
-│       ├── RootNavigator.tsx      # gates on Supabase session + profile completion
+│       ├── RootNavigator.tsx      # gates on session + profile + has_seen_welcome
 │       ├── AuthStack.tsx          # unauthenticated: sign-in via Supabase OTP
 │       ├── OnboardingStack.tsx    # authenticated but no profile yet: Location → GrassType → EffortLevel → PhotoCapture
-│       └── AppTabs.tsx            # authenticated + onboarded: Home | Settings
+│       ├── WelcomeFlow.tsx        # profile complete but has_seen_welcome=false: 4-screen tutorial
+│       └── AppTabs.tsx            # authenticated + onboarded + welcomed: Home | Settings
 │
 ├── features/
 │   ├── onboarding/
@@ -26,11 +27,17 @@ src/
 │   │   │   ├── geocoding.service.ts    # ZIP → lat/lng via Zippopotam.us (called once at onboarding)
 │   │   │   └── onboarding.service.ts   # saves complete profile to user_profiles at end of onboarding
 │   │   └── types.ts
+│   ├── home/
+│   │   ├── screens/
+│   │   │   └── HomeScreen.tsx          # Focus Card dashboard — owns focusedId state
+│   │   └── components/
+│   │       ├── FocusTaskRow/           # compact overview row (icon · name · meta · time pill · chevron)
+│   │       ├── FocusTaskDetail/        # expanded detail (why it matters / steps / CTA)
+│   │       └── CompletedTaskRow/       # struck-through row with filled check circle
 │   ├── recommendations/
-│   │   ├── components/RecommendationCard/  # task card with Yes / Not yet buttons
-│   │   ├── constants/recommendationContent.ts  # maps recommendation type → display copy
+│   │   ├── constants/recommendationContent.ts  # maps recommendation type → icon, copy, steps
 │   │   ├── hooks/
-│   │   │   ├── useActiveRecommendations.ts  # TanStack Query — fetches status=pending rows
+│   │   │   ├── useActiveRecommendations.ts  # TanStack Query — fetches status=pending rows joined with tasks
 │   │   │   ├── useConfirmRecommendation.ts  # mutation — status → confirmed
 │   │   │   └── useSnoozeRecommendation.ts   # mutation — status → snoozed + snoozed_until
 │   │   ├── services/recommendations.service.ts
@@ -39,11 +46,7 @@ src/
 │   │   ├── screens/SettingsScreen.tsx  # change grass type, change effort level, "I've moved" data reset
 │   │   └── hooks/useUpdateEffortLevel.ts  # (to implement) mutation — updates user_profiles.effort_level
 │   ├── tasks/
-│   │   ├── screens/               # TaskList, TaskDetail
-│   │   ├── components/TaskCard/   # TaskCard.tsx + TaskCard.test.tsx + index.tsx
-│   │   ├── components/TaskList/
-│   │   ├── hooks/                 # useTaskList.ts, useCompleteTask.ts
-│   │   ├── services/tasks.service.ts
+│   │   ├── services/tasks.service.ts   # fetches tasks table for display metadata (estimated_minutes, etc.)
 │   │   └── types.ts
 │   ├── notifications/
 │   │   ├── hooks/
@@ -52,6 +55,18 @@ src/
 │   │   ├── services/notifications.service.ts
 │   │   │   # platform split: .ios.ts / .android.ts / .ts (fallback)
 │   │   └── types.ts
+│   ├── welcome/
+│   │   ├── screens/
+│   │   │   └── WelcomeFlow.tsx        # pager container — owns currentStep (0–3)
+│   │   ├── components/
+│   │   │   ├── WelcomeStep1.tsx       # Welcome + "Let's go →"
+│   │   │   ├── WelcomeStep2.tsx       # Today Feature + sample task card
+│   │   │   ├── WelcomeStep3.tsx       # Navigation pills + live tab bar
+│   │   │   ├── WelcomeStep4.tsx       # All Set + "Start Growing" (writes has_seen_welcome)
+│   │   │   ├── WelcomeDots.tsx        # progress dot row
+│   │   │   └── WelcomeStepLabel.tsx   # "Quick Tour · X of 4" pill
+│   │   └── services/
+│   │       └── welcome.service.ts     # markWelcomeSeen() — PATCH user_profiles.has_seen_welcome = true
 │   └── progress-photos/
 │       ├── screens/               # LawnProgress, PhotoCapture
 │       ├── components/PhotoTimeline/  # scrollable before→now timeline
@@ -208,19 +223,22 @@ RootNavigator
   │   └── SignIn: email input → OTP verification (Supabase magic link)
   ├── OnboardingStack    — session exists but user profile not yet created
   │   └── Location → GrassType → EffortLevel → PhotoCapture
-  └── AppTabs            — session exists and profile is complete
-      ├── HomeStack:     TaskList → TaskDetail
+  ├── WelcomeFlow        — profile complete but has_seen_welcome = false
+  │   └── Step 1 (Welcome) → Step 2 (Today) → Step 3 (Navigation) → Step 4 (All Set)
+  └── AppTabs            — profile complete and has_seen_welcome = true
+      ├── HomeStack:     HomeScreen (Focus Card dashboard — single screen, no push navigation)
       ├── ProgressStack: LawnProgress → PhotoCapture
       └── SettingsScreen
 ```
 
-**Auth flow:** The user enters their email, receives a one-time passcode via Supabase, and confirms it. Once the Supabase session is established, `RootNavigator` checks for an existing user profile row. If none exists the user is sent to `OnboardingStack`; if one exists they go straight to `AppTabs`.
+**Auth flow:** The user enters their email, receives a one-time passcode via Supabase, and confirms it. Once the session is established, `RootNavigator` checks for an existing profile row. A missing row → `OnboardingStack`. A present row with `has_seen_welcome = false` → `WelcomeFlow`. A present row with `has_seen_welcome = true` → `AppTabs`.
 
-**Profile gate:** `RootNavigator` queries `profiles` (RLS-protected, `auth.uid()`) on session change. A missing row means first-time user → onboarding. A present row means returning user → tabs. Zustand stores the resolved state so the gate only queries Supabase once per session.
+**Profile gate:** `RootNavigator` queries `user_profiles` (RLS-protected, `auth.uid()`) on session change. Zustand caches the resolved state — `{ hasProfile, hasSeenWelcome }` — so the gate only queries Supabase once per session. `WelcomeFlow` is non-dismissible: no back gesture, no way to reach `AppTabs` without tapping "Start Growing" on the final screen, which calls `welcomeService.markWelcomeSeen()` and sets `hasSeenWelcome: true` in the Zustand store before `RootNavigator` re-evaluates.
 
 - All param lists typed in `src/types/navigation.ts` — no untyped `route.navigate()` calls
-- Notification taps deep-link to `HomeStack > TaskList` via registered `kura://` scheme
-- Photo reminder notification taps deep-link to `ProgressStack > PhotoCapture` via `kura://progress/capture`
+- Notification taps deep-link to `kura://home` — `HomeScreen` refetches on focus so any pending recommendation card is already visible
+- Recommendation deep links do not push a new screen — `HomeScreen` handles all states inline
+- Photo reminder notifications deep-link to `kura://progress/capture` → `ProgressStack > PhotoCapture`
 - All deep link paths validated against the registered scheme — unrecognized paths are silently dropped (MASWE-0058)
 
 ---
