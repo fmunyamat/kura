@@ -1,1 +1,0 @@
-export { OnboardingProgressBar } from './OnboardingProgressBar';
