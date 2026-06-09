@@ -12,7 +12,7 @@ import { supabase } from '~/shared/lib/supabase';
 //   2. Subscribes to future auth events (sign-in, sign-out, token refresh)
 //   3. Pauses/resumes the token auto-refresh when the app backgrounds/foregrounds
 const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const { setSession, setHasCompletedOnboarding, setIsLoading } = useAuthStore();
+  const { setSession, setHasCompletedOnboarding, setHasSeenWelcome, setIsLoading } = useAuthStore();
 
   useEffect(() => {
     // Pause token auto-refresh while the app is in the background to avoid
@@ -33,8 +33,9 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setSession(session);
 
       if (session?.user) {
-        const hasProfile = await checkUserProfile(session.user.id);
-        setHasCompletedOnboarding(hasProfile);
+        const flags = await checkUserProfile(session.user.id);
+        setHasCompletedOnboarding(flags.hasProfile);
+        setHasSeenWelcome(flags.hasSeenWelcome);
       }
 
       // isLoading must flip to false AFTER session and profile are both set,
@@ -53,11 +54,13 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setSession(session);
 
       if (session?.user) {
-        const hasProfile = await checkUserProfile(session.user.id);
-        setHasCompletedOnboarding(hasProfile);
+        const flags = await checkUserProfile(session.user.id);
+        setHasCompletedOnboarding(flags.hasProfile);
+        setHasSeenWelcome(flags.hasSeenWelcome);
       } else {
-        // Signed out — clear the profile flag so the next sign-in starts fresh.
+        // Signed out — clear profile flags so the next sign-in starts fresh.
         setHasCompletedOnboarding(false);
+        setHasSeenWelcome(false);
       }
     });
 

@@ -1,1 +1,1 @@
-export { GlassCard } from './GlassCard';
+export { GlassCard, default } from './GlassCard';
