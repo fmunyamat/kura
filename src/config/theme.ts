@@ -65,11 +65,6 @@ export const lightTheme = {
     placeholderOnGlass:  'rgba(14,42,14,0.32)',
     // Links and accents inside the panel use a medium forest green.
     textAccentOnGlass:   '#135633',
-
-    // Progress bar segments — white on green reads the same on both themes.
-    onboardingProgressDone:   'rgba(255,255,255,0.75)',
-    onboardingProgressActive: 'rgba(255,255,255,0.75)',
-    onboardingProgressEmpty:  'rgba(255,255,255,0.15)',
   },
   spacing:   { xs: 4, sm: 8, md: 16, lg: 24, xl: 32, xxl: 48 },
   // iconSizes — fixed dimensions for inline brand/action icons alongside text.
