@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Kura — Flat Bold Design Direction</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #0A0C0A;
+      padding: 64px 40px 100px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ─── Page header ─── */
+    .page-header { text-align: center; margin-bottom: 68px; }
+    .eyebrow {
+      font-size: 10px; font-weight: 700; letter-spacing: 0.24em;
+      text-transform: uppercase; color: rgba(163,230,53,0.42); margin-bottom: 12px;
+    }
+    .pg-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 38px; font-weight: 800; color: rgba(255,255,255,0.90);
+      letter-spacing: -0.5px; margin-bottom: 8px;
+    }
+    .pg-sub { font-size: 14px; color: rgba(255,255,255,0.26); font-weight: 400; }
+
+    /* ─── 2 × 2 grid ─── */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, 340px);
+      gap: 64px 52px;
+      justify-content: center;
+    }
+
+    /* ─── Mockup wrapper ─── */
+    .mockup {
+      display: flex; flex-direction: column;
+      align-items: center; gap: 20px;
+      animation: rise 0.55s ease-out both;
+    }
+    .mockup:nth-child(1) { animation-delay: 0.05s; }
+    .mockup:nth-child(2) { animation-delay: 0.14s; }
+    .mockup:nth-child(3) { animation-delay: 0.23s; }
+    .mockup:nth-child(4) { animation-delay: 0.32s; }
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .lbl-name {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 16px; font-weight: 800;
+      color: rgba(255,255,255,0.80); text-align: center; margin-bottom: 3px;
+    }
+    .lbl-desc { font-size: 12px; color: rgba(255,255,255,0.26); text-align: center; line-height: 1.6; }
+
+    /* ─── Phone frame ─── */
+    .phone {
+      width: 340px; background: #D0D0D0;
+      border-radius: 52px; padding: 12px;
+      box-shadow:
+        0 0 0 1px #202020,
+        inset 0 0 0 1px #3C3C3E,
+        0 64px 104px -8px rgba(0,0,0,0.99),
+        0 22px 44px -16px rgba(0,0,0,0.62);
+      position: relative;
+    }
+    .phone::before {
+      content: '';
+      position: absolute; top: 126px; right: -3px;
+      width: 3px; height: 58px;
+      background: linear-gradient(to bottom, #2C2C2E, #46464A, #2C2C2E);
+      border-radius: 2px;
+    }
+
+    /* ─── Screen ─── */
+    .screen {
+      width: 100%; height: 676px;
+      border-radius: 42px; overflow: hidden;
+      background: #F5F4F1;
+      display: flex; flex-direction: column;
+      position: relative;
+    }
+
+    /* Dynamic Island */
+    .di {
+      position: absolute; top: 10px; left: 50%;
+      transform: translateX(-50%);
+      width: 104px; height: 30px;
+      background: #000; border-radius: 15px; z-index: 200;
+    }
+
+    /* ─── Status bar ─── */
+    .status {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 14px 22px 6px;
+      font-size: 11px; font-weight: 700; color: #1C1C1C;
+      flex-shrink: 0;
+    }
+
+    /* ─── App header ─── */
+    .app-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 4px 22px 12px;
+      flex-shrink: 0;
+    }
+    .app-title {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 28px; font-weight: 800;
+      color: #1C1C1C; letter-spacing: -0.5px;
+    }
+    .header-actions { display: flex; gap: 8px; align-items: center; }
+    .header-btn {
+      width: 36px; height: 36px; border-radius: 50%;
+      border: 1.5px solid #1C1C1C;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 15px; position: relative; background: #fff;
+    }
+    .notif-dot {
+      position: absolute; top: -2px; right: -1px;
+      width: 9px; height: 9px; border-radius: 50%;
+      background: #5A9E2F; border: 2px solid #F5F4F1;
+    }
+
+    /* Accent rule under header — earthy green instead of neon */
+    .header-rule { height: 3px; background: #6DB042; flex-shrink: 0; }
+
+    /* ─── Scrollable content ─── */
+    .content {
+      flex: 1; overflow: hidden;
+      display: flex; flex-direction: column;
+      padding: 16px 22px 12px; gap: 14px;
+    }
+
+    /* ─── Shared tokens ─── */
+    .section-label {
+      font-size: 17px; font-weight: 800;
+      color: #1C1C1C; flex-shrink: 0; letter-spacing: -0.2px;
+    }
+
+    /* Card base — lighter border, tighter radius than before */
+    .card {
+      border: 1.5px solid #1C1C1C;
+      border-radius: 14px;
+      background: #fff;
+      flex-shrink: 0;
+    }
+
+    /* Muted pastel fills — desaturated from the original */
+    .blue     { background: #D4E5F5; }
+    .yellow   { background: #EFE3A0; }
+    .pink     { background: #EDD0D8; }
+    .mint     { background: #C2EDD4; }
+    .lavender { background: #DFC8F0; }
+    .sage     { background: #D0E8C4; }
+
+    /* ─── Tab bar ─── */
+    .tabbar {
+      display: flex; justify-content: space-around; align-items: center;
+      padding: 8px 12px 22px;
+      background: #fff;
+      border-top: 1.5px solid #1C1C1C;
+      flex-shrink: 0;
+    }
+    .tab {
+      display: flex; flex-direction: column; align-items: center; gap: 2px;
+    }
+    .tab-pill {
+      width: 38px; height: 38px; border-radius: 11px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 19px;
+    }
+    /* Active tab: soft sage background, not neon */
+    .tab.on .tab-pill { background: #D4EAB8; }
+    .tab-lbl {
+      font-size: 9.5px; font-weight: 700;
+      color: rgba(0,0,0,0.36); letter-spacing: 0.01em;
+    }
+    .tab.on .tab-lbl { color: #2D6814; }
+
+
+    /* ══════════════════════════════════════
+       DASHBOARD
+       ══════════════════════════════════════ */
+
+    .greeting-card {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 18px;
+    }
+    .greeting-txt {
+      font-size: 22px; font-weight: 800;
+      color: #1C1C1C; line-height: 1.22; letter-spacing: -0.3px;
+    }
+    .greeting-icon { font-size: 36px; }
+
+    /* Horizontal task cards */
+    .h-scroll {
+      display: flex; gap: 10px;
+      margin: 0 -22px; padding: 4px 22px;
+      overflow: hidden; flex-shrink: 0;
+    }
+    .task-card {
+      min-width: 182px; flex-shrink: 0;
+      border: 1.5px solid #1C1C1C;
+      border-radius: 14px; padding: 13px;
+      display: flex; align-items: center; gap: 11px;
+    }
+    .tc-icon { font-size: 28px; flex-shrink: 0; }
+    .tc-name {
+      font-size: 14px; font-weight: 800;
+      color: #1C1C1C; line-height: 1.2; letter-spacing: -0.1px;
+    }
+    .tc-meta { font-size: 11px; color: rgba(0,0,0,0.50); font-weight: 600; margin-top: 2px; }
+
+    /* Lawn stats */
+    .stats-row { display: flex; padding: 14px 10px; }
+    .stat-cell {
+      flex: 1; text-align: center;
+      display: flex; flex-direction: column; align-items: center; gap: 2px;
+    }
+    .stat-cell + .stat-cell { border-left: 1px solid rgba(0,0,0,0.10); }
+    .stat-val {
+      font-size: 15px; font-weight: 800;
+      color: #1C1C1C; line-height: 1.2; letter-spacing: -0.2px;
+    }
+    .stat-sub {
+      font-size: 9px; font-weight: 700; color: rgba(0,0,0,0.38);
+      text-transform: uppercase; letter-spacing: 0.06em;
+    }
+    .streak-banner {
+      display: flex; align-items: center; justify-content: center; gap: 7px;
+      padding: 10px 14px;
+      border-top: 1px solid rgba(0,0,0,0.08);
+    }
+    .streak-txt { font-size: 12px; font-weight: 700; color: #1C1C1C; }
+    .streak-txt span { color: #3A7A18; }
+
+
+    /* ══════════════════════════════════════
+       TASKS
+       ══════════════════════════════════════ */
+
+    .filter-row {
+      display: flex; gap: 7px; flex-shrink: 0; overflow: hidden;
+    }
+    .chip {
+      border: 1.5px solid #1C1C1C; border-radius: 999px;
+      padding: 5px 13px; font-size: 12px; font-weight: 700;
+      color: #1C1C1C; background: #fff; flex-shrink: 0;
+    }
+    .chip.on { background: #D4EAB8; color: #2D6814; border-color: #6DB042; }
+
+    .task-list { display: flex; flex-direction: column; gap: 9px; }
+
+    .task-row {
+      display: flex; align-items: center; gap: 11px;
+      background: #fff; border: 1.5px solid #1C1C1C;
+      border-radius: 13px; padding: 11px 13px; flex-shrink: 0;
+    }
+    .task-row.done-row { opacity: 0.46; }
+
+    .check-box {
+      width: 26px; height: 26px; border-radius: 7px;
+      border: 1.5px solid #1C1C1C; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .check-box.checked { background: #6DB042; border-color: #6DB042; }
+    .check-mark { font-size: 13px; color: #fff; font-weight: 800; }
+
+    .tr-body { flex: 1; min-width: 0; }
+    .tr-name { font-size: 14px; font-weight: 800; color: #1C1C1C; line-height: 1.2; letter-spacing: -0.1px; }
+    .tr-name.struck { text-decoration: line-through; color: rgba(0,0,0,0.36); }
+    .tr-meta { font-size: 11px; color: rgba(0,0,0,0.44); font-weight: 600; margin-top: 2px; }
+
+    .badge {
+      font-size: 9.5px; font-weight: 800;
+      border: 1.5px solid rgba(0,0,0,0.18);
+      border-radius: 6px; padding: 2px 8px; flex-shrink: 0; color: #1C1C1C;
+    }
+
+
+    /* ══════════════════════════════════════
+       LEARN
+       ══════════════════════════════════════ */
+
+    .search-bar {
+      display: flex; align-items: center; gap: 9px;
+      background: #fff; border: 1.5px solid #1C1C1C;
+      border-radius: 12px; padding: 9px 13px; flex-shrink: 0;
+    }
+    .search-ph { font-size: 13px; color: rgba(0,0,0,0.30); font-weight: 600; }
+
+    .featured {
+      border: 1.5px solid #1C1C1C; border-radius: 14px;
+      padding: 15px; flex-shrink: 0;
+    }
+    .feat-tag {
+      font-size: 9px; font-weight: 800; letter-spacing: 0.14em;
+      text-transform: uppercase; color: rgba(0,0,0,0.40); margin-bottom: 6px;
+    }
+    .feat-title {
+      font-size: 18px; font-weight: 800;
+      color: #1C1C1C; line-height: 1.2;
+      letter-spacing: -0.3px; margin-bottom: 6px;
+    }
+    .feat-sub { font-size: 11px; color: rgba(0,0,0,0.50); font-weight: 600; line-height: 1.5; }
+    .feat-meta { margin-top: 10px; font-size: 10px; font-weight: 700; color: rgba(0,0,0,0.36); }
+
+    .cat-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 9px; flex-shrink: 0;
+    }
+    .cat-card {
+      border: 1.5px solid #1C1C1C; border-radius: 13px;
+      padding: 12px 13px;
+      display: flex; flex-direction: column; gap: 4px;
+    }
+    .cat-icon { font-size: 22px; }
+    .cat-name { font-size: 14px; font-weight: 800; color: #1C1C1C; letter-spacing: -0.1px; }
+    .cat-count { font-size: 10px; color: rgba(0,0,0,0.38); font-weight: 600; }
+
+
+    /* ══════════════════════════════════════
+       SETTINGS
+       ══════════════════════════════════════ */
+
+    .profile-card {
+      border: 1.5px solid #1C1C1C; border-radius: 14px;
+      padding: 15px; flex-shrink: 0;
+      display: flex; align-items: center; gap: 14px;
+    }
+    .avatar {
+      width: 50px; height: 50px; border-radius: 50%;
+      background: #1C1C1C;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; flex-shrink: 0;
+    }
+    .profile-name { font-size: 20px; font-weight: 800; color: #1C1C1C; letter-spacing: -0.2px; }
+    .profile-sub { font-size: 12px; color: rgba(0,0,0,0.44); font-weight: 600; margin-top: 2px; }
+
+    .settings-block { display: flex; flex-direction: column; gap: 6px; flex-shrink: 0; }
+    .settings-block-label {
+      font-size: 10px; font-weight: 800; letter-spacing: 0.14em;
+      text-transform: uppercase; color: rgba(0,0,0,0.34); padding: 0 2px;
+    }
+    .settings-group {
+      border: 1.5px solid #1C1C1C; border-radius: 13px;
+      overflow: hidden; background: #fff;
+    }
+    .s-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 11px 13px; background: #fff;
+    }
+    .s-row + .s-row { border-top: 1px solid rgba(0,0,0,0.07); }
+    .s-left { display: flex; align-items: center; gap: 10px; }
+    .s-icon { font-size: 17px; }
+    .s-label { font-size: 13.5px; font-weight: 700; color: #1C1C1C; }
+    .s-value { font-size: 12px; color: rgba(0,0,0,0.38); font-weight: 600; }
+    .s-row-right { display: flex; align-items: center; gap: 5px; }
+    .s-chev { font-size: 13px; color: rgba(0,0,0,0.20); }
+
+    .toggle {
+      width: 38px; height: 22px; border-radius: 11px;
+      background: #6DB042; border: 1.5px solid #1C1C1C; position: relative;
+    }
+    .toggle-knob {
+      position: absolute; top: 2px; right: 2px;
+      width: 14px; height: 14px; border-radius: 50%; background: #fff;
+    }
+
+    .danger-label {
+      font-size: 10px; font-weight: 800; letter-spacing: 0.14em;
+      text-transform: uppercase; color: rgba(185,28,28,0.55); padding: 0 2px;
+    }
+    .danger-group {
+      border: 1.5px solid #1C1C1C; border-radius: 13px; overflow: hidden;
+    }
+    .s-row.danger .s-label { color: #B91C1C; }
+
+  </style>
+</head>
+<body>
+
+  <div class="page-header">
+    <div class="eyebrow">Kura · Alternative Design Direction</div>
+    <div class="pg-title">Flat Bold UI</div>
+    <div class="pg-sub">High-contrast, beginner-friendly — inspired by the reference aesthetic</div>
+  </div>
+
+  <div class="grid">
+
+    <!-- ══════════════════════════════════
+         SCREEN 1 — DASHBOARD
+    ══════════════════════════════════ -->
+    <div class="mockup">
+      <div class="phone">
+        <div class="screen">
+          <div class="di"></div>
+
+          <div class="status">
+            <span>9:41</span>
+            <span style="letter-spacing:0;">▲▲▲ WiFi</span>
+            <span>🔋 100%</span>
+          </div>
+
+          <div class="app-header">
+            <div class="app-title">Dashboard</div>
+            <div class="header-actions">
+              <div class="header-btn">👤</div>
+              <div class="header-btn">🔔<div class="notif-dot"></div></div>
+            </div>
+          </div>
+          <div class="header-rule"></div>
+
+          <div class="content">
+
+            <div class="card greeting-card">
+              <div class="greeting-txt">Hi, Farai!<br>Ready to grow?</div>
+              <div class="greeting-icon">🌿</div>
+            </div>
+
+            <div class="section-label">Today's Tasks</div>
+            <div class="h-scroll">
+              <div class="task-card blue">
+                <div class="tc-icon">💧</div>
+                <div>
+                  <div class="tc-name">Water the lawn</div>
+                  <div class="tc-meta">Due Today</div>
+                </div>
+              </div>
+              <div class="task-card yellow">
+                <div class="tc-icon">✂️</div>
+                <div>
+                  <div class="tc-name">Mow the backyard</div>
+                  <div class="tc-meta">Rec: Evening</div>
+                </div>
+              </div>
+              <div class="task-card pink">
+                <div class="tc-icon">🌱</div>
+                <div>
+                  <div class="tc-name">Apply fertilizer</div>
+                  <div class="tc-meta">Next: Tomorrow</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="section-label">Your Lawn</div>
+            <div class="card" style="padding:0;">
+              <div class="stats-row">
+                <div class="stat-cell">
+                  <div class="stat-val">Cool-season</div>
+                  <div class="stat-sub">Grass type</div>
+                </div>
+                <div class="stat-cell">
+                  <div class="stat-val">3 days</div>
+                  <div class="stat-sub">Since watered</div>
+                </div>
+                <div class="stat-cell">
+                  <div class="stat-val">Just Alive</div>
+                  <div class="stat-sub">Effort level</div>
+                </div>
+              </div>
+              <div class="streak-banner">
+                <span style="font-size:16px;">🔥</span>
+                <div class="streak-txt"><span>4-week streak</span> — keep it up!</div>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="tabbar">
+            <div class="tab on">
+              <div class="tab-pill">🏠</div>
+              <div class="tab-lbl">Today</div>
+            </div>
+            <div class="tab">
+              <div class="tab-pill">✅</div>
+              <div class="tab-lbl">Tasks</div>
+            </div>
+            <div class="tab">
+              <div class="tab-pill">📚</div>
+              <div class="tab-lbl">Learn</div>
+            </div>
+            <div class="tab">
+              <div class="tab-pill">⚙️</div>
+              <div class="tab-lbl">Settings</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="lbl-name">Dashboard</div>
+        <div class="lbl-desc">Greeting card, horizontal task scroll, lawn snapshot</div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════
+         SCREEN 2 — TASKS
+    ══════════════════════════════════ -->
+    <div class="mockup">
+      <div class="phone">
+        <div class="screen">
+          <div class="di"></div>
+
+          <div class="status">
+            <span>9:41</span>
+            <span style="letter-spacing:0;">▲▲▲ WiFi</span>
+            <span>🔋 100%</span>
+          </div>
+
+          <div class="app-header">
+            <div class="app-title">My Tasks</div>
+            <div class="header-actions">
+              <div class="header-btn">🔔<div class="notif-dot"></div></div>
+            </div>
+          </div>
+          <div class="header-rule"></div>
+
+          <div class="content">
+
+            <div class="filter-row">
+              <div class="chip on">All</div>
+              <div class="chip">Today</div>
+              <div class="chip">Upcoming</div>
+              <div class="chip">Done</div>
+            </div>
+
+            <div class="task-list">
+
+              <div class="task-row done-row">
+                <div class="check-box checked">
+                  <div class="check-mark">✓</div>
+                </div>
+                <div class="tr-body">
+                  <div class="tr-name struck">Water the lawn</div>
+                  <div class="tr-meta">Completed · June 1</div>
+                </div>
+              </div>
+
+              <div class="task-row">
+                <div class="check-box"></div>
+                <div class="tr-body">
+                  <div class="tr-name">Check for grubs</div>
+                  <div class="tr-meta">Due today · 10 min</div>
+                </div>
+                <div class="badge blue">TODAY</div>
+              </div>
+
+              <div class="task-row">
+                <div class="check-box"></div>
+                <div class="tr-body">
+                  <div class="tr-name">Mow the backyard</div>
+                  <div class="tr-meta">Tomorrow · 30 min</div>
+                </div>
+                <div class="badge yellow">SOON</div>
+              </div>
+
+              <div class="task-row">
+                <div class="check-box"></div>
+                <div class="tr-body">
+                  <div class="tr-name">Apply pre-emergent</div>
+                  <div class="tr-meta">June 5 · 20 min</div>
+                </div>
+                <div class="badge mint">JUN 5</div>
+              </div>
+
+              <div class="task-row">
+                <div class="check-box"></div>
+                <div class="tr-body">
+                  <div class="tr-name">Fertilize your lawn</div>
+                  <div class="tr-meta">June 10 · 45 min</div>
+                </div>
+                <div class="badge pink">JUN 10</div>
+              </div>
+
+            </div>
+          </div>
+
+          <div class="tabbar">
+            <div class="tab">
+              <div class="tab-pill">🏠</div>
+              <div class="tab-lbl">Today</div>
+            </div>
+            <div class="tab on">
+              <div class="tab-pill">✅</div>
+              <div class="tab-lbl">Tasks</div>
+            </div>
+            <div class="tab">
+              <div class="tab-pill">📚</div>
+              <div class="tab-lbl">Learn</div>
+            </div>
+            <div class="tab">
+              <div class="tab-pill">⚙️</div>
+              <div class="tab-lbl">Settings</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="lbl-name">Tasks</div>
+        <div class="lbl-desc">Filter chips, colored date badges, completion states</div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════
+         SCREEN 3 — LEARN
+    ══════════════════════════════════ -->
+    <div class="mockup">
+      <div class="phone">
+        <div class="screen">
+          <div class="di"></div>
+
+          <div class="status">
+            <span>9:41</span>
+            <span style="letter-spacing:0;">▲▲▲ WiFi</span>
+            <span>🔋 100%</span>
+          </div>
+
+          <div class="app-header">
+            <div class="app-title">Learn</div>
+          </div>
+          <div class="header-rule"></div>
+
+          <div class="content">
+
+            <div class="search-bar">
+              <div style="font-size:15px;">🔍</div>
+              <div class="search-ph">Search lawn tips...</div>
+            </div>
+
+            <div class="featured yellow">
+              <div class="feat-tag">⭐ Featured · 3 min read</div>
+              <div class="feat-title">Why soil temperature beats the calendar</div>
+              <div class="feat-sub">Your grass doesn't care what month it is — it responds to soil warmth. Here's what that means for your timing.</div>
+              <div class="feat-meta">🌡️ Watering &amp; Timing</div>
+            </div>
+
+            <div class="section-label">Browse Topics</div>
+            <div class="cat-grid">
+              <div class="cat-card blue">
+                <div class="cat-icon">💧</div>
+                <div class="cat-name">Watering</div>
+                <div class="cat-count">8 guides</div>
+              </div>
+              <div class="cat-card yellow">
+                <div class="cat-icon">✂️</div>
+                <div class="cat-name">Mowing</div>
+                <div class="cat-count">5 guides</div>
+              </div>
+              <div class="cat-card mint">
+                <div class="cat-icon">🌱</div>
+                <div class="cat-name">Fertilizing</div>
+                <div class="cat-count">6 guides</div>
+              </div>
+              <div class="cat-card pink">
+                <div class="cat-icon">🐛</div>
+                <div class="cat-name">Pests</div>
+                <div class="cat-count">4 guides</div>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="tabbar">
+            <div class="tab">
+              <div class="tab-pill">🏠</div>
+              <div class="tab-lbl">Today</div>
+            </div>
+            <div class="tab">
+              <div class="tab-pill">✅</div>
+              <div class="tab-lbl">Tasks</div>
+            </div>
+            <div class="tab on">
+              <div class="tab-pill">📚</div>
+              <div class="tab-lbl">Learn</div>
+            </div>
+            <div class="tab">
+              <div class="tab-pill">⚙️</div>
+              <div class="tab-lbl">Settings</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="lbl-name">Learn</div>
+        <div class="lbl-desc">Search, featured article, and topic category grid</div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════
+         SCREEN 4 — SETTINGS
+    ══════════════════════════════════ -->
+    <div class="mockup">
+      <div class="phone">
+        <div class="screen">
+          <div class="di"></div>
+
+          <div class="status">
+            <span>9:41</span>
+            <span style="letter-spacing:0;">▲▲▲ WiFi</span>
+            <span>🔋 100%</span>
+          </div>
+
+          <div class="app-header">
+            <div class="app-title">Settings</div>
+          </div>
+          <div class="header-rule"></div>
+
+          <div class="content" style="gap:12px;">
+
+            <div class="profile-card blue">
+              <div class="avatar">👤</div>
+              <div>
+                <div class="profile-name">Farai</div>
+                <div class="profile-sub">Cool-season grass · Austin, TX</div>
+              </div>
+            </div>
+
+            <div class="settings-block">
+              <div class="settings-block-label">My Lawn</div>
+              <div class="settings-group">
+                <div class="s-row">
+                  <div class="s-left">
+                    <div class="s-icon">🌾</div>
+                    <div class="s-label">Grass Type</div>
+                  </div>
+                  <div class="s-row-right">
+                    <div class="s-value">Cool-season</div>
+                    <div class="s-chev">›</div>
+                  </div>
+                </div>
+                <div class="s-row">
+                  <div class="s-left">
+                    <div class="s-icon">📐</div>
+                    <div class="s-label">Lawn Size</div>
+                  </div>
+                  <div class="s-row-right">
+                    <div class="s-value">Medium</div>
+                    <div class="s-chev">›</div>
+                  </div>
+                </div>
+                <div class="s-row">
+                  <div class="s-left">
+                    <div class="s-icon">💪</div>
+                    <div class="s-label">Effort Level</div>
+                  </div>
+                  <div class="s-row-right">
+                    <div class="s-value">Just alive</div>
+                    <div class="s-chev">›</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="settings-block">
+              <div class="settings-block-label">Notifications</div>
+              <div class="settings-group">
+                <div class="s-row">
+                  <div class="s-left">
+                    <div class="s-icon">🔔</div>
+                    <div class="s-label">Push Notifications</div>
+                  </div>
+                  <div class="toggle"><div class="toggle-knob"></div></div>
+                </div>
+                <div class="s-row">
+                  <div class="s-left">
+                    <div class="s-icon">⏰</div>
+                    <div class="s-label">Reminder Time</div>
+                  </div>
+                  <div class="s-row-right">
+                    <div class="s-value">8:00 AM</div>
+                    <div class="s-chev">›</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="settings-block">
+              <div class="danger-label">Danger Zone</div>
+              <div class="danger-group">
+                <div class="s-row danger" style="background:#fff;">
+                  <div class="s-left">
+                    <div class="s-icon">📦</div>
+                    <div class="s-label">I've Moved</div>
+                  </div>
+                  <div class="s-chev" style="color:rgba(185,28,28,0.28);">›</div>
+                </div>
+                <div class="s-row danger" style="background:#fff; border-top:1px solid rgba(0,0,0,0.07);">
+                  <div class="s-left">
+                    <div class="s-icon">🚪</div>
+                    <div class="s-label">Sign Out</div>
+                  </div>
+                  <div class="s-chev" style="color:rgba(185,28,28,0.28);">›</div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="tabbar">
+            <div class="tab">
+              <div class="tab-pill">🏠</div>
+              <div class="tab-lbl">Today</div>
+            </div>
+            <div class="tab">
+              <div class="tab-pill">✅</div>
+              <div class="tab-lbl">Tasks</div>
+            </div>
+            <div class="tab">
+              <div class="tab-pill">📚</div>
+              <div class="tab-lbl">Learn</div>
+            </div>
+            <div class="tab on">
+              <div class="tab-pill">⚙️</div>
+              <div class="tab-lbl">Settings</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="lbl-name">Settings</div>
+        <div class="lbl-desc">Profile card, grouped rows, toggles, danger zone</div>
+      </div>
+    </div>
+
+  </div><!-- /grid -->
+
+</body>
+</html>

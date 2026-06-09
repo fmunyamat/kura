@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>kura · Sign-In Screens — Final Look</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700;9..40,900&family=DM+Mono:wght@500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #060d06;
+      background-image:
+        radial-gradient(ellipse 70% 40% at 50% 0%, rgba(19,86,51,0.16), transparent),
+        radial-gradient(ellipse 40% 30% at 10% 90%, rgba(45,106,45,0.05), transparent);
+      min-height: 100vh;
+      font-family: 'DM Sans', -apple-system, sans-serif;
+      padding: 56px 48px 88px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 48px;
+    }
+
+    /* ─── Page header ─── */
+    .page-header { text-align: center; }
+    .page-brand  { display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 10px; }
+    .page-brand-name { color: rgba(255,255,255,0.90); font-size: 18px; font-weight: 900; letter-spacing: -0.8px; }
+    .page-sep    { color: rgba(255,255,255,0.16); font-size: 13px; }
+    .page-title  { color: rgba(255,255,255,0.35); font-size: 10px; font-weight: 500; letter-spacing: 3px; text-transform: uppercase; }
+
+    /* ─── Two phones ─── */
+    .phones-pair {
+      display: flex;
+      gap: 32px;
+      align-items: flex-start;
+    }
+
+    .phone-block {
+      display: flex; flex-direction: column;
+      align-items: center; gap: 14px;
+    }
+
+    .phone-label {
+      font-size: 10px; letter-spacing: 2.5px; text-transform: uppercase;
+      color: rgba(255,255,255,0.22); font-weight: 500;
+    }
+
+    /* ─── Phone frame ─── */
+    .phone {
+      width: 280px; height: 564px;
+      border-radius: 36px; position: relative; overflow: hidden;
+      box-shadow:
+        0 0 0 1px rgba(255,255,255,0.07),
+        0 32px 64px rgba(0,0,0,0.65),
+        0 8px 24px rgba(0,0,0,0.40);
+    }
+    /* pill notch */
+    .phone::before {
+      content: ''; position: absolute;
+      top: 12px; left: 50%; transform: translateX(-50%);
+      width: 60px; height: 7px;
+      background: rgba(0,0,0,0.7); border-radius: 3.5px; z-index: 30;
+    }
+
+    .bg-photo {
+      position: absolute; inset: 0;
+      background: url('./assets/images/mowing-photo.jpg') center/cover no-repeat;
+    }
+    .bg-tint {
+      position: absolute; inset: 0;
+      background: rgba(5,12,5,0.58);
+    }
+    .screen {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column; align-items: center;
+      padding: 38px 15px 18px;
+    }
+
+    /* ─── Hero ─── */
+    .hero {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: flex-end;
+      padding-bottom: 12px; gap: 3px;
+    }
+    .hero-logo { font-size: 28px; margin-bottom: 3px; }
+    .hero-word  { color: rgba(255,255,255,0.92); font-size: 20px; font-weight: 900; letter-spacing: -1px; }
+    .hero-tag   { color: rgba(184,229,106,0.92); font-size: 7.5px; font-weight: 700; letter-spacing: 2.5px; text-transform: uppercase; }
+
+    /* ─── Glass card ─── */
+    .card {
+      width: 100%; border-radius: 14px; overflow: hidden;
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      background: red;
+      border: 1px solid rgba(255,255,255,0.10);
+    }
+    .card-body {
+      padding: 18px 15px;
+      display: flex; flex-direction: column; align-items: center;
+    }
+
+    /* ── REQUEST panel ── */
+    .input-field {
+      width: 100%; height: 38px; border-radius: 7px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.10);
+      display: flex; align-items: center;
+      padding: 0 11px; margin-bottom: 10px;
+      color: rgba(255,255,255,0.25); font-size: 12px;
+    }
+    .send-btn { width: 100%; border-radius: 7px; overflow: hidden; margin-bottom: 14px; }
+    .send-btn-inner {
+      padding: 11px; text-align: center; font-size: 13px; font-weight: 700;
+      background: linear-gradient(135deg, #2D6A2D, #5A9E3A);
+      color: #fff;
+    }
+    .divider { width: 100%; display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+    .div-line { flex: 1; height: 1px; background: rgba(255,255,255,0.10); }
+    .div-text  { font-size: 10px; color: rgba(255,255,255,0.40); white-space: nowrap; }
+    .social-row { display: flex; gap: 7px; width: 100%; }
+    .social-btn {
+      flex: 1; height: 38px; border-radius: 7px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.10);
+      display: flex; align-items: center; justify-content: center; gap: 5px;
+    }
+    .social-label { font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.85); }
+
+    /* ── VERIFY panel ── */
+    .icon-circle {
+      width: 42px; height: 42px; border-radius: 9999px;
+      background: rgba(255,255,255,0.08);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; margin-bottom: 10px;
+    }
+    .v-heading {
+      color: rgba(255,255,255,0.85);
+      font-size: 16px; font-weight: 700; letter-spacing: -0.3px;
+      text-align: center; margin-bottom: 5px;
+    }
+    .v-body {
+      color: rgba(255,255,255,0.58);
+      font-size: 11.5px; text-align: center; line-height: 1.4; margin-bottom: 4px;
+    }
+    /* email — no pill background, just lime text */
+    .v-email {
+      color: rgba(184,229,106,0.92);
+      font-size: 11.5px; font-weight: 700;
+      font-family: 'DM Mono', monospace;
+      margin-bottom: 12px;
+    }
+    .otp-row { display: flex; gap: 6px; width: 100%; margin-bottom: 12px; }
+    .otp-box {
+      flex: 1; aspect-ratio: 1; border-radius: 7px;
+      background: rgba(255,255,255,0.05);
+      border: 1.5px solid rgba(255,255,255,0.12);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .otp-box.act {
+      background: rgba(184,229,106,0.06);
+      border-color: rgba(184,229,106,0.84);
+    }
+    .cursor {
+      width: 1.5px; height: 15px;
+      background: rgba(184,229,106,0.92);
+      animation: blink 1s step-end infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+    .verify-btn { width: 100%; border-radius: 7px; overflow: hidden; margin-bottom: 9px; }
+    .verify-btn-inner {
+      padding: 11px; text-align: center; font-size: 13px; font-weight: 700;
+      background: linear-gradient(135deg, #2D6A2D, #5A9E3A);
+      color: #fff;
+    }
+    .resend-txt { font-size: 11px; color: rgba(255,255,255,0.55); margin-bottom: 5px; }
+    .reset-txt  { font-size: 11px; color: rgba(255,255,255,0.55); text-decoration: underline; text-underline-offset: 2px; }
+  </style>
+</head>
+<body>
+
+  <div class="page-header">
+    <div class="page-brand">
+      <span style="font-size:16px">🌿</span>
+      <span class="page-brand-name">kura</span>
+      <span class="page-sep">·</span>
+      <span class="page-title">Sign-In — Final Look</span>
+    </div>
+  </div>
+
+  <div class="phones-pair">
+
+    <!-- OTP Request -->
+    <div class="phone-block">
+      <div class="phone">
+        <div class="bg-photo"></div>
+        <div class="bg-tint"></div>
+        <div class="screen">
+          <div class="hero">
+            <div class="hero-logo">🌿</div>
+            <div class="hero-word">kura</div>
+            <div class="hero-tag">Lawn care, simplified</div>
+          </div>
+          <div class="card">
+            <div class="card-body">
+              <div class="input-field">Enter Email Address</div>
+              <div class="send-btn"><div class="send-btn-inner">Send code</div></div>
+              <div class="divider">
+                <div class="div-line"></div>
+                <div class="div-text">or continue with</div>
+                <div class="div-line"></div>
+              </div>
+              <div class="social-row">
+                <div class="social-btn">
+                  <svg width="14" height="14" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+                  <span class="social-label">Google</span>
+                </div>
+                <div class="social-btn">
+                  <svg width="12" height="14" viewBox="0 0 814 1000" fill="rgba(255,255,255,0.85)"><path d="M788.1 340.9c-5.8 4.5-108.2 62.2-108.2 190.5 0 148.4 130.3 200.9 134.2 202.2-.6 3.2-20.7 71.9-68.7 141.9-42.8 61.6-87.5 123.1-155.5 123.1s-85.5-39.3-164-39.3c-76 0-103.7 40.8-165.9 40.8s-105-57.8-155.5-127.4C46 411.3 10.5 266.1 10.5 226c0-98.7 54.3-151.7 104.4-207.7C158.7 65.3 206.8 26 280.1 26c81.4 0 140.7 52.4 183.2 52.4 40.4 0 104-55.4 196.2-55.4zm-60.6-176.7c0 25.5-9.3 52.8-27.9 75.4-23.3 28.5-52.3 44.6-84 44.6-3.8 0-7.7-.4-11.6-.4 1-27.6 12.4-54.1 30.5-74.4 19.6-21.5 50.1-37.5 81.7-41.4 11 .2 1 0 11.3 0z"/></svg>
+                  <span class="social-label">Apple</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="phone-label">Step 1 · Request</div>
+    </div>
+
+    <!-- OTP Verify -->
+    <div class="phone-block">
+      <div class="phone">
+        <div class="bg-photo"></div>
+        <div class="bg-tint"></div>
+        <div class="screen">
+          <div class="hero">
+            <div class="hero-logo">🌿</div>
+            <div class="hero-word">kura</div>
+            <div class="hero-tag">Lawn care, simplified</div>
+          </div>
+          <div class="card">
+            <div class="card-body">
+              <div class="icon-circle">🔐</div>
+              <div class="v-heading">Check your email</div>
+              <div class="v-body">We sent a 6-digit code to</div>
+              <div class="v-email">fmatangira@gmail.com</div>
+              <div class="otp-row">
+                <div class="otp-box act"><span class="cursor"></span></div>
+                <div class="otp-box"></div>
+                <div class="otp-box"></div>
+                <div class="otp-box"></div>
+                <div class="otp-box"></div>
+                <div class="otp-box"></div>
+              </div>
+              <div class="verify-btn"><div class="verify-btn-inner">Sign in</div></div>
+              <div class="resend-txt">Resend code in 60s</div>
+              <div class="reset-txt">Use a different email</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="phone-label">Step 2 · Verify</div>
+    </div>
+
+  </div>
+
+</body>
+</html>

@@ -1,7 +1,5 @@
-jest.mock('@shopify/react-native-skia', () => ({
-  Canvas: 'Canvas',
-  BackdropBlur: 'BackdropBlur',
-  Fill: 'Fill',
+jest.mock('expo-blur', () => ({
+  BlurView: 'BlurView',
 }));
 
 import React from 'react';
@@ -24,11 +22,10 @@ describe('GlassCard', () => {
     expect(getByText('hello')).toBeTruthy();
   });
 
-  // Verify that passing a custom blur sigma does not cause an error.
-  it('renders without error when a custom blur value is supplied', () => {
+  it('renders without error when a custom intensity is supplied', () => {
     expect(() =>
       render(
-        <GlassCard blur={20}><Text>custom blur</Text></GlassCard>,
+        <GlassCard intensity={40}><Text>custom intensity</Text></GlassCard>,
         { wrapper: Wrapper }
       )
     ).not.toThrow();

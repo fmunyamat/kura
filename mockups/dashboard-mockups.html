@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Kura — Home Screen UX Exploration</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,700&family=Lora:ital,wght@1,400;1,500&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #040a05;
+      padding: 64px 40px 100px;
+      font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ─── Page header ─── */
+    .page-header { text-align: center; margin-bottom: 72px; }
+    .eyebrow {
+      font-size: 10px; font-weight: 700;
+      letter-spacing: 0.24em; text-transform: uppercase;
+      color: rgba(184,229,106,0.45); margin-bottom: 14px;
+    }
+    .pg-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 38px; font-weight: 800;
+      color: rgba(255,255,255,0.90);
+      letter-spacing: -0.6px; margin-bottom: 10px;
+    }
+    .pg-sub { font-size: 14px; color: rgba(255,255,255,0.26); font-weight: 300; }
+
+    /* ─── Grid: 4 wide × 2 tall ─── */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, 272px);
+      gap: 56px 22px;
+      justify-content: center;
+    }
+
+    /* ─── Mockup wrapper ─── */
+    .mockup {
+      display: flex; flex-direction: column;
+      align-items: center; gap: 18px;
+      animation: rise 0.55s ease-out both;
+    }
+    .mockup:nth-child(1) { animation-delay: 0.04s; }
+    .mockup:nth-child(2) { animation-delay: 0.10s; }
+    .mockup:nth-child(3) { animation-delay: 0.17s; }
+    .mockup:nth-child(4) { animation-delay: 0.24s; }
+    .mockup:nth-child(5) { animation-delay: 0.31s; }
+    .mockup:nth-child(6) { animation-delay: 0.38s; }
+    .mockup:nth-child(7) { animation-delay: 0.45s; }
+    .mockup:nth-child(8) { animation-delay: 0.52s; }
+
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(22px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Concept label */
+    .lbl-num {
+      font-size: 9px; font-weight: 700; letter-spacing: 0.22em;
+      text-transform: uppercase; color: rgba(184,229,106,0.38);
+      margin-bottom: 5px; text-align: center;
+    }
+    .lbl-name {
+      font-family: 'Syne', sans-serif;
+      font-size: 15px; font-weight: 700;
+      color: rgba(255,255,255,0.78);
+      text-align: center; margin-bottom: 4px;
+    }
+    .lbl-desc {
+      font-size: 11.5px; color: rgba(255,255,255,0.25);
+      text-align: center; line-height: 1.60; max-width: 230px;
+    }
+
+    /* ─── Phone frame ─── */
+    .phone {
+      width: 272px;
+      background: #1B1B1D;
+      border-radius: 50px;
+      padding: 12px;
+      box-shadow:
+        0 0 0 1px #272729,
+        inset 0 0 0 1px #343437,
+        0 64px 104px -8px rgba(0,0,0,0.99),
+        0 22px 44px -16px rgba(0,0,0,0.58);
+      position: relative;
+    }
+    /* Side button */
+    .phone::before {
+      content: '';
+      position: absolute; top: 120px; right: -3px;
+      width: 3px; height: 52px;
+      background: linear-gradient(to bottom, #2C2C2E, #46464A, #2C2C2E);
+      border-radius: 2px;
+    }
+
+    /* ─── Screen — exact 4-stop green gradient from OnboardingLayout ─── */
+    .screen {
+      width: 100%; height: 554px;
+      border-radius: 40px; overflow: hidden;
+      background: linear-gradient(168deg, #0c3520 0%, #135633 33%, #1e6b3c 67%, #3d7d35 100%);
+      display: flex; flex-direction: column;
+      position: relative;
+    }
+
+    /* Dynamic Island */
+    .di {
+      position: absolute; top: 10px; left: 50%;
+      transform: translateX(-50%);
+      width: 90px; height: 26px;
+      background: #000; border-radius: 13px; z-index: 200;
+    }
+
+    /* Status bar */
+    .status {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 14px 20px 0;
+      font-size: 11px; font-weight: 600;
+      color: rgba(255,255,255,0.82);
+      flex-shrink: 0;
+    }
+
+    /* Hero zone — default flex:1 fills space above glass panel */
+    .hero {
+      flex: 1;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 6px 16px 10px;
+      text-align: center;
+    }
+
+    /* Step label above hero title */
+    .step-lbl {
+      font-size: 9px; font-weight: 700;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      color: rgba(184,229,106,0.72);
+      margin-bottom: 5px;
+    }
+
+    /* Hero title */
+    .hero-title {
+      font-size: 19px; font-weight: 900;
+      color: rgba(255,255,255,0.94);
+      letter-spacing: -0.3px; line-height: 1.2;
+      margin-bottom: 4px;
+    }
+
+    /* Hero subtitle */
+    .hero-sub {
+      font-size: 10.5px; color: rgba(255,255,255,0.50);
+      line-height: 1.55;
+    }
+
+    /* ─── Glass panel — sits at the bottom of the screen ─── */
+    /* glass-outer drives the flex height; glass-clip fills it with the blur surface */
+    .glass-outer { flex: 2.4; position: relative; }
+    .glass-clip {
+      position: absolute; inset: 0;
+      border-radius: 18px 18px 0 0; overflow: hidden;
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      background: rgba(255,255,255,0.46);
+      border: 1px solid rgba(255,255,255,0.52);
+      border-bottom: none;
+      box-shadow: 0 -10px 26px rgba(0,0,0,0.18);
+    }
+    .glass-content {
+      padding: 13px 13px 0;
+      height: 100%; overflow: hidden;
+      display: flex; flex-direction: column;
+      gap: 8px;
+    }
+
+    /* ─── Shared design tokens (all from theme.ts) ─── */
+
+    /* Section label */
+    .sec-lbl {
+      font-size: 8.5px; font-weight: 700;
+      letter-spacing: 0.16em; text-transform: uppercase;
+      color: rgba(14,42,14,0.35); flex-shrink: 0;
+    }
+
+    /* Task row — GrassTypeCard pattern */
+    .task-row {
+      background: rgba(19,86,51,0.08);
+      border-radius: 8px; padding: 8px 10px;
+      display: flex; align-items: center; gap: 8px;
+      flex-shrink: 0;
+    }
+    .task-row.active { background: rgba(19,86,51,0.18); }
+    .task-row.done   { opacity: 0.52; }
+    .task-row.dim    { opacity: 0.38; }
+
+    .t-icon { font-size: 18px; flex-shrink: 0; }
+    .t-body { flex: 1; min-width: 0; }
+    .t-name { font-size: 12px; font-weight: 700; color: rgba(14,42,14,0.85); line-height: 1.3; }
+    .t-meta { font-size: 10px; color: rgba(14,42,14,0.50); margin-top: 1px; }
+    .t-pill {
+      font-size: 9px; font-weight: 600;
+      color: rgba(14,42,14,0.55);
+      background: rgba(19,86,51,0.10);
+      border-radius: 5px; padding: 2px 7px; flex-shrink: 0;
+    }
+    .t-chev { font-size: 14px; color: rgba(14,42,14,0.24); flex-shrink: 0; }
+    .t-check {
+      width: 18px; height: 18px; border-radius: 9px; background: #0c3520;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 9px; font-weight: 900; color: #fff; flex-shrink: 0;
+    }
+
+    /* Divider */
+    .divider { height: 1px; background: rgba(14,42,14,0.08); flex-shrink: 0; }
+
+    /* CTA buttons */
+    .cta {
+      background: #1e6b3c; border-radius: 8px;
+      padding: 10px 12px; text-align: center;
+      font-size: 12px; font-weight: 700;
+      color: rgba(255,255,255,0.93); flex-shrink: 0;
+    }
+    .cta-lime {
+      background: rgba(184,229,106,0.90); border-radius: 8px;
+      padding: 10px 12px; text-align: center;
+      font-size: 12px; font-weight: 700;
+      color: #0c3520; flex-shrink: 0;
+    }
+
+    .hint {
+      text-align: center; font-size: 9.5px;
+      color: rgba(14,42,14,0.36); flex-shrink: 0;
+    }
+
+    /* Pushes content down in flex column */
+    .spacer { flex: 1; }
+
+    /* Tab bar */
+    .tabs {
+      flex-shrink: 0;
+      display: flex; justify-content: space-around; align-items: center;
+      padding: 8px 6px 16px;
+      background: rgba(4,16,7,0.76);
+      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      border-top: 1px solid rgba(255,255,255,0.07);
+    }
+    .tab {
+      display: flex; flex-direction: column; align-items: center; gap: 2px;
+      font-size: 8.5px; font-weight: 600; letter-spacing: 0.04em;
+      text-transform: uppercase; color: rgba(255,255,255,0.24);
+    }
+    .tab.on { color: rgba(184,229,106,0.88); }
+    .ti { font-size: 18px; }
+
+
+    /* ════════════════════════════════════════════
+       CONCEPT 1: ONE THING ONLY
+       ════════════════════════════════════════════ */
+    .c1-card {
+      flex: 1; background: rgba(19,86,51,0.10);
+      border: 1px solid rgba(19,86,51,0.13);
+      border-radius: 12px; padding: 14px 12px;
+      display: flex; flex-direction: column;
+      align-items: center; text-align: center; gap: 7px;
+    }
+    .c1-icon { font-size: 36px; line-height: 1; }
+    .c1-name {
+      font-size: 15px; font-weight: 900;
+      color: rgba(14,42,14,0.90);
+      letter-spacing: -0.2px; line-height: 1.2;
+    }
+    .c1-why { font-size: 10px; color: rgba(14,42,14,0.50); line-height: 1.55; }
+    .c1-chips { display: flex; gap: 6px; justify-content: center; }
+    .c1-chip {
+      background: rgba(12,53,32,0.10); border-radius: 20px;
+      padding: 3px 9px; font-size: 9.5px; font-weight: 600;
+      color: rgba(14,42,14,0.58);
+    }
+    .c1-more {
+      font-size: 9.5px; color: rgba(14,42,14,0.28);
+      text-align: center; flex-shrink: 0;
+    }
+
+
+    /* ════════════════════════════════════════════
+       CONCEPT 2: LAWN SCORE
+       ════════════════════════════════════════════ */
+    .score-wrap { position: relative; width: 84px; height: 84px; }
+    .score-wrap svg { transform: rotate(-90deg); display: block; }
+    .score-center {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+    }
+    .score-num {
+      font-size: 22px; font-weight: 900;
+      color: rgba(255,255,255,0.94);
+      letter-spacing: -1px; line-height: 1;
+    }
+    .score-den { font-size: 9px; color: rgba(255,255,255,0.36); font-weight: 500; }
+    .boost-card {
+      background: rgba(184,229,106,0.10);
+      border: 1px solid rgba(184,229,106,0.20);
+      border-radius: 9px; padding: 8px 10px; flex-shrink: 0;
+    }
+    .boost-label {
+      font-size: 8px; font-weight: 700; letter-spacing: 0.14em;
+      text-transform: uppercase; color: rgba(14,42,14,0.34); margin-bottom: 3px;
+    }
+    .boost-txt { font-size: 11px; font-weight: 600; color: rgba(14,42,14,0.76); line-height: 1.4; }
+    .boost-score { font-size: 14px; font-weight: 900; color: #135633; }
+
+
+    /* ════════════════════════════════════════════
+       CONCEPT 3: RECIPE CARD
+       ════════════════════════════════════════════ */
+    .recipe-step { display: flex; align-items: flex-start; gap: 7px; }
+    .recipe-n {
+      width: 17px; height: 17px; border-radius: 50%; background: #0c3520;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 8.5px; font-weight: 900; color: #fff;
+      flex-shrink: 0; margin-top: 1px;
+    }
+    .recipe-t { font-size: 10.5px; color: rgba(14,42,14,0.72); line-height: 1.45; flex: 1; }
+    .ingredient { display: flex; align-items: center; gap: 7px; padding: 3px 0; }
+    .ing-icon { font-size: 13px; flex-shrink: 0; }
+    .ing-txt { font-size: 10px; color: rgba(14,42,14,0.68); }
+
+
+    /* ════════════════════════════════════════════
+       CONCEPT 4: WEATHER BRIEF
+       ════════════════════════════════════════════ */
+    .wx-temp {
+      font-size: 46px; font-weight: 900;
+      color: rgba(255,255,255,0.94);
+      letter-spacing: -2.5px; line-height: 1;
+    }
+    .wx-icon { font-size: 26px; margin-bottom: 2px; }
+    .wx-cond { font-size: 10px; color: rgba(255,255,255,0.42); letter-spacing: 0.04em; }
+    .wx-explain {
+      font-size: 10.5px; color: rgba(14,42,14,0.65);
+      line-height: 1.62; font-style: italic;
+    }
+
+
+    /* ════════════════════════════════════════════
+       CONCEPT 5: DAILY LETTER
+       ════════════════════════════════════════════ */
+    .letter-greeting {
+      font-family: 'Lora', Georgia, serif;
+      font-style: italic; font-size: 18px; font-weight: 400;
+      color: rgba(255,255,255,0.88); line-height: 1.25;
+    }
+    .letter-body { font-size: 10.5px; color: rgba(14,42,14,0.66); line-height: 1.68; }
+    .letter-body strong { color: rgba(14,42,14,0.87); font-weight: 600; }
+    .letter-sig {
+      font-family: 'Lora', Georgia, serif;
+      font-style: italic; font-size: 10px;
+      color: rgba(14,42,14,0.34); flex-shrink: 0;
+    }
+
+
+    /* ════════════════════════════════════════════
+       CONCEPT 6: SEASON MAP
+       ════════════════════════════════════════════ */
+    .timeline {
+      position: relative; display: flex;
+      align-items: flex-start; width: 100%; margin: 7px 0 10px;
+    }
+    .tl-track {
+      position: absolute; top: 3.5px; left: 11%; right: 11%;
+      height: 1px; background: rgba(255,255,255,0.17);
+    }
+    .tl-seg {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; gap: 5px; position: relative; z-index: 1;
+    }
+    .tl-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.20); }
+    .tl-dot.on {
+      background: rgba(184,229,106,0.90);
+      box-shadow: 0 0 0 3px rgba(184,229,106,0.20);
+    }
+    .tl-lbl {
+      font-size: 7.5px; font-weight: 600; letter-spacing: 0.06em;
+      text-transform: uppercase; color: rgba(255,255,255,0.30); text-align: center;
+    }
+    .tl-lbl.on { color: rgba(184,229,106,0.80); }
+
+
+    /* ════════════════════════════════════════════
+       CONCEPT 7: COACH VOICE
+       ════════════════════════════════════════════ */
+    .coach-avatar {
+      width: 26px; height: 26px; border-radius: 50%;
+      background: rgba(184,229,106,0.14);
+      border: 1.5px solid rgba(184,229,106,0.32);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; margin-bottom: 5px; align-self: flex-start;
+    }
+    .coach-bubble {
+      background: rgba(255,255,255,0.13);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 14px 14px 14px 3px; padding: 9px 11px;
+    }
+    .coach-msg { font-size: 11.5px; color: rgba(255,255,255,0.86); line-height: 1.52; }
+    .coach-action {
+      background: rgba(19,86,51,0.11);
+      border: 1px solid rgba(19,86,51,0.14);
+      border-radius: 10px; padding: 10px 11px; flex-shrink: 0;
+    }
+    .coach-a-name { font-size: 12px; font-weight: 800; color: rgba(14,42,14,0.87); margin-bottom: 2px; }
+    .coach-a-meta { font-size: 9.5px; color: rgba(14,42,14,0.50); margin-bottom: 8px; }
+    .ask-bar {
+      background: rgba(19,86,51,0.07); border-radius: 8px;
+      padding: 8px 10px; font-size: 10px; color: rgba(14,42,14,0.36);
+      flex-shrink: 0;
+    }
+
+
+    /* ════════════════════════════════════════════
+       CONCEPT 8: BEFORE / AFTER
+       ════════════════════════════════════════════ */
+    .ba-row { display: flex; gap: 7px; align-items: stretch; width: 100%; }
+    .ba-panel {
+      flex: 1; background: rgba(255,255,255,0.10);
+      border-radius: 9px; padding: 8px 7px;
+      text-align: center; display: flex; flex-direction: column;
+      align-items: center; gap: 3px;
+    }
+    .ba-panel.after {
+      background: rgba(184,229,106,0.09);
+      border: 1px solid rgba(184,229,106,0.16);
+    }
+    .ba-lbl {
+      font-size: 7.5px; font-weight: 700; letter-spacing: 0.12em;
+      text-transform: uppercase; color: rgba(255,255,255,0.34);
+    }
+    .ba-lbl.after { color: rgba(184,229,106,0.58); }
+    .ba-icon { font-size: 20px; }
+    .ba-desc { font-size: 8.5px; color: rgba(255,255,255,0.42); line-height: 1.4; }
+    .ba-arrow { font-size: 15px; color: rgba(184,229,106,0.58); align-self: center; flex-shrink: 0; }
+    .result-box {
+      background: rgba(184,229,106,0.08);
+      border: 1px solid rgba(184,229,106,0.16);
+      border-radius: 8px; padding: 7px 9px; flex-shrink: 0;
+    }
+    .result-txt { font-size: 10px; color: rgba(14,42,14,0.66); line-height: 1.58; }
+    .result-txt strong { color: #0c3520; font-weight: 700; }
+
+  </style>
+</head>
+<body>
+
+  <div class="page-header">
+    <div class="eyebrow">Kura · Home Screen · UX Exploration</div>
+    <div class="pg-title">8 UX Directions</div>
+    <div class="pg-sub">Same visual language — eight different ways to engage a beginner lawn owner</div>
+  </div>
+
+  <div class="grid">
+
+    <!-- ════════════════════════════════════════
+         01 — ONE THING ONLY
+         Radical simplicity. One task, huge and
+         impossible to miss. No list, no choice.
+    ════════════════════════════════════════ -->
+    <div class="mockup">
+      <div class="phone">
+        <div class="screen">
+          <div class="di"></div>
+          <div class="status"><span>9:41</span><span>▲▲▲ 🔋</span></div>
+
+          <div class="hero">
+            <div class="step-lbl">Sunday, June 1</div>
+            <div class="hero-title">Your one thing<br>today</div>
+            <div class="hero-sub">One task. That's it.</div>
+          </div>
+
+          <div class="glass-outer">
+            <div class="glass-clip">
+              <div class="glass-content">
+                <div class="c1-card">
+                  <div class="c1-icon">💧</div>
+                  <div class="c1-name">Water your lawn</div>
+                  <div class="c1-why">It hasn't rained in 3 days and today hits 94°F. Your grass is starting to stress.</div>
+                  <div class="c1-chips">
+                    <div class="c1-chip">⏱ 30 min</div>
+                    <div class="c1-chip">📍 Front &amp; back</div>
+                  </div>
+                  <div style="width:100%;"><div class="cta-lime">I did this ✓</div></div>
+                </div>
+                <div class="c1-more">and 1 other task waiting →</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="tabs">
+            <div class="tab on"><span class="ti">🌿</span><span>Today</span></div>
+            <div class="tab"><span class="ti">🌱</span><span>My Lawn</span></div>
+            <div class="tab"><span class="ti">📷</span><span>Progress</span></div>
+            <div class="tab"><span class="ti">⚙️</span><span>Settings</span></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="lbl-num">Option 01</div>
+        <div class="lbl-name">One Thing Only</div>
+        <div class="lbl-desc">Radical simplicity. One task front and centre — no lists to overwhelm first-timers.</div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════
+         02 — LAWN SCORE
+         Gamification. A health score makes
+         abstract lawn care tangible and
+         rewarding. Completing tasks = points.
+    ════════════════════════════════════════ -->
+    <div class="mockup">
+      <div class="phone">
+        <div class="screen">
+          <div class="di"></div>
+          <div class="status"><span>9:41</span><span>▲▲▲ 🔋</span></div>
+
+          <div class="hero">
+            <div class="step-lbl">Lawn Health</div>
+            <!-- Ring: r=34, circ=213.6, 72% → offset=59.8 -->
+            <div class="score-wrap" style="margin-bottom:6px;">
+              <svg width="84" height="84" viewBox="0 0 84 84">
+                <circle cx="42" cy="42" r="34" fill="none" stroke="rgba(255,255,255,0.09)" stroke-width="7"/>
+                <circle cx="42" cy="42" r="34" fill="none"
+                  stroke="rgba(184,229,106,0.85)" stroke-width="7"
+                  stroke-linecap="round"
+                  stroke-dasharray="213.6" stroke-dashoffset="59.8"/>
+              </svg>
+              <div class="score-center">
+                <div class="score-num">72</div>
+                <div class="score-den">/ 100</div>
+              </div>
+            </div>
+            <div class="hero-sub">Good — room to grow</div>
+          </div>
+
+          <div class="glass-outer" style="flex:2.6;">
+            <div class="glass-clip">
+              <div class="glass-content">
+                <div class="boost-card">
+                  <div class="boost-label">Do this today</div>
+                  <div class="boost-txt">Water your lawn → score jumps to <span class="boost-score">84</span> 🌱</div>
+                </div>
+                <div class="task-row active">
+                  <div class="t-icon">💧</div>
+                  <div class="t-body">
+                    <div class="t-name">Water your lawn</div>
+                    <div class="t-meta">+12 pts · 30 min</div>
+                  </div>
+                  <div class="t-chev">›</div>
+                </div>
+                <div class="task-row dim">
+                  <div class="t-icon">🪲</div>
+                  <div class="t-body">
+                    <div class="t-name">Check for grubs</div>
+                    <div class="t-meta">+8 pts · 10 min</div>
+                  </div>
+                  <div class="t-chev">›</div>
+                </div>
+                <div class="spacer"></div>
+                <div class="cta">Boost my score</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="tabs">
+            <div class="tab on"><span class="ti">🌿</span><span>Today</span></div>
+            <div class="tab"><span class="ti">🌱</span><span>My Lawn</span></div>
+            <div class="tab"><span class="ti">📷</span><span>Progress</span></div>
+            <div class="tab"><span class="ti">⚙️</span><span>Settings</span></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="lbl-num">Option 02</div>
+        <div class="lbl-name">Lawn Score</div>
+        <div class="lbl-desc">Gamification. A health score makes abstract care tangible — completing tasks earns points.</div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════
+         03 — RECIPE CARD
+         Familiar format borrowed from cooking.
+         Ingredients + numbered steps make
+         lawn care feel approachable, not alien.
+    ════════════════════════════════════════ -->
+    <div class="mockup">
+      <div class="phone">
+        <div class="screen">
+          <div class="di"></div>
+          <div class="status"><span>9:41</span><span>▲▲▲ 🔋</span></div>
+
+          <div class="hero" style="flex:0.72;">
+            <div class="step-lbl">Today's Recipe</div>
+            <div style="font-size:28px; margin-bottom:3px;">💧</div>
+            <div class="hero-title" style="font-size:16px;">Watering Your Lawn</div>
+            <div class="hero-sub">Simple · 30 minutes</div>
+          </div>
+
+          <div class="glass-outer" style="flex:2.9;">
+            <div class="glass-clip">
+              <div class="glass-content">
+                <div class="sec-lbl">What you'll need</div>
+                <div class="ingredient">
+                  <div class="ing-icon">🪣</div>
+                  <div class="ing-txt">Garden hose or sprinkler</div>
+                </div>
+                <div class="ingredient">
+                  <div class="ing-icon">⏱</div>
+                  <div class="ing-txt">About 30 minutes</div>
+                </div>
+                <div class="divider"></div>
+                <div class="sec-lbl">Steps</div>
+                <div class="recipe-step">
+                  <div class="recipe-n">1</div>
+                  <div class="recipe-t">Water early — before 10am means less evaporation.</div>
+                </div>
+                <div style="height:5px;"></div>
+                <div class="recipe-step">
+                  <div class="recipe-n">2</div>
+                  <div class="recipe-t">Soak until water spreads to the edges. No puddles.</div>
+                </div>
+                <div style="height:5px;"></div>
+                <div class="recipe-step">
+                  <div class="recipe-n">3</div>
+                  <div class="recipe-t">Do the front yard first, then the back.</div>
+                </div>
+                <div class="spacer"></div>
+                <div class="cta">Mark as done ✓</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="tabs">
+            <div class="tab on"><span class="ti">🌿</span><span>Today</span></div>
+            <div class="tab"><span class="ti">🌱</span><span>My Lawn</span></div>
+            <div class="tab"><span class="ti">📷</span><span>Progress</span></div>
+            <div class="tab"><span class="ti">⚙️</span><span>Settings</span></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="lbl-num">Option 03</div>
+        <div class="lbl-name">Recipe Card</div>
+        <div class="lbl-desc">Familiar structure borrowed from cooking — ingredients, numbered steps, done.</div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════
+         04 — WEATHER BRIEF
+         Context-first. Leads with WHY (today's
+         conditions) before telling them WHAT to
+         do. Helps beginners understand the link
+         between weather and lawn health.
+    ════════════════════════════════════════ -->
+    <div class="mockup">
+      <div class="phone">
+        <div class="screen">
+          <div class="di"></div>
+          <div class="status"><span>9:41</span><span>▲▲▲ 🔋</span></div>
+
+          <div class="hero">
+            <div class="wx-icon">☀️</div>
+            <div class="wx-temp">94°</div>
+            <div class="wx-cond">Sunny · low humidity · June 1</div>
+            <div style="height:9px;"></div>
+            <div style="font-size:8.5px; font-weight:700; letter-spacing:0.10em; text-transform:uppercase; color:rgba(184,229,106,0.62);">what this means for your lawn ↓</div>
+          </div>
+
+          <div class="glass-outer" style="flex:2.7;">
+            <div class="glass-clip">
+              <div class="glass-content">
+                <div class="wx-explain">
+                  "It's hot and dry today. Grass loses moisture fast in this heat — if it goes without water today it starts to wilt. Water <em>before noon</em> to prevent stress."
+                </div>
+                <div class="divider"></div>
+                <div class="sec-lbl">What to do about it</div>
+                <div class="task-row active">
+                  <div class="t-icon">💧</div>
+                  <div class="t-body">
+                    <div class="t-name">Water your lawn</div>
+                    <div class="t-meta">Before 10am · 30 min</div>
+                  </div>
+                  <div class="t-chev">›</div>
+                </div>
+                <div class="spacer"></div>
+                <div class="cta">Let's do it</div>
+                <div class="hint">Remind me in 2 hours</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="tabs">
+            <div class="tab on"><span class="ti">🌿</span><span>Today</span></div>
+            <div class="tab"><span class="ti">🌱</span><span>My Lawn</span></div>
+            <div class="tab"><span class="ti">📷</span><span>Progress</span></div>
+            <div class="tab"><span class="ti">⚙️</span><span>Settings</span></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="lbl-num">Option 04</div>
+        <div class="lbl-name">Weather Brief</div>
+        <div class="lbl-desc">Context-first. Leads with WHY (weather conditions) before telling them WHAT to do.</div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════
+         05 — DAILY LETTER
+         Warm and personal. A short note from
+         Kura that explains things in plain
+         English. Like a text from a friend who
+         happens to know a lot about lawns.
+    ════════════════════════════════════════ -->
+    <div class="mockup">
+      <div class="phone">
+        <div class="screen">
+          <div class="di"></div>
+          <div class="status"><span>9:41</span><span>▲▲▲ 🔋</span></div>
+
+          <div class="hero" style="flex:0.60; justify-content:flex-end; padding-bottom:10px;">
+            <div class="step-lbl">Sunday, June 1</div>
+            <div class="letter-greeting">Good morning,<br>Farai.</div>
+          </div>
+
+          <div class="glass-outer" style="flex:3.1;">
+            <div class="glass-clip">
+              <div class="glass-content">
+                <div class="letter-body">
+                  Your lawn has gone <strong>3 days without water</strong>, and today's going to be a hot one — 94°F by the afternoon. Cool-season grass starts to stress in that heat when the soil's dry.
+                  <br><br>
+                  <strong>One thing for today:</strong> give it a good watering before 10am. That's all you need.
+                </div>
+                <div class="task-row active">
+                  <div class="t-icon">💧</div>
+                  <div class="t-body">
+                    <div class="t-name">Water your lawn</div>
+                    <div class="t-meta">Before 10am · 30 min</div>
+                  </div>
+                </div>
+                <div class="spacer"></div>
+                <div class="cta">Done</div>
+                <div style="height:4px;"></div>
+                <div class="letter-sig">— Kura</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="tabs">
+            <div class="tab on"><span class="ti">🌿</span><span>Today</span></div>
+            <div class="tab"><span class="ti">🌱</span><span>My Lawn</span></div>
+            <div class="tab"><span class="ti">📷</span><span>Progress</span></div>
+            <div class="tab"><span class="ti">⚙️</span><span>Settings</span></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="lbl-num">Option 05</div>
+        <div class="lbl-name">Daily Letter</div>
+        <div class="lbl-desc">Warm and personal. A short note from Kura explaining the why in plain English.</div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════
+         06 — SEASON MAP
+         Big-picture context. Shows where the
+         user is in the lawn care year. Helps
+         beginners build a mental model so tasks
+         feel timely rather than random.
+    ════════════════════════════════════════ -->
+    <div class="mockup">
+      <div class="phone">
+        <div class="screen">
+          <div class="di"></div>
+          <div class="status"><span>9:41</span><span>▲▲▲ 🔋</span></div>
+
+          <div class="hero" style="flex:1.15;">
+            <div class="step-lbl">Where you are in the year</div>
+            <div class="timeline">
+              <div class="tl-track"></div>
+              <div class="tl-seg">
+                <div class="tl-dot"></div>
+                <div class="tl-lbl">Winter</div>
+              </div>
+              <div class="tl-seg">
+                <div class="tl-dot on"></div>
+                <div class="tl-lbl on">Spring</div>
+              </div>
+              <div class="tl-seg">
+                <div class="tl-dot"></div>
+                <div class="tl-lbl">Summer</div>
+              </div>
+              <div class="tl-seg">
+                <div class="tl-dot"></div>
+                <div class="tl-lbl">Fall</div>
+              </div>
+            </div>
+            <div style="font-size:8px; font-weight:700; letter-spacing:0.10em; text-transform:uppercase; color:rgba(184,229,106,0.52); margin-bottom:5px;">↑ You are here</div>
+            <div class="hero-title" style="font-size:17px;">Late Spring</div>
+            <div class="hero-sub">Watering is the priority<br>as temperatures climb</div>
+          </div>
+
+          <div class="glass-outer" style="flex:2.2;">
+            <div class="glass-clip">
+              <div class="glass-content">
+                <div class="sec-lbl">This week</div>
+                <div class="task-row active">
+                  <div class="t-icon">💧</div>
+                  <div class="t-body">
+                    <div class="t-name">Water your lawn</div>
+                    <div class="t-meta">3 days without rain · 30 min</div>
+                  </div>
+                  <div class="t-chev">›</div>
+                </div>
+                <div class="task-row">
+                  <div class="t-icon">🪲</div>
+                  <div class="t-body">
+                    <div class="t-name">Check for grubs</div>
+                    <div class="t-meta">Peak season</div>
+                  </div>
+                  <div class="t-chev">›</div>
+                </div>
+                <div class="spacer"></div>
+                <div class="cta">Start watering</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="tabs">
+            <div class="tab on"><span class="ti">🌿</span><span>Today</span></div>
+            <div class="tab"><span class="ti">🌱</span><span>My Lawn</span></div>
+            <div class="tab"><span class="ti">📷</span><span>Progress</span></div>
+            <div class="tab"><span class="ti">⚙️</span><span>Settings</span></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="lbl-num">Option 06</div>
+        <div class="lbl-name">Season Map</div>
+        <div class="lbl-desc">Big-picture context. Shows where they are in the year so tasks feel timely, not random.</div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════
+         07 — COACH VOICE
+         Conversational. Kura speaks directly
+         to the user — friendly, encouraging,
+         zero jargon. Like a personal trainer
+         for your lawn.
+    ════════════════════════════════════════ -->
+    <div class="mockup">
+      <div class="phone">
+        <div class="screen">
+          <div class="di"></div>
+          <div class="status"><span>9:41</span><span>▲▲▲ 🔋</span></div>
+
+          <div class="hero" style="align-items:flex-start; justify-content:flex-end; padding:6px 14px 10px; flex:1.1;">
+            <div class="coach-avatar">🌿</div>
+            <div class="coach-bubble">
+              <div class="coach-msg">Hey Farai! 👋 Your lawn is thirsty — it's been 3 days without water and today hits 94°F. Let's give it a drink before it stresses.</div>
+            </div>
+          </div>
+
+          <div class="glass-outer" style="flex:2.5;">
+            <div class="glass-clip">
+              <div class="glass-content">
+                <div class="coach-action">
+                  <div class="coach-a-name">💧 Water your lawn</div>
+                  <div class="coach-a-meta">⏱ 30 min · 📍 Front &amp; back yard</div>
+                  <div class="cta-lime">I did it ✓</div>
+                </div>
+                <div style="font-size:10px; color:rgba(14,42,14,0.50); line-height:1.62;">
+                  Morning is best — before 10am. Water evaporates fast in the afternoon heat and can scorch the blades.
+                </div>
+                <div class="spacer"></div>
+                <div class="ask-bar">💬 Ask Kura about your lawn...</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="tabs">
+            <div class="tab on"><span class="ti">🌿</span><span>Today</span></div>
+            <div class="tab"><span class="ti">🌱</span><span>My Lawn</span></div>
+            <div class="tab"><span class="ti">📷</span><span>Progress</span></div>
+            <div class="tab"><span class="ti">⚙️</span><span>Settings</span></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="lbl-num">Option 07</div>
+        <div class="lbl-name">Coach Voice</div>
+        <div class="lbl-desc">Conversational and direct. Kura speaks to you like a knowledgeable friend.</div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════
+         08 — BEFORE / AFTER
+         Results-driven. Shows the transformation
+         — what the lawn looks like NOW vs. what
+         consistent care leads to. Beginners need
+         to see the payoff to stay motivated.
+    ════════════════════════════════════════ -->
+    <div class="mockup">
+      <div class="phone">
+        <div class="screen">
+          <div class="di"></div>
+          <div class="status"><span>9:41</span><span>▲▲▲ 🔋</span></div>
+
+          <div class="hero">
+            <div class="step-lbl">Today's action</div>
+            <div class="ba-row" style="margin:8px 0 5px;">
+              <div class="ba-panel">
+                <div class="ba-lbl">Right now</div>
+                <div class="ba-icon">🥀</div>
+                <div class="ba-desc">Dry, stressed grass</div>
+              </div>
+              <div class="ba-arrow">→</div>
+              <div class="ba-panel after">
+                <div class="ba-lbl after">In 4 weeks</div>
+                <div class="ba-icon">🌿</div>
+                <div class="ba-desc" style="color:rgba(255,255,255,0.52);">Thick, green lawn</div>
+              </div>
+            </div>
+            <div class="hero-sub">Water today, see results in a month</div>
+          </div>
+
+          <div class="glass-outer" style="flex:2.6;">
+            <div class="glass-clip">
+              <div class="glass-content">
+                <div class="task-row active">
+                  <div class="t-icon">💧</div>
+                  <div class="t-body">
+                    <div class="t-name">Water your lawn</div>
+                    <div class="t-meta">3 days without rain · 30 min</div>
+                  </div>
+                </div>
+                <div class="result-box">
+                  <div class="result-txt">
+                    Regular watering through June means <strong>deeper roots by August</strong> — your lawn will handle summer heat without going brown.
+                  </div>
+                </div>
+                <div class="spacer"></div>
+                <div class="cta">Water my lawn now</div>
+                <div class="hint">Remind me later</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="tabs">
+            <div class="tab on"><span class="ti">🌿</span><span>Today</span></div>
+            <div class="tab"><span class="ti">🌱</span><span>My Lawn</span></div>
+            <div class="tab"><span class="ti">📷</span><span>Progress</span></div>
+            <div class="tab"><span class="ti">⚙️</span><span>Settings</span></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="lbl-num">Option 08</div>
+        <div class="lbl-name">Before / After</div>
+        <div class="lbl-desc">Results-driven. Shows the transformation — beginners need to see the payoff to stay motivated.</div>
+      </div>
+    </div>
+
+  </div><!-- /grid -->
+
+</body>
+</html>

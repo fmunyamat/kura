@@ -91,6 +91,15 @@ export const lightTheme = {
     letterSpacingTight:  -0.3,
     letterSpacingBrand:  -1,
     letterSpacingWide:    2,
+    // fontBody — JetBrains Mono used for all body copy, labels, and UI text.
+    // fontHeader — Zalando Sans used for headings and card titles.
+    fontBody:        'JetBrainsMono-Regular',
+    fontBodyMedium:  'JetBrainsMono-Medium',
+    fontBodyBold:    'JetBrainsMono-Bold',
+    fontBodyBlack:   'JetBrainsMono-ExtraBold',
+    fontHeader:      'ZalandoSans-Regular',
+    fontHeaderBold:  'ZalandoSans-Bold',
+    fontHeaderHeavy: 'ZalandoSans-Black',
   },
 };
 

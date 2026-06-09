@@ -22,17 +22,26 @@ export const verifyOtpCode = async (email: string, token: string): Promise<void>
   if (error) throw error;
 };
 
-// checkUserProfile — returns true if a user_profiles row exists for this user,
-// meaning they have already completed onboarding. Returns false for new users.
-// Called by AuthProvider after every sign-in to decide whether to route to
-// onboarding or straight to the home tabs.
-export const checkUserProfile = async (userId: string): Promise<boolean> => {
+// ProfileFlags — the two routing signals AuthProvider needs from user_profiles.
+interface ProfileFlags {
+  hasProfile: boolean;
+  hasSeenWelcome: boolean;
+}
+
+// checkUserProfile — returns routing flags for the given user.
+// hasProfile: true if a user_profiles row exists (onboarding complete).
+// hasSeenWelcome: true if the user has already completed the welcome flow.
+// Called by AuthProvider after every sign-in to decide which screen to route to.
+export const checkUserProfile = async (userId: string): Promise<ProfileFlags> => {
   const { data } = await supabase
     .from('user_profiles')
-    .select('user_id')
+    .select('user_id, has_seen_welcome')
     .eq('user_id', userId)
     .maybeSingle();
-  return !!data;
+  return {
+    hasProfile: !!data,
+    hasSeenWelcome: data?.has_seen_welcome ?? false,
+  };
 };
 
 // signOut — ends the Supabase session and wipes tokens from SecureStore.

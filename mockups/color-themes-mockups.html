@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Kura — Modernity Progression</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #080A08; padding: 64px 40px 100px; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-font-smoothing: antialiased; }
+
+    .page-header { text-align: center; margin-bottom: 52px; }
+    .eyebrow { font-size: 10px; font-weight: 700; letter-spacing: 0.24em; text-transform: uppercase; color: rgba(163,230,53,0.40); margin-bottom: 12px; }
+    .pg-title { font-family: 'Syne', sans-serif; font-size: 38px; font-weight: 800; color: rgba(255,255,255,0.90); letter-spacing: -0.5px; margin-bottom: 8px; }
+    .pg-sub { font-size: 14px; color: rgba(255,255,255,0.26); font-weight: 400; }
+
+    .progression { display: flex; align-items: flex-end; justify-content: center; gap: 0; margin-bottom: 64px; }
+    .prog-step { display: flex; flex-direction: column; align-items: center; gap: 7px; width: 90px; }
+    .prog-dot { width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 800; color: rgba(255,255,255,0.60); }
+    .pd1 { background: rgba(109,176,66,0.16); border: 1.5px solid rgba(109,176,66,0.38); }
+    .pd2 { background: rgba(52,97,209,0.16); border: 1.5px solid rgba(52,97,209,0.38); }
+    .pd3 { background: rgba(192,83,43,0.16); border: 1.5px solid rgba(192,83,43,0.38); }
+    .pd4 { background: rgba(45,75,115,0.16); border: 1.5px solid rgba(45,75,115,0.38); }
+    .pd5 { background: rgba(107,63,160,0.16); border: 1.5px solid rgba(107,63,160,0.40); }
+    .pd6 { background: rgba(228,168,50,0.16); border: 1.5px solid rgba(228,168,50,0.38); }
+    .prog-lbl { font-size: 9px; font-weight: 700; color: rgba(255,255,255,0.22); text-align: center; line-height: 1.4; }
+    .prog-arr { width: 24px; color: rgba(255,255,255,0.12); font-size: 14px; text-align: center; padding-bottom: 18px; }
+
+    .grid { display: grid; grid-template-columns: repeat(3, 320px); gap: 80px 48px; justify-content: center; }
+
+    .mockup { display: flex; flex-direction: column; align-items: center; gap: 20px; animation: rise 0.55s ease-out both; }
+    .mockup:nth-child(1) { animation-delay: 0.04s; } .mockup:nth-child(2) { animation-delay: 0.11s; }
+    .mockup:nth-child(3) { animation-delay: 0.18s; } .mockup:nth-child(4) { animation-delay: 0.25s; }
+    .mockup:nth-child(5) { animation-delay: 0.32s; } .mockup:nth-child(6) { animation-delay: 0.39s; }
+    @keyframes rise { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+
+    .lbl-level { font-size: 9px; font-weight: 800; letter-spacing: 0.20em; text-transform: uppercase; color: rgba(255,255,255,0.22); text-align: center; margin-bottom: 3px; }
+    .lbl-name { font-size: 16px; font-weight: 800; color: rgba(255,255,255,0.82); text-align: center; margin-bottom: 3px; }
+    .lbl-desc { font-size: 11px; color: rgba(255,255,255,0.26); text-align: center; line-height: 1.65; max-width: 230px; }
+
+    .phone { width: 320px; background: #C8C8C8; border-radius: 50px; padding: 11px;
+      box-shadow: 0 0 0 1px #1C1C1C, inset 0 0 0 1px #3C3C3E, 0 60px 100px -8px rgba(0,0,0,1), 0 20px 44px -12px rgba(0,0,0,0.70);
+      position: relative; }
+    .phone::before { content: ''; position: absolute; top: 118px; right: -3px; width: 3px; height: 54px;
+      background: linear-gradient(to bottom, #2C2C2E, #46464A, #2C2C2E); border-radius: 2px; }
+
+    .screen { width: 100%; height: 640px; border-radius: 41px; overflow: hidden; display: flex; flex-direction: column; position: relative; }
+    .di { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); width: 96px; height: 28px; background: #000; border-radius: 14px; z-index: 200; }
+
+
+    /* ═══════════════════════════════════════════════════════
+       T1 — CLASSIC FLAT BOLD (Forest Green)
+       1.5px hard dark borders everywhere. No shadows. Flat.
+    ═══════════════════════════════════════════════════════ */
+    .t1 { background: #F5F4F1; }
+    .t1 .status { display:flex; justify-content:space-between; align-items:center; padding:13px 20px 5px; font-size:10.5px; font-weight:700; color:#1C1C1C; flex-shrink:0; }
+    .t1 .app-hd { display:flex; align-items:center; justify-content:space-between; padding:2px 20px 11px; flex-shrink:0; }
+    .t1 .app-title { font-size:26px; font-weight:800; color:#1C1C1C; letter-spacing:-0.5px; }
+    .t1 .hactions { display:flex; gap:7px; }
+    .t1 .hbtn { width:34px; height:34px; border-radius:50%; border:1.5px solid #1C1C1C; background:#fff; display:flex; align-items:center; justify-content:center; font-size:14px; position:relative; }
+    .t1 .ndot { position:absolute; top:-2px; right:-1px; width:9px; height:9px; border-radius:50%; background:#5A9E2F; border:2px solid #F5F4F1; }
+    .t1 .rule { height:3px; background:#6DB042; flex-shrink:0; }
+    .t1 .content { flex:1; overflow:hidden; display:flex; flex-direction:column; padding:14px 20px 10px; gap:11px; }
+    .t1 .slbl { font-size:15px; font-weight:800; color:#1C1C1C; letter-spacing:-0.2px; flex-shrink:0; }
+    .t1 .greet { border:1.5px solid #1C1C1C; border-radius:13px; background:#fff; padding:14px 16px; display:flex; align-items:center; justify-content:space-between; flex-shrink:0; }
+    .t1 .gtxt { font-size:19px; font-weight:800; color:#1C1C1C; line-height:1.22; letter-spacing:-0.3px; }
+    .t1 .gico { font-size:30px; }
+    .t1 .hscroll { display:flex; gap:9px; margin:0 -20px; padding:3px 20px; overflow:hidden; flex-shrink:0; }
+    .t1 .tc { min-width:162px; flex-shrink:0; border:1.5px solid #1C1C1C; border-radius:13px; padding:11px 12px; display:flex; align-items:center; gap:10px; }
+    .t1 .tc.a { background:#D4E5F5; } .t1 .tc.b { background:#EFE3A0; } .t1 .tc.c { background:#EDD0D8; }
+    .t1 .tci { font-size:24px; flex-shrink:0; }
+    .t1 .tcn { font-size:12.5px; font-weight:800; color:#1C1C1C; line-height:1.2; }
+    .t1 .tcs { font-size:10px; font-weight:600; color:rgba(0,0,0,0.50); margin-top:2px; }
+    .t1 .lawn { border:1.5px solid #1C1C1C; border-radius:13px; background:#fff; flex-shrink:0; }
+    .t1 .srow { display:flex; padding:12px 8px; }
+    .t1 .scell { flex:1; text-align:center; display:flex; flex-direction:column; align-items:center; gap:2px; }
+    .t1 .scell+.scell { border-left:1px solid rgba(0,0,0,0.09); }
+    .t1 .sv { font-size:12.5px; font-weight:800; color:#1C1C1C; }
+    .t1 .sk { font-size:8px; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:rgba(0,0,0,0.38); }
+    .t1 .streak { display:flex; align-items:center; justify-content:center; gap:6px; padding:9px 12px; border-top:1px solid rgba(0,0,0,0.07); }
+    .t1 .stxt { font-size:11px; font-weight:700; color:#1C1C1C; } .t1 .stxt span { color:#3A7A18; }
+    .t1 .tabbar { display:flex; justify-content:space-around; align-items:center; padding:7px 10px 20px; background:#fff; border-top:1.5px solid #1C1C1C; flex-shrink:0; }
+    .t1 .tab { display:flex; flex-direction:column; align-items:center; gap:2px; }
+    .t1 .tp { width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:17px; }
+    .t1 .tab.on .tp { background:#D4EAB8; }
+    .t1 .tl { font-size:9px; font-weight:700; color:rgba(0,0,0,0.34); }
+    .t1 .tab.on .tl { color:#2D6814; }
+
+
+    /* ═══════════════════════════════════════════════════════
+       T2 — REFINED FLAT (Cobalt)
+       Borders thin + soften to blue-tinted. Shadows appear.
+       No underline rule. 16px radius.
+    ═══════════════════════════════════════════════════════ */
+    .t2 { background: #F0F3FB; }
+    .t2 .status { display:flex; justify-content:space-between; align-items:center; padding:13px 20px 5px; font-size:10.5px; font-weight:700; color:#1A1E36; flex-shrink:0; }
+    .t2 .app-hd { display:flex; align-items:center; justify-content:space-between; padding:2px 20px 14px; flex-shrink:0; }
+    .t2 .app-title { font-size:26px; font-weight:800; color:#1A1E36; letter-spacing:-0.5px; }
+    .t2 .hactions { display:flex; gap:7px; }
+    .t2 .hbtn { width:34px; height:34px; border-radius:50%; border:1px solid #C4CDE8; background:#fff; display:flex; align-items:center; justify-content:center; font-size:14px; position:relative; box-shadow:0 2px 8px rgba(52,97,209,0.08); }
+    .t2 .ndot { position:absolute; top:-2px; right:-1px; width:9px; height:9px; border-radius:50%; background:#3461D1; border:2px solid #F0F3FB; }
+    .t2 .content { flex:1; overflow:hidden; display:flex; flex-direction:column; padding:0 20px 10px; gap:12px; }
+    .t2 .slbl { font-size:15px; font-weight:800; color:#1A1E36; letter-spacing:-0.2px; flex-shrink:0; }
+    .t2 .greet { border:1px solid #C4CDE8; border-radius:16px; background:#fff; padding:14px 16px; display:flex; align-items:center; justify-content:space-between; flex-shrink:0; box-shadow:0 2px 14px rgba(52,97,209,0.07); }
+    .t2 .gtxt { font-size:19px; font-weight:800; color:#1A1E36; line-height:1.22; letter-spacing:-0.3px; }
+    .t2 .gico { font-size:30px; }
+    .t2 .hscroll { display:flex; gap:9px; margin:0 -20px; padding:3px 20px; overflow:hidden; flex-shrink:0; }
+    .t2 .tc { min-width:162px; flex-shrink:0; border:1px solid rgba(0,0,0,0.06); border-radius:16px; padding:11px 12px; display:flex; align-items:center; gap:10px; box-shadow:0 2px 10px rgba(52,97,209,0.07); }
+    .t2 .tc.a { background:#C8D8F8; } .t2 .tc.b { background:#FCF4C8; } .t2 .tc.c { background:#F2CADC; }
+    .t2 .tci { font-size:24px; flex-shrink:0; }
+    .t2 .tcn { font-size:12.5px; font-weight:800; color:#1A1E36; line-height:1.2; }
+    .t2 .tcs { font-size:10px; font-weight:600; color:rgba(26,30,54,0.50); margin-top:2px; }
+    .t2 .lawn { border:1px solid #C4CDE8; border-radius:16px; background:#fff; flex-shrink:0; box-shadow:0 2px 14px rgba(52,97,209,0.07); }
+    .t2 .srow { display:flex; padding:12px 8px; }
+    .t2 .scell { flex:1; text-align:center; display:flex; flex-direction:column; align-items:center; gap:2px; }
+    .t2 .scell+.scell { border-left:1px solid rgba(52,97,209,0.08); }
+    .t2 .sv { font-size:12.5px; font-weight:800; color:#1A1E36; }
+    .t2 .sk { font-size:8px; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:rgba(26,30,54,0.36); }
+    .t2 .streak { display:flex; align-items:center; justify-content:center; gap:6px; padding:9px 12px; border-top:1px solid rgba(52,97,209,0.07); }
+    .t2 .stxt { font-size:11px; font-weight:700; color:#1A1E36; } .t2 .stxt span { color:#1E40AF; }
+    .t2 .tabbar { display:flex; justify-content:space-around; align-items:center; padding:7px 10px 20px; background:#fff; border-top:1px solid #E4E8F4; flex-shrink:0; }
+    .t2 .tab { display:flex; flex-direction:column; align-items:center; gap:2px; }
+    .t2 .tp { width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:17px; }
+    .t2 .tab.on .tp { background:#C8D8F8; }
+    .t2 .tl { font-size:9px; font-weight:700; color:rgba(26,30,54,0.34); }
+    .t2 .tab.on .tl { color:#1E40AF; }
+
+
+    /* ═══════════════════════════════════════════════════════
+       T3 — AIRY ELEVATED (Ember)
+       Borders gone from inner cards — shadows only.
+       20px radius. Floating tab bar with upward shadow.
+       Section labels become uppercase + tracked.
+    ═══════════════════════════════════════════════════════ */
+    .t3 { background: #FBF3EC; }
+    .t3 .status { display:flex; justify-content:space-between; align-items:center; padding:13px 20px 5px; font-size:10.5px; font-weight:700; color:#281208; flex-shrink:0; }
+    .t3 .app-hd { display:flex; align-items:center; justify-content:space-between; padding:2px 20px 14px; flex-shrink:0; }
+    .t3 .app-title { font-size:26px; font-weight:800; color:#281208; letter-spacing:-0.5px; }
+    .t3 .hactions { display:flex; gap:7px; }
+    .t3 .hbtn { width:34px; height:34px; border-radius:50%; background:#fff; border:none; display:flex; align-items:center; justify-content:center; font-size:14px; position:relative; box-shadow:0 2px 12px rgba(192,83,43,0.12); }
+    .t3 .ndot { position:absolute; top:-2px; right:-1px; width:9px; height:9px; border-radius:50%; background:#C0532B; border:2px solid #FBF3EC; }
+    .t3 .content { flex:1; overflow:hidden; display:flex; flex-direction:column; padding:0 20px 10px; gap:12px; }
+    .t3 .slbl { font-size:9.5px; font-weight:800; color:rgba(40,18,8,0.42); text-transform:uppercase; letter-spacing:0.13em; flex-shrink:0; }
+    .t3 .greet { border-radius:20px; background:#fff; padding:14px 16px; display:flex; align-items:center; justify-content:space-between; flex-shrink:0; box-shadow:0 4px 24px rgba(192,83,43,0.11); }
+    .t3 .gtxt { font-size:19px; font-weight:800; color:#281208; line-height:1.22; letter-spacing:-0.3px; }
+    .t3 .gico { font-size:30px; }
+    .t3 .hscroll { display:flex; gap:9px; margin:0 -20px; padding:4px 20px; overflow:hidden; flex-shrink:0; }
+    .t3 .tc { min-width:162px; flex-shrink:0; border-radius:20px; padding:11px 12px; display:flex; align-items:center; gap:10px; box-shadow:0 4px 18px rgba(0,0,0,0.08); }
+    .t3 .tc.a { background:#FAD4C0; } .t3 .tc.b { background:#FBE8B8; } .t3 .tc.c { background:#F4C8D4; }
+    .t3 .tci { font-size:24px; flex-shrink:0; }
+    .t3 .tcn { font-size:12.5px; font-weight:800; color:#281208; line-height:1.2; }
+    .t3 .tcs { font-size:10px; font-weight:600; color:rgba(40,18,8,0.50); margin-top:2px; }
+    .t3 .lawn { border-radius:20px; background:#fff; flex-shrink:0; box-shadow:0 4px 24px rgba(192,83,43,0.10); }
+    .t3 .srow { display:flex; padding:12px 8px; }
+    .t3 .scell { flex:1; text-align:center; display:flex; flex-direction:column; align-items:center; gap:2px; }
+    .t3 .scell+.scell { border-left:1px solid rgba(0,0,0,0.07); }
+    .t3 .sv { font-size:12.5px; font-weight:800; color:#281208; }
+    .t3 .sk { font-size:8px; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:rgba(40,18,8,0.36); }
+    .t3 .streak { display:flex; align-items:center; justify-content:center; gap:6px; padding:9px 12px; border-top:1px solid rgba(0,0,0,0.06); }
+    .t3 .stxt { font-size:11px; font-weight:700; color:#281208; } .t3 .stxt span { color:#9A3412; }
+    .t3 .tabbar { display:flex; justify-content:space-around; align-items:center; padding:7px 10px 20px; background:#fff; flex-shrink:0; box-shadow:0 -6px 28px rgba(0,0,0,0.07); border-radius:28px 28px 0 0; }
+    .t3 .tab { display:flex; flex-direction:column; align-items:center; gap:2px; }
+    .t3 .tp { width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:17px; }
+    .t3 .tab.on .tp { background:#FAD4C0; }
+    .t3 .tl { font-size:9px; font-weight:700; color:rgba(40,18,8,0.34); }
+    .t3 .tab.on .tl { color:#9A3412; }
+
+
+    /* ═══════════════════════════════════════════════════════
+       T4 — FLOATING LAYERS (Slate Navy)
+       Fully borderless. Tinted colored shadows.
+       Tinted gradient wash at top. Detached pill tab bar.
+    ═══════════════════════════════════════════════════════ */
+    .t4 { background: #EDF0F5; }
+    .t4 .tint-hd { background:linear-gradient(to bottom, rgba(45,75,115,0.09), transparent); flex-shrink:0; }
+    .t4 .status { display:flex; justify-content:space-between; align-items:center; padding:13px 20px 5px; font-size:10.5px; font-weight:700; color:#1C2840; }
+    .t4 .app-hd { display:flex; align-items:center; justify-content:space-between; padding:2px 20px 14px; }
+    .t4 .app-title { font-size:26px; font-weight:800; color:#1C2840; letter-spacing:-0.5px; }
+    .t4 .hactions { display:flex; gap:7px; }
+    .t4 .hbtn { width:34px; height:34px; border-radius:50%; background:#fff; border:none; display:flex; align-items:center; justify-content:center; font-size:14px; position:relative; box-shadow:0 4px 16px rgba(45,75,115,0.14); }
+    .t4 .ndot { position:absolute; top:-2px; right:-1px; width:9px; height:9px; border-radius:50%; background:#2D4B73; border:2px solid #EDF0F5; }
+    .t4 .content { flex:1; overflow:hidden; display:flex; flex-direction:column; padding:0 20px 8px; gap:12px; }
+    .t4 .slbl { font-size:9px; font-weight:800; color:rgba(28,40,64,0.36); text-transform:uppercase; letter-spacing:0.16em; flex-shrink:0; }
+    .t4 .greet { border-radius:24px; background:#fff; padding:14px 16px; display:flex; align-items:center; justify-content:space-between; flex-shrink:0; box-shadow:0 8px 28px rgba(45,75,115,0.14); }
+    .t4 .gtxt { font-size:19px; font-weight:800; color:#1C2840; line-height:1.22; letter-spacing:-0.3px; }
+    .t4 .gico { font-size:30px; }
+    .t4 .hscroll { display:flex; gap:9px; margin:0 -20px; padding:4px 20px; overflow:hidden; flex-shrink:0; }
+    .t4 .tc { min-width:162px; flex-shrink:0; border-radius:24px; padding:12px; display:flex; align-items:center; gap:10px; box-shadow:0 8px 24px rgba(45,75,115,0.14); }
+    .t4 .tc.a { background:#BDD4E8; } .t4 .tc.b { background:#EDE8CC; } .t4 .tc.c { background:#E8D4DC; }
+    .t4 .tci { font-size:24px; flex-shrink:0; }
+    .t4 .tcn { font-size:12.5px; font-weight:800; color:#1C2840; line-height:1.2; }
+    .t4 .tcs { font-size:10px; font-weight:600; color:rgba(28,40,64,0.50); margin-top:2px; }
+    .t4 .lawn { border-radius:24px; background:#fff; flex-shrink:0; box-shadow:0 8px 28px rgba(45,75,115,0.13); }
+    .t4 .srow { display:flex; padding:13px 8px; }
+    .t4 .scell { flex:1; text-align:center; display:flex; flex-direction:column; align-items:center; gap:2px; }
+    .t4 .scell+.scell { border-left:1px solid rgba(45,75,115,0.08); }
+    .t4 .sv { font-size:12.5px; font-weight:800; color:#1C2840; }
+    .t4 .sk { font-size:8px; font-weight:700; text-transform:uppercase; letter-spacing:0.07em; color:rgba(28,40,64,0.34); }
+    .t4 .streak { display:flex; align-items:center; justify-content:center; gap:6px; padding:9px 12px; border-top:1px solid rgba(45,75,115,0.06); }
+    .t4 .stxt { font-size:11px; font-weight:700; color:#1C2840; } .t4 .stxt span { color:#1E3A5F; }
+    .t4 .tab-wrap { padding:0 14px 14px; flex-shrink:0; }
+    .t4 .tabbar { display:flex; justify-content:space-around; align-items:center; padding:7px 10px 10px; background:#fff; border-radius:20px; box-shadow:0 8px 28px rgba(45,75,115,0.14), 0 2px 8px rgba(45,75,115,0.08); }
+    .t4 .tab { display:flex; flex-direction:column; align-items:center; gap:2px; }
+    .t4 .tp { width:36px; height:36px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:17px; }
+    .t4 .tab.on .tp { background:#BDD4E8; }
+    .t4 .tl { font-size:9px; font-weight:700; color:rgba(28,40,64,0.34); }
+    .t4 .tab.on .tl { color:#1E3A5F; }
+
+
+    /* ═══════════════════════════════════════════════════════
+       T5 — EDITORIAL HERO (Plum)
+       Full-bleed gradient hero section at top.
+       White content card floats up over gradient.
+       Task rows replace cards. Centered colored pill tab.
+    ═══════════════════════════════════════════════════════ */
+    .t5 { background: #F4F0FA; }
+    .t5 .hero { background:linear-gradient(160deg,#5A2890 0%,#6B3FA0 45%,#8B5BC0 100%); flex-shrink:0; padding-bottom:32px; position:relative; z-index:1; }
+    .t5 .status { display:flex; justify-content:space-between; align-items:center; padding:13px 20px 5px; font-size:10.5px; font-weight:700; color:rgba(255,255,255,0.75); }
+    .t5 .hero-body { padding:8px 20px 0; display:flex; flex-direction:column; gap:3px; }
+    .t5 .h-eye { font-size:10px; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; color:rgba(255,255,255,0.50); }
+    .t5 .h-name { font-size:27px; font-weight:800; color:#fff; letter-spacing:-0.5px; line-height:1.1; }
+    .t5 .h-sub { font-size:12px; font-weight:500; color:rgba(255,255,255,0.60); margin-top:2px; }
+    .t5 .content { flex:1; overflow:hidden; background:#FAF8FE; border-radius:28px 28px 0 0; margin-top:-20px; z-index:2; position:relative; display:flex; flex-direction:column; padding:20px 20px 8px; gap:13px; }
+    .t5 .slbl { font-size:9px; font-weight:800; color:rgba(30,14,56,0.34); text-transform:uppercase; letter-spacing:0.18em; flex-shrink:0; }
+    .t5 .task-rows { display:flex; flex-direction:column; flex-shrink:0; }
+    .t5 .trow { display:flex; align-items:center; gap:12px; padding:10px 0; border-bottom:1px solid rgba(107,63,160,0.07); }
+    .t5 .trow:last-child { border-bottom:none; }
+    .t5 .rico { width:36px; height:36px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:17px; flex-shrink:0; }
+    .t5 .rico.a { background:#DDD0F4; } .t5 .rico.b { background:#F8ECC0; } .t5 .rico.c { background:#F4C8DC; }
+    .t5 .rbody { flex:1; min-width:0; }
+    .t5 .rname { font-size:13.5px; font-weight:700; color:#1E0E38; line-height:1.2; }
+    .t5 .rsub { font-size:10.5px; font-weight:500; color:rgba(30,14,56,0.44); margin-top:1px; }
+    .t5 .rbadge { font-size:9px; font-weight:800; letter-spacing:0.04em; background:#DDD0F4; color:#5B2D8E; border-radius:6px; padding:3px 8px; flex-shrink:0; }
+    .t5 .rchev { font-size:14px; color:rgba(30,14,56,0.18); flex-shrink:0; }
+    .t5 .lawn { border-radius:20px; background:#fff; flex-shrink:0; box-shadow:0 4px 20px rgba(107,63,160,0.10); }
+    .t5 .srow { display:flex; padding:13px 8px; }
+    .t5 .scell { flex:1; text-align:center; display:flex; flex-direction:column; align-items:center; gap:2px; }
+    .t5 .scell+.scell { border-left:1px solid rgba(107,63,160,0.08); }
+    .t5 .sv { font-size:12.5px; font-weight:800; color:#1E0E38; }
+    .t5 .sk { font-size:8px; font-weight:700; text-transform:uppercase; letter-spacing:0.07em; color:rgba(30,14,56,0.34); }
+    .t5 .streak { display:flex; align-items:center; justify-content:center; gap:6px; padding:8px 12px; border-top:1px solid rgba(107,63,160,0.07); }
+    .t5 .stxt { font-size:11px; font-weight:700; color:#1E0E38; } .t5 .stxt span { color:#5B2D8E; }
+    .t5 .tab-wrap { padding:6px 16px 16px; flex-shrink:0; background:#FAF8FE; }
+    .t5 .tabbar { display:flex; justify-content:space-around; align-items:center; padding:6px 8px; background:#6B3FA0; border-radius:999px; }
+    .t5 .tab { display:flex; flex-direction:column; align-items:center; gap:1px; }
+    .t5 .ti { font-size:17px; padding:5px 16px; border-radius:999px; }
+    .t5 .tab.on .ti { background:rgba(255,255,255,0.20); }
+    .t5 .tl { font-size:8.5px; font-weight:700; color:rgba(255,255,255,0.46); }
+    .t5 .tab.on .tl { color:rgba(255,255,255,0.90); }
+
+
+    /* ═══════════════════════════════════════════════════════
+       T6 — ULTRA MODERN (Midnight Gold)
+       Dark bg. Glass cards with glow. Gradient title text.
+       Gradient task cards. Floating glass pill tab bar.
+    ═══════════════════════════════════════════════════════ */
+    .t6 { background: #0E1018; }
+    .t6 .status { display:flex; justify-content:space-between; align-items:center; padding:13px 20px 5px; font-size:10.5px; font-weight:700; color:rgba(255,255,255,0.50); flex-shrink:0; }
+    .t6 .app-hd { display:flex; align-items:center; justify-content:space-between; padding:2px 20px 14px; flex-shrink:0; }
+    .t6 .app-title { font-size:26px; font-weight:800; letter-spacing:-0.5px; background:linear-gradient(90deg,#E4A832,#F7CC60); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+    .t6 .hactions { display:flex; gap:7px; }
+    .t6 .hbtn { width:34px; height:34px; border-radius:50%; background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.10); display:flex; align-items:center; justify-content:center; font-size:14px; position:relative; }
+    .t6 .ndot { position:absolute; top:-2px; right:-1px; width:9px; height:9px; border-radius:50%; background:#E4A832; border:2px solid #0E1018; }
+    .t6 .content { flex:1; overflow:hidden; display:flex; flex-direction:column; padding:0 20px 8px; gap:12px; }
+    .t6 .slbl { font-size:9px; font-weight:800; color:rgba(255,255,255,0.22); text-transform:uppercase; letter-spacing:0.18em; flex-shrink:0; }
+    .t6 .greet { border-radius:22px; background:rgba(255,255,255,0.055); border:1px solid rgba(255,255,255,0.09); padding:14px 16px; display:flex; align-items:center; justify-content:space-between; flex-shrink:0; box-shadow:0 0 0 1px rgba(228,168,50,0.07), 0 8px 32px rgba(228,168,50,0.05), inset 0 1px 0 rgba(255,255,255,0.06); }
+    .t6 .gtxt { font-size:19px; font-weight:800; color:rgba(255,255,255,0.88); line-height:1.22; letter-spacing:-0.3px; }
+    .t6 .gico { font-size:30px; }
+    .t6 .hscroll { display:flex; gap:9px; margin:0 -20px; padding:5px 20px; overflow:hidden; flex-shrink:0; }
+    .t6 .tc { min-width:162px; flex-shrink:0; border-radius:22px; padding:12px; display:flex; align-items:center; gap:10px; }
+    .t6 .tc.a { background:linear-gradient(140deg,#1C3D6E,#2A5898); box-shadow:0 8px 28px rgba(42,88,152,0.32); }
+    .t6 .tc.b { background:linear-gradient(140deg,#5A3500,#8A5200); box-shadow:0 8px 28px rgba(228,168,50,0.22); }
+    .t6 .tc.c { background:linear-gradient(140deg,#4A0E38,#7A1A5A); box-shadow:0 8px 28px rgba(200,80,160,0.22); }
+    .t6 .tci { font-size:24px; flex-shrink:0; }
+    .t6 .tcn { font-size:12.5px; font-weight:800; color:rgba(255,255,255,0.90); line-height:1.2; }
+    .t6 .tcs { font-size:10px; font-weight:600; color:rgba(255,255,255,0.50); margin-top:2px; }
+    .t6 .lawn { border-radius:22px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08); flex-shrink:0; box-shadow:inset 0 1px 0 rgba(255,255,255,0.06); }
+    .t6 .srow { display:flex; padding:13px 8px; }
+    .t6 .scell { flex:1; text-align:center; display:flex; flex-direction:column; align-items:center; gap:2px; }
+    .t6 .scell+.scell { border-left:1px solid rgba(255,255,255,0.07); }
+    .t6 .sv { font-size:12.5px; font-weight:800; color:rgba(255,255,255,0.80); }
+    .t6 .sk { font-size:8px; font-weight:700; text-transform:uppercase; letter-spacing:0.07em; color:rgba(255,255,255,0.26); }
+    .t6 .streak { display:flex; align-items:center; justify-content:center; gap:6px; padding:9px 12px; border-top:1px solid rgba(255,255,255,0.06); }
+    .t6 .stxt { font-size:11px; font-weight:700; color:rgba(255,255,255,0.58); } .t6 .stxt span { color:#E4A832; }
+    .t6 .tab-wrap { padding:6px 16px 16px; flex-shrink:0; }
+    .t6 .tabbar { display:flex; justify-content:space-around; align-items:center; padding:6px 8px; background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.10); border-radius:999px; box-shadow:0 0 0 1px rgba(228,168,50,0.07), 0 8px 32px rgba(0,0,0,0.30); }
+    .t6 .tab { display:flex; flex-direction:column; align-items:center; gap:1px; }
+    .t6 .ti { font-size:17px; padding:5px 16px; border-radius:999px; }
+    .t6 .tab.on .ti { background:rgba(228,168,50,0.18); box-shadow:0 0 12px rgba(228,168,50,0.18); }
+    .t6 .tl { font-size:8.5px; font-weight:700; color:rgba(255,255,255,0.26); }
+    .t6 .tab.on .tl { color:#E4A832; }
+
+  </style>
+</head>
+<body>
+
+  <div class="page-header">
+    <div class="eyebrow">Kura · Flat Bold UI — Design Evolution</div>
+    <div class="pg-title">Modernity Progression</div>
+    <div class="pg-sub">Same dashboard. Each screen is more modern than the last →</div>
+  </div>
+
+  <div class="progression">
+    <div class="prog-step"><div class="prog-dot pd1">1</div><div class="prog-lbl">Classic<br>Flat Bold</div></div>
+    <div class="prog-arr">→</div>
+    <div class="prog-step"><div class="prog-dot pd2">2</div><div class="prog-lbl">Refined<br>Flat</div></div>
+    <div class="prog-arr">→</div>
+    <div class="prog-step"><div class="prog-dot pd3">3</div><div class="prog-lbl">Airy<br>Elevated</div></div>
+    <div class="prog-arr">→</div>
+    <div class="prog-step"><div class="prog-dot pd4">4</div><div class="prog-lbl">Floating<br>Layers</div></div>
+    <div class="prog-arr">→</div>
+    <div class="prog-step"><div class="prog-dot pd5">5</div><div class="prog-lbl">Editorial<br>Hero</div></div>
+    <div class="prog-arr">→</div>
+    <div class="prog-step"><div class="prog-dot pd6">6</div><div class="prog-lbl">Ultra<br>Modern</div></div>
+  </div>
+
+  <div class="grid">
+
+    <!-- T1 ─ CLASSIC FLAT BOLD -->
+    <div class="mockup">
+      <div class="phone"><div class="screen t1">
+        <div class="di"></div>
+        <div class="status"><span>9:41</span><span>▲▲▲</span><span>🔋</span></div>
+        <div class="app-hd">
+          <div class="app-title">Dashboard</div>
+          <div class="hactions"><div class="hbtn">👤</div><div class="hbtn">🔔<div class="ndot"></div></div></div>
+        </div>
+        <div class="rule"></div>
+        <div class="content">
+          <div class="greet"><div class="gtxt">Hi, Farai!<br>Ready to grow?</div><div class="gico">🌿</div></div>
+          <div class="slbl">Today's Tasks</div>
+          <div class="hscroll">
+            <div class="tc a"><div class="tci">💧</div><div><div class="tcn">Water the lawn</div><div class="tcs">Due Today</div></div></div>
+            <div class="tc b"><div class="tci">✂️</div><div><div class="tcn">Mow backyard</div><div class="tcs">This evening</div></div></div>
+            <div class="tc c"><div class="tci">🌱</div><div><div class="tcn">Apply fertilizer</div><div class="tcs">Tomorrow</div></div></div>
+          </div>
+          <div class="slbl">Your Lawn</div>
+          <div class="lawn">
+            <div class="srow">
+              <div class="scell"><div class="sv">Cool-season</div><div class="sk">Grass type</div></div>
+              <div class="scell"><div class="sv">3 days</div><div class="sk">Since watered</div></div>
+              <div class="scell"><div class="sv">Just Alive</div><div class="sk">Effort level</div></div>
+            </div>
+            <div class="streak"><span style="font-size:15px">🔥</span><div class="stxt"><span>4-week streak</span> — keep it up!</div></div>
+          </div>
+        </div>
+        <div class="tabbar">
+          <div class="tab on"><div class="tp">🏠</div><div class="tl">Today</div></div>
+          <div class="tab"><div class="tp">✅</div><div class="tl">Tasks</div></div>
+          <div class="tab"><div class="tp">📚</div><div class="tl">Learn</div></div>
+          <div class="tab"><div class="tp">⚙️</div><div class="tl">Settings</div></div>
+        </div>
+      </div></div>
+      <div><div class="lbl-level">Level 1</div><div class="lbl-name">Classic Flat Bold</div><div class="lbl-desc">1.5px hard borders everywhere · no shadows · underline rule · flat white tab bar</div></div>
+    </div>
+
+    <!-- T2 ─ REFINED FLAT -->
+    <div class="mockup">
+      <div class="phone"><div class="screen t2">
+        <div class="di"></div>
+        <div class="status"><span>9:41</span><span>▲▲▲</span><span>🔋</span></div>
+        <div class="app-hd">
+          <div class="app-title">Dashboard</div>
+          <div class="hactions"><div class="hbtn">👤</div><div class="hbtn">🔔<div class="ndot"></div></div></div>
+        </div>
+        <div class="content">
+          <div class="greet"><div class="gtxt">Hi, Farai!<br>Ready to grow?</div><div class="gico">🌿</div></div>
+          <div class="slbl">Today's Tasks</div>
+          <div class="hscroll">
+            <div class="tc a"><div class="tci">💧</div><div><div class="tcn">Water the lawn</div><div class="tcs">Due Today</div></div></div>
+            <div class="tc b"><div class="tci">✂️</div><div><div class="tcn">Mow backyard</div><div class="tcs">This evening</div></div></div>
+            <div class="tc c"><div class="tci">🌱</div><div><div class="tcn">Apply fertilizer</div><div class="tcs">Tomorrow</div></div></div>
+          </div>
+          <div class="slbl">Your Lawn</div>
+          <div class="lawn">
+            <div class="srow">
+              <div class="scell"><div class="sv">Cool-season</div><div class="sk">Grass type</div></div>
+              <div class="scell"><div class="sv">3 days</div><div class="sk">Since watered</div></div>
+              <div class="scell"><div class="sv">Just Alive</div><div class="sk">Effort level</div></div>
+            </div>
+            <div class="streak"><span style="font-size:15px">🔥</span><div class="stxt"><span>4-week streak</span> — keep it up!</div></div>
+          </div>
+        </div>
+        <div class="tabbar">
+          <div class="tab on"><div class="tp">🏠</div><div class="tl">Today</div></div>
+          <div class="tab"><div class="tp">✅</div><div class="tl">Tasks</div></div>
+          <div class="tab"><div class="tp">📚</div><div class="tl">Learn</div></div>
+          <div class="tab"><div class="tp">⚙️</div><div class="tl">Settings</div></div>
+        </div>
+      </div></div>
+      <div><div class="lbl-level">Level 2</div><div class="lbl-name">Refined Flat</div><div class="lbl-desc">1px soft blue-tinted borders · subtle shadows appear · no underline rule · 16px radius</div></div>
+    </div>
+
+    <!-- T3 ─ AIRY ELEVATED -->
+    <div class="mockup">
+      <div class="phone"><div class="screen t3">
+        <div class="di"></div>
+        <div class="status"><span>9:41</span><span>▲▲▲</span><span>🔋</span></div>
+        <div class="app-hd">
+          <div class="app-title">Dashboard</div>
+          <div class="hactions"><div class="hbtn">👤</div><div class="hbtn">🔔<div class="ndot"></div></div></div>
+        </div>
+        <div class="content">
+          <div class="greet"><div class="gtxt">Hi, Farai!<br>Ready to grow?</div><div class="gico">🍂</div></div>
+          <div class="slbl">Today's Tasks</div>
+          <div class="hscroll">
+            <div class="tc a"><div class="tci">💧</div><div><div class="tcn">Water the lawn</div><div class="tcs">Due Today</div></div></div>
+            <div class="tc b"><div class="tci">✂️</div><div><div class="tcn">Mow backyard</div><div class="tcs">This evening</div></div></div>
+            <div class="tc c"><div class="tci">🌱</div><div><div class="tcn">Apply fertilizer</div><div class="tcs">Tomorrow</div></div></div>
+          </div>
+          <div class="slbl">Your Lawn</div>
+          <div class="lawn">
+            <div class="srow">
+              <div class="scell"><div class="sv">Cool-season</div><div class="sk">Grass type</div></div>
+              <div class="scell"><div class="sv">3 days</div><div class="sk">Since watered</div></div>
+              <div class="scell"><div class="sv">Just Alive</div><div class="sk">Effort level</div></div>
+            </div>
+            <div class="streak"><span style="font-size:15px">🔥</span><div class="stxt"><span>4-week streak</span> — keep it up!</div></div>
+          </div>
+        </div>
+        <div class="tabbar">
+          <div class="tab on"><div class="tp">🏠</div><div class="tl">Today</div></div>
+          <div class="tab"><div class="tp">✅</div><div class="tl">Tasks</div></div>
+          <div class="tab"><div class="tp">📚</div><div class="tl">Learn</div></div>
+          <div class="tab"><div class="tp">⚙️</div><div class="tl">Settings</div></div>
+        </div>
+      </div></div>
+      <div><div class="lbl-level">Level 3</div><div class="lbl-name">Airy Elevated</div><div class="lbl-desc">Borders gone from all cards · shadows carry depth · floating tab with top-shadow · 20px radius</div></div>
+    </div>
+
+    <!-- T4 ─ FLOATING LAYERS -->
+    <div class="mockup">
+      <div class="phone"><div class="screen t4">
+        <div class="di"></div>
+        <div class="tint-hd">
+          <div class="status"><span>9:41</span><span>▲▲▲</span><span>🔋</span></div>
+          <div class="app-hd">
+            <div class="app-title">Dashboard</div>
+            <div class="hactions"><div class="hbtn">👤</div><div class="hbtn">🔔<div class="ndot"></div></div></div>
+          </div>
+        </div>
+        <div class="content">
+          <div class="greet"><div class="gtxt">Hi, Farai!<br>Ready to grow?</div><div class="gico">🌿</div></div>
+          <div class="slbl">Today's Tasks</div>
+          <div class="hscroll">
+            <div class="tc a"><div class="tci">💧</div><div><div class="tcn">Water the lawn</div><div class="tcs">Due Today</div></div></div>
+            <div class="tc b"><div class="tci">✂️</div><div><div class="tcn">Mow backyard</div><div class="tcs">This evening</div></div></div>
+            <div class="tc c"><div class="tci">🌱</div><div><div class="tcn">Apply fertilizer</div><div class="tcs">Tomorrow</div></div></div>
+          </div>
+          <div class="slbl">Your Lawn</div>
+          <div class="lawn">
+            <div class="srow">
+              <div class="scell"><div class="sv">Cool-season</div><div class="sk">Grass type</div></div>
+              <div class="scell"><div class="sv">3 days</div><div class="sk">Since watered</div></div>
+              <div class="scell"><div class="sv">Just Alive</div><div class="sk">Effort level</div></div>
+            </div>
+            <div class="streak"><span style="font-size:15px">🔥</span><div class="stxt"><span>4-week streak</span> — keep it up!</div></div>
+          </div>
+        </div>
+        <div class="tab-wrap"><div class="tabbar">
+          <div class="tab on"><div class="tp">🏠</div><div class="tl">Today</div></div>
+          <div class="tab"><div class="tp">✅</div><div class="tl">Tasks</div></div>
+          <div class="tab"><div class="tp">📚</div><div class="tl">Learn</div></div>
+          <div class="tab"><div class="tp">⚙️</div><div class="tl">Settings</div></div>
+        </div></div>
+      </div></div>
+      <div><div class="lbl-level">Level 4</div><div class="lbl-name">Floating Layers</div><div class="lbl-desc">Fully borderless · tinted colored shadows · gradient header wash · detached rounded pill tab</div></div>
+    </div>
+
+    <!-- T5 ─ EDITORIAL HERO -->
+    <div class="mockup">
+      <div class="phone"><div class="screen t5">
+        <div class="di"></div>
+        <div class="hero">
+          <div class="status"><span>9:41</span><span>▲▲▲</span><span>🔋</span></div>
+          <div class="hero-body">
+            <div class="h-eye">Good morning</div>
+            <div class="h-name">Farai ✦</div>
+            <div class="h-sub">Your lawn is ready for attention</div>
+          </div>
+        </div>
+        <div class="content">
+          <div class="slbl">Today's Tasks</div>
+          <div class="task-rows">
+            <div class="trow">
+              <div class="rico a">💧</div>
+              <div class="rbody"><div class="rname">Water the lawn</div><div class="rsub">Due today · 15 min</div></div>
+              <div class="rbadge">TODAY</div>
+              <div class="rchev">›</div>
+            </div>
+            <div class="trow">
+              <div class="rico b">✂️</div>
+              <div class="rbody"><div class="rname">Mow the backyard</div><div class="rsub">This evening · 30 min</div></div>
+              <div class="rchev">›</div>
+            </div>
+            <div class="trow">
+              <div class="rico c">🌱</div>
+              <div class="rbody"><div class="rname">Apply fertilizer</div><div class="rsub">Tomorrow · 20 min</div></div>
+              <div class="rchev">›</div>
+            </div>
+          </div>
+          <div class="slbl">Your Lawn</div>
+          <div class="lawn">
+            <div class="srow">
+              <div class="scell"><div class="sv">Cool-season</div><div class="sk">Grass type</div></div>
+              <div class="scell"><div class="sv">3 days</div><div class="sk">Since watered</div></div>
+              <div class="scell"><div class="sv">Just Alive</div><div class="sk">Effort level</div></div>
+            </div>
+            <div class="streak"><span style="font-size:15px">🔥</span><div class="stxt"><span>4-week streak</span> — keep it up!</div></div>
+          </div>
+        </div>
+        <div class="tab-wrap"><div class="tabbar">
+          <div class="tab on"><div class="ti">🏠</div><div class="tl">Today</div></div>
+          <div class="tab"><div class="ti">✅</div><div class="tl">Tasks</div></div>
+          <div class="tab"><div class="ti">📚</div><div class="tl">Learn</div></div>
+          <div class="tab"><div class="ti">⚙️</div><div class="tl">Settings</div></div>
+        </div></div>
+      </div></div>
+      <div><div class="lbl-level">Level 5</div><div class="lbl-name">Editorial Hero</div><div class="lbl-desc">Full-bleed gradient header · content card floats up · task list rows · centered colored pill tab</div></div>
+    </div>
+
+    <!-- T6 ─ ULTRA MODERN -->
+    <div class="mockup">
+      <div class="phone"><div class="screen t6">
+        <div class="di"></div>
+        <div class="status"><span>9:41</span><span>▲▲▲</span><span>🔋</span></div>
+        <div class="app-hd">
+          <div class="app-title">Dashboard</div>
+          <div class="hactions"><div class="hbtn">👤</div><div class="hbtn">🔔<div class="ndot"></div></div></div>
+        </div>
+        <div class="content">
+          <div class="greet"><div class="gtxt">Hi, Farai!<br>Ready to grow?</div><div class="gico">🌿</div></div>
+          <div class="slbl">Today's Tasks</div>
+          <div class="hscroll">
+            <div class="tc a"><div class="tci">💧</div><div><div class="tcn">Water the lawn</div><div class="tcs">Due Today</div></div></div>
+            <div class="tc b"><div class="tci">✂️</div><div><div class="tcn">Mow backyard</div><div class="tcs">This evening</div></div></div>
+            <div class="tc c"><div class="tci">🌱</div><div><div class="tcn">Apply fertilizer</div><div class="tcs">Tomorrow</div></div></div>
+          </div>
+          <div class="slbl">Your Lawn</div>
+          <div class="lawn">
+            <div class="srow">
+              <div class="scell"><div class="sv">Cool-season</div><div class="sk">Grass type</div></div>
+              <div class="scell"><div class="sv">3 days</div><div class="sk">Since watered</div></div>
+              <div class="scell"><div class="sv">Just Alive</div><div class="sk">Effort level</div></div>
+            </div>
+            <div class="streak"><span style="font-size:15px">🔥</span><div class="stxt"><span>4-week streak</span> — keep it up!</div></div>
+          </div>
+        </div>
+        <div class="tab-wrap"><div class="tabbar">
+          <div class="tab on"><div class="ti">🏠</div><div class="tl">Today</div></div>
+          <div class="tab"><div class="ti">✅</div><div class="tl">Tasks</div></div>
+          <div class="tab"><div class="ti">📚</div><div class="tl">Learn</div></div>
+          <div class="tab"><div class="ti">⚙️</div><div class="tl">Settings</div></div>
+        </div></div>
+      </div></div>
+      <div><div class="lbl-level">Level 6</div><div class="lbl-name">Ultra Modern</div><div class="lbl-desc">Dark bg · glass cards · colored glows · gradient text title · gradient task cards · glass pill tab</div></div>
+    </div>
+
+  </div>
+</body>
+</html>
