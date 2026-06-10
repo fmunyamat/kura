@@ -46,7 +46,9 @@ Read the diff to understand the nature of the work — not just which files, but
 - If already on `main` or `master` → must create a new branch
 - If on `memory-update` or another non-feature branch → create a new branch
 - If already on a relevant feature branch that matches the work → commit directly to it
-- If on a feature branch that does NOT match the current work → create a new branch
+- If on a feature branch that does NOT match the current work → create a new branch with a descriptive name derived from Step 3
+
+**The match test:** Ask "would a stranger reading this branch name know it contains this commit?" If no, create a new branch. A branch named `onboarding-ui-revamp` does not match work done specifically on the sign-in screen — create `sign-in-ui-revamp` instead. Broad names like `ui-updates` or `fixes` always fail this test.
 
 **Never commit directly to `main` or `master`.**
 
@@ -181,6 +183,9 @@ Tell the user:
 
 **Vague branch names**
 - `fix/bug` → bad. `fix/auth-provider-default-export` → good.
+
+**Branch name doesn't match the work**
+- Even on an existing feature branch, if the name doesn't accurately describe what's being committed, create a new branch first. Don't let commits accumulate under a misleading name just because the branch was already there.
 
 **Vague commit messages**
 - "update files" → bad. Describe the actual change and why.
