@@ -12,6 +12,7 @@ const brandColors = {
   // errorOnDark — soft red that reads clearly on dark or semi-transparent
   // glass surfaces (e.g. the sign-in glass card over a dark photo background).
   errorOnDark: 'rgba(255,120,100,0.92)',
+  errorOnLight: 'rgba(177, 24, 0, 0.92)'
 };
 
 // ─── Light theme ─────────────────────────────────────────────────────────────
@@ -65,11 +66,6 @@ export const lightTheme = {
     placeholderOnGlass:  'rgba(14,42,14,0.32)',
     // Links and accents inside the panel use a medium forest green.
     textAccentOnGlass:   '#135633',
-
-    // Progress bar segments — white on green reads the same on both themes.
-    onboardingProgressDone:   'rgba(255,255,255,0.75)',
-    onboardingProgressActive: 'rgba(255,255,255,0.75)',
-    onboardingProgressEmpty:  'rgba(255,255,255,0.15)',
   },
   spacing:   { xs: 4, sm: 8, md: 16, lg: 24, xl: 32, xxl: 48 },
   // iconSizes — fixed dimensions for inline brand/action icons alongside text.
@@ -91,6 +87,15 @@ export const lightTheme = {
     letterSpacingTight:  -0.3,
     letterSpacingBrand:  -1,
     letterSpacingWide:    2,
+    // fontBody — JetBrains Mono used for all body copy, labels, and UI text.
+    // fontHeader — Zalando Sans used for headings and card titles.
+    fontBody:        'JetBrainsMono-Regular',
+    fontBodyMedium:  'JetBrainsMono-Medium',
+    fontBodyBold:    'JetBrainsMono-Bold',
+    fontBodyBlack:   'JetBrainsMono-ExtraBold',
+    fontHeader:      'ZalandoSans-Regular',
+    fontHeaderBold:  'ZalandoSans-Bold',
+    fontHeaderHeavy: 'ZalandoSans-Black',
   },
 };
 

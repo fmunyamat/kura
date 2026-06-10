@@ -46,6 +46,34 @@ export interface CreateUserProfileInput {
   effortLevel: 1 | 2 | 3;
 }
 
+// upsertUserProfile — inserts a user_profiles row if none exists, or updates
+// it if one does. Using upsert rather than a separate check-then-create/update
+// avoids the race condition where the check returns false (e.g. due to an RLS
+// read gap) but the row already exists, causing a duplicate-key 23505 error.
+export const upsertUserProfile = async ({
+  userId,
+  zipCode,
+  lawnSize,
+  grassType,
+  effortLevel,
+}: CreateUserProfileInput): Promise<void> => {
+  const { lat, lng } = await geocodeZip(zipCode);
+
+  const { data, error, status, statusText } = await supabase.from('user_profiles').upsert({
+    user_id: userId,
+    zip_code: zipCode,
+    lawn_size: lawnSize,
+    grass_type: grassType,
+    lat,
+    lng,
+    effort_level: effortLevel,
+  }, { onConflict: 'user_id' }).select();
+
+  if (__DEV__) console.log('[upsertUserProfile] status:', status, statusText, 'data:', JSON.stringify(data), 'error:', JSON.stringify(error));
+
+  if (error) throw error;
+};
+
 // createUserProfile — writes the completed onboarding data to user_profiles.
 // This INSERT is the single event that flips hasCompletedOnboarding to true,
 // which the AuthProvider reads on next auth state check to route the user to

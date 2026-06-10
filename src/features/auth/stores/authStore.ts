@@ -19,6 +19,11 @@ interface AuthState {
   // Drives the routing decision: false → /onboarding, true → /(tabs).
   hasCompletedOnboarding: boolean;
 
+  // hasSeenWelcome — true once the user has tapped "Start Growing" on the
+  // final welcome screen. Set from user_profiles.has_seen_welcome.
+  // Drives the routing decision: profile exists + false → /welcome, true → /(tabs).
+  hasSeenWelcome: boolean;
+
   // isLoading — true while AuthProvider is running the initial session check
   // on app launch. Routing guards wait for this to be false before redirecting
   // so we never flash the sign-in screen to an already-logged-in user.
@@ -26,6 +31,7 @@ interface AuthState {
 
   setSession: (session: Session | null) => void;
   setHasCompletedOnboarding: (has: boolean) => void;
+  setHasSeenWelcome: (seen: boolean) => void;
   setIsLoading: (loading: boolean) => void;
 }
 
@@ -35,6 +41,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   session: null,
   user: null,
   hasCompletedOnboarding: false,
+  hasSeenWelcome: false,
   isLoading: true,
 
   // setSession updates both session and user together so they never drift
@@ -44,6 +51,9 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   setHasCompletedOnboarding: (has) =>
     set({ hasCompletedOnboarding: has }),
+
+  setHasSeenWelcome: (seen) =>
+    set({ hasSeenWelcome: seen }),
 
   setIsLoading: (loading) =>
     set({ isLoading: loading }),

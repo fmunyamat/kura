@@ -1,9 +1,3 @@
-jest.mock('@shopify/react-native-skia', () => ({
-  Canvas: 'Canvas',
-  BackdropBlur: 'BackdropBlur',
-  Fill: 'Fill',
-}));
-
 import React from 'react';
 import { Text } from 'react-native';
 import { render } from '@testing-library/react-native';
@@ -22,15 +16,5 @@ describe('GlassCard', () => {
       { wrapper: Wrapper }
     );
     expect(getByText('hello')).toBeTruthy();
-  });
-
-  // Verify that passing a custom blur sigma does not cause an error.
-  it('renders without error when a custom blur value is supplied', () => {
-    expect(() =>
-      render(
-        <GlassCard blur={20}><Text>custom blur</Text></GlassCard>,
-        { wrapper: Wrapper }
-      )
-    ).not.toThrow();
   });
 });

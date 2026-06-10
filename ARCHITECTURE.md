@@ -76,7 +76,7 @@ src/
 │       └── types.ts
 │
 ├── shared/
-│   ├── components/                # Button, Typography, TooltipModal, ProgressBar
+│   ├── components/                # Button, Typography, TooltipModal
 │   ├── hooks/
 │   │   ├── useAppState.ts
 │   │   ├── useSafeInsets.ts

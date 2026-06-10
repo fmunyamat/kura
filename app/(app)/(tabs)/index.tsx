@@ -1,3 +1,3 @@
-import Dashboard from '~/features/onboarding/screens/Dashboard';
+import Dashboard from '~/features/dashboard/screens/Dashboard';
 
 export default Dashboard;
