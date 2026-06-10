@@ -59,22 +59,24 @@ const ContentKAV = styled(KeyboardAvoidingView)`
 // When the keyboard is up, padding-top shrinks and the logo downsizes so the
 // panel below gains room without the hero disappearing. The resize is instant;
 // the smooth slide upward is handled by KeyboardAvoidingView's padding animation.
-const GlassHero = styled.View<{ $keyboardVisible: boolean }>`
+// GlassHero — on phones, padding-top collapses when the keyboard is up so the
+// hero slides toward the top and the glass card below gains room. Tablets keep
+// the full padding regardless of keyboard state — the screen is tall enough that
+// there is no need to compress the hero.
+const GlassHero = styled.View<{ $keyboardVisible: boolean; $isTablet: boolean }>`
   flex: 1;
   align-items: center;
   justify-content: center;
-  padding-top: ${({ $keyboardVisible, theme }) =>
-    $keyboardVisible ? theme.spacing.md : theme.spacing.xxl * 4}px;
+  padding-top: ${({ $keyboardVisible, $isTablet, theme }) =>
+    !$isTablet && $keyboardVisible ? theme.spacing.md : theme.spacing.xxl * 4}px;
   gap: ${({ theme }) => theme.spacing.xs}px;
 `;
 
 // LogoImage — the kura SVG mark. Shrinks when the keyboard is up to give the
 // hero a more compact footprint while remaining visible.
-const LogoImage = styled(Image)<{ $isTablet: boolean; $keyboardVisible: boolean }>`
-  width: ${({ $isTablet, $keyboardVisible }) =>
-    $keyboardVisible ? 48 : $isTablet ? 150 : 120}px;
-  height: ${({ $isTablet, $keyboardVisible }) =>
-    $keyboardVisible ? 48 : $isTablet ? 150 : 120}px;
+const LogoImage = styled(Image)<{ $isTablet: boolean }>`
+  width: ${({ $isTablet }) => ($isTablet ? 150 : 120)}px;
+  height: ${({ $isTablet }) => ($isTablet ? 150 : 120)}px;
   margin-bottom: ${({ theme }) => theme.spacing.xs}px;
 `;
 
@@ -109,10 +111,14 @@ const PanelHost = styled.View`
 // GlassAuthContent — the container for the email form panel. Its explicit width
 // reserves exactly one screen-width slot in the horizontal row. The padding
 // creates breathing room between the glass card and the screen edges.
-const GlassAuthContent = styled.View<{ $width: number }>`
+// On tablet, flex-start + a small padding-top pulls the card up so it sits
+// closer to the GlassHero rather than floating in the middle of the panel.
+const GlassAuthContent = styled.View<{ $width: number; $isTablet: boolean }>`
   width: ${({ $width }) => $width}px;
   padding: ${({ theme }) => theme.spacing.md}px;
-  justify-content: center;
+  justify-content: ${({ $isTablet }) => ($isTablet ? 'flex-start' : 'center')};
+  padding-top: ${({ $isTablet, theme }) =>
+    $isTablet ? theme.spacing.xxl * 2 : theme.spacing.md}px;
 `;
 
 // PanelRow — the horizontal Animated row that holds both panels side-by-side.
@@ -343,10 +349,9 @@ export const SignInScreen = () => {
               auth panel has more room above the keyboard. KeyboardAvoidingView
               animates the upward slide; the hero resize happens instantly on
               the same frame without interfering with that animation. */}
-          <GlassHero $keyboardVisible={keyboardVisible}>
+          <GlassHero $keyboardVisible={keyboardVisible} $isTablet={isTablet}>
             <LogoImage
               $isTablet={isTablet}
-              $keyboardVisible={keyboardVisible}
               accessibilityLabel="Kura logo"
               source={require('../../../../assets/images/kura-logo.svg')}
               contentFit="contain"
@@ -369,6 +374,7 @@ export const SignInScreen = () => {
             >
               <GlassAuthContent
                 $width={screenWidth}
+                $isTablet={isTablet}
                 pointerEvents={isConfirming ? 'none' : 'auto'}
               >
                 <GlassCard>
@@ -377,6 +383,7 @@ export const SignInScreen = () => {
                     onEmailChange={handleEmailChange}
                     onSubmit={handleSubmit}
                     isLoading={isSubmitting}
+                    isTablet={isTablet}
                   />
                   {/* Show the send error below the form when the OTP email request
                       fails, or when the user arrives via an expired deep link. */}
@@ -389,6 +396,7 @@ export const SignInScreen = () => {
                   <SocialAuthButtons
                     onGooglePress={() => {}}
                     onApplePress={() => {}}
+                    isTablet={isTablet}
                   />
                 </GlassCard>
               </GlassAuthContent>

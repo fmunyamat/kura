@@ -7,6 +7,7 @@ export interface SocialAuthButtonsProps {
   // onApplePress is optional — Apple Sign-In is only available on iOS, so
   // Android callers don't need to supply a handler at all.
   onApplePress?: () => void;
+  isTablet?: boolean;
 }
 
 // ButtonsWrapper — horizontal row so Google and Apple sit side-by-side,
@@ -17,12 +18,12 @@ const ButtonsWrapper = styled.View`
   width: 100%;
 `;
 
-// SocialButton — provider button. Dark well background and white border match
-// the input style on the frosted card: dark recess on a semi-transparent white
-// surface. rgba(0,0,0,0.10) background pairs with the email input well.
-const SocialButton = styled(Pressable)`
+// SocialButton — provider button. Semi-transparent white background sits on the
+// frosted card surface. On tablet, height scales up to match the taller email
+// input and submit button so all three controls stay visually consistent.
+const SocialButton = styled(Pressable)<{ $isTablet: boolean }>`
   flex: 1;
-  height: 44px;
+  height: ${({ $isTablet }) => ($isTablet ? 54 : 44)}px;
   border-radius: ${({ theme }) => theme.radii.md}px;
   background-color: rgba(223, 223, 223, 0.55);
   flex-direction: row;
@@ -50,9 +51,11 @@ const ButtonLabel = styled.Text`
 export const SocialAuthButtons = ({
   onGooglePress,
   onApplePress,
+  isTablet = false,
 }: SocialAuthButtonsProps) => (
   <ButtonsWrapper>
     <SocialButton
+      $isTablet={isTablet}
       onPress={onGooglePress}
       accessibilityLabel="Continue with Google"
       accessibilityRole="button"
@@ -66,6 +69,7 @@ export const SocialAuthButtons = ({
 
     {Platform.OS === 'ios' && onApplePress && (
       <SocialButton
+        $isTablet={isTablet}
         onPress={onApplePress}
         accessibilityLabel="Continue with Apple"
         accessibilityRole="button"

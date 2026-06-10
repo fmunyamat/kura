@@ -10,6 +10,7 @@ interface OtpRequestFormProps {
   onEmailChange: (email: string) => void;
   onSubmit: () => void;
   isLoading?: boolean;
+  isTablet?: boolean;
 }
 
 const Container = styled.View`
@@ -22,6 +23,7 @@ const Container = styled.View`
 const StyledTextInput = styled(TextInput)<{
   theme: DefaultTheme;
   $focused: boolean;
+  $isTablet: boolean;
 }>`
   background-color: ${({ $focused }) =>
     $focused ? 'rgba(0, 0, 0, 0.18)' : 'rgba(0, 0, 0, 0.10)'};
@@ -30,16 +32,16 @@ const StyledTextInput = styled(TextInput)<{
   font-family: ${({ theme }: { theme: DefaultTheme }) => theme.typography.fontBody};
   font-size: 14px;
   color: #ffffff;
-  height: 44px;
+  height: ${({ $isTablet }) => ($isTablet ? 54 : 44)}px;
 `;
 
 // SubmitButton — soft lime-green pastel pill. rgba(184,229,106,0.28) applies
 // the brand lime at low opacity so the button reads as a gentle colour accent
 // on the frosted card rather than a heavy dark block.
-const SubmitButton = styled(Pressable)<{ $disabled: boolean }>`
+const SubmitButton = styled(Pressable)<{ $disabled: boolean; $isTablet: boolean }>`
   background-color: rgba(82, 140, 32, 0.92);
   border-radius: ${({ theme }: { theme: DefaultTheme }) => theme.radii.md}px;
-  padding: 14px 12px;
+  padding: ${({ $isTablet }) => ($isTablet ? '18px' : '14px')} 12px;
   align-items: center;
   margin-top: ${({ theme }: { theme: DefaultTheme }) => theme.spacing.md}px;
   opacity: ${({ $disabled }) => ($disabled ? 0.5 : 1)};
@@ -59,6 +61,7 @@ export const OtpRequestForm = ({
   onEmailChange,
   onSubmit,
   isLoading = false,
+  isTablet = false,
 }: OtpRequestFormProps) => {
   const theme = useTheme();
   const [isFocused, setIsFocused] = useState(false);
@@ -67,6 +70,7 @@ export const OtpRequestForm = ({
     <Container>
       <StyledTextInput
         $focused={isFocused}
+        $isTablet={isTablet}
         placeholder="Enter email address"
         placeholderTextColor={theme.colors.placeholderOnGlass}
         value={email}
@@ -82,6 +86,7 @@ export const OtpRequestForm = ({
       />
       <SubmitButton
         $disabled={isLoading}
+        $isTablet={isTablet}
         onPress={onSubmit}
         disabled={isLoading}
         accessibilityLabel={isLoading ? 'Sending code' : 'Send code'}
