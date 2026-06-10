@@ -33,11 +33,17 @@ interface ProfileFlags {
 // hasSeenWelcome: true if the user has already completed the welcome flow.
 // Called by AuthProvider after every sign-in to decide which screen to route to.
 export const checkUserProfile = async (userId: string): Promise<ProfileFlags> => {
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('user_profiles')
     .select('user_id, has_seen_welcome')
     .eq('user_id', userId)
     .maybeSingle();
+
+  if (error) {
+    if (__DEV__) console.log('[checkUserProfile] error:', JSON.stringify(error));
+    return { hasProfile: false, hasSeenWelcome: false };
+  }
+
   return {
     hasProfile: !!data,
     hasSeenWelcome: data?.has_seen_welcome ?? false,

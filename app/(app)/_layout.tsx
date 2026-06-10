@@ -68,5 +68,12 @@ export default function AppGroupLayout() {
     return <Redirect href="/welcome" />;
   }
 
+  // Welcome flow just finished — user is still on /welcome but hasSeenWelcome
+  // flipped to true. Redirect to tabs; the routing guard owns this transition,
+  // not handleFinish, for the same reason handleComplete doesn't call router.replace.
+  if (hasCompletedOnboarding && hasSeenWelcome && inWelcome) {
+    return <Redirect href="/" />;
+  }
+
   return <Stack screenOptions={{ headerShown: false }} />;
 }

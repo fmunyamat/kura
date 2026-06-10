@@ -34,6 +34,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       if (session?.user) {
         const flags = await checkUserProfile(session.user.id);
+        if (__DEV__) console.log('[AuthProvider] startup flags:', JSON.stringify(flags), 'userId:', session.user.id);
         setHasCompletedOnboarding(flags.hasProfile);
         setHasSeenWelcome(flags.hasSeenWelcome);
       }

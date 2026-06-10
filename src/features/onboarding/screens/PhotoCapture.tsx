@@ -1,10 +1,9 @@
-import { router } from 'expo-router';
 import { useState } from 'react';
 import { ActivityIndicator, Pressable, useWindowDimensions } from 'react-native';
 import styled from 'styled-components/native';
 import { useAuthStore } from '~/features/auth/stores/authStore';
 import { OnboardingScreenShell } from '~/features/onboarding/components/OnboardingScreenShell';
-import { createUserProfile } from '../services/onboardingService';
+import { upsertUserProfile } from '../services/onboardingService';
 import { useOnboardingStore } from '../stores/onboardingStore';
 
 // $isTablet — passed to every styled-component that needs to scale up on tablets.
@@ -123,8 +122,12 @@ export const PhotoCapture = () => {
   // handleComplete — writes the user_profiles row to Supabase, which flips
   // hasCompletedOnboarding to true. On success, we update the Zustand auth
   // store immediately so the routing guard re-renders without waiting for
-  // another onAuthStateChange event, then reset the onboarding store and
-  // navigate to the home tabs.
+  // another onAuthStateChange event. Navigation is automatic from there —
+  // the guard in app/(app)/_layout.tsx redirects to /welcome (or tabs).
+  // We must NOT call router.replace ourselves: the store update synchronously
+  // swaps the (app) layout's <Stack> for a <Redirect>, so a manual navigation
+  // dispatched right after targets a navigator that no longer exists and
+  // throws "action not handled by any navigator".
   //
   // On failure we show a generic message — never the raw Supabase error
   // (MAVSV-CODE-4, MASWE-0087).
@@ -135,20 +138,14 @@ export const PhotoCapture = () => {
     setIsSubmitting(true);
 
     try {
-      await createUserProfile({
-        userId: user.id,
-        zipCode,
-        lawnSize,
-        grassType,
-        effortLevel,
-      });
+      await upsertUserProfile({ userId: user.id, zipCode, lawnSize, grassType, effortLevel });
 
       // Update auth store directly so the routing guard sees hasCompletedOnboarding
       // = true on the next render without waiting for an onAuthStateChange event.
       useAuthStore.getState().setHasCompletedOnboarding(true);
       useOnboardingStore.getState().reset();
-      router.replace('/');
-    } catch {
+    } catch (err) {
+      if (__DEV__) console.log('[PhotoCapture] handleComplete error:', err);
       setErrorMessage('Something went wrong. Please try again.');
     } finally {
       setIsSubmitting(false);
