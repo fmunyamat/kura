@@ -12,6 +12,7 @@ const brandColors = {
   // errorOnDark — soft red that reads clearly on dark or semi-transparent
   // glass surfaces (e.g. the sign-in glass card over a dark photo background).
   errorOnDark: 'rgba(255,120,100,0.92)',
+  errorOnLight: 'rgba(177, 24, 0, 0.92)'
 };
 
 // ─── Light theme ─────────────────────────────────────────────────────────────
