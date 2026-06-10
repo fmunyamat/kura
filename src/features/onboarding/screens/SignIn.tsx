@@ -81,10 +81,10 @@ const LogoImage = styled(Image)<{ $isTablet: boolean; $keyboardVisible: boolean 
 // Wordmark — the "kura" brand name in a heavy weight. On tablets the type
 // scales up to stay proportional to the larger logo.
 const Wordmark = styled.Text<{ $isTablet: boolean }>`
+  font-family: ${({ theme }) => theme.typography.fontHeaderHeavy};
   color: ${({ theme }) => theme.colors.textOnDark};
   font-size: ${({ $isTablet, theme }) =>
     $isTablet ? theme.typography.size2xl : theme.typography.size2xl * 0.8}px;
-  font-weight: ${({ theme }) => theme.typography.weightBlack};
   letter-spacing: ${({ theme }) => theme.typography.letterSpacingBrand}px;
 `;
 
@@ -133,22 +133,26 @@ const Divider = styled.View`
 `;
 
 // DividerLine — one of the two thin horizontal rules flanking the label.
+// rgba(255,255,255,0.18) matches the row dividers used inside the onboarding
+// cards (FormCard, OptionsCard) so the divider reads on the frosted surface.
 const DividerLine = styled.View`
   flex: 1;
   height: 1px;
-  background-color: ${({ theme }) => theme.colors.borderOnDark};
+  background-color: rgba(255, 255, 255, 0.18);
 `;
 
 const DividerText = styled.Text`
+  font-family: ${({ theme }) => theme.typography.fontBody};
   font-size: ${({ theme }) => theme.typography.sizeXs}px;
-  color: ${({ theme }) => theme.colors.textMutedOnDark};
+  color: rgba(255, 255, 255, 0.48);
 `;
 
 // ErrorText — the inline error that appears below the OTP request form when
 // something goes wrong (send failure or expired deep link redirect).
 const ErrorText = styled.Text`
   font-size: ${({ theme }) => theme.typography.sizeSm}px;
-  color: ${({ theme }) => theme.colors.errorOnDark};
+  font-family: ${({ theme }) => theme.typography.fontBody};
+  color: ${({ theme }) => theme.colors.errorOnLight};
   text-align: center;
   margin-top: ${({ theme }) => theme.spacing.xs}px;
 `;
@@ -253,7 +257,7 @@ export const SignInScreen = () => {
   // error — because exposing internal errors is a security concern (MASVS-CODE-4).
   const handleSubmit = async () => {
     if (!isValidEmail(email)) {
-      setSendError('Please enter a valid email address (e.g. name@example.com).');
+      setSendError('Please enter a valid email address (e.g. name@example.com)');
       return;
     }
     setSendError(null);
@@ -347,7 +351,7 @@ export const SignInScreen = () => {
               source={require('../../../../assets/images/kura-logo.svg')}
               contentFit="contain"
             />
-            <Wordmark $isTablet={isTablet}>kura</Wordmark>
+            <Wordmark $isTablet={isTablet}>KURA</Wordmark>
             <Tagline $isTablet={isTablet}>Lawn care, simplified</Tagline>
           </GlassHero>
 
@@ -397,7 +401,7 @@ export const SignInScreen = () => {
                 onResend={handleResend}
                 isVerifying={isVerifying}
                 errorMessage={verifyError}
-                // keyboardVisible={keyboardVisible}
+                keyboardVisible={keyboardVisible}
               />
             </PanelRow>
           </PanelHost>

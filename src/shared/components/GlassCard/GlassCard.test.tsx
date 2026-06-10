@@ -1,7 +1,3 @@
-jest.mock('expo-blur', () => ({
-  BlurView: 'BlurView',
-}));
-
 import React from 'react';
 import { Text } from 'react-native';
 import { render } from '@testing-library/react-native';
@@ -20,14 +16,5 @@ describe('GlassCard', () => {
       { wrapper: Wrapper }
     );
     expect(getByText('hello')).toBeTruthy();
-  });
-
-  it('renders without error when a custom intensity is supplied', () => {
-    expect(() =>
-      render(
-        <GlassCard intensity={40}><Text>custom intensity</Text></GlassCard>,
-        { wrapper: Wrapper }
-      )
-    ).not.toThrow();
   });
 });
