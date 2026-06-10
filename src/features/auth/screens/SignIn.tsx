@@ -13,8 +13,8 @@ import {
 import styled from 'styled-components/native';
 import { sendOtpCode, verifyOtpCode } from '~/features/auth/services/authService';
 import { GlassCard } from '~/shared/components/GlassCard';
-import { OtpRequestForm } from '../components/OtpRequestForm/OtpRequestForm';
-import { OtpVerifyPanel } from '../components/OtpVerifyPanel/OtpVerifyPanel';
+import { OtpRequestForm } from '../components/OtpRequestForm';
+import { OtpVerifyPanel } from '../components/OtpVerifyPanel';
 import { SocialAuthButtons } from '../components/SocialAuthButtons';
 
 const KEYBOARD_BEHAVIOR = 'padding' as const;

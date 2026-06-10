@@ -10,10 +10,10 @@ import styled from 'styled-components/native';
 
 import { useAuthStore } from '~/features/auth/stores/authStore';
 import WelcomeDots from '../components/WelcomeDots';
-import WelcomeStep1 from '../components/WelcomeStep1';
-import WelcomeStep2 from '../components/WelcomeStep2';
-import WelcomeStep3 from '../components/WelcomeStep3';
-import WelcomeStep4 from '../components/WelcomeStep4';
+import WelcomeStep1 from './WelcomeStep1';
+import WelcomeStep2 from './WelcomeStep2';
+import WelcomeStep3 from './WelcomeStep3';
+import WelcomeStep4 from './WelcomeStep4';
 import WelcomeStepLabel from '../components/WelcomeStepLabel';
 import { welcomeService } from '../services/welcome.service';
 
@@ -117,7 +117,8 @@ const WelcomeFlow = () => {
     try {
       await welcomeService.markWelcomeSeen();
       useAuthStore.getState().setHasSeenWelcome(true);
-    } catch {
+    } catch (err) {
+      if (__DEV__) console.log('[WelcomeFlow] handleFinish error:', err);
       setErrorMessage('Something went wrong. Please try again.');
     } finally {
       setIsSubmitting(false);

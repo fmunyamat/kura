@@ -1,3 +1,3 @@
-import { SignInScreen } from '@/src/features/onboarding/screens/SignIn';
+import { SignInScreen } from '@/src/features/auth/screens/SignIn';
 
 export default SignInScreen;

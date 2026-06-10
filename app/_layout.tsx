@@ -8,7 +8,7 @@ import 'react-native-reanimated';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { ThemeProvider } from 'styled-components/native';
 
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useColorScheme } from '@/src/shared/hooks/use-color-scheme';
 import AuthProvider from '@/src/app/providers/AuthProvider';
 import { darkTheme, lightTheme } from '@/src/config/theme';
 import DevPill from '@/src/features/dev/DevPill';
