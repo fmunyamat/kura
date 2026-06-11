@@ -83,7 +83,7 @@ const Subtext = styled.Text<TabletProps>`
 // to prevent double-taps from firing two Supabase writes. Scales on tablet
 // to match Steps 1–3.
 const CtaButton = styled(Pressable)<TabletProps & { $disabled: boolean }>`
-  background-color: rgba(8, 20, 8, 0.88);
+  background-color: ${({ theme }) => theme.colors.primary};
   border-radius: ${({ theme }) => theme.radii.md}px;
   padding: ${({ $isTablet }) => ($isTablet ? '22px 18px' : '14px 12px')};
   width: 100%;

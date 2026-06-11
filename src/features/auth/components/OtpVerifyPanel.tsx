@@ -291,7 +291,16 @@ export const OtpVerifyPanel = ({
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={{ flexGrow: 1 }}
       >
-      <GlassCard>
+      {/* variant="clear" matches the request-form card on the first panel —
+          this panel's white/lime-on-dark content was designed for exactly this
+          kind of dark transparent surface. The backdrop props feed Android's
+          faux-glass fill (blurred copy of the screen's own photo + tint);
+          iOS ignores them and blurs the real screen natively. */}
+      <GlassCard
+        variant="clear"
+        clearBackdropSource={require('../../../../assets/images/mowing-photo.jpg')}
+        clearBackdropTint={theme.colors.photoTint}
+      >
         <GlassContent $isTablet={isTablet} $keyboardVisible={keyboardVisible}>
           {/* Hide the icon when the keyboard is visible — it saves ~56px
               (icon + one gap) which is enough to keep all interactive elements

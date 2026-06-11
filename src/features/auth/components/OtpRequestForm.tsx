@@ -1,5 +1,5 @@
-import { ActivityIndicator, Pressable, TextInput } from 'react-native';
 import { useState } from 'react';
+import { ActivityIndicator, Pressable, TextInput, useColorScheme } from 'react-native';
 import styled, { DefaultTheme, useTheme } from 'styled-components/native';
 
 // OtpRequestForm — the email input panel. The user types their address and
@@ -17,29 +17,34 @@ const Container = styled.View`
   width: 100%;
 `;
 
-// StyledTextInput — the email address text field. Dark well background matches
-// the inputs in the onboarding Location screen: rgba(0,0,0,0.10) at rest,
-// rgba(0,0,0,0.18) when focused. No border — the background change signals focus.
+// StyledTextInput — the email address text field. Clear-glass style: a faint
+// white well (13% at rest) with a hairline border so the field reads as a
+// distinct control on the transparent pane. Focusing brightens the well to 22%
+// instead of changing the border. Text is white because the photo behind the
+// clear card is dark.
 const StyledTextInput = styled(TextInput)<{
   theme: DefaultTheme;
   $focused: boolean;
   $isTablet: boolean;
 }>`
-  background-color: ${({ $focused }) =>
-    $focused ? 'rgba(0, 0, 0, 0.18)' : 'rgba(0, 0, 0, 0.10)'};
+  background-color: ${({ $focused, theme }) =>
+    $focused ? theme.colors.glassClearInputFocused : theme.colors.glassClearInput};
+  border-width: 1px;
+  border-color: ${({ theme }: { theme: DefaultTheme }) => theme.colors.glassClearInputBorder};
   border-radius: ${({ theme }: { theme: DefaultTheme }) => theme.radii.md}px;
   padding: 10px 12px;
   font-family: ${({ theme }: { theme: DefaultTheme }) => theme.typography.fontBody};
   font-size: 14px;
-  color: #ffffff;
+  color: ${({ theme }: { theme: DefaultTheme }) => theme.colors.textOnDark};
   height: ${({ $isTablet }) => ($isTablet ? 54 : 44)}px;
 `;
 
-// SubmitButton — soft lime-green pastel pill. rgba(184,229,106,0.28) applies
-// the brand lime at low opacity so the button reads as a gentle colour accent
-// on the frosted card rather than a heavy dark block.
-const SubmitButton = styled(Pressable)<{ $disabled: boolean; $isTablet: boolean }>`
-  background-color: rgba(82, 140, 32, 0.92);
+// SubmitButton — the primary action on the clear glass card. Dark mode uses
+// the deeper primary green so it reads as intentional against the dark photo;
+// light mode uses the brighter primaryMid so it pops against the lighter scene.
+const SubmitButton = styled(Pressable)<{ $disabled: boolean; $isTablet: boolean; $isDark: boolean }>`
+  background-color: ${({ $isDark, theme }) =>
+    $isDark ? theme.colors.primary : theme.colors.primaryMid};
   border-radius: ${({ theme }: { theme: DefaultTheme }) => theme.radii.md}px;
   padding: ${({ $isTablet }) => ($isTablet ? '18px' : '14px')} 12px;
   align-items: center;
@@ -47,12 +52,12 @@ const SubmitButton = styled(Pressable)<{ $disabled: boolean; $isTablet: boolean 
   opacity: ${({ $disabled }) => ($disabled ? 0.5 : 1)};
 `;
 
-// ButtonText — deep forest green label for maximum contrast against the
-// light lime-pastel pill surface.
+// ButtonText — deep forest-green label, the darkest value on screen, for
+// maximum contrast against the bright lime pill.
 const ButtonText = styled.Text`
   font-family: ${({ theme }: { theme: DefaultTheme }) => theme.typography.fontBodyBold};
   font-size: 14px;
-  color: #ffffff;
+  color: ${({ theme }: { theme: DefaultTheme }) => theme.colors.white};
   text-align: center;
 `;
 
@@ -64,6 +69,7 @@ export const OtpRequestForm = ({
   isTablet = false,
 }: OtpRequestFormProps) => {
   const theme = useTheme();
+  const isDark = useColorScheme() === 'dark';
   const [isFocused, setIsFocused] = useState(false);
 
   return (
@@ -72,7 +78,7 @@ export const OtpRequestForm = ({
         $focused={isFocused}
         $isTablet={isTablet}
         placeholder="Enter email address"
-        placeholderTextColor={theme.colors.placeholderOnGlass}
+        placeholderTextColor={theme.colors.textMutedOnDark}
         value={email}
         onChangeText={onEmailChange}
         onFocus={() => setIsFocused(true)}
@@ -87,6 +93,7 @@ export const OtpRequestForm = ({
       <SubmitButton
         $disabled={isLoading}
         $isTablet={isTablet}
+        $isDark={isDark}
         onPress={onSubmit}
         disabled={isLoading}
         accessibilityLabel={isLoading ? 'Sending code' : 'Send code'}
@@ -94,7 +101,9 @@ export const OtpRequestForm = ({
         accessibilityState={{ busy: isLoading, disabled: isLoading }}
       >
         {isLoading ? (
-          <ActivityIndicator color="#ffffff" />
+          // Spinner is deep forest green to stay visible on the lime pill —
+          // a white spinner would wash out against the bright surface.
+          <ActivityIndicator color={theme.colors.primaryDeep} />
         ) : (
           <ButtonText>Send code →</ButtonText>
         )}

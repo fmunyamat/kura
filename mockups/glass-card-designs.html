@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Kura — 8 Card Designs for the Sign-In Screen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Zalando+Sans:wght@400;700;900&display=swap" rel="stylesheet" />
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --forest:      #2D6A2D;
+    --forest-deep: #0c3520;
+    --ink:         rgba(14,42,14,0.85);
+    --ink-muted:   rgba(14,42,14,0.52);
+    --lime:        rgba(184,229,106,0.95);
+    --lime-solid:  #B8E56A;
+  }
+
+  body {
+    font-family: 'JetBrains Mono', monospace;
+    background: #0a120a;
+    color: #fff;
+    min-height: 100vh;
+    padding: 48px 28px 96px;
+  }
+
+  .page-title {
+    font-family: 'Zalando Sans', sans-serif;
+    font-weight: 900;
+    font-size: 26px;
+    letter-spacing: -0.5px;
+    text-align: center;
+    margin-bottom: 10px;
+  }
+  .page-sub {
+    text-align: center;
+    font-size: 12.5px;
+    line-height: 1.6;
+    color: rgba(255,255,255,0.6);
+    max-width: 640px;
+    margin: 0 auto 52px;
+  }
+  .page-sub b { color: var(--lime-solid); font-weight: 700; }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 56px 36px;
+    max-width: 1340px;
+    margin: 0 auto;
+  }
+
+  .option {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    opacity: 0;
+    transform: translateY(18px);
+    animation: rise 0.6s cubic-bezier(0.22,1,0.36,1) forwards;
+  }
+  .option:nth-child(1){animation-delay:.05s} .option:nth-child(2){animation-delay:.12s}
+  .option:nth-child(3){animation-delay:.19s} .option:nth-child(4){animation-delay:.26s}
+  .option:nth-child(5){animation-delay:.33s} .option:nth-child(6){animation-delay:.40s}
+  .option:nth-child(7){animation-delay:.47s} .option:nth-child(8){animation-delay:.54s}
+  @keyframes rise { to { opacity: 1; transform: none; } }
+
+  .option-head { display: flex; flex-direction: column; gap: 5px; padding: 0 4px; }
+  .option-no   { font-size: 10px; letter-spacing: 2.5px; text-transform: uppercase; color: var(--lime-solid); font-weight: 700; }
+  .option-name { font-family: 'Zalando Sans', sans-serif; font-size: 17px; font-weight: 900; }
+  .option-desc { font-size: 11.5px; color: rgba(255,255,255,0.62); line-height: 1.55; }
+
+  /* ── Mini phone frame — every card judged in true screen context ── */
+  .phone {
+    position: relative;
+    width: 100%;
+    max-width: 310px;
+    margin: 0 auto;
+    aspect-ratio: 9 / 17.5;
+    border-radius: 34px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.14);
+    background:
+      linear-gradient(rgba(5,12,5,0.58), rgba(5,12,5,0.58)),
+      url('../assets/images/mowing-photo.jpg') center/cover;
+    display: flex;
+    flex-direction: column;
+    transition: transform .35s cubic-bezier(0.22,1,0.36,1), box-shadow .35s;
+  }
+  .option:hover .phone {
+    transform: translateY(-6px);
+    box-shadow: 0 28px 60px -18px rgba(0,0,0,0.85);
+  }
+
+  .hero {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    padding-top: 30px;
+  }
+  .hero img { width: 54px; height: 54px; }
+  .hero .wordmark {
+    font-family: 'Zalando Sans', sans-serif;
+    font-weight: 900;
+    font-size: 21px;
+    letter-spacing: -0.8px;
+    color: rgba(255,255,255,0.88);
+  }
+  .hero .tagline {
+    font-size: 7.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--lime);
+  }
+
+  .panel { flex: 1.7; display: flex; flex-direction: column; justify-content: center; padding: 12px; }
+
+  /* ── Shared card internals (scaled-down sign-in controls) ── */
+  .card  { display: flex; flex-direction: column; gap: 10px; padding: 13px; }
+  .input { height: 34px; border-radius: 7px; padding: 0 10px; font-size: 10px; display: flex; align-items: center; font-family: inherit; }
+  .btn   { height: 36px; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 10.5px; font-weight: 700; font-family: inherit; }
+  .divider { display: flex; align-items: center; gap: 7px; }
+  .divider .line  { flex: 1; height: 1px; }
+  .divider .label { font-size: 7.5px; white-space: nowrap; }
+  .socials { display: flex; gap: 8px; }
+  .social  { flex: 1; height: 34px; border-radius: 7px; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 9.5px; font-weight: 700; }
+  .dot { width: 11px; height: 11px; border-radius: 50%; flex: 0 0 auto; }
+
+  .swatches { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 4px; }
+  .chip { font-size: 9.5px; padding: 3px 8px; border-radius: 5px; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.75); }
+
+  /* ════ 1 · CLEAR GLASS — near-invisible frost, luminous edge ════ */
+  .d1 .card {
+    background: rgba(255,255,255,0.10);
+    backdrop-filter: blur(22px) saturate(1.5);
+    -webkit-backdrop-filter: blur(22px) saturate(1.5);
+    border-radius: 18px;
+    border: 1px solid rgba(255,255,255,0.32);
+    border-bottom-color: rgba(255,255,255,0.10);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.25), 0 18px 40px -16px rgba(0,0,0,0.5);
+  }
+  .d1 .input  { background: rgba(255,255,255,0.13); color: rgba(255,255,255,0.55); border: 1px solid rgba(255,255,255,0.14); }
+  .d1 .btn    { background: var(--lime-solid); color: #14361a; }
+  .d1 .line   { background: rgba(255,255,255,0.22); }
+  .d1 .label  { color: rgba(255,255,255,0.55); }
+  .d1 .social { background: rgba(255,255,255,0.13); color: rgba(255,255,255,0.85); border: 1px solid rgba(255,255,255,0.16); }
+
+  /* ════ 2 · SMOKED FOREST — dark tinted glass, lime ink ════ */
+  .d2 .card {
+    background: rgba(12,40,20,0.68);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border-radius: 18px;
+    border: 1px solid rgba(184,229,106,0.20);
+  }
+  .d2 .input  { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.5); }
+  .d2 .btn    { background: linear-gradient(120deg, #B8E56A, #8FCB4C); color: #14361a; }
+  .d2 .line   { background: rgba(184,229,106,0.20); }
+  .d2 .label  { color: rgba(184,229,106,0.55); }
+  .d2 .social { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.85); }
+
+  /* ════ 3 · FIELD NOTES — opaque warm paper, editorial stamp ════ */
+  .d3 .card {
+    background: #FAF7EE;
+    border-radius: 10px;
+    box-shadow: 0 22px 44px -14px rgba(0,0,0,0.65);
+    gap: 9px;
+  }
+  .d3 .stamp {
+    display: flex; justify-content: space-between;
+    font-size: 7px; font-weight: 700; letter-spacing: 1.8px; text-transform: uppercase;
+    color: rgba(44,58,34,0.45);
+    border-bottom: 1px dashed rgba(44,58,34,0.25);
+    padding-bottom: 7px;
+  }
+  .d3 .input  { background: rgba(44,58,34,0.07); color: rgba(44,58,34,0.5); }
+  .d3 .btn    { background: var(--forest); color: #fff; }
+  .d3 .line   { border-top: 1px dashed rgba(44,58,34,0.3); height: 0; background: none; }
+  .d3 .label  { color: rgba(44,58,34,0.5); }
+  .d3 .social { background: #fff; color: #2c3a22; border: 1px solid rgba(44,58,34,0.18); }
+
+  /* ════ 4 · TRAIL MARKER — sharp corners, hairline, utility ════ */
+  .d4 .card {
+    background: rgba(5,12,5,0.38);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-radius: 0;
+    border: 1px solid rgba(255,255,255,0.85);
+    position: relative;
+  }
+  .d4 .meta {
+    font-size: 6.5px; letter-spacing: 2.2px; text-transform: uppercase;
+    color: rgba(255,255,255,0.5); display: flex; justify-content: space-between;
+  }
+  .d4 .input  { background: transparent; border: 1px solid rgba(255,255,255,0.35); border-radius: 0; color: rgba(255,255,255,0.55); }
+  .d4 .btn    { background: #fff; color: #0a120a; border-radius: 0; text-transform: uppercase; letter-spacing: 1.5px; font-size: 9px; }
+  .d4 .line   { background: rgba(255,255,255,0.3); }
+  .d4 .label  { color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 1px; font-size: 6.5px; }
+  .d4 .social { background: transparent; border: 1px solid rgba(255,255,255,0.35); border-radius: 0; color: rgba(255,255,255,0.85); }
+
+  /* ════ 5 · MEADOW TINT — gradient-tinted glass ════ */
+  .d5 .card {
+    background: linear-gradient(150deg, rgba(61,125,53,0.52), rgba(12,53,32,0.68));
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-radius: 18px;
+    border: 1px solid rgba(255,255,255,0.18);
+  }
+  .d5 .input  { background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.55); }
+  .d5 .btn    { background: var(--lime-solid); color: #14361a; }
+  .d5 .line   { background: rgba(255,255,255,0.2); }
+  .d5 .label  { color: rgba(255,255,255,0.55); }
+  .d5 .social { background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.88); }
+
+  /* ════ 6 · STICKER POP — solid card, hard offset shadow ════ */
+  .d6 .card {
+    background: #FDFBF4;
+    border-radius: 16px;
+    border: 2px solid #14361a;
+    box-shadow: 7px 7px 0 var(--lime-solid);
+    margin-right: 7px; margin-bottom: 7px;
+  }
+  .d6 .input  { background: rgba(20,54,26,0.07); border: 1.5px solid #14361a; color: rgba(20,54,26,0.5); }
+  .d6 .btn    { background: #14361a; color: var(--lime-solid); border-radius: 99px; }
+  .d6 .line   { background: rgba(20,54,26,0.25); }
+  .d6 .label  { color: rgba(20,54,26,0.55); }
+  .d6 .social { background: #fff; border: 1.5px solid #14361a; color: #14361a; border-radius: 99px; }
+
+  /* ════ 7 · GROUND SHEET — bottom-anchored sheet with grabber ════ */
+  .d7 .panel { justify-content: flex-end; padding: 0; }
+  .d7 .card {
+    background: rgba(255,255,255,0.50);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border-radius: 24px 24px 0 0;
+    border-top: 1px solid rgba(255,255,255,0.55);
+    padding: 10px 15px 18px;
+  }
+  .d7 .grabber { width: 34px; height: 4px; border-radius: 99px; background: rgba(14,42,14,0.25); margin: 0 auto 4px; }
+  .d7 .input  { background: rgba(255,255,255,0.55); color: var(--ink-muted); }
+  .d7 .btn    { background: var(--forest); color: #fff; }
+  .d7 .line   { background: rgba(14,42,14,0.16); }
+  .d7 .label  { color: var(--ink-muted); }
+  .d7 .social { background: rgba(255,255,255,0.6); color: var(--ink); border: 1px solid rgba(14,42,14,0.12); }
+
+  /* ════ 8 · OPEN AIR — no card at all, underlined fields ════ */
+  .d8 .card { background: none; padding: 13px 18px; gap: 13px; }
+  .d8 .input  { background: transparent; border-radius: 0; border-bottom: 1px solid rgba(255,255,255,0.5); padding: 0 2px; color: rgba(255,255,255,0.6); }
+  .d8 .btn    { background: var(--lime-solid); color: #14361a; border-radius: 99px; }
+  .d8 .line   { background: rgba(255,255,255,0.25); }
+  .d8 .label  { color: rgba(255,255,255,0.55); }
+  .d8 .social { background: rgba(255,255,255,0.10); border: 1px solid rgba(255,255,255,0.3); color: rgba(255,255,255,0.88); border-radius: 99px; }
+</style>
+</head>
+<body>
+  <div class="page-title">Sign-in card — 8 design directions</div>
+  <div class="page-sub">
+    Same screen, same photo, same controls — only the <b>card itself</b> changes:
+    its material, shape, edge and presence. Options 3, 6 and 7 keep your
+    <b>Forest Ink</b> elements as-is; the darker materials (1, 2, 4, 5, 8) flip
+    the ink to white/lime to stay legible.
+  </div>
+
+  <div class="grid">
+
+    <!-- 1 · CLEAR GLASS -->
+    <div class="option d1">
+      <div class="option-head">
+        <span class="option-no">Option 1</span>
+        <span class="option-name">Clear Glass</span>
+        <span class="option-desc">Near-invisible frost with a luminous top edge — the photo stays the hero, the card is pure atmosphere. Lime CTA carries the action.</span>
+      </div>
+      <div class="phone">
+        <div class="hero">
+          <img src="../assets/images/kura-logo.svg" alt="" />
+          <div class="wordmark">KURA</div>
+          <div class="tagline">Lawn care, simplified</div>
+        </div>
+        <div class="panel">
+          <div class="card">
+            <div class="input">Enter email address</div>
+            <div class="btn">Send code →</div>
+            <div class="divider"><span class="line"></span><span class="label">or continue with</span><span class="line"></span></div>
+            <div class="socials">
+              <div class="social"><span class="dot" style="background:#4285F4"></span>Google</div>
+              <div class="social"><span class="dot" style="background:#fff"></span>Apple</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="swatches"><span class="chip">frost #fff·10%</span><span class="chip">edge #fff·32%</span><span class="chip">blur 22 + saturate</span></div>
+    </div>
+
+    <!-- 2 · SMOKED FOREST -->
+    <div class="option d2">
+      <div class="option-head">
+        <span class="option-no">Option 2</span>
+        <span class="option-name">Smoked Forest</span>
+        <span class="option-desc">Dark green-black glass with a faint lime edge — matches your dark-theme onboarding panel. Moody, premium, the lime gradient CTA glows.</span>
+      </div>
+      <div class="phone">
+        <div class="hero">
+          <img src="../assets/images/kura-logo.svg" alt="" />
+          <div class="wordmark">KURA</div>
+          <div class="tagline">Lawn care, simplified</div>
+        </div>
+        <div class="panel">
+          <div class="card">
+            <div class="input">Enter email address</div>
+            <div class="btn">Send code →</div>
+            <div class="divider"><span class="line"></span><span class="label">or continue with</span><span class="line"></span></div>
+            <div class="socials">
+              <div class="social"><span class="dot" style="background:#4285F4"></span>Google</div>
+              <div class="social"><span class="dot" style="background:#fff"></span>Apple</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="swatches"><span class="chip">smoke green·68%</span><span class="chip">edge lime·20%</span><span class="chip">CTA lime gradient</span></div>
+    </div>
+
+    <!-- 3 · FIELD NOTES -->
+    <div class="option d3">
+      <div class="option-head">
+        <span class="option-no">Option 3</span>
+        <span class="option-name">Field Notes</span>
+        <span class="option-desc">Opaque warm paper with a stamped header and dashed rules — like a notebook page laid over the lawn. Friendliest read; Forest Ink unchanged.</span>
+      </div>
+      <div class="phone">
+        <div class="hero">
+          <img src="../assets/images/kura-logo.svg" alt="" />
+          <div class="wordmark">KURA</div>
+          <div class="tagline">Lawn care, simplified</div>
+        </div>
+        <div class="panel">
+          <div class="card">
+            <div class="stamp"><span>Kura · Sign in</span><span>№ 001</span></div>
+            <div class="input">Enter email address</div>
+            <div class="btn">Send code →</div>
+            <div class="divider"><span class="line"></span><span class="label">or continue with</span><span class="line"></span></div>
+            <div class="socials">
+              <div class="social"><span class="dot" style="background:#4285F4"></span>Google</div>
+              <div class="social"><span class="dot" style="background:#000"></span>Apple</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="swatches"><span class="chip">paper #FAF7EE</span><span class="chip">no blur</span><span class="chip">dashed rules</span></div>
+    </div>
+
+    <!-- 4 · TRAIL MARKER -->
+    <div class="option d4">
+      <div class="option-head">
+        <span class="option-no">Option 4</span>
+        <span class="option-name">Trail Marker</span>
+        <span class="option-desc">Sharp corners, single white hairline, uppercase microlabels — utilitarian like a park signpost. The most distinctive; least soft.</span>
+      </div>
+      <div class="phone">
+        <div class="hero">
+          <img src="../assets/images/kura-logo.svg" alt="" />
+          <div class="wordmark">KURA</div>
+          <div class="tagline">Lawn care, simplified</div>
+        </div>
+        <div class="panel">
+          <div class="card">
+            <div class="meta"><span>Auth / 01</span><span>Kura</span></div>
+            <div class="input">Enter email address</div>
+            <div class="btn">Send code →</div>
+            <div class="divider"><span class="line"></span><span class="label">or continue with</span><span class="line"></span></div>
+            <div class="socials">
+              <div class="social"><span class="dot" style="background:#4285F4"></span>Google</div>
+              <div class="social"><span class="dot" style="background:#fff"></span>Apple</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="swatches"><span class="chip">radius 0</span><span class="chip">hairline #fff·85%</span><span class="chip">light blur 8</span></div>
+    </div>
+
+    <!-- 5 · MEADOW TINT -->
+    <div class="option d5">
+      <div class="option-head">
+        <span class="option-no">Option 5</span>
+        <span class="option-name">Meadow Tint</span>
+        <span class="option-desc">Glass tinted with the onboarding forest gradient — ties sign-in directly to the next screen the user sees. Cohesion play.</span>
+      </div>
+      <div class="phone">
+        <div class="hero">
+          <img src="../assets/images/kura-logo.svg" alt="" />
+          <div class="wordmark">KURA</div>
+          <div class="tagline">Lawn care, simplified</div>
+        </div>
+        <div class="panel">
+          <div class="card">
+            <div class="input">Enter email address</div>
+            <div class="btn">Send code →</div>
+            <div class="divider"><span class="line"></span><span class="label">or continue with</span><span class="line"></span></div>
+            <div class="socials">
+              <div class="social"><span class="dot" style="background:#4285F4"></span>Google</div>
+              <div class="social"><span class="dot" style="background:#fff"></span>Apple</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="swatches"><span class="chip">gradient green 52→68%</span><span class="chip">blur 16</span><span class="chip">CTA lime</span></div>
+    </div>
+
+    <!-- 6 · STICKER POP -->
+    <div class="option d6">
+      <div class="option-head">
+        <span class="option-no">Option 6</span>
+        <span class="option-name">Sticker Pop</span>
+        <span class="option-desc">Solid card, bold ink outline, hard lime offset shadow, pill controls — playful and toy-like. Most beginner-friendly energy.</span>
+      </div>
+      <div class="phone">
+        <div class="hero">
+          <img src="../assets/images/kura-logo.svg" alt="" />
+          <div class="wordmark">KURA</div>
+          <div class="tagline">Lawn care, simplified</div>
+        </div>
+        <div class="panel">
+          <div class="card">
+            <div class="input">Enter email address</div>
+            <div class="btn">Send code →</div>
+            <div class="divider"><span class="line"></span><span class="label">or continue with</span><span class="line"></span></div>
+            <div class="socials">
+              <div class="social"><span class="dot" style="background:#4285F4"></span>Google</div>
+              <div class="social"><span class="dot" style="background:#000"></span>Apple</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="swatches"><span class="chip">outline 2px #14361a</span><span class="chip">offset 7px lime</span><span class="chip">pill controls</span></div>
+    </div>
+
+    <!-- 7 · GROUND SHEET -->
+    <div class="option d7">
+      <div class="option-head">
+        <span class="option-no">Option 7</span>
+        <span class="option-name">Ground Sheet</span>
+        <span class="option-desc">Your frost becomes a bottom sheet — full-width, anchored, with a grabber. Feels native and thumb-reachable; Forest Ink unchanged.</span>
+      </div>
+      <div class="phone">
+        <div class="hero">
+          <img src="../assets/images/kura-logo.svg" alt="" />
+          <div class="wordmark">KURA</div>
+          <div class="tagline">Lawn care, simplified</div>
+        </div>
+        <div class="panel">
+          <div class="card">
+            <div class="grabber"></div>
+            <div class="input">Enter email address</div>
+            <div class="btn">Send code →</div>
+            <div class="divider"><span class="line"></span><span class="label">or continue with</span><span class="line"></span></div>
+            <div class="socials">
+              <div class="social"><span class="dot" style="background:#4285F4"></span>Google</div>
+              <div class="social"><span class="dot" style="background:#000"></span>Apple</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="swatches"><span class="chip">frost #fff·50%</span><span class="chip">radius 24 top only</span><span class="chip">edge-to-edge</span></div>
+    </div>
+
+    <!-- 8 · OPEN AIR -->
+    <div class="option d8">
+      <div class="option-head">
+        <span class="option-no">Option 8</span>
+        <span class="option-name">Open Air</span>
+        <span class="option-desc">No card at all — underlined fields and pill buttons float straight on the photo. Maximum confidence, minimum chrome.</span>
+      </div>
+      <div class="phone">
+        <div class="hero">
+          <img src="../assets/images/kura-logo.svg" alt="" />
+          <div class="wordmark">KURA</div>
+          <div class="tagline">Lawn care, simplified</div>
+        </div>
+        <div class="panel">
+          <div class="card">
+            <div class="input">Enter email address</div>
+            <div class="btn">Send code →</div>
+            <div class="divider"><span class="line"></span><span class="label">or continue with</span><span class="line"></span></div>
+            <div class="socials">
+              <div class="social"><span class="dot" style="background:#4285F4"></span>Google</div>
+              <div class="social"><span class="dot" style="background:#fff"></span>Apple</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="swatches"><span class="chip">no surface</span><span class="chip">underline fields</span><span class="chip">pill CTA lime</span></div>
+    </div>
+
+  </div>
+</body>
+</html>

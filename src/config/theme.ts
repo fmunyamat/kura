@@ -33,6 +33,14 @@ export const lightTheme = {
     success:         '#C8E6C0',
 
     // Sign-in screen (dark photo background)
+    // photoTint — the dark green-black wash laid over the full-screen mowing
+    // photo so white text stays readable on top of it. Also reused inside the
+    // Android clear-glass card so its faked backdrop matches the real screen.
+    photoTint:            'rgba(5,12,5,0.58)',
+    // onboardingPhotoTint — the darker green tint on the onboarding screens'
+    // blurred photo (OnboardingScreenShell's DarkOverlay). Passed to GlassCard
+    // as clearBackdropTint on Android so the faux-glass fill matches the scene.
+    onboardingPhotoTint:  'rgba(10,28,10,0.60)',
     screenDark:          '#1a1a1a',
     panelDark:           '#242424',
     inputBorderDark:     'rgba(255,255,255,0.10)',
@@ -41,6 +49,22 @@ export const lightTheme = {
     textMutedOnDark:     'rgba(255,255,255,0.60)',
     borderOnDark:        'rgba(255,255,255,0.10)',
     buttonSurfaceDark:   '#2a2a2a',
+
+    // Clear-glass card (sign-in screen) — a barely-there pane of glass over the
+    // dark photo. The panel is white at only 10% so the photo shows through; the
+    // edge is a brighter white line along the top that fades on the bottom,
+    // mimicking light catching the top of a real pane. These never change with
+    // the theme because the photo behind them is always dark.
+    glassClearPanel:        'rgba(255,255,255,0.10)',
+    glassClearEdge:         'rgba(255,255,255,0.32)',
+    glassClearEdgeBottom:   'rgba(255,255,255,0.10)',
+    // Controls sit a step brighter than the panel so they read as interactive;
+    // focus brightens the well further instead of using a border change.
+    glassClearInput:        'rgba(255,255,255,0.13)',
+    glassClearInputFocused: 'rgba(255,255,255,0.22)',
+    glassClearInputBorder:  'rgba(255,255,255,0.14)',
+    // Divider rule between the email form and the social buttons.
+    glassClearDivider:      'rgba(255,255,255,0.22)',
 
     // Onboarding background gradient — rich forest green, four stops.
     gradientDark:     '#0c3520',
@@ -66,6 +90,10 @@ export const lightTheme = {
     placeholderOnGlass:  'rgba(14,42,14,0.32)',
     // Links and accents inside the panel use a medium forest green.
     textAccentOnGlass:   '#135633',
+    // Thin border for controls that sit on the light glass surface (inputs,
+    // social buttons) — dark green at low opacity so the divider reads without
+    // competing with the content.
+    borderOnGlass:       'rgba(14,42,14,0.12)',
   },
   spacing:   { xs: 4, sm: 8, md: 16, lg: 24, xl: 32, xxl: 48 },
   // iconSizes — fixed dimensions for inline brand/action icons alongside text.
@@ -142,5 +170,7 @@ export const darkTheme: AppTheme = {
     placeholderOnGlass:  'rgba(255,255,255,0.30)',
     // Links and accents switch to lime so they pop on the dark panel.
     textAccentOnGlass:   'rgba(184,229,106,0.82)',
+    // Dark-glass border — white at low opacity mirrors the frosted surface edge.
+    borderOnGlass:       'rgba(255,255,255,0.12)',
   },
 };
