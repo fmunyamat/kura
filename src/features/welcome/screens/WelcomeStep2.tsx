@@ -1,5 +1,6 @@
 import styled from 'styled-components/native';
 import { CtaButton } from '~/shared/components/CtaButton';
+import { GlassCard } from '~/shared/components/GlassCard';
 import {
   BottomSpacer,
   ContentArea,
@@ -15,14 +16,6 @@ interface WelcomeStep2Props {
 
 // Spacer12 — small gap between the task card and the caption below it.
 const Spacer12 = styled.View`height: 12px;`;
-
-// TaskCard — glass panel containing the sample task list preview.
-// Background and border-radius match Step1's GlassCard.
-const TaskCard = styled.View`
-  background-color: rgba(255, 255, 255, 0.44);
-  border-radius: ${({ theme }) => theme.radii.lg}px;
-  overflow: hidden;
-`;
 
 // TaskRow — one task entry inside the card. First row has no top border;
 // subsequent rows use a divider to separate them. Divider is white-tinted
@@ -97,7 +90,9 @@ const WelcomeStep2 = ({ onNext }: WelcomeStep2Props) => {
           Kura picks the most important thing for your lawn today. You don't have to decide.
         </ScreenSubtext>
         <GapSpacer />
-        <TaskCard>
+        {/* contentPadding="none" — the task rows pad themselves, and their
+            top-border dividers need to run edge-to-edge across the card. */}
+        <GlassCard contentPadding="none">
           <TaskRow $first>
             <TaskIcon>💧</TaskIcon>
             <TaskBody>
@@ -114,7 +109,7 @@ const WelcomeStep2 = ({ onNext }: WelcomeStep2Props) => {
             </TaskBody>
             <UrgencyPill><UrgencyText>SOON</UrgencyText></UrgencyPill>
           </TaskRow>
-        </TaskCard>
+        </GlassCard>
         <Spacer12 />
         <Caption>
           Kura schedules tasks based on your grass type, location, and the time of year.

@@ -1,5 +1,6 @@
 import styled from 'styled-components/native';
 import { CtaButton } from '~/shared/components/CtaButton';
+import { GlassCard } from '~/shared/components/GlassCard';
 import {
   BottomSpacer,
   ContentArea,
@@ -22,12 +23,10 @@ const HeadlineGroup = styled.View<TabletProps>`
   gap: ${({ $isTablet }) => ($isTablet ? 12 : 6)}px;
 `;
 
-// GlassCard — white-frosted panel that holds the "Your journey starts today"
-// content. Padding and internal gap scale up so the card doesn't feel cramped
-// when rendered at tablet size.
-const GlassCard = styled.View<TabletProps>`
-  background-color: rgba(255, 255, 255, 0.44);
-  border-radius: ${({ theme }) => theme.radii.lg}px;
+// CardRow — the row layout inside the shared GlassCard: icon on the left,
+// text column on the right. Carries this card's own padding and gap (both
+// scale up on tablets) since the card is rendered with contentPadding="none".
+const CardRow = styled.View<TabletProps>`
   padding: ${({ $isTablet }) => ($isTablet ? 26 : 16)}px;
   flex-direction: row;
   align-items: center;
@@ -81,14 +80,16 @@ const WelcomeStep1 = ({ userName, onNext }: WelcomeStep1Props) => {
           We'll help you grow a healthier lawn — one simple task at a time. No experience needed.
         </ScreenSubtext>
         <GapSpacer />
-        <GlassCard $isTablet={isTablet}>
-          <CardIcon $isTablet={isTablet}>🌱</CardIcon>
-          <CardBody>
-            <CardTitle $isTablet={isTablet}>Your journey starts today</CardTitle>
-            <CardDesc $isTablet={isTablet}>
-              We'll check in with you each morning with one thing to do.
-            </CardDesc>
-          </CardBody>
+        <GlassCard contentPadding="none">
+          <CardRow $isTablet={isTablet}>
+            <CardIcon $isTablet={isTablet}>🌱</CardIcon>
+            <CardBody>
+              <CardTitle $isTablet={isTablet}>Your journey starts today</CardTitle>
+              <CardDesc $isTablet={isTablet}>
+                We'll check in with you each morning with one thing to do.
+              </CardDesc>
+            </CardBody>
+          </CardRow>
         </GlassCard>
       </ContentGroup>
       <BottomSpacer />

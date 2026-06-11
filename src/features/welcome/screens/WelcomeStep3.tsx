@@ -16,10 +16,12 @@ interface WelcomeStep3Props {
 // NavPills — the stack of four tab-description cards.
 const NavPills = styled.View`gap: ${({ theme }) => theme.spacing.sm + 2}px;`;
 
-// NavPill — one glass card describing a single tab. Padding, gap, and
-// border-radius match the GlassCard (Step 1) and TaskCard (Step 2).
+// NavPill — one small frosted card describing a single tab. Uses the same
+// glassFrostPanel token as the shared GlassCard but stays a local component:
+// its border-radius is deliberately 2px tighter than GlassCard's because four
+// stacked pills read better with slightly sharper corners than one big card.
 const NavPill = styled.View`
-  background-color: rgba(255, 255, 255, 0.44);
+  background-color: ${({ theme }) => theme.colors.glassFrostPanel};
   border-radius: ${({ theme }) => theme.radii.lg - 2}px;
   padding: 16px;
   flex-direction: row;

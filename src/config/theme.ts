@@ -81,6 +81,11 @@ export const lightTheme = {
 
     // Onboarding glass panel — white frost at 46% sits cleanly over the gradient.
     glassOnboardingPanel:          'rgba(255,255,255,0.46)',
+    // glassFrostPanel — the heavy white frost used by GlassCard's 'frost'
+    // variant and the welcome flow's smaller frosted pills. Slightly lighter
+    // than glassOnboardingPanel; constant across themes because it always
+    // sits over a dark photo or gradient.
+    glassFrostPanel:               'rgba(255,255,255,0.44)',
     // Inputs sit slightly brighter than the panel surface to read as interactive.
     glassOnboardingInput:          'rgba(255,255,255,0.55)',
     glassOnboardingInputFocused:   'rgba(255,255,255,0.72)',

@@ -2,11 +2,11 @@ import { router } from 'expo-router';
 import { Fragment, useState } from 'react';
 import { ScrollView } from 'react-native';
 import styled, { useTheme } from 'styled-components/native';
-import { GrassTypeCard } from '~/features/onboarding/components/GrassTypeCard';
 import { OnboardingScreenShell } from '~/features/onboarding/components/OnboardingScreenShell';
 import type { GrassTypeList } from '~/features/onboarding/types';
 import { CtaButton } from '~/shared/components/CtaButton';
 import { GlassCard } from '~/shared/components/GlassCard';
+import { OptionCard } from '~/shared/components/OptionCard';
 import {
   BottomSpacer,
   ContentArea,
@@ -112,7 +112,7 @@ export const GrassType = () => {
                 {GRASS_OPTIONS.map((opt, index) => (
                   <Fragment key={opt.value}>
                     {index > 0 && <OptionDivider />}
-                    <GrassTypeCard
+                    <OptionCard
                       icon={opt.icon}
                       name={opt.name}
                       description={opt.description}

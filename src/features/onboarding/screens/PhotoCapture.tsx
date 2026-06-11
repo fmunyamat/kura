@@ -4,6 +4,7 @@ import styled from 'styled-components/native';
 import { useAuthStore } from '~/features/auth/stores/authStore';
 import { OnboardingScreenShell } from '~/features/onboarding/components/OnboardingScreenShell';
 import { CtaButton } from '~/shared/components/CtaButton';
+import { GlassCard } from '~/shared/components/GlassCard';
 import {
   BottomSpacer,
   ContentArea,
@@ -16,17 +17,9 @@ import { ScreenHeadline, ScreenSubtext } from '~/shared/components/ScreenTypogra
 import { upsertUserProfile } from '../services/onboardingService';
 import { useOnboardingStore } from '../stores/onboardingStore';
 
-// CameraCard — frosted white card housing the camera well and the skip link.
-// Matches FormCard/OptionsCard used in Location, GrassType, and EffortLevel.
-const CameraCard = styled.View`
-  background-color: rgba(255, 255, 255, 0.44);
-  border-radius: ${({ theme }) => theme.radii.lg}px;
-  overflow: hidden;
-`;
-
-// CameraWell — the tappable area that launches the camera. Sits inside
-// CameraCard so it gets the frosted background. Large vertical padding makes
-// it an obvious tap target.
+// CameraWell — the tappable area that launches the camera. Sits inside the
+// shared GlassCard so it gets the frosted background. Large vertical padding
+// makes it an obvious tap target.
 const CameraWell = styled(Pressable)`
   padding: ${({ theme }) => theme.spacing.xl}px ${({ theme }) => theme.spacing.md}px;
   align-items: center;
@@ -112,7 +105,9 @@ export const PhotoCapture = () => {
             See how much your lawn improves over the season.
           </ScreenSubtext>
           <GapSpacer />
-          <CameraCard>
+          {/* contentPadding="none" — the camera well pads itself and its tap
+              target should reach the card's edges. */}
+          <GlassCard contentPadding="none">
             <CameraWell
               onPress={handleComplete}
               disabled={isSubmitting}
@@ -122,7 +117,7 @@ export const PhotoCapture = () => {
               <CameraIcon>📷</CameraIcon>
               <CameraLabel>Tap to take a photo</CameraLabel>
             </CameraWell>
-          </CameraCard>
+          </GlassCard>
         </ContentGroup>
         <BottomSpacer />
       </ContentArea>
