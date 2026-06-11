@@ -4,6 +4,7 @@ import styled from 'styled-components/native';
 import { useAuthStore } from '~/features/auth/stores/authStore';
 import { OnboardingScreenShell } from '~/features/onboarding/components/OnboardingScreenShell';
 import { CtaButton } from '~/shared/components/CtaButton';
+import { ErrorMessage } from '~/shared/components/ErrorMessage';
 import { GlassCard } from '~/shared/components/GlassCard';
 import {
   BottomSpacer,
@@ -36,15 +37,6 @@ const CameraLabel = styled.Text`
   font-size: 14px;
   color: #ffffff;
   margin-top: 4px;
-`;
-
-// ErrorText — shown above the CTA if the profile INSERT fails.
-// Never exposes the raw Supabase error (MASVS-CODE-4, MASWE-0087).
-const ErrorText = styled.Text`
-  font-size: ${({ theme }) => theme.typography.sizeXs}px;
-  color: ${({ theme }) => theme.colors.errorOnDark};
-  text-align: center;
-  margin-bottom: ${({ theme }) => theme.spacing.sm}px;
 `;
 
 // PhotoCapture — the final onboarding step. The user takes a "before" photo
@@ -123,7 +115,7 @@ export const PhotoCapture = () => {
       </ContentArea>
 
       <CtaArea>
-        {errorMessage && <ErrorText>{errorMessage}</ErrorText>}
+        {errorMessage && <ErrorMessage>{errorMessage}</ErrorMessage>}
         <CtaButton
           label="Skip for now →"
           onPress={handleComplete}

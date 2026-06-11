@@ -1,5 +1,6 @@
 import styled from 'styled-components/native';
 import { CtaButton } from '~/shared/components/CtaButton';
+import { ErrorMessage } from '~/shared/components/ErrorMessage';
 import { BottomSpacer, ContentArea, TopSpacer } from '~/shared/components/ScreenLayout';
 import { ScreenHeadline, ScreenSubtext } from '~/shared/components/ScreenTypography';
 import { useIsTablet, type TabletProps } from '~/shared/hooks/use-is-tablet';
@@ -36,15 +37,6 @@ const CheckIcon = styled.Text<TabletProps>`
   font-size: ${({ $isTablet }) => ($isTablet ? 44 : 32)}px;
 `;
 
-// ErrorText — shown inline above the CTA when the Supabase write fails.
-// Never exposes the internal error message — a generic string only (MASVS-CODE-4).
-const ErrorText = styled.Text`
-  font-size: ${({ theme }) => theme.typography.sizeXs}px;
-  color: ${({ theme }) => theme.colors.errorOnDark};
-  text-align: center;
-  margin-bottom: ${({ theme }) => theme.spacing.sm}px;
-`;
-
 // WelcomeStep4 — the closing screen of the welcome flow.
 // The only CTA here is "Start Growing", which commits the welcome-seen flag
 // to the database. If the write fails the user stays on this screen and sees
@@ -67,7 +59,7 @@ const WelcomeStep4 = ({ onFinish, isSubmitting, errorMessage }: WelcomeStep4Prop
         </ScreenSubtext>
       </CenteredContentGroup>
       <BottomSpacer />
-      {errorMessage && <ErrorText>{errorMessage}</ErrorText>}
+      {errorMessage && <ErrorMessage>{errorMessage}</ErrorMessage>}
       <CtaButton
         label="Start Growing →"
         onPress={onFinish}

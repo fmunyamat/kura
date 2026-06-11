@@ -5,6 +5,7 @@ import styled, { useTheme } from 'styled-components/native';
 import { OnboardingScreenShell } from '~/features/onboarding/components/OnboardingScreenShell';
 import type { GrassTypeList } from '~/features/onboarding/types';
 import { CtaButton } from '~/shared/components/CtaButton';
+import { GlassDivider } from '~/shared/components/GlassDivider';
 import { GlassCard } from '~/shared/components/GlassCard';
 import { OptionCard } from '~/shared/components/OptionCard';
 import {
@@ -57,13 +58,6 @@ const OptionsGroup = styled.View`
   margin: -${({ theme }) => theme.spacing.md}px;
 `;
 
-// OptionDivider — rule between option rows. Uses the same glassClearDivider
-// token as the Location screen's FieldDivider.
-const OptionDivider = styled.View`
-  height: 1px;
-  background-color: ${({ theme }) => theme.colors.glassClearDivider};
-`;
-
 // GrassType — lets the user identify their grass type.
 // One option must be selected before Continue activates.
 // "I'm not sure" maps to 'unknown' — the task engine infers grass type
@@ -111,7 +105,7 @@ export const GrassType = () => {
               <OptionsGroup>
                 {GRASS_OPTIONS.map((opt, index) => (
                   <Fragment key={opt.value}>
-                    {index > 0 && <OptionDivider />}
+                    {index > 0 && <GlassDivider />}
                     <OptionCard
                       icon={opt.icon}
                       name={opt.name}

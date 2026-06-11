@@ -10,6 +10,7 @@ import {
 import styled, { useTheme } from 'styled-components/native';
 import { OnboardingScreenShell } from '~/features/onboarding/components/OnboardingScreenShell';
 import { CtaButton } from '~/shared/components/CtaButton';
+import { GlassDivider } from '~/shared/components/GlassDivider';
 import { GlassCard } from '~/shared/components/GlassCard';
 import {
   BottomSpacer,
@@ -31,13 +32,6 @@ const SPRINKLER_BG = require('../../../../assets/images/sprinkler-android.jpg');
 // FieldGroup — wraps a label + input pair. GlassCard's Content gap handles
 // the spacing between groups; no extra padding needed here.
 const FieldGroup = styled.View``;
-
-// FieldDivider — full-width rule between the two field groups. Same token
-// as the sign-in card's DividerLine so both cards share the same visual weight.
-const FieldDivider = styled.View`
-  height: 1px;
-  background-color: ${({ theme }) => theme.colors.glassClearDivider};
-`;
 
 // FieldLabel — small header above each input. Scales up on tablet to stay
 // proportional to the taller input well below it. textMutedOnDark matches
@@ -194,7 +188,7 @@ export const Location = () => {
                   />
                 </FieldGroup>
 
-                <FieldDivider />
+                <GlassDivider />
 
                 {/* Lawn size field */}
                 <FieldGroup>

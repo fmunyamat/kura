@@ -4,6 +4,7 @@ import { ScrollView } from 'react-native';
 import styled, { useTheme } from 'styled-components/native';
 import { OnboardingScreenShell } from '~/features/onboarding/components/OnboardingScreenShell';
 import { CtaButton } from '~/shared/components/CtaButton';
+import { GlassDivider } from '~/shared/components/GlassDivider';
 import { GlassCard } from '~/shared/components/GlassCard';
 import { OptionCard } from '~/shared/components/OptionCard';
 import {
@@ -54,12 +55,6 @@ const EFFORT_OPTIONS: Array<{
 // inside the card; overflow:hidden on GlassCard's Clip clips to rounded corners.
 const OptionsGroup = styled.View`
   margin: -${({ theme }) => theme.spacing.md}px;
-`;
-
-// OptionDivider — rule between option rows.
-const OptionDivider = styled.View`
-  height: 1px;
-  background-color: ${({ theme }) => theme.colors.glassClearDivider};
 `;
 
 // HintText — reminder that the user can change their choice later in Settings.
@@ -117,7 +112,7 @@ export const EffortLevel = () => {
               <OptionsGroup>
                 {EFFORT_OPTIONS.map((opt, index) => (
                   <Fragment key={opt.value}>
-                    {index > 0 && <OptionDivider />}
+                    {index > 0 && <GlassDivider />}
                     <OptionCard
                       icon={opt.icon}
                       name={opt.name}
