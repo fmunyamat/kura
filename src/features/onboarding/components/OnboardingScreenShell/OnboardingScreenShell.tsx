@@ -10,7 +10,7 @@ import Animated, {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import styled from 'styled-components/native';
 
-const GRASS_BG = require('../../../../../assets/images/grass-bkg.jpg') as number;
+const GRASS_BG = require('../../../../../assets/images/sprinkler.png') as number;
 
 interface OnboardingScreenShellProps {
   currentStep: number;
