@@ -92,7 +92,7 @@ const CtaArea = styled.View<TabletProps>`
 // CtaButton — dark pill matching all other onboarding screens.
 // Dims while the profile write is in flight to block double-taps.
 const CtaButton = styled(Pressable)<TabletProps & { $disabled: boolean }>`
-  background-color: rgba(8, 20, 8, 0.88);
+  background-color: ${({ theme }) => theme.colors.primary};
   border-radius: ${({ theme }) => theme.radii.md}px;
   padding: ${({ $isTablet }) => ($isTablet ? '22px 18px' : '14px 12px')};
   opacity: ${({ $disabled }) => ($disabled ? 0.6 : 1)};

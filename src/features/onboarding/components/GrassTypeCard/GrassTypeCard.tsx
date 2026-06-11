@@ -6,58 +6,54 @@ interface GrassTypeCardProps {
   name: string;
   description: string;
   selected: boolean;
-  isFirst: boolean;
   onPress: () => void;
 }
 
-// CardTouchable — one selectable row inside the OptionsCard. Transparent
-// when unselected so the frosted card background shows through. Gets a
-// subtle white highlight when selected to distinguish the chosen option.
-// First row has no top border; subsequent rows use a white-tinted divider
-// matching the TaskCard and FormCard row divider pattern.
-const CardTouchable = styled(Pressable)<{ $selected: boolean; $isFirst: boolean }>`
-  background-color: ${({ $selected }) =>
-    $selected ? 'rgba(255, 255, 255, 0.14)' : 'transparent'};
-  padding: 16px;
+// CardTouchable — one selectable row inside the GlassCard options list.
+// Brightens to glassClearInputFocused when selected so the active choice
+// reads clearly against the transparent card surface.
+const CardTouchable = styled(Pressable)<{ $selected: boolean }>`
+  background-color: ${({ $selected, theme }) =>
+    $selected ? theme.colors.glassClearInputFocused : 'transparent'};
+  padding: ${({ theme }) => theme.spacing.md}px;
   flex-direction: row;
   align-items: center;
   gap: 12px;
-  ${({ $isFirst }) =>
-    !$isFirst ? 'border-top-width: 1px; border-top-color: rgba(255, 255, 255, 0.18);' : ''}
 `;
 
-// IconText — emoji icon on the left. Matches NavPillIcon and TaskIcon size.
+// IconText — emoji icon on the left.
 const IconText = styled.Text`font-size: 32px;`;
 
 // TextGroup — holds the name and description, fills available space.
 const TextGroup = styled.View`flex: 1;`;
 
-// CardName — grass type label. fontHeaderBold and white text match NavPillName
-// (Step 3) and TaskName (Step 2) for consistent card typography.
+// CardName — grass type label. textOnDark matches the clear-glass input text
+// colour used on the sign-in and Location screens.
 const CardName = styled.Text`
   font-family: ${({ theme }) => theme.typography.fontHeaderBold};
   font-size: 14px;
-  color: #ffffff;
+  color: ${({ theme }) => theme.colors.textOnDark};
 `;
 
-// CardDescription — one-line explanation below the name. fontBody and muted
-// white match NavPillDesc (Step 3) and TaskMeta (Step 2).
+// CardDescription — one-line explanation below the name. textMutedOnDark sits
+// at 60% white opacity, consistent with FieldLabel and placeholder text on the
+// other clear-glass screens.
 const CardDescription = styled.Text`
   font-family: ${({ theme }) => theme.typography.fontBody};
   font-size: 11px;
-  color: rgba(255, 255, 255, 0.72);
+  color: ${({ theme }) => theme.colors.textMutedOnDark};
   margin-top: 2px;
   line-height: 17px;
 `;
 
 // CheckCircle — small circle on the right indicating selection state.
-// Dark green fill when selected gives clear contrast against the frosted card.
+// Uses primary green when selected so it reads as a brand-coloured confirm.
 const CheckCircle = styled.View<{ $selected: boolean }>`
   width: 20px;
   height: 20px;
   border-radius: 10px;
-  background-color: ${({ $selected }) =>
-    $selected ? 'rgba(26, 83, 25, 0.80)' : 'rgba(0, 0, 0, 0.14)'};
+  background-color: ${({ $selected, theme }) =>
+    $selected ? theme.colors.primary : theme.colors.glassClearInput};
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
@@ -67,24 +63,22 @@ const CheckCircle = styled.View<{ $selected: boolean }>`
 const CheckMark = styled.Text`
   font-size: 10px;
   font-weight: ${({ theme }) => theme.typography.weightBlack};
-  color: #ffffff;
+  color: ${({ theme }) => theme.colors.white};
   line-height: 12px;
 `;
 
 // GrassTypeCard — a single selectable option row in the grass type picker.
-// Designed to live inside an OptionsCard (the frosted white card container).
-// Tapping calls onPress; the parent screen manages which option is selected.
+// Lives inside a GlassCard; explicit OptionDivider components in the parent
+// screen separate the rows instead of border-top here.
 export const GrassTypeCard = ({
   icon,
   name,
   description,
   selected,
-  isFirst,
   onPress,
 }: GrassTypeCardProps) => (
   <CardTouchable
     $selected={selected}
-    $isFirst={isFirst}
     onPress={onPress}
     accessibilityRole="button"
     accessibilityState={{ selected }}

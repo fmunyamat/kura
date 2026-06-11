@@ -1,26 +1,35 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
 import {
-  KeyboardAvoidingView,
-  Linking,
-  Platform,
-  Pressable,
-  ScrollView,
-  useWindowDimensions,
+    KeyboardAvoidingView,
+    Linking,
+    Platform,
+    Pressable,
+    ScrollView,
+    useWindowDimensions,
 } from 'react-native';
 import styled, { useTheme } from 'styled-components/native';
 import { OnboardingScreenShell } from '~/features/onboarding/components/OnboardingScreenShell';
+import { GlassCard } from '~/shared/components/GlassCard';
 import { useOnboardingStore } from '../stores/onboardingStore';
+
+// Same photo the OnboardingScreenShell renders as its background. Passed to
+// GlassCard as clearBackdropSource so the Android faux-glass fill uses the
+// same image that would be behind the card on a real backdrop blur.
+const SPRINKLER_BG = require('../../../../assets/images/sprinkler-android.jpg');
 
 // $isTablet — passed to every styled-component that needs to scale up on tablets.
 interface TabletProps {
   $isTablet: boolean;
 }
 
-const ContentArea = styled.View<TabletProps>`
+// ContentArea — constrains the card width. On tablets, horizontal padding is
+// 10% of screen width each side so the FormCard matches the sign-in GlassCard's
+// 80% column width. On phones the standard md padding applies.
+const ContentArea = styled.View<TabletProps & { $width: number }>`
   flex: 1;
-  padding: 0 ${({ theme, $isTablet }) =>
-    $isTablet ? theme.spacing.xxl : theme.spacing.md}px;
+  padding: 0 ${({ $width, $isTablet, theme }) =>
+    $isTablet ? $width * 0.1 : theme.spacing.md}px;
 `;
 
 // TopSpacer — pushes the headline group down from the NavBar.
@@ -57,42 +66,42 @@ const SpacerCard = styled.View<TabletProps>`
   height: ${({ $isTablet }) => ($isTablet ? 100 : 60)}px;
 `;
 
-// FormCard — frosted white panel holding the input rows. Background,
-// border-radius, and overflow match GlassCard/TaskCard in the welcome flow.
-const FormCard = styled.View`
-  background-color: rgba(255, 255, 255, 0.44);
-  border-radius: ${({ theme }) => theme.radii.lg}px;
-  overflow: hidden;
+// FieldGroup — wraps a label + input pair. GlassCard's Content gap handles
+// the spacing between groups; no extra padding needed here.
+const FieldGroup = styled.View``;
+
+// FieldDivider — full-width rule between the two field groups. Same token
+// as the sign-in card's DividerLine so both cards share the same visual weight.
+const FieldDivider = styled.View`
+  height: 1px;
+  background-color: ${({ theme }) => theme.colors.glassClearDivider};
 `;
 
-// FormRow — one field row inside the card. First row has no top border;
-// subsequent rows use a white-tinted divider matching TaskCard's row divider.
-const FormRow = styled.View<{ $first: boolean }>`
-  padding: 16px;
-  ${({ $first }) =>
-    !$first ? 'border-top-width: 1px; border-top-color: rgba(255, 255, 255, 0.18);' : ''}
-`;
-
-// FieldLabel — small header above each input. fontHeaderBold and white text
-// match NavPillName (Step 3) and TaskName (Step 2) for consistent card typography.
-const FieldLabel = styled.Text`
+// FieldLabel — small header above each input. Scales up on tablet to stay
+// proportional to the taller input well below it. textMutedOnDark matches
+// the label style used in the sign-in clear-glass card.
+const FieldLabel = styled.Text<{ $isTablet: boolean }>`
   font-family: ${({ theme }) => theme.typography.fontHeaderBold};
-  font-size: 12px;
-  color: rgba(255, 255, 255, 0.60);
-  margin-bottom: 8px;
+  font-size: ${({ $isTablet, theme }) =>
+    $isTablet ? theme.typography.sizeSm : 12}px;
+  color: ${({ theme }) => theme.colors.textMutedOnDark};
+  margin-bottom: ${({ $isTablet }) => ($isTablet ? 10 : 8)}px;
 `;
 
-// StyledInput — text field inside the card. Background darkens on focus to
-// create depth contrast within the frosted card surface. $hasUnit adds right
-// padding to leave room for the "sq ft" badge.
-const StyledInput = styled.TextInput<{ $focused: boolean; $hasUnit?: boolean }>`
-  background-color: ${({ $focused }) =>
-    $focused ? 'rgba(0, 0, 0, 0.18)' : 'rgba(0, 0, 0, 0.10)'};
+// StyledInput — text field inside the clear-glass card. Matches the sign-in
+// card's input style: faint white well with a hairline border, brighter on
+// focus. textOnDark for typed text; textMutedOnDark for the placeholder.
+const StyledInput = styled.TextInput<{ $focused: boolean; $hasUnit?: boolean; $isTablet: boolean }>`
+  background-color: ${({ $focused, theme }) =>
+    $focused ? theme.colors.glassClearInputFocused : theme.colors.glassClearInput};
+  border-width: 1px;
+  border-color: ${({ theme }) => theme.colors.glassClearInputBorder};
   border-radius: ${({ theme }) => theme.radii.md}px;
   padding: 10px ${({ $hasUnit }) => ($hasUnit ? 56 : 12)}px 10px 12px;
   font-family: ${({ theme }) => theme.typography.fontBody};
   font-size: 14px;
-  color: #ffffff;
+  color: ${({ theme }) => theme.colors.textOnDark};
+  height: ${({ $isTablet }) => ($isTablet ? 54 : 44)}px;
 `;
 
 // InputWrapper — positions the "sq ft" badge over the right side of the input.
@@ -110,7 +119,7 @@ const UnitBadge = styled.View`
 const UnitText = styled.Text`
   font-family: ${({ theme }) => theme.typography.fontBody};
   font-size: 11px;
-  color: rgba(255, 255, 255, 0.50);
+  color: ${({ theme }) => theme.colors.textMutedOnDark};
 `;
 
 // HintRow — tappable hint below the lawn size input. Opens the measurement
@@ -127,29 +136,30 @@ const HintIcon = styled.Text`font-size: 12px; margin-top: 1px;`;
 const HintBody = styled.Text`
   font-family: ${({ theme }) => theme.typography.fontBody};
   font-size: 11px;
-  color: rgba(255, 255, 255, 0.40);
+  color: ${({ theme }) => theme.colors.textMutedOnDark};
   flex: 1;
   line-height: 16px;
 `;
 
 const HintLink = styled.Text`
   font-family: ${({ theme }) => theme.typography.fontBodyBold};
-  color: rgba(255, 255, 255, 0.70);
+  color: ${({ theme }) => theme.colors.textOnDark};
   text-decoration-line: underline;
 `;
 
 // CtaArea — wraps the CTA button outside the ScrollView so it stays pinned
-// to the bottom of the screen even while the keyboard is open.
-const CtaArea = styled.View<TabletProps>`
-  padding: 0 ${({ theme, $isTablet }) =>
-    $isTablet ? theme.spacing.xxl : theme.spacing.md}px
+// to the bottom of the screen even while the keyboard is open. Horizontal
+// padding mirrors ContentArea so the button aligns with the FormCard edges.
+const CtaArea = styled.View<TabletProps & { $width: number }>`
+  padding: 0 ${({ $width, $isTablet, theme }) =>
+    $isTablet ? $width * 0.1 : theme.spacing.md}px
     ${({ theme }) => theme.spacing.md}px;
 `;
 
 // CtaButton — dark pill button matching all welcome steps and the other
 // onboarding screens. Opacity drops to 0.4 when the form is incomplete.
 const CtaButton = styled(Pressable)<TabletProps & { $enabled: boolean }>`
-  background-color: rgba(8, 20, 8, 0.88);
+  background-color: ${({ theme }) => theme.colors.primaryMid};
   border-radius: ${({ theme }) => theme.radii.md}px;
   padding: ${({ $isTablet }) => ($isTablet ? '22px 18px' : '14px 12px')};
   opacity: ${({ $enabled }) => ($enabled ? 1 : 0.4)};
@@ -206,7 +216,7 @@ export const Location = () => {
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
-          <ContentArea $isTablet={isTablet}>
+          <ContentArea $isTablet={isTablet} $width={width}>
             <TopSpacer />
             <ContentGroup>
               <Headline $isTablet={isTablet}>
@@ -216,39 +226,50 @@ export const Location = () => {
                 We use this to figure out your season and how much product your lawn needs.
               </Subtext>
               <SpacerCard $isTablet={isTablet} />
-              <FormCard>
-                {/* ZIP code row */}
-                <FormRow $first>
-                  <FieldLabel>ZIP code</FieldLabel>
+              {/* GlassCard variant="clear" matches the sign-in screen's card exactly —
+                  same faux-glass backdrop approach on Android, real BlurView on iOS. */}
+              <GlassCard
+                variant="clear"
+                clearBackdropSource={SPRINKLER_BG}
+                clearBackdropTint={theme.colors.photoTint}
+                androidBlurRadius={15}
+              >
+                {/* ZIP code field */}
+                <FieldGroup>
+                  <FieldLabel $isTablet={isTablet}>ZIP code</FieldLabel>
                   <StyledInput
                     $focused={zipFocused}
+                    $isTablet={isTablet}
                     value={zipCode}
                     onChangeText={setZipCode}
                     onFocus={() => setZipFocused(true)}
                     onBlur={() => setZipFocused(false)}
                     placeholder="e.g. 30301"
-                    placeholderTextColor={theme.colors.placeholderOnGlass}
+                    placeholderTextColor={theme.colors.textMutedOnDark}
                     keyboardType="numeric"
                     maxLength={5}
                     autoCorrect={false}
                     autoComplete="off"
                     textContentType="none"
                   />
-                </FormRow>
+                </FieldGroup>
 
-                {/* Lawn size row */}
-                <FormRow $first={false}>
-                  <FieldLabel>Lawn size</FieldLabel>
+                <FieldDivider />
+
+                {/* Lawn size field */}
+                <FieldGroup>
+                  <FieldLabel $isTablet={isTablet}>Lawn size</FieldLabel>
                   <InputWrapper>
                     <StyledInput
                       $focused={lawnFocused}
                       $hasUnit
+                      $isTablet={isTablet}
                       value={lawnSize}
                       onChangeText={setLawnSize}
                       onFocus={() => setLawnFocused(true)}
                       onBlur={() => setLawnFocused(false)}
                       placeholder="e.g. 1500"
-                      placeholderTextColor={theme.colors.placeholderOnGlass}
+                      placeholderTextColor={theme.colors.textMutedOnDark}
                       keyboardType="numeric"
                       autoCorrect={false}
                       autoComplete="off"
@@ -264,8 +285,8 @@ export const Location = () => {
                       Not sure? <HintLink>Measure your lawn →</HintLink>
                     </HintBody>
                   </HintRow>
-                </FormRow>
-              </FormCard>
+                </FieldGroup>
+              </GlassCard>
             </ContentGroup>
             <BottomSpacer />
           </ContentArea>
@@ -273,7 +294,7 @@ export const Location = () => {
 
         {/* CTA lives outside the ScrollView so it stays anchored to the
             bottom of the KeyboardAvoidingView frame, not the scroll content. */}
-        <CtaArea $isTablet={isTablet}>
+        <CtaArea $isTablet={isTablet} $width={width}>
           <CtaButton
             $isTablet={isTablet}
             $enabled={isValid}

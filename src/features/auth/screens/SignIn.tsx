@@ -10,7 +10,7 @@ import {
     Platform,
     useWindowDimensions,
 } from 'react-native';
-import styled from 'styled-components/native';
+import styled, { useTheme } from 'styled-components/native';
 import { sendOtpCode, verifyOtpCode } from '~/features/auth/services/authService';
 import { GlassCard } from '~/shared/components/GlassCard';
 import { OtpRequestForm } from '../components/OtpRequestForm';
@@ -45,7 +45,7 @@ const TintOverlay = styled.View`
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(5, 12, 5, 0.58);
+  background-color: ${({ theme }) => theme.colors.photoTint};
 `;
 
 // ContentKAV — the only layer that participates in keyboard avoidance. Sits on
@@ -97,6 +97,7 @@ const Tagline = styled.Text<{ $isTablet: boolean }>`
   font-size: ${({ $isTablet, theme }) =>
     $isTablet ? theme.typography.sizeSm : theme.typography.sizeSm * 0.8}px;
   font-weight: ${({ theme }) => theme.typography.weightBold};
+  font-family: ${({ theme }) => theme.typography.fontBodyBlack};
   text-transform: uppercase;
   letter-spacing: ${({ theme }) => theme.typography.letterSpacingWide}px;
 `;
@@ -111,11 +112,14 @@ const PanelHost = styled.View`
 // GlassAuthContent — the container for the email form panel. Its explicit width
 // reserves exactly one screen-width slot in the horizontal row. The padding
 // creates breathing room between the glass card and the screen edges.
-// On tablet, flex-start + a small padding-top pulls the card up so it sits
-// closer to the GlassHero rather than floating in the middle of the panel.
+// On tablet, horizontal padding is widened to 10% of screen width each side so
+// the card occupies 80% of the screen width — a more comfortable reading column
+// on a large display. Vertical padding and alignment are handled separately.
 const GlassAuthContent = styled.View<{ $width: number; $isTablet: boolean }>`
   width: ${({ $width }) => $width}px;
-  padding: ${({ theme }) => theme.spacing.md}px;
+  padding-horizontal: ${({ $width, $isTablet }) =>
+    $isTablet ? $width * 0.1 : 16}px;
+  padding-vertical: ${({ theme }) => theme.spacing.md}px;
   justify-content: ${({ $isTablet }) => ($isTablet ? 'flex-start' : 'center')};
   padding-top: ${({ $isTablet, theme }) =>
     $isTablet ? theme.spacing.xxl * 2 : theme.spacing.md}px;
@@ -139,26 +143,30 @@ const Divider = styled.View`
 `;
 
 // DividerLine — one of the two thin horizontal rules flanking the label.
-// rgba(255,255,255,0.18) matches the row dividers used inside the onboarding
-// cards (FormCard, OptionsCard) so the divider reads on the frosted surface.
+// White at 22% opacity reads cleanly on the clear glass pane over the dark
+// photo without competing with the controls above and below.
 const DividerLine = styled.View`
   flex: 1;
   height: 1px;
-  background-color: rgba(255, 255, 255, 0.18);
+  background-color: ${({ theme }) => theme.colors.glassClearDivider};
 `;
 
+// DividerText — "or continue with" label in muted white so it recedes behind
+// the primary actions while staying legible on the dark photo behind the glass.
 const DividerText = styled.Text`
   font-family: ${({ theme }) => theme.typography.fontBody};
   font-size: ${({ theme }) => theme.typography.sizeXs}px;
-  color: rgba(255, 255, 255, 0.48);
+  color: ${({ theme }) => theme.colors.textMutedOnDark};
 `;
 
 // ErrorText — the inline error that appears below the OTP request form when
 // something goes wrong (send failure or expired deep link redirect).
+// errorOnDark is the soft red designed for semi-transparent glass over a dark
+// photo — the deep red errorOnLight would disappear here.
 const ErrorText = styled.Text`
   font-size: ${({ theme }) => theme.typography.sizeSm}px;
   font-family: ${({ theme }) => theme.typography.fontBody};
-  color: ${({ theme }) => theme.colors.errorOnLight};
+  color: ${({ theme }) => theme.colors.errorOnDark};
   text-align: center;
   margin-top: ${({ theme }) => theme.spacing.xs}px;
 `;
@@ -170,6 +178,10 @@ const isValidEmail = (value: string) =>
   /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
 
 export const SignInScreen = () => {
+  // theme gives the GlassCard the photo tint colour so its Android faux-glass
+  // backdrop matches the real tinted photo around the card.
+  const theme = useTheme();
+
   const [email, setEmail] = useState('');
 
   // isConfirming disables pointer events on the off-screen form so stray taps
@@ -377,7 +389,15 @@ export const SignInScreen = () => {
                 $isTablet={isTablet}
                 pointerEvents={isConfirming ? 'none' : 'auto'}
               >
-                <GlassCard>
+                {/* On Android the card fakes its glass backdrop from the same
+                    photo + tint the screen draws behind it (real backdrop blur
+                    halos the controls there); iOS ignores these two props and
+                    blurs the screen natively. */}
+                <GlassCard
+                  variant="clear"
+                  clearBackdropSource={require('../../../../assets/images/grass.jpg')}
+                  clearBackdropTint={theme.colors.photoTint}
+                >
                   <OtpRequestForm
                     email={email}
                     onEmailChange={handleEmailChange}

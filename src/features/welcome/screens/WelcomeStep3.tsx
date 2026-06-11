@@ -112,7 +112,7 @@ const TabBar = styled.View`
   justify-content: space-around;
   align-items: center;
   padding: 6px;
-  background-color: rgba(8, 20, 8, 0.88);
+  background-color: ${({ theme }) => theme.colors.primary};
   border-radius: ${({ theme }) => theme.radii.full}px;
 `;
 
@@ -150,7 +150,7 @@ const TABS = [
 
 // CtaButton — dark full-width pill, scales on tablet to match Steps 1 and 2.
 const CtaButton = styled(Pressable)<TabletProps>`
-  background-color: rgba(8, 20, 8, 0.88);
+  background-color: ${({ theme }) => theme.colors.primary};
   border-radius: ${({ theme }) => theme.radii.md}px;
   padding: ${({ $isTablet }) => ($isTablet ? '22px 18px' : '14px 12px')};
   margin-bottom: ${({ theme }) => theme.spacing.md}px;

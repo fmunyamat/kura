@@ -2,15 +2,16 @@ import { router, useFocusEffect } from 'expo-router';
 import { ReactNode, useCallback, useRef } from 'react';
 import { ImageBackground, Pressable, useWindowDimensions } from 'react-native';
 import Animated, {
-  SlideOutRight,
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming,
+    SlideOutRight,
+    cancelAnimation,
+    useAnimatedStyle,
+    useSharedValue,
+    withTiming,
 } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import styled from 'styled-components/native';
 
-const GRASS_BG = require('../../../../../assets/images/grass-bkg.jpg') as number;
+const GRASS_BG = require('../../../../../assets/images/sprinkler.png') as number;
 
 interface OnboardingScreenShellProps {
   currentStep: number;
@@ -134,6 +135,11 @@ export const OnboardingScreenShell = ({
         translateX.value = -width;
         translateX.value = withTiming(0, { duration: 300 });
       }
+      // Cancel the in-flight animation when the screen loses focus (e.g. the
+      // user taps Continue before the slide completes). Without this, the
+      // withTiming update fires after Reanimated has removed its listener,
+      // triggering "onAnimatedValueUpdate with no listeners registered".
+      return () => cancelAnimation(translateX);
     }, [translateX, width])
   );
 
@@ -144,7 +150,7 @@ export const OnboardingScreenShell = ({
 
   return (
     <Screen>
-      <PhotoBackground source={GRASS_BG} resizeMode="cover" blurRadius={18} />
+      <PhotoBackground source={GRASS_BG} resizeMode="cover" blurRadius={7} />
       <DarkOverlay />
       <Safe edges={['top', 'bottom']}>
         <TopBar>

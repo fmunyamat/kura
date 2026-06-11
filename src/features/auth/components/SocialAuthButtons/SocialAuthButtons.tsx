@@ -18,14 +18,16 @@ const ButtonsWrapper = styled.View`
   width: 100%;
 `;
 
-// SocialButton — provider button. Semi-transparent white background sits on the
-// frosted card surface. On tablet, height scales up to match the taller email
-// input and submit button so all three controls stay visually consistent.
+// SocialButton — provider button. Uses the same faint white well + hairline
+// border as the email input so all secondary controls on the clear glass pane
+// read as one consistent material; only the lime submit button stands apart.
 const SocialButton = styled(Pressable)<{ $isTablet: boolean }>`
   flex: 1;
   height: ${({ $isTablet }) => ($isTablet ? 54 : 44)}px;
   border-radius: ${({ theme }) => theme.radii.md}px;
-  background-color: rgba(223, 223, 223, 0.55);
+  background-color: ${({ theme }) => theme.colors.glassClearInput};
+  border-width: 1px;
+  border-color: ${({ theme }) => theme.colors.glassClearInputBorder};
   flex-direction: row;
   align-items: center;
   justify-content: center;
@@ -38,12 +40,13 @@ const BrandLogo = styled(Image)`
   height: 18px;
 `;
 
-// ButtonLabel — provider name in JetBrains Mono Bold. In React Native, custom
-// fonts require the bold variant by name — font-weight alone is ignored.
+// ButtonLabel — white text to match the email input, since the clear glass
+// pane sits over a dark photo. In React Native, custom fonts require the bold
+// variant by name — font-weight alone is ignored.
 const ButtonLabel = styled.Text`
   font-family: ${({ theme }) => theme.typography.fontBodyBold};
   font-size: ${({ theme }) => theme.typography.sizeSm}px;
-  color: rgba(255, 255, 255, 0.85);
+  color: ${({ theme }) => theme.colors.textOnDark};
 `;
 
 // SocialAuthButtons — Google always renders; Apple only appears on iOS where
