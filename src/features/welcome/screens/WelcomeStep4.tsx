@@ -1,5 +1,6 @@
-import { ActivityIndicator, Pressable, useWindowDimensions } from 'react-native';
+import { ActivityIndicator, Pressable } from 'react-native';
 import styled from 'styled-components/native';
+import { useIsTablet, type TabletProps } from '~/shared/hooks/use-is-tablet';
 
 interface WelcomeStep4Props {
   // onFinish — async handler that writes has_seen_welcome and routes to tabs.
@@ -7,12 +8,6 @@ interface WelcomeStep4Props {
   onFinish: () => Promise<void>;
   isSubmitting: boolean;
   errorMessage: string | null;
-}
-
-// $isTablet — passed to every styled-component that needs to scale up on tablets.
-// Threshold matches the app-wide convention: min(width, height) >= 600.
-interface TabletProps {
-  $isTablet: boolean;
 }
 
 // ContentArea — flex column that fills the space below the shared nav bar.
@@ -113,8 +108,7 @@ const ErrorText = styled.Text`
 // to the database. If the write fails the user stays on this screen and sees
 // an error so they can try again — we never silently drop them into the tabs.
 const WelcomeStep4 = ({ onFinish, isSubmitting, errorMessage }: WelcomeStep4Props) => {
-  const { width, height } = useWindowDimensions();
-  const isTablet = Math.min(width, height) >= 600;
+  const isTablet = useIsTablet();
 
   return (
     <ContentArea $isTablet={isTablet}>

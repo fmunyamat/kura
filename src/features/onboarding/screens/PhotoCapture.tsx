@@ -1,15 +1,11 @@
 import { useState } from 'react';
-import { ActivityIndicator, Pressable, useWindowDimensions } from 'react-native';
+import { ActivityIndicator, Pressable } from 'react-native';
 import styled from 'styled-components/native';
 import { useAuthStore } from '~/features/auth/stores/authStore';
 import { OnboardingScreenShell } from '~/features/onboarding/components/OnboardingScreenShell';
+import { useIsTablet, type TabletProps } from '~/shared/hooks/use-is-tablet';
 import { upsertUserProfile } from '../services/onboardingService';
 import { useOnboardingStore } from '../stores/onboardingStore';
-
-// $isTablet — passed to every styled-component that needs to scale up on tablets.
-interface TabletProps {
-  $isTablet: boolean;
-}
 
 const ContentArea = styled.View<TabletProps>`
   flex: 1;
@@ -111,8 +107,7 @@ const CtaLabel = styled.Text<TabletProps>`
 // Both paths (take photo + skip) call handleComplete to write user_profiles,
 // which is what signals the app to route to the home tabs on next render.
 export const PhotoCapture = () => {
-  const { width, height } = useWindowDimensions();
-  const isTablet = Math.min(width, height) >= 600;
+  const isTablet = useIsTablet();
 
   const user = useAuthStore((state) => state.user);
   const { zipCode, lawnSize, grassType, effortLevel } = useOnboardingStore();

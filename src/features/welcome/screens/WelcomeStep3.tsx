@@ -1,14 +1,9 @@
-import { Pressable, useWindowDimensions } from 'react-native';
+import { Pressable } from 'react-native';
 import styled from 'styled-components/native';
+import { useIsTablet, type TabletProps } from '~/shared/hooks/use-is-tablet';
 
 interface WelcomeStep3Props {
   onNext: () => void;
-}
-
-// $isTablet — passed to every styled-component that needs to scale up on tablets.
-// Threshold matches the app-wide convention: min(width, height) >= 600.
-interface TabletProps {
-  $isTablet: boolean;
 }
 
 // ContentArea — flex column that fills the space below the shared nav bar.
@@ -169,8 +164,7 @@ const CtaLabel = styled.Text<TabletProps>`
 // at the bottom so the user recognises it immediately when they enter the app.
 // Layout and typography match Steps 1 and 2 exactly.
 const WelcomeStep3 = ({ onNext }: WelcomeStep3Props) => {
-  const { width, height } = useWindowDimensions();
-  const isTablet = Math.min(width, height) >= 600;
+  const isTablet = useIsTablet();
 
   return (
     <ContentArea $isTablet={isTablet}>

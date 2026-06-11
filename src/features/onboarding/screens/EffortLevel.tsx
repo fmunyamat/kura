@@ -5,16 +5,12 @@ import styled, { useTheme } from 'styled-components/native';
 import { GrassTypeCard } from '~/features/onboarding/components/GrassTypeCard';
 import { OnboardingScreenShell } from '~/features/onboarding/components/OnboardingScreenShell';
 import { GlassCard } from '~/shared/components/GlassCard';
+import { useIsTablet, type TabletProps } from '~/shared/hooks/use-is-tablet';
 import { useOnboardingStore } from '../stores/onboardingStore';
 
 // Same photo the OnboardingScreenShell renders as its background — passed to
 // GlassCard as clearBackdropSource for the Android faux-glass fill.
 const SPRINKLER_BG = require('../../../../assets/images/sprinkler.png');
-
-// $isTablet — passed to every styled-component that needs to scale up on tablets.
-interface TabletProps {
-  $isTablet: boolean;
-}
 
 // EFFORT_OPTIONS — the three goal-based effort tiers the user picks from.
 // value maps to the smallint stored in user_profiles.effort_level (1 / 2 / 3).
@@ -135,8 +131,10 @@ const CtaLabel = styled.Text<TabletProps>`
 // is stored in user_profiles.effort_level and can be changed later in Settings.
 export const EffortLevel = () => {
   const theme = useTheme();
-  const { width, height } = useWindowDimensions();
-  const isTablet = Math.min(width, height) >= 600;
+  // width still comes from the window — it drives the 10% tablet side padding.
+  // isTablet itself comes from the shared device-type hook.
+  const { width } = useWindowDimensions();
+  const isTablet = useIsTablet();
 
   const [selected, setSelected] = useState<1 | 2 | 3 | null>(null);
   const { setEffortLevel } = useOnboardingStore();

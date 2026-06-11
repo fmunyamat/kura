@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, TextInput, useWindowDimensions } from 'react-native';
 import styled, { DefaultTheme, useTheme } from 'styled-components/native';
 import { GlassCard } from '~/shared/components/GlassCard';
+import { useIsTablet } from '~/shared/hooks/use-is-tablet';
 
 // OtpVerifyPanel — the right-side slide panel shown after the user submits their
 // email. It shows six digit boxes and a hidden TextInput that captures keyboard
@@ -203,8 +204,10 @@ export const OtpVerifyPanel = ({
   keyboardVisible,
 }: OtpVerifyPanelProps) => {
   const theme = useTheme();
-  const { width, height } = useWindowDimensions();
-  const isTablet = Math.min(width, height) >= 600;
+  // width still comes from the window — the panel must span exactly one
+  // screen-width slot in the slide row. isTablet comes from the shared hook.
+  const { width } = useWindowDimensions();
+  const isTablet = useIsTablet();
 
   // code — the digits the user has typed so far (max 6).
   const [code, setCode] = useState('');

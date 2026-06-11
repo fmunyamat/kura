@@ -1,16 +1,11 @@
-import { Pressable, useWindowDimensions } from 'react-native';
+import { Pressable } from 'react-native';
 import styled from 'styled-components/native';
+import { useIsTablet, type TabletProps } from '~/shared/hooks/use-is-tablet';
 
 interface WelcomeStep1Props {
   // userName — the user's first name from their profile, used in the greeting.
   userName: string;
   onNext: () => void;
-}
-
-// $isTablet — passed to every styled-component that needs to scale up on tablets.
-// Threshold matches the app-wide convention: min(width, height) >= 600.
-interface TabletProps {
-  $isTablet: boolean;
 }
 
 // ContentArea — flex column that fills the space below the shared dots row.
@@ -126,11 +121,10 @@ const CtaLabel = styled.Text<TabletProps>`
 // WelcomeStep1 — the opening welcome screen.
 // Greets the user by first name, sets the tone ("no experience needed"),
 // and shows a glass card summarising what Kura will do for them each morning.
-// isTablet is derived here and threaded through every element so scaling is
-// consistent — nothing picks its own breakpoint independently.
+// isTablet comes from the shared device-type hook and is threaded through
+// every element so scaling is consistent — nothing picks its own breakpoint.
 const WelcomeStep1 = ({ userName, onNext }: WelcomeStep1Props) => {
-  const { width, height } = useWindowDimensions();
-  const isTablet = Math.min(width, height) >= 600;
+  const isTablet = useIsTablet();
 
   return (
     <ContentArea $isTablet={isTablet}>

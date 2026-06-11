@@ -13,6 +13,7 @@ import {
 import styled, { useTheme } from 'styled-components/native';
 import { sendOtpCode, verifyOtpCode } from '~/features/auth/services/authService';
 import { GlassCard } from '~/shared/components/GlassCard';
+import { useIsTablet } from '~/shared/hooks/use-is-tablet';
 import { OtpRequestForm } from '../components/OtpRequestForm';
 import { OtpVerifyPanel } from '../components/OtpVerifyPanel';
 import { SocialAuthButtons } from '../components/SocialAuthButtons';
@@ -247,9 +248,10 @@ export const SignInScreen = () => {
 
   // screenWidth drives the slide distance and each panel's explicit width.
   // useWindowDimensions re-runs on rotation so both stay correct after the
-  // device turns. isTablet scales up the hero content on large screens.
-  const { width: screenWidth, height } = useWindowDimensions();
-  const isTablet = Math.min(screenWidth, height) >= 600;
+  // device turns. isTablet comes from the shared device-type hook and scales
+  // up the hero content on large screens.
+  const { width: screenWidth } = useWindowDimensions();
+  const isTablet = useIsTablet();
 
   // slideAnim is the horizontal offset applied to the panel row.
   // 0 = OTP request form visible. -screenWidth = OTP verify panel visible.

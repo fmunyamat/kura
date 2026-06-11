@@ -6,16 +6,12 @@ import { GrassTypeCard } from '~/features/onboarding/components/GrassTypeCard';
 import { OnboardingScreenShell } from '~/features/onboarding/components/OnboardingScreenShell';
 import type { GrassTypeList } from '~/features/onboarding/types';
 import { GlassCard } from '~/shared/components/GlassCard';
+import { useIsTablet, type TabletProps } from '~/shared/hooks/use-is-tablet';
 import { useOnboardingStore } from '../stores/onboardingStore';
 
 // Same photo the OnboardingScreenShell renders as its background — passed to
 // GlassCard as clearBackdropSource for the Android faux-glass fill.
 const SPRINKLER_BG = require('../../../../assets/images/sprinkler-android.jpg');
-
-// $isTablet — passed to every styled-component that needs to scale up on tablets.
-interface TabletProps {
-  $isTablet: boolean;
-}
 
 // GRASS_OPTIONS — the three choices shown on this screen.
 const GRASS_OPTIONS: Array<{
@@ -127,8 +123,10 @@ const CtaLabel = styled.Text<TabletProps>`
 // from ZIP code server-side rather than storing a wrong value.
 export const GrassType = () => {
   const theme = useTheme();
-  const { width, height } = useWindowDimensions();
-  const isTablet = Math.min(width, height) >= 600;
+  // width still comes from the window — it drives the 10% tablet side padding.
+  // isTablet itself comes from the shared device-type hook.
+  const { width } = useWindowDimensions();
+  const isTablet = useIsTablet();
 
   const [selected, setSelected] = useState<GrassTypeList | null>(null);
   const { setGrassType } = useOnboardingStore();

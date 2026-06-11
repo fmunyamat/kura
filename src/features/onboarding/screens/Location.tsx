@@ -11,17 +11,13 @@ import {
 import styled, { useTheme } from 'styled-components/native';
 import { OnboardingScreenShell } from '~/features/onboarding/components/OnboardingScreenShell';
 import { GlassCard } from '~/shared/components/GlassCard';
+import { useIsTablet, type TabletProps } from '~/shared/hooks/use-is-tablet';
 import { useOnboardingStore } from '../stores/onboardingStore';
 
 // Same photo the OnboardingScreenShell renders as its background. Passed to
 // GlassCard as clearBackdropSource so the Android faux-glass fill uses the
 // same image that would be behind the card on a real backdrop blur.
 const SPRINKLER_BG = require('../../../../assets/images/sprinkler-android.jpg');
-
-// $isTablet — passed to every styled-component that needs to scale up on tablets.
-interface TabletProps {
-  $isTablet: boolean;
-}
 
 // ContentArea — constrains the card width. On tablets, horizontal padding is
 // 10% of screen width each side so the FormCard matches the sign-in GlassCard's
@@ -177,8 +173,10 @@ const CtaLabel = styled.Text<TabletProps>`
 // detection; lawn size drives fertilizer and seed quantity calculations.
 export const Location = () => {
   const theme = useTheme();
-  const { width, height } = useWindowDimensions();
-  const isTablet = Math.min(width, height) >= 600;
+  // width still comes from the window — it drives the 10% tablet side padding.
+  // isTablet itself comes from the shared device-type hook.
+  const { width } = useWindowDimensions();
+  const isTablet = useIsTablet();
 
   const [zipCode, setZipCode] = useState('');
   const [lawnSize, setLawnSize] = useState('');

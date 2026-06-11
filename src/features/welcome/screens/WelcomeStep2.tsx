@@ -1,14 +1,9 @@
-import { Pressable, useWindowDimensions } from 'react-native';
+import { Pressable } from 'react-native';
 import styled from 'styled-components/native';
+import { useIsTablet, type TabletProps } from '~/shared/hooks/use-is-tablet';
 
 interface WelcomeStep2Props {
   onNext: () => void;
-}
-
-// $isTablet — passed to every styled-component that needs to scale up on tablets.
-// Threshold matches the app-wide convention: min(width, height) >= 600.
-interface TabletProps {
-  $isTablet: boolean;
 }
 
 // ContentArea — flex column that fills the space below the shared dots row.
@@ -151,8 +146,7 @@ const CtaLabel = styled.Text<TabletProps>`
 // in the Today tab when they start using the app.
 // Tablet scaling and layout structure match Step1 for visual consistency.
 const WelcomeStep2 = ({ onNext }: WelcomeStep2Props) => {
-  const { width, height } = useWindowDimensions();
-  const isTablet = Math.min(width, height) >= 600;
+  const isTablet = useIsTablet();
 
   return (
     <ContentArea $isTablet={isTablet}>
