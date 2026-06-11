@@ -132,7 +132,7 @@ const Caption = styled.Text`
 
 // CtaButton — dark pill at the bottom, scales on tablet to match Step1.
 const CtaButton = styled(Pressable)<TabletProps>`
-  background-color: rgba(8, 20, 8, 0.88);
+  background-color: ${({ theme }) => theme.colors.primary};
   border-radius: ${({ theme }) => theme.radii.md}px;
   padding: ${({ $isTablet }) => ($isTablet ? '22px 18px' : '14px 12px')};
   margin-bottom: ${({ theme }) => theme.spacing.md}px;

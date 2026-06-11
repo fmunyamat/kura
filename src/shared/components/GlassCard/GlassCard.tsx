@@ -26,6 +26,12 @@ interface GlassCardProps {
   // backdrop blur, and nothing is snapshotted, so nothing glows.
   clearBackdropSource?: CardImageSource;
   clearBackdropTint?: string;
+  // iosBlurIntensity — BlurView intensity on iOS (0–100). Higher values produce
+  // a stronger backdrop blur. Defaults to 15.
+  iosBlurIntensity?: number;
+  // androidBlurRadius — expo-image blurRadius on Android (0–100). Controls how
+  // blurred the faux-glass photo copy appears. Defaults to 20.
+  androidBlurRadius?: number;
 }
 
 // Clip — rounded container clipped to its border-radius. overflow: hidden
@@ -105,6 +111,8 @@ export const GlassCard = ({
   variant = 'frost',
   clearBackdropSource,
   clearBackdropTint,
+  iosBlurIntensity = 15,
+  androidBlurRadius = 20,
 }: GlassCardProps) => {
   if (variant !== 'clear') {
     return (
@@ -118,7 +126,11 @@ export const GlassCard = ({
     return (
       <Clip $variant="clear">
         {clearBackdropSource !== undefined && (
-          <FrostedPhoto source={clearBackdropSource} blurRadius={2} contentFit="cover" />
+          <FrostedPhoto
+            source={clearBackdropSource}
+            blurRadius={androidBlurRadius}
+            contentFit="cover"
+          />
         )}
         {clearBackdropTint !== undefined && <BackdropScrim $color={clearBackdropTint} />}
         <TintFill />
@@ -129,7 +141,7 @@ export const GlassCard = ({
 
   return (
     <Clip $variant="clear">
-      <BlurPane intensity={15} tint="default">
+      <BlurPane intensity={iosBlurIntensity} tint="default">
         <TintFill />
         <Content>{children}</Content>
       </BlurPane>

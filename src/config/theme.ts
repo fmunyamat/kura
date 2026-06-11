@@ -36,7 +36,11 @@ export const lightTheme = {
     // photoTint — the dark green-black wash laid over the full-screen mowing
     // photo so white text stays readable on top of it. Also reused inside the
     // Android clear-glass card so its faked backdrop matches the real screen.
-    photoTint:           'rgba(5,12,5,0.58)',
+    photoTint:            'rgba(5,12,5,0.58)',
+    // onboardingPhotoTint — the darker green tint on the onboarding screens'
+    // blurred photo (OnboardingScreenShell's DarkOverlay). Passed to GlassCard
+    // as clearBackdropTint on Android so the faux-glass fill matches the scene.
+    onboardingPhotoTint:  'rgba(10,28,10,0.60)',
     screenDark:          '#1a1a1a',
     panelDark:           '#242424',
     inputBorderDark:     'rgba(255,255,255,0.10)',
