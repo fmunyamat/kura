@@ -1,45 +1,20 @@
 import { useState } from 'react';
-import { ActivityIndicator, Pressable } from 'react-native';
+import { Pressable } from 'react-native';
 import styled from 'styled-components/native';
 import { useAuthStore } from '~/features/auth/stores/authStore';
 import { OnboardingScreenShell } from '~/features/onboarding/components/OnboardingScreenShell';
-import { useIsTablet, type TabletProps } from '~/shared/hooks/use-is-tablet';
+import { CtaButton } from '~/shared/components/CtaButton';
+import {
+  BottomSpacer,
+  ContentArea,
+  ContentGroup,
+  CtaArea,
+  GapSpacer,
+  TopSpacer,
+} from '~/shared/components/ScreenLayout';
+import { ScreenHeadline, ScreenSubtext } from '~/shared/components/ScreenTypography';
 import { upsertUserProfile } from '../services/onboardingService';
 import { useOnboardingStore } from '../stores/onboardingStore';
-
-const ContentArea = styled.View<TabletProps>`
-  flex: 1;
-  padding: 0 ${({ theme, $isTablet }) =>
-    $isTablet ? theme.spacing.xxl : theme.spacing.md}px;
-`;
-
-const TopSpacer = styled.View`flex: 0.2;`;
-const BottomSpacer = styled.View`flex: 1;`;
-const ContentGroup = styled.View``;
-
-const Headline = styled.Text<TabletProps>`
-  font-family: ${({ theme }) => theme.typography.fontHeaderHeavy};
-  font-size: ${({ $isTablet }) => ($isTablet ? 64 : 42)}px;
-  color: #ffffff;
-  letter-spacing: ${({ theme }) => theme.typography.letterSpacingTight}px;
-  text-align: center;
-  line-height: ${({ $isTablet }) => ($isTablet ? 76 : 50)}px;
-`;
-
-const Subtext = styled.Text<TabletProps>`
-  font-family: ${({ theme }) => theme.typography.fontBodyMedium};
-  font-size: ${({ $isTablet }) => ($isTablet ? 17 : 11)}px;
-  color: rgba(255, 255, 255, 0.48);
-  text-align: center;
-  line-height: ${({ $isTablet }) => ($isTablet ? 28 : 18)}px;
-  padding: 0 ${({ theme }) => theme.spacing.sm}px;
-  margin-top: ${({ theme, $isTablet }) =>
-    $isTablet ? theme.spacing.md : theme.spacing.sm}px;
-`;
-
-const SpacerCard = styled.View<TabletProps>`
-  height: ${({ $isTablet }) => ($isTablet ? 100 : 60)}px;
-`;
 
 // CameraCard — frosted white card housing the camera well and the skip link.
 // Matches FormCard/OptionsCard used in Location, GrassType, and EffortLevel.
@@ -79,36 +54,14 @@ const ErrorText = styled.Text`
   margin-bottom: ${({ theme }) => theme.spacing.sm}px;
 `;
 
-const CtaArea = styled.View<TabletProps>`
-  padding: 0 ${({ theme, $isTablet }) =>
-    $isTablet ? theme.spacing.xxl : theme.spacing.md}px
-    ${({ theme }) => theme.spacing.md}px;
-`;
-
-// CtaButton — dark pill matching all other onboarding screens.
-// Dims while the profile write is in flight to block double-taps.
-const CtaButton = styled(Pressable)<TabletProps & { $disabled: boolean }>`
-  background-color: ${({ theme }) => theme.colors.primary};
-  border-radius: ${({ theme }) => theme.radii.md}px;
-  padding: ${({ $isTablet }) => ($isTablet ? '22px 18px' : '14px 12px')};
-  opacity: ${({ $disabled }) => ($disabled ? 0.6 : 1)};
-`;
-
-const CtaLabel = styled.Text<TabletProps>`
-  font-family: ${({ theme }) => theme.typography.fontBodyBold};
-  font-size: ${({ $isTablet }) => ($isTablet ? 22 : 14)}px;
-  color: #D6EFD8;
-  text-align: center;
-`;
-
 // PhotoCapture — the final onboarding step. The user takes a "before" photo
 // of their lawn to anchor the progress timeline.
 // Skipping is allowed — they can take the photo later from the Progress tab.
 // Both paths (take photo + skip) call handleComplete to write user_profiles,
 // which is what signals the app to route to the home tabs on next render.
+// Layout, headline, subtext, and the CTA all come from the shared screen
+// components.
 export const PhotoCapture = () => {
-  const isTablet = useIsTablet();
-
   const user = useAuthStore((state) => state.user);
   const { zipCode, lawnSize, grassType, effortLevel } = useOnboardingStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -149,16 +102,16 @@ export const PhotoCapture = () => {
 
   return (
     <OnboardingScreenShell currentStep={4} totalSteps={4}>
-      <ContentArea $isTablet={isTablet}>
+      <ContentArea>
         <TopSpacer />
         <ContentGroup>
-          <Headline $isTablet={isTablet}>
+          <ScreenHeadline size="title">
             Snap a "before"{'\n'}photo.
-          </Headline>
-          <Subtext $isTablet={isTablet}>
+          </ScreenHeadline>
+          <ScreenSubtext>
             See how much your lawn improves over the season.
-          </Subtext>
-          <SpacerCard $isTablet={isTablet} />
+          </ScreenSubtext>
+          <GapSpacer />
           <CameraCard>
             <CameraWell
               onPress={handleComplete}
@@ -174,23 +127,14 @@ export const PhotoCapture = () => {
         <BottomSpacer />
       </ContentArea>
 
-      <CtaArea $isTablet={isTablet}>
+      <CtaArea>
         {errorMessage && <ErrorText>{errorMessage}</ErrorText>}
         <CtaButton
-          $isTablet={isTablet}
-          $disabled={isSubmitting}
-          disabled={isSubmitting}
+          label="Skip for now →"
           onPress={handleComplete}
-          accessibilityRole="button"
+          isLoading={isSubmitting}
           accessibilityLabel={isSubmitting ? 'Saving your profile' : 'Skip for now'}
-          accessibilityState={{ busy: isSubmitting }}
-        >
-          {isSubmitting ? (
-            <ActivityIndicator color="#D6EFD8" />
-          ) : (
-            <CtaLabel $isTablet={isTablet}>Skip for now →</CtaLabel>
-          )}
-        </CtaButton>
+        />
       </CtaArea>
     </OnboardingScreenShell>
   );

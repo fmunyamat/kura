@@ -1,5 +1,7 @@
-import { ActivityIndicator, Pressable } from 'react-native';
 import styled from 'styled-components/native';
+import { CtaButton } from '~/shared/components/CtaButton';
+import { BottomSpacer, ContentArea, TopSpacer } from '~/shared/components/ScreenLayout';
+import { ScreenHeadline, ScreenSubtext } from '~/shared/components/ScreenTypography';
 import { useIsTablet, type TabletProps } from '~/shared/hooks/use-is-tablet';
 
 interface WelcomeStep4Props {
@@ -10,27 +12,10 @@ interface WelcomeStep4Props {
   errorMessage: string | null;
 }
 
-// ContentArea — flex column that fills the space below the shared nav bar.
-// align-items: center keeps the icon and text horizontally centred.
-// On tablets, horizontal padding increases so content doesn't stretch edge-to-edge.
-const ContentArea = styled.View<TabletProps>`
-  flex: 1;
-  align-items: center;
-  padding: 0 ${({ theme, $isTablet }) =>
-    $isTablet ? theme.spacing.xxl : theme.spacing.md}px;
-`;
-
-// TopSpacer — pushes the content group down from the NavBar.
-// flex: 0.2 matches Steps 1–3 so the headline sits at the same vertical position.
-const TopSpacer = styled.View`flex: 0.2;`;
-
-// BottomSpacer — absorbs remaining space below the content group, pinning
-// the CTA to the bottom of the screen.
-const BottomSpacer = styled.View`flex: 1;`;
-
-// ContentGroup — wraps icon, headline, and subtext as one centred unit so
-// the whole block moves together in the vertical layout.
-const ContentGroup = styled.View`
+// CenteredContentGroup — unlike the other steps' plain ContentGroup, this one
+// centres the icon, headline, and subtext as one unit, and spans the full
+// width so the centring works inside the centered ContentArea.
+const CenteredContentGroup = styled.View`
   align-items: center;
   width: 100%;
 `;
@@ -51,49 +36,6 @@ const CheckIcon = styled.Text<TabletProps>`
   font-size: ${({ $isTablet }) => ($isTablet ? 44 : 32)}px;
 `;
 
-// Headline — the step's main heading. Uses fontHeaderHeavy and tablet-aware
-// sizing to match Steps 1–3's typographic scale exactly.
-const Headline = styled.Text<TabletProps>`
-  font-family: ${({ theme }) => theme.typography.fontHeaderHeavy};
-  font-size: ${({ $isTablet }) => ($isTablet ? 76 : 50)}px;
-  color: #ffffff;
-  letter-spacing: ${({ theme }) => theme.typography.letterSpacingTight}px;
-  text-align: center;
-  line-height: ${({ $isTablet }) => ($isTablet ? 90 : 60)}px;
-`;
-
-// Subtext — supporting copy below the headline. Matches Steps 1–3 styling exactly.
-const Subtext = styled.Text<TabletProps>`
-  font-family: ${({ theme }) => theme.typography.fontBodyMedium};
-  font-size: ${({ $isTablet }) => ($isTablet ? 17 : 11)}px;
-  color: rgba(255, 255, 255, 0.48);
-  text-align: center;
-  line-height: ${({ $isTablet }) => ($isTablet ? 28 : 18)}px;
-  padding: 0 ${({ theme }) => theme.spacing.sm}px;
-  margin-top: ${({ theme, $isTablet }) =>
-    $isTablet ? theme.spacing.md : theme.spacing.sm}px;
-`;
-
-// CtaButton — the only exit from the welcome flow. Disabled while submitting
-// to prevent double-taps from firing two Supabase writes. Scales on tablet
-// to match Steps 1–3.
-const CtaButton = styled(Pressable)<TabletProps & { $disabled: boolean }>`
-  background-color: ${({ theme }) => theme.colors.primary};
-  border-radius: ${({ theme }) => theme.radii.md}px;
-  padding: ${({ $isTablet }) => ($isTablet ? '22px 18px' : '14px 12px')};
-  width: 100%;
-  margin-bottom: ${({ theme }) => theme.spacing.md}px;
-  opacity: ${({ $disabled }) => ($disabled ? 0.60 : 1)};
-`;
-
-// CtaLabel — button text, scales from 14px to 22px on tablets.
-const CtaLabel = styled.Text<TabletProps>`
-  font-family: ${({ theme }) => theme.typography.fontBodyBold};
-  font-size: ${({ $isTablet }) => ($isTablet ? 22 : 14)}px;
-  color: #D6EFD8;
-  text-align: center;
-`;
-
 // ErrorText — shown inline above the CTA when the Supabase write fails.
 // Never exposes the internal error message — a generic string only (MASVS-CODE-4).
 const ErrorText = styled.Text`
@@ -107,38 +49,33 @@ const ErrorText = styled.Text`
 // The only CTA here is "Start Growing", which commits the welcome-seen flag
 // to the database. If the write fails the user stays on this screen and sees
 // an error so they can try again — we never silently drop them into the tabs.
+// Layout, headline, subtext, and the CTA all come from the shared screen
+// components; the CTA shows its loading spinner while the write is in flight.
 const WelcomeStep4 = ({ onFinish, isSubmitting, errorMessage }: WelcomeStep4Props) => {
   const isTablet = useIsTablet();
 
   return (
-    <ContentArea $isTablet={isTablet}>
+    <ContentArea centered>
       <TopSpacer />
-      <ContentGroup>
+      <CenteredContentGroup>
         <CheckCircle $isTablet={isTablet}>
           <CheckIcon $isTablet={isTablet}>✅</CheckIcon>
         </CheckCircle>
-        <Headline $isTablet={isTablet}>You're all set.</Headline>
-        <Subtext $isTablet={isTablet}>
+        <ScreenHeadline>You're all set.</ScreenHeadline>
+        <ScreenSubtext>
           Your first task is already waiting. Let's see what your lawn needs today.
-        </Subtext>
-      </ContentGroup>
+        </ScreenSubtext>
+      </CenteredContentGroup>
       <BottomSpacer />
       {errorMessage && <ErrorText>{errorMessage}</ErrorText>}
       <CtaButton
-        $isTablet={isTablet}
+        label="Start Growing →"
         onPress={onFinish}
-        $disabled={isSubmitting}
-        disabled={isSubmitting}
-        accessibilityRole="button"
+        isLoading={isSubmitting}
         accessibilityLabel="Start Growing"
-        accessibilityState={{ busy: isSubmitting }}
-      >
-        {isSubmitting ? (
-          <ActivityIndicator color="#D6EFD8" />
-        ) : (
-          <CtaLabel $isTablet={isTablet}>Start Growing →</CtaLabel>
-        )}
-      </CtaButton>
+        fullWidth
+        withBottomGap
+      />
     </ContentArea>
   );
 };

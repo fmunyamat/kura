@@ -6,61 +6,27 @@ import {
     Platform,
     Pressable,
     ScrollView,
-    useWindowDimensions,
 } from 'react-native';
 import styled, { useTheme } from 'styled-components/native';
 import { OnboardingScreenShell } from '~/features/onboarding/components/OnboardingScreenShell';
+import { CtaButton } from '~/shared/components/CtaButton';
 import { GlassCard } from '~/shared/components/GlassCard';
-import { useIsTablet, type TabletProps } from '~/shared/hooks/use-is-tablet';
+import {
+  BottomSpacer,
+  ContentArea,
+  ContentGroup,
+  CtaArea,
+  GapSpacer,
+  TopSpacer,
+} from '~/shared/components/ScreenLayout';
+import { ScreenHeadline, ScreenSubtext } from '~/shared/components/ScreenTypography';
+import { useIsTablet } from '~/shared/hooks/use-is-tablet';
 import { useOnboardingStore } from '../stores/onboardingStore';
 
 // Same photo the OnboardingScreenShell renders as its background. Passed to
 // GlassCard as clearBackdropSource so the Android faux-glass fill uses the
 // same image that would be behind the card on a real backdrop blur.
 const SPRINKLER_BG = require('../../../../assets/images/sprinkler-android.jpg');
-
-// ContentArea — constrains the card width. On tablets, horizontal padding is
-// 10% of screen width each side so the FormCard matches the sign-in GlassCard's
-// 80% column width. On phones the standard md padding applies.
-const ContentArea = styled.View<TabletProps & { $width: number }>`
-  flex: 1;
-  padding: 0 ${({ $width, $isTablet, theme }) =>
-    $isTablet ? $width * 0.1 : theme.spacing.md}px;
-`;
-
-// TopSpacer — pushes the headline group down from the NavBar.
-// flex: 0.2 matches the welcome flow and the other onboarding screens.
-const TopSpacer = styled.View`flex: 0.2;`;
-
-// BottomSpacer — absorbs remaining space below the content group so the
-// CTA stays outside the scroll area pinned to the bottom.
-const BottomSpacer = styled.View`flex: 1;`;
-
-const ContentGroup = styled.View``;
-
-const Headline = styled.Text<TabletProps>`
-  font-family: ${({ theme }) => theme.typography.fontHeaderHeavy};
-  font-size: ${({ $isTablet }) => ($isTablet ? 64 : 42)}px;
-  color: #ffffff;
-  letter-spacing: ${({ theme }) => theme.typography.letterSpacingTight}px;
-  text-align: center;
-  line-height: ${({ $isTablet }) => ($isTablet ? 76 : 50)}px;
-`;
-
-const Subtext = styled.Text<TabletProps>`
-  font-family: ${({ theme }) => theme.typography.fontBodyMedium};
-  font-size: ${({ $isTablet }) => ($isTablet ? 17 : 11)}px;
-  color: rgba(255, 255, 255, 0.48);
-  text-align: center;
-  line-height: ${({ $isTablet }) => ($isTablet ? 28 : 18)}px;
-  padding: 0 ${({ theme }) => theme.spacing.sm}px;
-  margin-top: ${({ theme, $isTablet }) =>
-    $isTablet ? theme.spacing.md : theme.spacing.sm}px;
-`;
-
-const SpacerCard = styled.View<TabletProps>`
-  height: ${({ $isTablet }) => ($isTablet ? 100 : 60)}px;
-`;
 
 // FieldGroup — wraps a label + input pair. GlassCard's Content gap handles
 // the spacing between groups; no extra padding needed here.
@@ -143,39 +109,15 @@ const HintLink = styled.Text`
   text-decoration-line: underline;
 `;
 
-// CtaArea — wraps the CTA button outside the ScrollView so it stays pinned
-// to the bottom of the screen even while the keyboard is open. Horizontal
-// padding mirrors ContentArea so the button aligns with the FormCard edges.
-const CtaArea = styled.View<TabletProps & { $width: number }>`
-  padding: 0 ${({ $width, $isTablet, theme }) =>
-    $isTablet ? $width * 0.1 : theme.spacing.md}px
-    ${({ theme }) => theme.spacing.md}px;
-`;
-
-// CtaButton — dark pill button matching all welcome steps and the other
-// onboarding screens. Opacity drops to 0.4 when the form is incomplete.
-const CtaButton = styled(Pressable)<TabletProps & { $enabled: boolean }>`
-  background-color: ${({ theme }) => theme.colors.primaryMid};
-  border-radius: ${({ theme }) => theme.radii.md}px;
-  padding: ${({ $isTablet }) => ($isTablet ? '22px 18px' : '14px 12px')};
-  opacity: ${({ $enabled }) => ($enabled ? 1 : 0.4)};
-`;
-
-const CtaLabel = styled.Text<TabletProps>`
-  font-family: ${({ theme }) => theme.typography.fontBodyBold};
-  font-size: ${({ $isTablet }) => ($isTablet ? 22 : 14)}px;
-  color: #D6EFD8;
-  text-align: center;
-`;
-
 // Location — collects the user's ZIP code and total lawn size in sq ft.
 // Both fields must be filled before Continue activates. ZIP drives season
 // detection; lawn size drives fertilizer and seed quantity calculations.
+// Layout, headline, subtext, and the CTA all come from the shared screen
+// components; ContentArea/CtaArea run in column mode so the card matches
+// the sign-in card's 80% tablet column. The CTA keeps its lighter primaryMid
+// fill — the only screen that uses it.
 export const Location = () => {
   const theme = useTheme();
-  // width still comes from the window — it drives the 10% tablet side padding.
-  // isTablet itself comes from the shared device-type hook.
-  const { width } = useWindowDimensions();
   const isTablet = useIsTablet();
 
   const [zipCode, setZipCode] = useState('');
@@ -214,16 +156,16 @@ export const Location = () => {
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
-          <ContentArea $isTablet={isTablet} $width={width}>
+          <ContentArea column>
             <TopSpacer />
             <ContentGroup>
-              <Headline $isTablet={isTablet}>
+              <ScreenHeadline size="title">
                 Tell us about{'\n'}your yard.
-              </Headline>
-              <Subtext $isTablet={isTablet}>
+              </ScreenHeadline>
+              <ScreenSubtext>
                 We use this to figure out your season and how much product your lawn needs.
-              </Subtext>
-              <SpacerCard $isTablet={isTablet} />
+              </ScreenSubtext>
+              <GapSpacer />
               {/* GlassCard variant="clear" matches the sign-in screen's card exactly —
                   same faux-glass backdrop approach on Android, real BlurView on iOS. */}
               <GlassCard
@@ -292,18 +234,14 @@ export const Location = () => {
 
         {/* CTA lives outside the ScrollView so it stays anchored to the
             bottom of the KeyboardAvoidingView frame, not the scroll content. */}
-        <CtaArea $isTablet={isTablet} $width={width}>
+        <CtaArea column>
           <CtaButton
-            $isTablet={isTablet}
-            $enabled={isValid}
-            disabled={!isValid}
+            label="Continue →"
             onPress={handleContinue}
-            accessibilityRole="button"
+            enabled={isValid}
+            color="primaryMid"
             accessibilityLabel="Continue to next step"
-            accessibilityState={{ disabled: !isValid }}
-          >
-            <CtaLabel $isTablet={isTablet}>Continue →</CtaLabel>
-          </CtaButton>
+          />
         </CtaArea>
       </KeyboardAvoidingView>
     </OnboardingScreenShell>

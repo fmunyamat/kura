@@ -47,6 +47,13 @@ export const lightTheme = {
     inputBackgroundDark: 'rgba(255,255,255,0.05)',
     textOnDark:          'rgba(255,255,255,0.85)',
     textMutedOnDark:     'rgba(255,255,255,0.60)',
+    // subtextOnPhoto — the supporting line under the big white headlines on the
+    // welcome/onboarding photo and gradient backgrounds. Fainter than
+    // textMutedOnDark so it whispers next to the heavy headline above it.
+    subtextOnPhoto:      'rgba(255,255,255,0.48)',
+    // textOnPrimary — pale mint label used on the solid primary CTA pill so the
+    // button text reads clearly against the dark forest green fill.
+    textOnPrimary:       '#D6EFD8',
     borderOnDark:        'rgba(255,255,255,0.10)',
     buttonSurfaceDark:   '#2a2a2a',
 
