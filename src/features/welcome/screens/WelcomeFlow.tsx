@@ -1,23 +1,23 @@
 import { useState } from 'react';
 import { ImageBackground, Pressable, useWindowDimensions } from 'react-native';
 import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming,
+    useAnimatedStyle,
+    useSharedValue,
+    withTiming,
 } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import styled from 'styled-components/native';
 
 import { useAuthStore } from '~/features/auth/stores/authStore';
-import WelcomeDots from '../components/WelcomeDots';
+import { StepPillLabel } from '~/shared/components/StepPillLabel';
+import { StepProgressDots } from '~/shared/components/StepProgressDots';
+import { welcomeService } from '../services/welcome.service';
 import WelcomeStep1 from './WelcomeStep1';
 import WelcomeStep2 from './WelcomeStep2';
 import WelcomeStep3 from './WelcomeStep3';
 import WelcomeStep4 from './WelcomeStep4';
-import WelcomeStepLabel from '../components/WelcomeStepLabel';
-import { welcomeService } from '../services/welcome.service';
 
-const GRASS_BG = require('../../../../assets/images/grass-bkg.jpg') as number;
+const GRASS_BG = require('../../../../assets/images/lawn.png') as number;
 const TOTAL_STEPS = 4;
 
 const Screen = styled.View`flex: 1;`;
@@ -127,16 +127,16 @@ const WelcomeFlow = () => {
 
   return (
     <Screen>
-      <PhotoBackground source={GRASS_BG} resizeMode="cover" blurRadius={18} />
+      <PhotoBackground source={GRASS_BG} resizeMode="cover" blurRadius={7} />
       <DarkOverlay />
       <Safe edges={['top', 'bottom']}>
         <TopBar>
-          <WelcomeDots total={TOTAL_STEPS} activeIndex={currentStep} />
+          <StepProgressDots total={TOTAL_STEPS} activeIndex={currentStep} />
         </TopBar>
 
         {/* NavBar is outside the animation — label and back arrow stay fixed. */}
         <NavBar>
-          <WelcomeStepLabel step={currentStep + 1} total={4} />
+          <StepPillLabel prefix="Quick Tour" step={currentStep + 1} total={4} />
           {currentStep >= 1 && currentStep <= 3 && (
             <NavBackButton
               onPress={handleBack}

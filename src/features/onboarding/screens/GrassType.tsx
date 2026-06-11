@@ -1,21 +1,27 @@
 import { router } from 'expo-router';
 import { Fragment, useState } from 'react';
-import { Pressable, ScrollView, useWindowDimensions } from 'react-native';
+import { ScrollView } from 'react-native';
 import styled, { useTheme } from 'styled-components/native';
-import { GrassTypeCard } from '~/features/onboarding/components/GrassTypeCard';
 import { OnboardingScreenShell } from '~/features/onboarding/components/OnboardingScreenShell';
 import type { GrassTypeList } from '~/features/onboarding/types';
+import { CtaButton } from '~/shared/components/CtaButton';
+import { GlassDivider } from '~/shared/components/GlassDivider';
 import { GlassCard } from '~/shared/components/GlassCard';
+import { OptionCard } from '~/shared/components/OptionCard';
+import {
+  BottomSpacer,
+  ContentArea,
+  ContentGroup,
+  CtaArea,
+  GapSpacer,
+  TopSpacer,
+} from '~/shared/components/ScreenLayout';
+import { ScreenHeadline, ScreenSubtext } from '~/shared/components/ScreenTypography';
 import { useOnboardingStore } from '../stores/onboardingStore';
 
 // Same photo the OnboardingScreenShell renders as its background — passed to
 // GlassCard as clearBackdropSource for the Android faux-glass fill.
 const SPRINKLER_BG = require('../../../../assets/images/sprinkler-android.jpg');
-
-// $isTablet — passed to every styled-component that needs to scale up on tablets.
-interface TabletProps {
-  $isTablet: boolean;
-}
 
 // GRASS_OPTIONS — the three choices shown on this screen.
 const GRASS_OPTIONS: Array<{
@@ -44,43 +50,6 @@ const GRASS_OPTIONS: Array<{
   },
 ];
 
-// ContentArea — constrains the card width. On tablets, horizontal padding is
-// 10% of screen width each side so the GlassCard matches the sign-in and
-// Location screens' 80% column width. On phones the standard md padding applies.
-const ContentArea = styled.View<TabletProps & { $width: number }>`
-  flex: 1;
-  padding: 0 ${({ $width, $isTablet, theme }) =>
-    $isTablet ? $width * 0.1 : theme.spacing.md}px;
-`;
-
-const TopSpacer = styled.View`flex: 0.2;`;
-const BottomSpacer = styled.View`flex: 1;`;
-const ContentGroup = styled.View``;
-
-const Headline = styled.Text<TabletProps>`
-  font-family: ${({ theme }) => theme.typography.fontHeaderHeavy};
-  font-size: ${({ $isTablet }) => ($isTablet ? 64 : 42)}px;
-  color: ${({ theme }) => theme.colors.white};
-  letter-spacing: ${({ theme }) => theme.typography.letterSpacingTight}px;
-  text-align: center;
-  line-height: ${({ $isTablet }) => ($isTablet ? 76 : 50)}px;
-`;
-
-const Subtext = styled.Text<TabletProps>`
-  font-family: ${({ theme }) => theme.typography.fontBodyMedium};
-  font-size: ${({ $isTablet }) => ($isTablet ? 17 : 11)}px;
-  color: ${({ theme }) => theme.colors.textMutedOnDark};
-  text-align: center;
-  line-height: ${({ $isTablet }) => ($isTablet ? 28 : 18)}px;
-  padding: 0 ${({ theme }) => theme.spacing.sm}px;
-  margin-top: ${({ theme, $isTablet }) =>
-    $isTablet ? theme.spacing.md : theme.spacing.sm}px;
-`;
-
-const SpacerCard = styled.View<TabletProps>`
-  height: ${({ $isTablet }) => ($isTablet ? 100 : 60)}px;
-`;
-
 // OptionsGroup — single wrapper for all option rows. Placed as one child
 // inside GlassCard's Content. Negative margins cancel out Content's 16px
 // padding so row highlight backgrounds extend edge-to-edge inside the card;
@@ -89,46 +58,15 @@ const OptionsGroup = styled.View`
   margin: -${({ theme }) => theme.spacing.md}px;
 `;
 
-// OptionDivider — rule between option rows. Uses the same glassClearDivider
-// token as the Location screen's FieldDivider.
-const OptionDivider = styled.View`
-  height: 1px;
-  background-color: ${({ theme }) => theme.colors.glassClearDivider};
-`;
-
-// CtaArea — wraps the CTA button outside the ScrollView so it stays pinned
-// to the bottom of the screen. Horizontal padding mirrors ContentArea so
-// the button aligns with the GlassCard edges.
-const CtaArea = styled.View<TabletProps & { $width: number }>`
-  padding: 0 ${({ $width, $isTablet, theme }) =>
-    $isTablet ? $width * 0.1 : theme.spacing.md}px
-    ${({ theme }) => theme.spacing.md}px;
-`;
-
-// CtaButton — dark pill button matching all welcome steps and other onboarding
-// screens. Opacity drops to 0.4 when no option is selected.
-const CtaButton = styled(Pressable)<TabletProps & { $enabled: boolean }>`
-  background-color: ${({ theme }) => theme.colors.primary};
-  border-radius: ${({ theme }) => theme.radii.md}px;
-  padding: ${({ $isTablet }) => ($isTablet ? '22px 18px' : '14px 12px')};
-  opacity: ${({ $enabled }) => ($enabled ? 1 : 0.4)};
-`;
-
-const CtaLabel = styled.Text<TabletProps>`
-  font-family: ${({ theme }) => theme.typography.fontBodyBold};
-  font-size: ${({ $isTablet }) => ($isTablet ? 22 : 14)}px;
-  color: #D6EFD8;
-  text-align: center;
-`;
-
 // GrassType — lets the user identify their grass type.
 // One option must be selected before Continue activates.
 // "I'm not sure" maps to 'unknown' — the task engine infers grass type
 // from ZIP code server-side rather than storing a wrong value.
+// Layout, headline, subtext, and the CTA all come from the shared screen
+// components; ContentArea/CtaArea run in column mode so the card matches
+// the sign-in and Location screens' 80% tablet column.
 export const GrassType = () => {
   const theme = useTheme();
-  const { width, height } = useWindowDimensions();
-  const isTablet = Math.min(width, height) >= 600;
 
   const [selected, setSelected] = useState<GrassTypeList | null>(null);
   const { setGrassType } = useOnboardingStore();
@@ -147,16 +85,16 @@ export const GrassType = () => {
         bounces={false}
         showsVerticalScrollIndicator={false}
       >
-        <ContentArea $isTablet={isTablet} $width={width}>
+        <ContentArea column>
           <TopSpacer />
           <ContentGroup>
-            <Headline $isTablet={isTablet}>
+            <ScreenHeadline size="title">
               What kind of{'\n'}grass is it?
-            </Headline>
-            <Subtext $isTablet={isTablet}>
+            </ScreenHeadline>
+            <ScreenSubtext tone="muted">
               This determines which tasks are right for your lawn.
-            </Subtext>
-            <SpacerCard $isTablet={isTablet} />
+            </ScreenSubtext>
+            <GapSpacer />
             {/* GlassCard variant="clear" matches the Location screen's card —
                 same faux-glass backdrop on Android, real BlurView on iOS. */}
             <GlassCard
@@ -167,8 +105,8 @@ export const GrassType = () => {
               <OptionsGroup>
                 {GRASS_OPTIONS.map((opt, index) => (
                   <Fragment key={opt.value}>
-                    {index > 0 && <OptionDivider />}
-                    <GrassTypeCard
+                    {index > 0 && <GlassDivider />}
+                    <OptionCard
                       icon={opt.icon}
                       name={opt.name}
                       description={opt.description}
@@ -186,18 +124,13 @@ export const GrassType = () => {
 
       {/* CTA lives outside the ScrollView so it stays anchored to the
           bottom of the screen, not the scroll content. */}
-      <CtaArea $isTablet={isTablet} $width={width}>
+      <CtaArea column>
         <CtaButton
-          $isTablet={isTablet}
-          $enabled={selected !== null}
-          disabled={selected === null}
+          label="Continue →"
           onPress={handleContinue}
-          accessibilityRole="button"
+          enabled={selected !== null}
           accessibilityLabel="Continue to next step"
-          accessibilityState={{ disabled: selected === null }}
-        >
-          <CtaLabel $isTablet={isTablet}>Continue →</CtaLabel>
-        </CtaButton>
+        />
       </CtaArea>
     </OnboardingScreenShell>
   );

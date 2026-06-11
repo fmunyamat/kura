@@ -47,6 +47,13 @@ export const lightTheme = {
     inputBackgroundDark: 'rgba(255,255,255,0.05)',
     textOnDark:          'rgba(255,255,255,0.85)',
     textMutedOnDark:     'rgba(255,255,255,0.60)',
+    // subtextOnPhoto — the supporting line under the big white headlines on the
+    // welcome/onboarding photo and gradient backgrounds. Fainter than
+    // textMutedOnDark so it whispers next to the heavy headline above it.
+    subtextOnPhoto:      'rgba(255,255,255,0.48)',
+    // textOnPrimary — pale mint label used on the solid primary CTA pill so the
+    // button text reads clearly against the dark forest green fill.
+    textOnPrimary:       '#D6EFD8',
     borderOnDark:        'rgba(255,255,255,0.10)',
     buttonSurfaceDark:   '#2a2a2a',
 
@@ -74,6 +81,11 @@ export const lightTheme = {
 
     // Onboarding glass panel — white frost at 46% sits cleanly over the gradient.
     glassOnboardingPanel:          'rgba(255,255,255,0.46)',
+    // glassFrostPanel — the heavy white frost used by GlassCard's 'frost'
+    // variant and the welcome flow's smaller frosted pills. Slightly lighter
+    // than glassOnboardingPanel; constant across themes because it always
+    // sits over a dark photo or gradient.
+    glassFrostPanel:               'rgba(255,255,255,0.44)',
     // Inputs sit slightly brighter than the panel surface to read as interactive.
     glassOnboardingInput:          'rgba(255,255,255,0.55)',
     glassOnboardingInputFocused:   'rgba(255,255,255,0.72)',
