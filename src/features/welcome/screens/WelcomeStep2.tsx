@@ -1,14 +1,16 @@
-import styled from 'styled-components/native';
+import styled, { useTheme } from 'styled-components/native';
 import { CtaButton } from '~/shared/components/CtaButton';
 import { GlassCard } from '~/shared/components/GlassCard';
 import {
-  BottomSpacer,
-  ContentArea,
-  ContentGroup,
-  GapSpacer,
-  TopSpacer,
+    BottomSpacer,
+    ContentArea,
+    ContentGroup,
+    GapSpacer,
+    TopSpacer,
 } from '~/shared/components/ScreenLayout';
 import { ScreenHeadline, ScreenSubtext } from '~/shared/components/ScreenTypography';
+
+const LAWN_BG = require('../../../../assets/images/lawn-android.jpg') as number;
 
 interface WelcomeStep2Props {
   onNext: () => void;
@@ -81,6 +83,8 @@ const Caption = styled.Text`
 // Layout, headline, subtext, and the CTA all come from the shared screen
 // components so every step renders the identical skeleton.
 const WelcomeStep2 = ({ onNext }: WelcomeStep2Props) => {
+  const theme = useTheme();
+
   return (
     <ContentArea>
       <TopSpacer />
@@ -92,7 +96,12 @@ const WelcomeStep2 = ({ onNext }: WelcomeStep2Props) => {
         <GapSpacer />
         {/* contentPadding="none" — the task rows pad themselves, and their
             top-border dividers need to run edge-to-edge across the card. */}
-        <GlassCard contentPadding="none">
+        <GlassCard
+          variant="clear"
+          clearBackdropSource={LAWN_BG}
+          clearBackdropTint={theme.colors.onboardingPhotoTint}
+          contentPadding="none"
+        >
           <TaskRow $first>
             <TaskIcon>💧</TaskIcon>
             <TaskBody>

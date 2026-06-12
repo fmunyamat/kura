@@ -5,16 +5,16 @@ import styled, { useTheme } from 'styled-components/native';
 import { OnboardingScreenShell } from '~/features/onboarding/components/OnboardingScreenShell';
 import type { GrassTypeList } from '~/features/onboarding/types';
 import { CtaButton } from '~/shared/components/CtaButton';
-import { GlassDivider } from '~/shared/components/GlassDivider';
 import { GlassCard } from '~/shared/components/GlassCard';
+import { GlassDivider } from '~/shared/components/GlassDivider';
 import { OptionCard } from '~/shared/components/OptionCard';
 import {
-  BottomSpacer,
-  ContentArea,
-  ContentGroup,
-  CtaArea,
-  GapSpacer,
-  TopSpacer,
+    BottomSpacer,
+    ContentArea,
+    ContentGroup,
+    CtaArea,
+    GapSpacer,
+    TopSpacer,
 } from '~/shared/components/ScreenLayout';
 import { ScreenHeadline, ScreenSubtext } from '~/shared/components/ScreenTypography';
 import { useOnboardingStore } from '../stores/onboardingStore';

@@ -10,15 +10,15 @@ import {
 import styled, { useTheme } from 'styled-components/native';
 import { OnboardingScreenShell } from '~/features/onboarding/components/OnboardingScreenShell';
 import { CtaButton } from '~/shared/components/CtaButton';
-import { GlassDivider } from '~/shared/components/GlassDivider';
 import { GlassCard } from '~/shared/components/GlassCard';
+import { GlassDivider } from '~/shared/components/GlassDivider';
 import {
-  BottomSpacer,
-  ContentArea,
-  ContentGroup,
-  CtaArea,
-  GapSpacer,
-  TopSpacer,
+    BottomSpacer,
+    ContentArea,
+    ContentGroup,
+    CtaArea,
+    GapSpacer,
+    TopSpacer,
 } from '~/shared/components/ScreenLayout';
 import { ScreenHeadline, ScreenSubtext } from '~/shared/components/ScreenTypography';
 import { useIsTablet } from '~/shared/hooks/use-is-tablet';
@@ -166,7 +166,6 @@ export const Location = () => {
                 variant="clear"
                 clearBackdropSource={SPRINKLER_BG}
                 clearBackdropTint={theme.colors.photoTint}
-                androidBlurRadius={15}
               >
                 {/* ZIP code field */}
                 <FieldGroup>
@@ -233,7 +232,6 @@ export const Location = () => {
             label="Continue →"
             onPress={handleContinue}
             enabled={isValid}
-            color="primaryMid"
             accessibilityLabel="Continue to next step"
           />
         </CtaArea>

@@ -1,15 +1,19 @@
-import styled from 'styled-components/native';
+import styled, { useTheme } from 'styled-components/native';
 import { CtaButton } from '~/shared/components/CtaButton';
 import { GlassCard } from '~/shared/components/GlassCard';
 import {
-  BottomSpacer,
-  ContentArea,
-  ContentGroup,
-  GapSpacer,
-  TopSpacer,
+    BottomSpacer,
+    ContentArea,
+    ContentGroup,
+    GapSpacer,
+    TopSpacer,
 } from '~/shared/components/ScreenLayout';
 import { ScreenHeadline, ScreenSubtext } from '~/shared/components/ScreenTypography';
 import { useIsTablet, type TabletProps } from '~/shared/hooks/use-is-tablet';
+
+// Same lawn photo that WelcomeFlow renders as its full-screen background —
+// passed to GlassCard so the Android faux-glass fill matches the real backdrop.
+const LAWN_BG = require('../../../../assets/images/lawn-android.jpg') as number;
 
 interface WelcomeStep1Props {
   // userName — the user's first name from their profile, used in the greeting.
@@ -66,6 +70,7 @@ const CardDesc = styled.Text<TabletProps>`
 // components so every step renders the identical skeleton.
 const WelcomeStep1 = ({ userName, onNext }: WelcomeStep1Props) => {
   const isTablet = useIsTablet();
+  const theme = useTheme();
 
   return (
     <ContentArea>
@@ -80,7 +85,13 @@ const WelcomeStep1 = ({ userName, onNext }: WelcomeStep1Props) => {
           We'll help you grow a healthier lawn — one simple task at a time. No experience needed.
         </ScreenSubtext>
         <GapSpacer />
-        <GlassCard contentPadding="none">
+        <GlassCard
+          variant="clear"
+          clearBackdropSource={LAWN_BG}
+          clearBackdropTint={theme.colors.onboardingPhotoTint}
+          contentPadding="none"
+        //   androidBlurRadius={1}
+        >
           <CardRow $isTablet={isTablet}>
             <CardIcon $isTablet={isTablet}>🌱</CardIcon>
             <CardBody>

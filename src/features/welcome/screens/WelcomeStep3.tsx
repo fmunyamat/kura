@@ -1,5 +1,7 @@
-import styled from 'styled-components/native';
+import styled, { useTheme } from 'styled-components/native';
 import { CtaButton } from '~/shared/components/CtaButton';
+import { GlassCard } from '~/shared/components/GlassCard';
+import { GlassDivider } from '~/shared/components/GlassDivider';
 import {
   BottomSpacer,
   ContentArea,
@@ -9,20 +11,22 @@ import {
 } from '~/shared/components/ScreenLayout';
 import { ScreenHeadline, ScreenSubtext } from '~/shared/components/ScreenTypography';
 
+const LAWN_BG = require('../../../../assets/images/lawn-android.jpg') as number;
+
 interface WelcomeStep3Props {
   onNext: () => void;
 }
 
-// NavPills — the stack of four tab-description cards.
-const NavPills = styled.View`gap: ${({ theme }) => theme.spacing.sm + 2}px;`;
+// OptionsGroup — cancels out GlassCard's 16px Content padding so each
+// NavPill's background can extend edge-to-edge inside the card.
+const OptionsGroup = styled.View`
+  margin: -${({ theme }) => theme.spacing.md}px;
+`;
 
-// NavPill — one small frosted card describing a single tab. Uses the same
-// glassFrostPanel token as the shared GlassCard but stays a local component:
-// its border-radius is deliberately 2px tighter than GlassCard's because four
-// stacked pills read better with slightly sharper corners than one big card.
+// NavPill — one row describing a single tab, rendered inside the shared
+// GlassCard. No individual background or border-radius — the card surface
+// and GlassDividers between rows provide the visual structure.
 const NavPill = styled.View`
-  background-color: ${({ theme }) => theme.colors.glassFrostPanel};
-  border-radius: ${({ theme }) => theme.radii.lg - 2}px;
   padding: 16px;
   flex-direction: row;
   align-items: center;
@@ -108,6 +112,8 @@ const TABS = [
 // components; the pills gap uses the smaller 'pills' GapSpacer because four
 // pills take more vertical space than one card.
 const WelcomeStep3 = ({ onNext }: WelcomeStep3Props) => {
+  const theme = useTheme();
+
   return (
     <ContentArea>
       <TopSpacer />
@@ -117,36 +123,45 @@ const WelcomeStep3 = ({ onNext }: WelcomeStep3Props) => {
           Each tab handles a different part of your lawn care routine.
         </ScreenSubtext>
         <GapSpacer size="pills" />
-        <NavPills>
-          <NavPill>
-            <NavPillIcon>🌅</NavPillIcon>
-            <NavPillBody>
-              <NavPillName>Today</NavPillName>
-              <NavPillDesc>Your daily task and streak</NavPillDesc>
-            </NavPillBody>
-          </NavPill>
-          <NavPill>
-            <NavPillIcon>📋</NavPillIcon>
-            <NavPillBody>
-              <NavPillName>Tasks</NavPillName>
-              <NavPillDesc>See what's coming up this month</NavPillDesc>
-            </NavPillBody>
-          </NavPill>
-          <NavPill>
-            <NavPillIcon>📖</NavPillIcon>
-            <NavPillBody>
-              <NavPillName>Learn</NavPillName>
-              <NavPillDesc>Beginner-friendly lawn guides</NavPillDesc>
-            </NavPillBody>
-          </NavPill>
-          <NavPill>
-            <NavPillIcon>👤</NavPillIcon>
-            <NavPillBody>
-              <NavPillName>Profile</NavPillName>
-              <NavPillDesc>Your lawn info and settings</NavPillDesc>
-            </NavPillBody>
-          </NavPill>
-        </NavPills>
+        <GlassCard
+          variant="clear"
+          clearBackdropSource={LAWN_BG}
+          clearBackdropTint={theme.colors.onboardingPhotoTint}
+        >
+          <OptionsGroup>
+            <NavPill>
+              <NavPillIcon>🌅</NavPillIcon>
+              <NavPillBody>
+                <NavPillName>Today</NavPillName>
+                <NavPillDesc>Your daily task and streak</NavPillDesc>
+              </NavPillBody>
+            </NavPill>
+            <GlassDivider />
+            <NavPill>
+              <NavPillIcon>📋</NavPillIcon>
+              <NavPillBody>
+                <NavPillName>Tasks</NavPillName>
+                <NavPillDesc>See what's coming up this month</NavPillDesc>
+              </NavPillBody>
+            </NavPill>
+            <GlassDivider />
+            <NavPill>
+              <NavPillIcon>📖</NavPillIcon>
+              <NavPillBody>
+                <NavPillName>Learn</NavPillName>
+                <NavPillDesc>Beginner-friendly lawn guides</NavPillDesc>
+              </NavPillBody>
+            </NavPill>
+            <GlassDivider />
+            <NavPill>
+              <NavPillIcon>👤</NavPillIcon>
+              <NavPillBody>
+                <NavPillName>Profile</NavPillName>
+                <NavPillDesc>Your lawn info and settings</NavPillDesc>
+              </NavPillBody>
+            </NavPill>
+          </OptionsGroup>
+        </GlassCard>
       </ContentGroup>
       <BottomSpacer />
       <TabBarWrapper>
