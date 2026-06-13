@@ -1,0 +1,1 @@
+export { StepProgressDots } from './StepProgressDots';

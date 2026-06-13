@@ -1,7 +1,13 @@
 import { Pressable } from 'react-native';
 import styled from 'styled-components/native';
 
-interface GrassTypeCardProps {
+// OptionCard — a single selectable option row: emoji icon, name, one-line
+// description, and a check circle that fills in when selected. Used inside a
+// GlassCard for the onboarding pickers (grass type, effort level) and on the
+// Settings screen's effort-level picker. Promoted from
+// features/onboarding/GrassTypeCard once Settings started using it too.
+
+interface OptionCardProps {
   icon: string;
   name: string;
   description: string;
@@ -27,7 +33,7 @@ const IconText = styled.Text`font-size: 32px;`;
 // TextGroup — holds the name and description, fills available space.
 const TextGroup = styled.View`flex: 1;`;
 
-// CardName — grass type label. textOnDark matches the clear-glass input text
+// CardName — the option's label. textOnDark matches the clear-glass input text
 // colour used on the sign-in and Location screens.
 const CardName = styled.Text`
   font-family: ${({ theme }) => theme.typography.fontHeaderBold};
@@ -67,16 +73,15 @@ const CheckMark = styled.Text`
   line-height: 12px;
 `;
 
-// GrassTypeCard — a single selectable option row in the grass type picker.
-// Lives inside a GlassCard; explicit OptionDivider components in the parent
-// screen separate the rows instead of border-top here.
-export const GrassTypeCard = ({
+// OptionCard — explicit divider components in the parent screen separate
+// stacked rows instead of a border-top here.
+export const OptionCard = ({
   icon,
   name,
   description,
   selected,
   onPress,
-}: GrassTypeCardProps) => (
+}: OptionCardProps) => (
   <CardTouchable
     $selected={selected}
     onPress={onPress}

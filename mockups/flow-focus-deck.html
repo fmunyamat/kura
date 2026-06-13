@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kura — Focus Deck · Interactive UX Flow</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Zalando+Sans:ital,wght@0,400;0,700;0,900;1,400&family=Zalando+Sans+Expanded:wght@700;900&display=swap" rel="stylesheet">
+<style>
+/* ── Kura tokens (src/config/theme.ts) ── */
+:root {
+  --primary:#2D6A2D; --primary-mid:#5A9E3A; --primary-deep:#0c3520;
+  --lime:rgba(184,229,106,0.92); --lime-solid:#b8e56a;
+  --onb-tint:rgba(10,28,10,0.60);
+  --text-on-dark:rgba(255,255,255,0.85); --text-muted:rgba(255,255,255,0.60);
+  --subtext:rgba(255,255,255,0.48); --text-on-primary:#D6EFD8;
+  --glass-panel:rgba(255,255,255,0.10); --glass-edge:rgba(255,255,255,0.32);
+  --glass-edge-btm:rgba(255,255,255,0.10); --glass-input:rgba(255,255,255,0.13);
+  --glass-divider:rgba(255,255,255,0.22);
+  --font-body:'JetBrains Mono',monospace;
+  --font-header:'Zalando Sans',sans-serif;
+  --font-header-x:'Zalando Sans Expanded','Zalando Sans',sans-serif;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  background:
+    radial-gradient(1100px 560px at 78% -8%, rgba(45,106,45,0.28), transparent 60%),
+    radial-gradient(800px 480px at 8% 108%, rgba(184,229,106,0.10), transparent 55%),
+    #07120a;
+  font-family:var(--font-body); color:var(--text-on-dark);
+  min-height:100vh; padding:48px 36px 72px;
+}
+body::after {
+  content:''; position:fixed; inset:0; pointer-events:none; opacity:.5;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.04 0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.kicker { font-size:11px; letter-spacing:4px; text-transform:uppercase; color:var(--lime); }
+h1.title { font-family:var(--font-header-x); font-weight:900; font-size:clamp(28px,3.6vw,46px); color:#fff; letter-spacing:-1px; margin-top:12px; }
+h1.title em { font-style:normal; color:var(--lime-solid); }
+.lede { margin-top:12px; max-width:580px; font-size:12px; line-height:1.8; color:var(--text-muted); }
+
+.stage { display:flex; gap:56px; justify-content:center; align-items:flex-start; flex-wrap:wrap; margin-top:48px; }
+
+/* ── Phone ── */
+.phone {
+  width:360px; height:760px; border-radius:48px; overflow:hidden; position:relative;
+  border:1px solid rgba(255,255,255,0.14); flex-shrink:0;
+  box-shadow:0 0 0 10px #0d130d, 0 0 0 11px rgba(255,255,255,0.07), 0 48px 90px -24px rgba(0,0,0,0.85);
+}
+.bg { position:absolute; inset:0; background:url('../assets/images/sprinkler.png') center/cover; filter:blur(7px); transform:scale(1.06); }
+.tint { position:absolute; inset:0; background:var(--onb-tint); }
+.screen { position:absolute; inset:0; display:flex; flex-direction:column; padding:0 20px; }
+.statusbar { display:flex; justify-content:space-between; align-items:center; padding:18px 8px 0; font-size:11.5px; font-weight:700; color:#fff; font-family:var(--font-header); }
+.pillcam { width:84px; height:24px; background:#000; border-radius:9999px; position:absolute; left:50%; transform:translateX(-50%); top:13px; }
+
+.glass {
+  background:var(--glass-panel);
+  backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px);
+  border-radius:16px;
+  border:1px solid var(--glass-edge-btm); border-top-color:var(--glass-edge);
+}
+.chip {
+  display:inline-flex; align-items:center; gap:5px;
+  background:var(--glass-input); border:1px solid var(--glass-edge-btm);
+  border-radius:9999px; padding:5px 12px;
+  font-size:9.5px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--text-muted);
+}
+.chip.lime { color:var(--primary-deep); background:var(--lime); border-color:transparent; }
+.eyebrow { font-size:9.5px; letter-spacing:2.5px; text-transform:uppercase; color:var(--subtext); }
+
+/* tab bar — same clear-glass recipe as the task cards: translucent white
+   panel, backdrop blur, bright top edge catching the light */
+.tabbar {
+  margin-top:auto; margin-bottom:18px; display:flex; justify-content:space-around; align-items:center;
+  padding:7px; border-radius:9999px;
+  background:var(--glass-panel);
+  backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px);
+  border:1px solid var(--glass-edge-btm); border-top-color:var(--glass-edge);
+}
+.tab { display:flex; flex-direction:column; align-items:center; gap:2px; }
+.tab .ico { font-size:16px; padding:4px 14px; border-radius:9999px; }
+.tab.active .ico { background:rgba(184,229,106,0.22); }
+.tab .lbl { font-size:8px; font-weight:700; letter-spacing:.4px; text-transform:uppercase; color:rgba(255,255,255,0.28); font-family:var(--font-header); }
+.tab.active .lbl { color:var(--lime-solid); }
+
+/* ── Deck screen ── */
+.toprow { display:flex; justify-content:space-between; align-items:center; margin-top:24px; }
+.greet { font-family:var(--font-header); font-weight:900; font-size:24px; color:#fff; letter-spacing:-.5px; margin-top:12px; }
+
+/* completion track — same component as Morning Brief's: fills as today's
+   cards get stamped. Tomorrow's locked card doesn't count toward it. */
+.counter { margin-top:12px; display:flex; align-items:center; gap:9px; }
+.counter .track { flex:1; height:4px; border-radius:9999px; background:var(--glass-input); overflow:hidden; }
+.counter .track i { display:block; height:100%; width:0%; background:linear-gradient(90deg,var(--primary-mid),var(--lime-solid)); border-radius:inherit; transition:width .6s cubic-bezier(.2,.7,.2,1); }
+.counter .ct { font-size:9px; letter-spacing:1.5px; color:var(--subtext); text-transform:uppercase; white-space:nowrap; }
+
+.deck { position:relative; margin-top:16px; height:370px; }
+.card {
+  position:absolute; left:0; right:0; top:0; overflow:hidden; min-height:1px;
+  transition:transform .5s cubic-bezier(.2,.85,.25,1.1), opacity .45s,
+             top .5s cubic-bezier(.2,.85,.25,1.1),
+             min-height .5s cubic-bezier(.2,.85,.25,1.1);
+  transform-origin:50% 100%;
+}
+/* deck positions */
+.card.pos-front { top:0; transform:none; opacity:1; z-index:3; background:rgba(255,255,255,0.13); }
+.card.pos-b1 { top:-13px; transform:scale(.93); opacity:.55; z-index:2; pointer-events:none; }
+.card.pos-b2 { top:-25px; transform:scale(.86); opacity:.3; z-index:1; pointer-events:none; }
+.card.pos-hidden { top:-25px; transform:scale(.8); opacity:0; z-index:0; pointer-events:none; }
+/* completion: stamp then fly away */
+.card.fly { transform:translate(125%,-26%) rotate(16deg); opacity:0; z-index:4; }
+/* peeking ahead: front card slides aside — it stays on top (z-index 4) so it
+   visibly glides over the card behind it, like flipping through a hand of cards */
+.card.aside { transform:translateX(-86%) rotate(-7deg) scale(.95); opacity:.35; z-index:4; pointer-events:none; }
+.card.pos-front { cursor:pointer; }
+
+/* detail drawer — cards are condensed by default (photo, title, CTA);
+   tapping the front card slides the description + steps open. */
+.detail { max-height:0; opacity:0; overflow:hidden;
+  transition:max-height .45s cubic-bezier(.2,.7,.2,1), opacity .35s; }
+.card.expanded .detail { max-height:300px; opacity:1; }
+.more-hint { margin-top:12px; text-align:center; font-size:8.5px; letter-spacing:1.6px; text-transform:uppercase; color:var(--subtext); }
+.more-hint::before { content:'tap for details ⌄'; }
+.expanded .more-hint::before { content:'tap to close ⌃'; }
+
+/* ── modal expansion ──
+   The open card rises above the deck and grows to ~80% of the screen while
+   a scrim dims and blurs everything behind it. top and min-height are both
+   numeric, so the whole move rides the deck's spring transitions — open and
+   close are equally smooth. */
+.scrim {
+  position:absolute; inset:0; z-index:40;
+  background:rgba(3,9,3,0.62);
+  backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px);
+  opacity:0; pointer-events:none; transition:opacity .35s;
+}
+.scrim.show { opacity:1; pointer-events:auto; }
+.card.expanded {
+  top:-120px; min-height:580px; z-index:45;
+  background:rgba(22,42,22,0.55);
+}
+/* inside the modal the body becomes a column so the CTA pins to the bottom */
+.card.expanded .card-body { display:flex; flex-direction:column; min-height:496px; }
+.card.expanded .detail { overflow-y:auto; }
+.card.expanded .more-hint { margin-top:auto; padding-top:10px; }
+/* applied for one frame during the FLIP zoom so the layout change snaps and
+   only the transform animates */
+.no-trans { transition:none !important; animation:none !important; }
+/* the CTA only lives on the front card; it fades during slides instead of popping */
+.card .cta { transition:opacity .25s, filter .2s, transform .12s; }
+.card:not(.pos-front) .cta { opacity:0; pointer-events:none; }
+
+.photo-hd { height:84px; background-size:cover; background-position:center; position:relative; }
+.photo-hd::after { content:''; position:absolute; inset:0; background:linear-gradient(180deg,rgba(10,28,10,0.04),rgba(10,28,10,0.58)); }
+.photo-emoji {
+  position:absolute; left:16px; bottom:-15px; z-index:2; width:42px; height:42px; border-radius:13px;
+  background:rgba(10,28,10,0.88); border:1px solid rgba(255,255,255,0.28);
+  display:grid; place-items:center; font-size:20px; box-shadow:0 6px 16px rgba(0,0,0,0.45);
+}
+.card-body { padding:24px 20px 20px; }
+.count { font-size:9.5px; letter-spacing:2px; color:var(--lime); text-transform:uppercase; }
+.count.tmw { color:var(--subtext); }
+.task { font-family:var(--font-header); font-weight:900; font-size:25px; color:#fff; line-height:1.1; margin-top:10px; }
+.desc { font-size:11px; line-height:1.65; color:var(--text-muted); margin-top:9px; }
+.steps-list { margin-top:13px; }
+.step-row { display:flex; gap:10px; align-items:center; padding:7px 0; font-size:11px; color:var(--text-on-dark); }
+.dotn { width:18px; height:18px; border-radius:50%; flex-shrink:0; border:1px solid var(--glass-divider); display:grid; place-items:center; font-size:9px; color:var(--lime); }
+.cta {
+  background:var(--lime); color:var(--primary-deep); border:none; width:100%;
+  border-radius:9999px; text-align:center; font-family:var(--font-header); font-weight:700;
+  font-size:14px; padding:14px; cursor:pointer; margin-top:15px; transition:filter .2s, transform .12s;
+}
+.cta:hover { filter:brightness(1.08); }
+.cta:active { transform:scale(.97); }
+.cta.locked { background:var(--glass-input); color:var(--subtext); cursor:default; border:1px solid var(--glass-divider); }
+
+/* DONE stamp slammed onto the card before it flies off */
+.stamp {
+  position:absolute; top:38%; left:50%; z-index:6; pointer-events:none;
+  transform:translate(-50%,-50%) rotate(-14deg) scale(3.2); opacity:0;
+  font-family:var(--font-header-x); font-weight:900; font-size:34px; letter-spacing:4px;
+  color:var(--lime-solid); border:4px solid var(--lime-solid); border-radius:10px;
+  padding:6px 18px; background:rgba(10,28,10,0.55); backdrop-filter:blur(4px);
+}
+.stamp.slam { animation:slam .4s cubic-bezier(.3,1.2,.4,1) forwards; }
+@keyframes slam {
+  to { transform:translate(-50%,-50%) rotate(-14deg) scale(1); opacity:1; }
+}
+
+/* ── Split context card — streak left, weather right ──
+   Sits between the greeting and the completion track. The hairline
+   divider separates the two halves without a gap. */
+.ctx-card {
+  margin-top:12px;
+  display:grid; grid-template-columns:1fr 1px 1fr;
+  background:var(--glass-panel);
+  backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px);
+  border-radius:16px; border:1px solid var(--glass-edge-btm); border-top-color:var(--glass-edge);
+  overflow:hidden;
+}
+.ctx-half { padding:11px 14px; }
+.ctx-divider { background:var(--glass-divider); }
+.ctx-eyebrow { font-size:8px; letter-spacing:2px; text-transform:uppercase; color:var(--subtext); }
+.ctx-num-row { display:flex; align-items:baseline; gap:5px; margin-top:4px; }
+.ctx-val { font-size:24px; font-weight:900; color:#fff; letter-spacing:-1px; line-height:1; }
+.ctx-ico { font-size:20px; line-height:1; }
+.ctx-sub { font-size:9px; color:var(--text-muted); margin-top:4px; line-height:1.4; }
+
+/* peek navigation under the deck */
+.peeknav { display:flex; justify-content:center; align-items:center; gap:16px; margin-top:16px; }
+.pk {
+  width:38px; height:38px; border-radius:50%; border:1px solid var(--glass-divider);
+  background:var(--glass-input); backdrop-filter:blur(10px); color:var(--text-on-dark);
+  font-size:15px; cursor:pointer; transition:all .2s;
+}
+.pk:hover { background:var(--lime); color:var(--primary-deep); border-color:transparent; }
+.pk:disabled { opacity:.3; cursor:default; }
+.pk:disabled:hover { background:var(--glass-input); color:var(--text-on-dark); }
+.peeklabel { font-size:9px; letter-spacing:1.6px; text-transform:uppercase; color:var(--subtext); min-width:120px; text-align:center; }
+
+/* deck-cleared state */
+.cleared { text-align:center; padding:34px 20px 26px; }
+.cl-ico { font-size:46px; animation:pop .55s cubic-bezier(.2,.9,.3,1.6) both; }
+@keyframes pop { from { transform:scale(0); } to { transform:scale(1); } }
+.cl-h { font-family:var(--font-header); font-weight:900; font-size:22px; color:#fff; margin-top:14px; }
+.cl-p { font-size:11px; line-height:1.7; color:var(--text-muted); margin-top:8px; }
+.cl-chip { margin-top:16px; }
+.chip.pop2 { animation:chipPop .6s .3s cubic-bezier(.2,.9,.3,1.6) both; }
+@keyframes chipPop { 0%{transform:scale(.4);opacity:0} 60%{transform:scale(1.25)} 100%{transform:scale(1);opacity:1} }
+
+/* confetti */
+.confetti { position:absolute; top:-10px; width:8px; height:13px; border-radius:2px; z-index:50; pointer-events:none; animation:fall linear forwards; }
+@keyframes fall {
+  0% { transform:translateY(0) rotate(0deg); opacity:1; }
+  100% { transform:translateY(560px) rotate(540deg); opacity:0; }
+}
+
+/* ── Annotation sidebar ── */
+.notes { width:340px; padding-top:8px; }
+.notes h2 { font-family:var(--font-header); font-weight:700; font-size:16px; color:#fff; }
+.notes .hint { font-size:10.5px; color:var(--lime); margin-top:8px; letter-spacing:.5px; line-height:1.7; }
+.steps-nav { margin-top:22px; display:flex; flex-direction:column; }
+.step-note { display:flex; gap:14px; padding:14px 16px; border-radius:14px; transition:background .3s; }
+.step-note.active { background:var(--glass-panel); }
+.step-note .num {
+  width:24px; height:24px; border-radius:50%; flex-shrink:0; display:grid; place-items:center;
+  font-size:10px; font-weight:700; border:1px solid var(--glass-divider); color:var(--text-muted); transition:all .3s;
+}
+.step-note.active .num { background:var(--lime); border-color:transparent; color:var(--primary-deep); }
+.step-note .s-t { font-family:var(--font-header); font-weight:700; font-size:12px; color:#fff; }
+.step-note .s-d { font-size:10px; line-height:1.65; color:var(--text-muted); margin-top:4px; }
+.replay {
+  margin-top:26px; background:none; border:1px solid var(--glass-divider); color:var(--text-on-dark);
+  font-family:var(--font-header); font-weight:700; font-size:11px; letter-spacing:1px;
+  padding:11px 22px; border-radius:9999px; cursor:pointer; transition:all .2s;
+}
+.replay:hover { background:var(--lime); color:var(--primary-deep); border-color:transparent; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="kicker">Kura · UX Flow Prototype 02</div>
+  <h1 class="title">Focus Deck — <em>one card at a time.</em></h1>
+  <p class="lede">A live click-through of the deck. Today holds two cards; tomorrow's is locked at the back. Use <b style="color:#fff">‹ ›</b> to peek through the deck without committing, and <b style="color:#fff">Done ✓</b> to stamp a card and send it flying.</p>
+</header>
+
+<div class="stage">
+  <div class="phone" id="phone">
+    <div class="bg"></div>
+    <div class="tint"></div>
+    <div class="screen">
+      <div class="statusbar"><span>9:41</span><span class="pillcam"></span><span>𝍤 ⚡︎</span></div>
+      <div class="toprow">
+        <span class="eyebrow">On Deck · Friday</span>
+      </div>
+      <div class="greet">Morning, Farai</div>
+      <div class="ctx-card">
+        <div class="ctx-half">
+          <div class="ctx-eyebrow">Streak</div>
+          <div class="ctx-num-row">
+            <div class="ctx-ico">🔥</div>
+            <div class="ctx-val" id="streakNum">6</div>
+          </div><div class="ctx-sub" id="streakSub">days in a row</div> 
+        </div>
+        <div class="ctx-divider"></div>
+        <div class="ctx-half">
+          <div class="ctx-eyebrow">Weather</div>
+          <div class="ctx-num-row">
+            <div class="ctx-val">24°</div>
+            <div class="ctx-ico">☀️</div>
+          </div>                                                  
+            <div class="ctx-sub">
+                Sunny · Wind 12 km/h
+            </div>  
+        </div>
+      </div>
+      <div class="counter">
+        <span class="ct" id="doneLabel">Task 1 of 2</span>
+        <span class="track"><i id="doneFill"></i></span>
+      </div>
+      <div class="deck" id="deck"></div>
+      <div class="peeknav">
+        <button class="pk" id="peekBack" title="Back">‹</button>
+        <span class="peeklabel" id="peekLabel">Card 1 of 3</span>
+        <button class="pk" id="peekFwd" title="Peek ahead">›</button>
+      </div>
+      <nav class="tabbar">
+        <div class="tab active"><span class="ico">🏠</span><span class="lbl">Today</span></div>
+        <div class="tab"><span class="ico">✅</span><span class="lbl">Tasks</span></div>
+        <div class="tab"><span class="ico">📚</span><span class="lbl">Learn</span></div>
+        <div class="tab"><span class="ico">⚙️</span><span class="lbl">Profile</span></div>
+      </nav>
+      <div class="scrim" id="scrim"></div>
+    </div>
+  </div>
+
+  <aside class="notes">
+    <h2>How the deck works</h2>
+    <div class="hint">▶ Tap the front card to expand its full details<br>▶ Click ‹ › to flip through the deck<br>▶ Click “Done ✓” to complete the front card</div>
+    <div class="steps-nav" id="stepsNav">
+      <div class="step-note" data-step="0">
+        <span class="num">1</span>
+        <div>
+          <div class="s-t">The front card is the job</div>
+          <div class="s-d">Today's first task faces you condensed — photo, title, Done. Tap the card and the description + three plain steps slide open; tap again to tuck them away.</div>
+        </div>
+      </div>
+      <div class="step-note" data-step="1">
+        <span class="num">2</span>
+        <div>
+          <div class="s-t">Peek without committing</div>
+          <div class="s-d">The ‹ › arrows lean the front card aside to reveal what's behind — including tomorrow's locked card. Browsing never completes anything.</div>
+        </div>
+      </div>
+      <div class="step-note" data-step="2">
+        <span class="num">3</span>
+        <div>
+          <div class="s-t">Stamp &amp; fly</div>
+          <div class="s-d">Done slams a DONE stamp onto the card, then it flies off the top of the deck. The card behind springs forward to take its place.</div>
+        </div>
+      </div>
+      <div class="step-note" data-step="3">
+        <span class="num">4</span>
+        <div>
+          <div class="s-t">Deck cleared</div>
+          <div class="s-d">Both of today's cards gone: confetti, streak ticks 6 → 7, and tomorrow's card stays visibly locked at the back — the deck refills overnight.</div>
+        </div>
+      </div>
+    </div>
+    <button class="replay" id="replay">↺ Rebuild the deck</button>
+  </aside>
+</div>
+
+<script>
+// ── Deck data: today's two tasks plus tomorrow's locked card at the back. ──
+const CARDS = [
+  {
+    emoji:'💧', img:'../assets/images/sprinkler-android.jpg',
+    count:'Task 1 of 2 · Today', name:'Give it a<br>deep soak.',
+    desc:'Water slowly so it sinks in — quick sprinkles only wet the surface.',
+    steps:['Set sprinkler on the front patch','Run 20 minutes, then move it','Repeat on the back half'],
+    locked:false,
+  },
+  {
+    emoji:'🔍', img:'../assets/images/grass.jpg',
+    count:'Task 2 of 2 · Today', name:'Walk the<br>edges.',
+    desc:"Five minutes along the walkway — pull anything that isn't grass.",
+    steps:['Start at the front path','Check both fence lines','Toss weeds in the green bin'],
+    locked:false,
+  },
+  {
+    emoji:'✂️', img:'../assets/images/evening-mow.jpg',
+    count:'Tomorrow · Saturday', name:'First mow of<br>the week.',
+    desc:'Blade on the high setting — never cut more than a third of the height.',
+    steps:['Unlocks tomorrow at 6:00am'],
+    locked:true,
+  },
+];
+
+let remaining = [0,1,2];   // indexes still in the deck, front first
+let peek = 0;              // how far ahead the user is browsing
+let busy = false;
+const deck = document.getElementById('deck');
+const label = document.getElementById('peekLabel');
+const back = document.getElementById('peekBack');
+const fwd = document.getElementById('peekFwd');
+const streakNum = document.getElementById('streakNum');
+const phone = document.getElementById('phone');
+const doneLabel = document.getElementById('doneLabel');
+const doneFill = document.getElementById('doneFill');
+const scrim = document.getElementById('scrim');
+
+// FLIP zoom: measure the card, apply the layout change instantly (no-trans),
+// measure again, then start the card transformed back at its old position and
+// size and release it — it zooms out to the modal on open and zooms back into
+// the deck on close, instead of just growing in place.
+function flipZoom(el, change) {
+  const first = el.getBoundingClientRect();
+  el.classList.add('no-trans');
+  change();
+  void el.offsetWidth;
+  const last = el.getBoundingClientRect();
+  const dx = first.left - last.left, dy = first.top - last.top;
+  const sx = first.width / last.width, sy = first.height / last.height;
+  el.style.transformOrigin = 'top left';
+  el.style.transform = `translate(${dx}px, ${dy}px) scale(${sx}, ${sy})`;
+  void el.offsetWidth;
+  el.classList.remove('no-trans');
+  el.style.transition = 'transform .5s cubic-bezier(.2,.85,.25,1.1)';
+  el.style.transform = '';
+  setTimeout(() => { el.style.transition = ''; el.style.transformOrigin = ''; }, 520);
+}
+
+function closeCard(el) {
+  flipZoom(el, () => { el.classList.remove('expanded'); scrim.classList.remove('show'); });
+}
+
+// Tapping the dimmed background closes the modal card.
+scrim.addEventListener('click', () => {
+  const f = deck.querySelector('.card.expanded');
+  if (f) closeCard(f);
+  else scrim.classList.remove('show');
+});
+
+// Today's workload, ignoring the locked tomorrow card at the back.
+const TODAY_TOTAL = CARDS.filter(c => !c.locked).length;
+
+// Fills the completion track from how many of today's cards have been
+// stamped: completed = total minus the unlocked cards still in the deck.
+function updateCounter() {
+  const left = remaining.filter(ci => !CARDS[ci].locked).length;
+  const done = TODAY_TOTAL - left;
+  doneLabel.textContent = left ? `Task ${done + 1} of ${TODAY_TOTAL}` : 'All done';
+  doneFill.style.width = (done / TODAY_TOTAL * 100) + '%';
+}
+
+function setStep(n) {
+  document.querySelectorAll('.step-note').forEach(s =>
+    s.classList.toggle('active', +s.dataset.step === n));
+}
+
+function cardHTML(c) {
+  // Every card carries its own CTA; CSS hides it on any card that isn't
+  // front, so it cross-fades during slides instead of appearing abruptly.
+  // The description + steps live in a collapsed detail drawer — the card
+  // shows only photo, count, and title until the user taps it open.
+  const cta = c.locked
+    ? `<button class="cta locked" onclick="event.stopPropagation()">🔒 Unlocks tomorrow 6:00am</button>`
+    : `<button class="cta" onclick="event.stopPropagation();complete()">Done ✓</button>`;
+  return `
+    <div class="photo-hd" style="background-image:url('${c.img}')">
+      <span class="photo-emoji">${c.emoji}</span>
+    </div>
+    <div class="card-body">
+      <span class="count${c.locked ? ' tmw' : ''}">${c.count}</span>
+      <div class="task">${c.name}</div>
+      <div class="detail">
+        <div class="desc">${c.desc}</div>
+        <div class="steps-list">
+          ${c.steps.map((s,i) => `<div class="step-row"><span class="dotn">${c.locked ? '🔒' : i+1}</span> ${s}</div>`).join('')}
+        </div>
+      </div>
+      <div class="more-hint"></div>
+      ${cta}
+    </div>
+    <div class="stamp">DONE</div>`;
+}
+
+// The card elements persist for the whole session — peeking and completing
+// only swap position classes on them, so the CSS transitions on .card do the
+// sliding. (Rebuilding innerHTML would destroy the elements and make every
+// move snap instead of animate.)
+let els = [];
+
+function buildDeck() {
+  deck.innerHTML = '';
+  els = remaining.map(ci => {
+    const el = document.createElement('div');
+    el.className = 'glass card';
+    el.innerHTML = cardHTML(CARDS[ci]);
+    // Tapping the front card zooms it out into a modal (scrim dims the deck)
+    // or zooms it back into the deck.
+    el.addEventListener('click', () => {
+      if (busy || !el.classList.contains('pos-front')) return;
+      if (el.classList.contains('expanded')) closeCard(el);
+      else flipZoom(el, () => { el.classList.add('expanded'); scrim.classList.add('show'); });
+    });
+    deck.appendChild(el);
+    return el;
+  });
+  layout();
+}
+
+// Assigns each card its position class relative to the peek cursor: cards
+// before it slide aside, the card at it fronts, the rest stack behind.
+function layout() {
+  // Any deck movement (peek or promotion) closes an open modal and tucks
+  // drawers back in, so cards always arrive in their condensed state.
+  scrim.classList.remove('show');
+  els.forEach((el, i) => {
+    const rel = i - peek;
+    el.classList.remove('aside','pos-front','pos-b1','pos-b2','pos-hidden','expanded');
+    if (rel < 0) el.classList.add('aside');
+    else if (rel === 0) el.classList.add('pos-front');
+    else if (rel === 1) el.classList.add('pos-b1');
+    else if (rel === 2) el.classList.add('pos-b2');
+    else el.classList.add('pos-hidden');
+  });
+  const c = CARDS[remaining[peek]];
+  label.textContent = c.locked ? 'Tomorrow · locked' : `Card ${peek + 1} of ${remaining.length}`;
+  back.disabled = peek === 0;
+  fwd.disabled = peek >= remaining.length - 1;
+  updateCounter();
+}
+
+function peekTo(dir) {
+  if (busy) return;
+  const next = peek + dir;
+  if (next < 0 || next > remaining.length - 1) return;
+  peek = next;
+  setStep(peek === 0 ? 0 : 1);
+  layout();
+}
+
+function confetti() {
+  const colors = ['#b8e56a','#ffffff','#5A9E3A','#D6EFD8'];
+  for (let i = 0; i < 30; i++) {
+    const c = document.createElement('span');
+    c.className = 'confetti';
+    c.style.left = (6 + Math.random() * 88) + '%';
+    c.style.background = colors[Math.random() * colors.length | 0];
+    c.style.animationDuration = (1.4 + Math.random() * 1.3) + 's';
+    c.style.animationDelay = (Math.random() * .5) + 's';
+    phone.appendChild(c);
+    setTimeout(() => c.remove(), 3400);
+  }
+}
+
+function clearedState() {
+  // Tomorrow's locked card stays at the back; the cleared banner takes the front.
+  scrim.classList.remove('show');
+  deck.innerHTML = '';
+  const behind = document.createElement('div');
+  behind.className = 'glass card pos-b1';
+  behind.innerHTML = cardHTML(CARDS[2]);
+  deck.appendChild(behind);
+  const front = document.createElement('div');
+  front.className = 'glass card pos-front cleared';
+  front.innerHTML = `
+    <div class="cl-ico">🎉</div>
+    <div class="cl-h">Deck cleared.</div>
+    <div class="cl-p">Both of today's cards are done. Tomorrow's mow is already shuffled in behind — it flips over at 6am.</div>
+    <div class="cl-chip"><span class="chip lime pop2">🔥 7 days — new record</span></div>`;
+  deck.appendChild(front);
+  label.textContent = 'See you tomorrow';
+  back.disabled = true; fwd.disabled = true;
+  streakNum.textContent = '7';
+  updateCounter();
+  confetti();
+  setStep(3);
+}
+
+// Stamp slams on → card flies off → the cards behind slide forward into
+// their new positions (the layout() class swap animates the promotion).
+function complete() {
+  if (busy || peek !== 0) return;
+  busy = true;
+  setStep(2);
+  const front = els[0];
+  front.querySelector('.stamp').classList.add('slam');     // DONE stamp
+  setTimeout(() => front.classList.add('fly'), 600);       // card flies off
+  setTimeout(() => {
+    remaining.shift();
+    els.shift();
+    front.remove();
+    busy = false;
+    if (remaining.length > 1) { layout(); }                // deck slides forward
+    else { clearedState(); }                               // only the locked card left
+  }, 1150);
+}
+
+back.addEventListener('click', () => peekTo(-1));
+fwd.addEventListener('click', () => peekTo(1));
+document.getElementById('replay').addEventListener('click', () => {
+  remaining = [0,1,2]; peek = 0; busy = false;
+  streakNum.textContent = '6';
+  buildDeck(); setStep(0);
+});
+
+buildDeck();
+setStep(0);
+</script>
+</body>
+</html>

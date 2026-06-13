@@ -32,6 +32,11 @@ interface GlassCardProps {
   // androidBlurRadius — expo-image blurRadius on Android (0–100). Controls how
   // blurred the faux-glass photo copy appears. Defaults to 20.
   androidBlurRadius?: number;
+  // contentPadding — 'md' (default) wraps children in the standard padded
+  // Content view. 'none' lets children reach the card's edges — used by cards
+  // whose rows carry their own padding (task list, camera well) so highlights
+  // and dividers can run edge-to-edge without negative-margin tricks.
+  contentPadding?: 'md' | 'none';
 }
 
 // Clip — rounded container clipped to its border-radius. overflow: hidden
@@ -42,8 +47,8 @@ interface GlassCardProps {
 // the top edge than the bottom — mimicking light catching the top of a real
 // pane of glass.
 const Clip = styled.View<{ $variant: GlassCardVariant }>`
-  background-color: ${({ $variant }) =>
-    $variant === 'clear' ? 'transparent' : 'rgba(255, 255, 255, 0.44)'};
+  background-color: ${({ $variant, theme }) =>
+    $variant === 'clear' ? 'transparent' : theme.colors.glassFrostPanel};
   border-radius: ${({ theme }) => theme.radii.lg}px;
   overflow: hidden;
   border-width: 0px;
@@ -94,7 +99,9 @@ const TintFill = styled.View`
 `;
 
 // Content — inner padding and gap that gives breathing room between
-// the card's child elements (form, divider, social buttons).
+// the card's child elements (form, divider, social buttons). When the card
+// is created with contentPadding="none" this wrapper is skipped entirely,
+// so children sit flush against the card's clipped edges.
 const Content = styled.View`
   padding: ${({ theme }) => theme.spacing.md}px;
   gap: ${({ theme }) => theme.spacing.md}px;
@@ -113,13 +120,14 @@ export const GlassCard = ({
   clearBackdropTint,
   iosBlurIntensity = 15,
   androidBlurRadius = 20,
+  contentPadding = 'md',
 }: GlassCardProps) => {
+  // body — children either wrapped in the standard padded Content view or
+  // rendered bare (contentPadding="none") so they can reach the card's edges.
+  const body = contentPadding === 'none' ? children : <Content>{children}</Content>;
+
   if (variant !== 'clear') {
-    return (
-      <Clip $variant="frost">
-        <Content>{children}</Content>
-      </Clip>
-    );
+    return <Clip $variant="frost">{body}</Clip>;
   }
 
   if (Platform.OS === 'android') {
@@ -134,7 +142,7 @@ export const GlassCard = ({
         )}
         {clearBackdropTint !== undefined && <BackdropScrim $color={clearBackdropTint} />}
         <TintFill />
-        <Content>{children}</Content>
+        {body}
       </Clip>
     );
   }
@@ -143,7 +151,7 @@ export const GlassCard = ({
     <Clip $variant="clear">
       <BlurPane intensity={iosBlurIntensity} tint="default">
         <TintFill />
-        <Content>{children}</Content>
+        {body}
       </BlurPane>
     </Clip>
   );

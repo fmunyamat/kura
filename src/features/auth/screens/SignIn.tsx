@@ -12,7 +12,10 @@ import {
 } from 'react-native';
 import styled, { useTheme } from 'styled-components/native';
 import { sendOtpCode, verifyOtpCode } from '~/features/auth/services/authService';
+import { ErrorMessage } from '~/shared/components/ErrorMessage';
+import { GlassDivider } from '~/shared/components/GlassDivider';
 import { GlassCard } from '~/shared/components/GlassCard';
+import { useIsTablet } from '~/shared/hooks/use-is-tablet';
 import { OtpRequestForm } from '../components/OtpRequestForm';
 import { OtpVerifyPanel } from '../components/OtpVerifyPanel';
 import { SocialAuthButtons } from '../components/SocialAuthButtons';
@@ -142,15 +145,6 @@ const Divider = styled.View`
   gap: ${({ theme }) => theme.spacing.sm}px;
 `;
 
-// DividerLine — one of the two thin horizontal rules flanking the label.
-// White at 22% opacity reads cleanly on the clear glass pane over the dark
-// photo without competing with the controls above and below.
-const DividerLine = styled.View`
-  flex: 1;
-  height: 1px;
-  background-color: ${({ theme }) => theme.colors.glassClearDivider};
-`;
-
 // DividerText — "or continue with" label in muted white so it recedes behind
 // the primary actions while staying legible on the dark photo behind the glass.
 const DividerText = styled.Text`
@@ -159,17 +153,6 @@ const DividerText = styled.Text`
   color: ${({ theme }) => theme.colors.textMutedOnDark};
 `;
 
-// ErrorText — the inline error that appears below the OTP request form when
-// something goes wrong (send failure or expired deep link redirect).
-// errorOnDark is the soft red designed for semi-transparent glass over a dark
-// photo — the deep red errorOnLight would disappear here.
-const ErrorText = styled.Text`
-  font-size: ${({ theme }) => theme.typography.sizeSm}px;
-  font-family: ${({ theme }) => theme.typography.fontBody};
-  color: ${({ theme }) => theme.colors.errorOnDark};
-  text-align: center;
-  margin-top: ${({ theme }) => theme.spacing.xs}px;
-`;
 
 // isValidEmail — checks that the string has the basic shape of an email address.
 // Supabase will reject malformed addresses anyway; this is a first-pass check to
@@ -247,9 +230,10 @@ export const SignInScreen = () => {
 
   // screenWidth drives the slide distance and each panel's explicit width.
   // useWindowDimensions re-runs on rotation so both stay correct after the
-  // device turns. isTablet scales up the hero content on large screens.
-  const { width: screenWidth, height } = useWindowDimensions();
-  const isTablet = Math.min(screenWidth, height) >= 600;
+  // device turns. isTablet comes from the shared device-type hook and scales
+  // up the hero content on large screens.
+  const { width: screenWidth } = useWindowDimensions();
+  const isTablet = useIsTablet();
 
   // slideAnim is the horizontal offset applied to the panel row.
   // 0 = OTP request form visible. -screenWidth = OTP verify panel visible.
@@ -407,11 +391,11 @@ export const SignInScreen = () => {
                   />
                   {/* Show the send error below the form when the OTP email request
                       fails, or when the user arrives via an expired deep link. */}
-                  {sendError && <ErrorText>{sendError}</ErrorText>}
+                  {sendError && <ErrorMessage size="sm" spacing="above">{sendError}</ErrorMessage>}
                   <Divider>
-                    <DividerLine />
+                    <GlassDivider flex />
                     <DividerText>or continue with</DividerText>
-                    <DividerLine />
+                    <GlassDivider flex />
                   </Divider>
                   <SocialAuthButtons
                     onGooglePress={() => {}}

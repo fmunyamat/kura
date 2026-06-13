@@ -1,5 +1,19 @@
-import { Pressable, useWindowDimensions } from 'react-native';
-import styled from 'styled-components/native';
+import styled, { useTheme } from 'styled-components/native';
+import { CtaButton } from '~/shared/components/CtaButton';
+import { GlassCard } from '~/shared/components/GlassCard';
+import {
+    BottomSpacer,
+    ContentArea,
+    ContentGroup,
+    GapSpacer,
+    TopSpacer,
+} from '~/shared/components/ScreenLayout';
+import { ScreenHeadline, ScreenSubtext } from '~/shared/components/ScreenTypography';
+import { useIsTablet, type TabletProps } from '~/shared/hooks/use-is-tablet';
+
+// Same lawn photo that WelcomeFlow renders as its full-screen background —
+// passed to GlassCard so the Android faux-glass fill matches the real backdrop.
+const LAWN_BG = require('../../../../assets/images/lawn-android.jpg') as number;
 
 interface WelcomeStep1Props {
   // userName — the user's first name from their profile, used in the greeting.
@@ -7,72 +21,16 @@ interface WelcomeStep1Props {
   onNext: () => void;
 }
 
-// $isTablet — passed to every styled-component that needs to scale up on tablets.
-// Threshold matches the app-wide convention: min(width, height) >= 600.
-interface TabletProps {
-  $isTablet: boolean;
-}
-
-// ContentArea — flex column that fills the space below the shared dots row.
-// On tablets, horizontal padding increases so content doesn't stretch edge-to-edge.
-const ContentArea = styled.View<TabletProps>`
-  flex: 1;
-  padding: 0 ${({ theme, $isTablet }) =>
-    $isTablet ? theme.spacing.xxl : theme.spacing.md}px;
-`;
-
-// Spacer32 — gap between subtext and glass card; taller on tablets.
-const Spacer32 = styled.View<TabletProps>`
-  height: ${({ $isTablet }) => ($isTablet ? 100 : 60)}px;
-`;
-
-// TopSpacer — controls how far down from the step label the content group starts.
-// Lower flex = content sits higher on screen.
-const TopSpacer = styled.View`flex: 0.2;`;
-// BottomSpacer — absorbs the remaining space below the content group, pushing
-// the CTA down to the bottom of the screen.
-const BottomSpacer = styled.View`flex: 1;`;
-
-// ContentGroup — wraps everything from the headline block to the glass card so
-// the whole unit moves as one in the vertical layout.
-const ContentGroup = styled.View``;
-
 // HeadlineGroup — column that holds the three headline lines.
 // gap scales up on tablets to maintain visual breathing between the larger lines.
 const HeadlineGroup = styled.View<TabletProps>`
   gap: ${({ $isTablet }) => ($isTablet ? 12 : 6)}px;
 `;
 
-// Headline — one line of the three-part welcome heading.
-// font-size and line-height both scale so the heading fills the wider tablet canvas.
-const Headline = styled.Text<TabletProps>`
-  font-family: ${({ theme }) => theme.typography.fontHeaderHeavy};
-  font-size: ${({ $isTablet }) => ($isTablet ? 76 : 50)}px;
-  color: #ffffff;
-  letter-spacing: ${({ theme }) => theme.typography.letterSpacingTight}px;
-  text-align: center;
-  line-height: ${({ $isTablet }) => ($isTablet ? 90 : 60)}px;
-`;
-
-// Subtext — supporting copy below the headline in body-medium weight, muted white.
-// Scales from 11px (phone) to 17px (tablet) so it stays readable against the headline.
-const Subtext = styled.Text<TabletProps>`
-  font-family: ${({ theme }) => theme.typography.fontBodyMedium};
-  font-size: ${({ $isTablet }) => ($isTablet ? 17 : 11)}px;
-  color: rgba(255, 255, 255, 0.48);
-  text-align: center;
-  line-height: ${({ $isTablet }) => ($isTablet ? 28 : 18)}px;
-  padding: 0 ${({ theme }) => theme.spacing.sm}px;
-  margin-top: ${({ theme, $isTablet }) =>
-    $isTablet ? theme.spacing.md : theme.spacing.sm}px;
-`;
-
-// GlassCard — white-frosted panel that holds the "Your journey starts today"
-// content. Padding and internal gap scale up so the card doesn't feel cramped
-// when rendered at tablet size.
-const GlassCard = styled.View<TabletProps>`
-  background-color: rgba(255, 255, 255, 0.44);
-  border-radius: ${({ theme }) => theme.radii.lg}px;
+// CardRow — the row layout inside the shared GlassCard: icon on the left,
+// text column on the right. Carries this card's own padding and gap (both
+// scale up on tablets) since the card is rendered with contentPadding="none".
+const CardRow = styled.View<TabletProps>`
   padding: ${({ $isTablet }) => ($isTablet ? 26 : 16)}px;
   flex-direction: row;
   align-items: center;
@@ -105,65 +63,53 @@ const CardDesc = styled.Text<TabletProps>`
   line-height: ${({ $isTablet }) => ($isTablet ? 27 : 17)}px;
 `;
 
-// CtaButton — dark pill at the bottom of the screen, the only tap target
-// that advances the flow. Padding grows on tablets so the touch target stays
-// large relative to the screen height.
-const CtaButton = styled(Pressable)<TabletProps>`
-  background-color: ${({ theme }) => theme.colors.primary};
-  border-radius: ${({ theme }) => theme.radii.md}px;
-  padding: ${({ $isTablet }) => ($isTablet ? '22px 18px' : '14px 12px')};
-  margin-bottom: ${({ theme }) => theme.spacing.md}px;
-`;
-
-// CtaLabel — text inside the CTA button; scales from 14px to 22px on tablets.
-const CtaLabel = styled.Text<TabletProps>`
-  font-family: ${({ theme }) => theme.typography.fontBodyBold};
-  font-size: ${({ $isTablet }) => ($isTablet ? 22 : 14)}px;
-  color: #D6EFD8;
-  text-align: center;
-`;
-
 // WelcomeStep1 — the opening welcome screen.
 // Greets the user by first name, sets the tone ("no experience needed"),
 // and shows a glass card summarising what Kura will do for them each morning.
-// isTablet is derived here and threaded through every element so scaling is
-// consistent — nothing picks its own breakpoint independently.
+// Layout, headline, subtext, and the CTA all come from the shared screen
+// components so every step renders the identical skeleton.
 const WelcomeStep1 = ({ userName, onNext }: WelcomeStep1Props) => {
-  const { width, height } = useWindowDimensions();
-  const isTablet = Math.min(width, height) >= 600;
+  const isTablet = useIsTablet();
+  const theme = useTheme();
 
   return (
-    <ContentArea $isTablet={isTablet}>
+    <ContentArea>
       <TopSpacer />
       <ContentGroup>
         <HeadlineGroup $isTablet={isTablet}>
-          <Headline $isTablet={isTablet}>Welcome</Headline>
-          <Headline $isTablet={isTablet}>to Kura,</Headline>
-          <Headline $isTablet={isTablet}>{userName}.</Headline>
+          <ScreenHeadline>Welcome</ScreenHeadline>
+          <ScreenHeadline>to Kura,</ScreenHeadline>
+          <ScreenHeadline>{userName}.</ScreenHeadline>
         </HeadlineGroup>
-        <Subtext $isTablet={isTablet}>
+        <ScreenSubtext>
           We'll help you grow a healthier lawn — one simple task at a time. No experience needed.
-        </Subtext>
-        <Spacer32 $isTablet={isTablet} />
-        <GlassCard $isTablet={isTablet}>
-          <CardIcon $isTablet={isTablet}>🌱</CardIcon>
-          <CardBody>
-            <CardTitle $isTablet={isTablet}>Your journey starts today</CardTitle>
-            <CardDesc $isTablet={isTablet}>
-              We'll check in with you each morning with one thing to do.
-            </CardDesc>
-          </CardBody>
+        </ScreenSubtext>
+        <GapSpacer />
+        <GlassCard
+          variant="clear"
+          clearBackdropSource={LAWN_BG}
+          clearBackdropTint={theme.colors.onboardingPhotoTint}
+          contentPadding="none"
+        //   androidBlurRadius={1}
+        >
+          <CardRow $isTablet={isTablet}>
+            <CardIcon $isTablet={isTablet}>🌱</CardIcon>
+            <CardBody>
+              <CardTitle $isTablet={isTablet}>Your journey starts today</CardTitle>
+              <CardDesc $isTablet={isTablet}>
+                We'll check in with you each morning with one thing to do.
+              </CardDesc>
+            </CardBody>
+          </CardRow>
         </GlassCard>
       </ContentGroup>
       <BottomSpacer />
       <CtaButton
-        $isTablet={isTablet}
+        label="Let's go →"
         onPress={onNext}
-        accessibilityRole="button"
         accessibilityLabel="Let's go, move to next step"
-      >
-        <CtaLabel $isTablet={isTablet}>Let's go →</CtaLabel>
-      </CtaButton>
+        withBottomGap
+      />
     </ContentArea>
   );
 };

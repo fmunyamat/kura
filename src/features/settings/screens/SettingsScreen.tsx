@@ -4,7 +4,7 @@ import { Pressable, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import styled from 'styled-components/native';
 import { signOut } from '~/features/auth/services/authService';
-import { GrassTypeCard } from '~/features/onboarding/components/GrassTypeCard';
+import { OptionCard } from '~/shared/components/OptionCard';
 
 // EFFORT_OPTIONS — same three tiers shown during onboarding, reused here so
 // the user can change their choice without going back through onboarding.
@@ -325,7 +325,7 @@ export const SettingsScreen = () => {
               {isPickerOpen && (
                 <PickerArea>
                   {EFFORT_OPTIONS.map((opt) => (
-                    <GrassTypeCard
+                    <OptionCard
                       key={opt.value}
                       icon={opt.icon}
                       name={opt.name}

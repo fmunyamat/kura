@@ -12,7 +12,12 @@ const brandColors = {
   // errorOnDark — soft red that reads clearly on dark or semi-transparent
   // glass surfaces (e.g. the sign-in glass card over a dark photo background).
   errorOnDark: 'rgba(255,120,100,0.92)',
-  errorOnLight: 'rgba(177, 24, 0, 0.92)'
+  errorOnLight: 'rgba(177, 24, 0, 0.92)',
+  // limeSolid — the fully-opaque lime used as a fill (not a tint): the "Done ✓"
+  // pill, the DONE stamp, the active tab label, the completion-bar gradient end,
+  // and confetti. `lime` above is the same hue at 92% for text/accents; this is
+  // the version you fill shapes with.
+  limeSolid: '#b8e56a',
 };
 
 // ─── Light theme ─────────────────────────────────────────────────────────────
@@ -47,6 +52,13 @@ export const lightTheme = {
     inputBackgroundDark: 'rgba(255,255,255,0.05)',
     textOnDark:          'rgba(255,255,255,0.85)',
     textMutedOnDark:     'rgba(255,255,255,0.60)',
+    // subtextOnPhoto — the supporting line under the big white headlines on the
+    // welcome/onboarding photo and gradient backgrounds. Fainter than
+    // textMutedOnDark so it whispers next to the heavy headline above it.
+    subtextOnPhoto:      'rgba(255,255,255,0.48)',
+    // textOnPrimary — pale mint label used on the solid primary CTA pill so the
+    // button text reads clearly against the dark forest green fill.
+    textOnPrimary:       '#D6EFD8',
     borderOnDark:        'rgba(255,255,255,0.10)',
     buttonSurfaceDark:   '#2a2a2a',
 
@@ -66,6 +78,32 @@ export const lightTheme = {
     // Divider rule between the email form and the social buttons.
     glassClearDivider:      'rgba(255,255,255,0.22)',
 
+    // ── Today / Focus Deck ──────────────────────────────────────────────
+    // These all sit over the same dark, blurred photo as the sign-in glass,
+    // so they never change with the light/dark theme (darkTheme inherits them
+    // via the spread below).
+    // deckCardSurface — the front card's fill: a touch brighter than the clear
+    // glass panel so the active card reads as lifted above the ones behind it.
+    deckCardSurface:       'rgba(255,255,255,0.13)',
+    // deckCardExpanded — the card's fill once it grows into the full-screen
+    // modal: a deep green tint so the opened card feels like its own surface.
+    deckCardExpanded:      'rgba(22,42,22,0.55)',
+    // scrimDark — the dimmer drawn behind an expanded card so everything below
+    // it recedes while the card is open.
+    scrimDark:             'rgba(3,9,3,0.62)',
+    // limeGlow — the soft lime pad behind the active tab's icon.
+    limeGlow:              'rgba(184,229,106,0.22)',
+    // photoHeaderFadeTop / Bottom — the top-to-bottom gradient laid over each
+    // card's photo so the title and emoji badge stay readable on any image.
+    photoHeaderFadeTop:    'rgba(10,28,10,0.04)',
+    photoHeaderFadeBottom: 'rgba(10,28,10,0.58)',
+    // emojiBadgeSurface — the dark rounded square the task emoji sits in (also
+    // the backing of the DONE stamp); emojiBadgeEdge is its faint 1px rim.
+    emojiBadgeSurface:     'rgba(10,28,10,0.88)',
+    emojiBadgeEdge:        'rgba(255,255,255,0.28)',
+    // textFaintOnDark — the dimmest text tier, used for inactive tab labels.
+    textFaintOnDark:       'rgba(255,255,255,0.28)',
+
     // Onboarding background gradient — rich forest green, four stops.
     gradientDark:     '#0c3520',
     gradientMid:      '#135633',
@@ -74,6 +112,11 @@ export const lightTheme = {
 
     // Onboarding glass panel — white frost at 46% sits cleanly over the gradient.
     glassOnboardingPanel:          'rgba(255,255,255,0.46)',
+    // glassFrostPanel — the heavy white frost used by GlassCard's 'frost'
+    // variant and the welcome flow's smaller frosted pills. Slightly lighter
+    // than glassOnboardingPanel; constant across themes because it always
+    // sits over a dark photo or gradient.
+    glassFrostPanel:               'rgba(255,255,255,0.44)',
     // Inputs sit slightly brighter than the panel surface to read as interactive.
     glassOnboardingInput:          'rgba(255,255,255,0.55)',
     glassOnboardingInputFocused:   'rgba(255,255,255,0.72)',

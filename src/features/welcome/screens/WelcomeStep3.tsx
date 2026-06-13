@@ -1,75 +1,32 @@
-import { Pressable, useWindowDimensions } from 'react-native';
-import styled from 'styled-components/native';
+import styled, { useTheme } from 'styled-components/native';
+import { CtaButton } from '~/shared/components/CtaButton';
+import { GlassCard } from '~/shared/components/GlassCard';
+import { GlassDivider } from '~/shared/components/GlassDivider';
+import {
+  BottomSpacer,
+  ContentArea,
+  ContentGroup,
+  GapSpacer,
+  TopSpacer,
+} from '~/shared/components/ScreenLayout';
+import { ScreenHeadline, ScreenSubtext } from '~/shared/components/ScreenTypography';
+
+const LAWN_BG = require('../../../../assets/images/lawn-android.jpg') as number;
 
 interface WelcomeStep3Props {
   onNext: () => void;
 }
 
-// $isTablet — passed to every styled-component that needs to scale up on tablets.
-// Threshold matches the app-wide convention: min(width, height) >= 600.
-interface TabletProps {
-  $isTablet: boolean;
-}
-
-// ContentArea — flex column that fills the space below the shared nav bar.
-// On tablets, horizontal padding increases so content doesn't stretch edge-to-edge.
-const ContentArea = styled.View<TabletProps>`
-  flex: 1;
-  padding: 0 ${({ theme, $isTablet }) =>
-    $isTablet ? theme.spacing.xxl : theme.spacing.md}px;
+// OptionsGroup — cancels out GlassCard's 16px Content padding so each
+// NavPill's background can extend edge-to-edge inside the card.
+const OptionsGroup = styled.View`
+  margin: -${({ theme }) => theme.spacing.md}px;
 `;
 
-// TopSpacer — pushes the content group down slightly from the NavBar.
-// flex: 0.2 matches Steps 1 and 2 so the headline sits at the same vertical position.
-const TopSpacer = styled.View`flex: 0.2;`;
-
-// BottomSpacer — absorbs remaining space below the content group, sitting
-// between the pills and the tab bar preview so they don't crowd each other.
-const BottomSpacer = styled.View`flex: 1;`;
-
-// ContentGroup — wraps headline through nav pills as one unit so the whole
-// block moves together in the vertical layout.
-const ContentGroup = styled.View``;
-
-// SpacerPills — gap between the subtext and the pill stack. Smaller than the
-// SpacerCard used in Steps 1–2 because four pills take more vertical space than
-// one card, so we give back some room here to avoid crowding.
-const SpacerPills = styled.View<TabletProps>`
-  height: ${({ $isTablet }) => ($isTablet ? 48 : 24)}px;
-`;
-
-// Headline — the step's main heading. Uses fontHeaderHeavy and tablet-aware
-// sizing to match Steps 1 and 2's typographic scale exactly.
-const Headline = styled.Text<TabletProps>`
-  font-family: ${({ theme }) => theme.typography.fontHeaderHeavy};
-  font-size: ${({ $isTablet }) => ($isTablet ? 76 : 50)}px;
-  color: #ffffff;
-  letter-spacing: ${({ theme }) => theme.typography.letterSpacingTight}px;
-  text-align: center;
-  line-height: ${({ $isTablet }) => ($isTablet ? 90 : 60)}px;
-`;
-
-// Subtext — supporting copy below the headline in body-medium weight, muted white.
-// Matches Steps 1 and 2 Subtext styling exactly.
-const Subtext = styled.Text<TabletProps>`
-  font-family: ${({ theme }) => theme.typography.fontBodyMedium};
-  font-size: ${({ $isTablet }) => ($isTablet ? 17 : 11)}px;
-  color: rgba(255, 255, 255, 0.48);
-  text-align: center;
-  line-height: ${({ $isTablet }) => ($isTablet ? 28 : 18)}px;
-  padding: 0 ${({ theme }) => theme.spacing.sm}px;
-  margin-top: ${({ theme, $isTablet }) =>
-    $isTablet ? theme.spacing.md : theme.spacing.sm}px;
-`;
-
-// NavPills — the stack of four tab-description cards.
-const NavPills = styled.View`gap: ${({ theme }) => theme.spacing.sm + 2}px;`;
-
-// NavPill — one glass card describing a single tab. Padding, gap, and
-// border-radius match the GlassCard (Step 1) and TaskCard (Step 2).
+// NavPill — one row describing a single tab, rendered inside the shared
+// GlassCard. No individual background or border-radius — the card surface
+// and GlassDividers between rows provide the visual structure.
 const NavPill = styled.View`
-  background-color: rgba(255, 255, 255, 0.44);
-  border-radius: ${({ theme }) => theme.radii.lg - 2}px;
   padding: 16px;
   flex-direction: row;
   align-items: center;
@@ -148,69 +105,63 @@ const TABS = [
   { icon: '⚙️', label: 'Profile', active: false },
 ];
 
-// CtaButton — dark full-width pill, scales on tablet to match Steps 1 and 2.
-const CtaButton = styled(Pressable)<TabletProps>`
-  background-color: ${({ theme }) => theme.colors.primary};
-  border-radius: ${({ theme }) => theme.radii.md}px;
-  padding: ${({ $isTablet }) => ($isTablet ? '22px 18px' : '14px 12px')};
-  margin-bottom: ${({ theme }) => theme.spacing.md}px;
-`;
-
-// CtaLabel — button text, scales from 14px to 22px on tablets.
-const CtaLabel = styled.Text<TabletProps>`
-  font-family: ${({ theme }) => theme.typography.fontBodyBold};
-  font-size: ${({ $isTablet }) => ($isTablet ? 22 : 14)}px;
-  color: #D6EFD8;
-  text-align: center;
-`;
-
 // WelcomeStep3 — introduces the four navigation tabs.
 // Pairs a description pill for each tab with a live-looking tab bar preview
 // at the bottom so the user recognises it immediately when they enter the app.
-// Layout and typography match Steps 1 and 2 exactly.
+// Layout, headline, subtext, and the CTA all come from the shared screen
+// components; the pills gap uses the smaller 'pills' GapSpacer because four
+// pills take more vertical space than one card.
 const WelcomeStep3 = ({ onNext }: WelcomeStep3Props) => {
-  const { width, height } = useWindowDimensions();
-  const isTablet = Math.min(width, height) >= 600;
+  const theme = useTheme();
 
   return (
-    <ContentArea $isTablet={isTablet}>
+    <ContentArea>
       <TopSpacer />
       <ContentGroup>
-        <Headline $isTablet={isTablet}>Four tabs,{'\n'}four tools.</Headline>
-        <Subtext $isTablet={isTablet}>
+        <ScreenHeadline>Four tabs,{'\n'}four tools.</ScreenHeadline>
+        <ScreenSubtext>
           Each tab handles a different part of your lawn care routine.
-        </Subtext>
-        <SpacerPills $isTablet={isTablet} />
-        <NavPills>
-          <NavPill>
-            <NavPillIcon>🌅</NavPillIcon>
-            <NavPillBody>
-              <NavPillName>Today</NavPillName>
-              <NavPillDesc>Your daily task and streak</NavPillDesc>
-            </NavPillBody>
-          </NavPill>
-          <NavPill>
-            <NavPillIcon>📋</NavPillIcon>
-            <NavPillBody>
-              <NavPillName>Tasks</NavPillName>
-              <NavPillDesc>See what's coming up this month</NavPillDesc>
-            </NavPillBody>
-          </NavPill>
-          <NavPill>
-            <NavPillIcon>📖</NavPillIcon>
-            <NavPillBody>
-              <NavPillName>Learn</NavPillName>
-              <NavPillDesc>Beginner-friendly lawn guides</NavPillDesc>
-            </NavPillBody>
-          </NavPill>
-          <NavPill>
-            <NavPillIcon>👤</NavPillIcon>
-            <NavPillBody>
-              <NavPillName>Profile</NavPillName>
-              <NavPillDesc>Your lawn info and settings</NavPillDesc>
-            </NavPillBody>
-          </NavPill>
-        </NavPills>
+        </ScreenSubtext>
+        <GapSpacer size="pills" />
+        <GlassCard
+          variant="clear"
+          clearBackdropSource={LAWN_BG}
+          clearBackdropTint={theme.colors.onboardingPhotoTint}
+        >
+          <OptionsGroup>
+            <NavPill>
+              <NavPillIcon>🌅</NavPillIcon>
+              <NavPillBody>
+                <NavPillName>Today</NavPillName>
+                <NavPillDesc>Your daily task and streak</NavPillDesc>
+              </NavPillBody>
+            </NavPill>
+            <GlassDivider />
+            <NavPill>
+              <NavPillIcon>📋</NavPillIcon>
+              <NavPillBody>
+                <NavPillName>Tasks</NavPillName>
+                <NavPillDesc>See what's coming up this month</NavPillDesc>
+              </NavPillBody>
+            </NavPill>
+            <GlassDivider />
+            <NavPill>
+              <NavPillIcon>📖</NavPillIcon>
+              <NavPillBody>
+                <NavPillName>Learn</NavPillName>
+                <NavPillDesc>Beginner-friendly lawn guides</NavPillDesc>
+              </NavPillBody>
+            </NavPill>
+            <GlassDivider />
+            <NavPill>
+              <NavPillIcon>👤</NavPillIcon>
+              <NavPillBody>
+                <NavPillName>Profile</NavPillName>
+                <NavPillDesc>Your lawn info and settings</NavPillDesc>
+              </NavPillBody>
+            </NavPill>
+          </OptionsGroup>
+        </GlassCard>
       </ContentGroup>
       <BottomSpacer />
       <TabBarWrapper>
@@ -226,13 +177,11 @@ const WelcomeStep3 = ({ onNext }: WelcomeStep3Props) => {
         </TabBar>
       </TabBarWrapper>
       <CtaButton
-        $isTablet={isTablet}
+        label="Next →"
         onPress={onNext}
-        accessibilityRole="button"
         accessibilityLabel="Next, move to final step"
-      >
-        <CtaLabel $isTablet={isTablet}>Next →</CtaLabel>
-      </CtaButton>
+        withBottomGap
+      />
     </ContentArea>
   );
 };

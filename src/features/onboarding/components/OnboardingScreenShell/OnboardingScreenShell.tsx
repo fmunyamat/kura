@@ -11,6 +11,9 @@ import Animated, {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import styled from 'styled-components/native';
 
+import { StepPillLabel } from '~/shared/components/StepPillLabel';
+import { StepProgressDots } from '~/shared/components/StepProgressDots';
+
 const GRASS_BG = require('../../../../../assets/images/sprinkler.png') as number;
 
 interface OnboardingScreenShellProps {
@@ -38,27 +41,6 @@ const Safe = styled(SafeAreaView)`flex: 1;`;
 // TopBar — holds the progress dots. Top padding matches WelcomeFlow.
 const TopBar = styled.View`
   padding: ${({ theme }) => theme.spacing.xl}px 0 ${({ theme }) => theme.spacing.sm}px;
-`;
-
-const DotsRow = styled.View`
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-  gap: 6px;
-`;
-
-const InactiveDot = styled.View`
-  width: 5px;
-  height: 5px;
-  border-radius: 3px;
-  background-color: rgba(255, 255, 255, 0.22);
-`;
-
-const ActiveDot = styled.View`
-  width: 18px;
-  height: 5px;
-  border-radius: 3px;
-  background-color: rgba(255, 255, 255, 0.72);
 `;
 
 // NavBar — fixed row below the dots. height: 44px matches WelcomeFlow's NavBar
@@ -91,20 +73,6 @@ const NavBackArrow = styled.Text`
   color: rgba(255, 255, 255, 0.50);
 `;
 
-const StepPill = styled.View`
-  align-self: center;
-  background-color: rgba(255, 255, 255, 0.10);
-  border-radius: ${({ theme }) => theme.radii.full}px;
-  padding: 4px 13px;
-`;
-
-const StepPillText = styled.Text`
-  font-size: 11px;
-  font-weight: ${({ theme }) => theme.typography.weightBold};
-  color: rgba(255, 255, 255, 0.40);
-  letter-spacing: 1.6px;
-  text-transform: uppercase;
-`;
 
 // OnboardingScreenShell — shared chrome for every onboarding screen.
 // Renders the grass background, dark overlay, progress dots, and NavBar
@@ -154,13 +122,7 @@ export const OnboardingScreenShell = ({
       <DarkOverlay />
       <Safe edges={['top', 'bottom']}>
         <TopBar>
-          <DotsRow>
-            {Array.from({ length: totalSteps }, (_, i) =>
-              i === currentStep - 1
-                ? <ActiveDot key={i} />
-                : <InactiveDot key={i} />
-            )}
-          </DotsRow>
+          <StepProgressDots total={totalSteps} activeIndex={currentStep - 1} />
         </TopBar>
 
         {/* NavBar stays outside the animation so it never slides with content. */}
@@ -174,9 +136,7 @@ export const OnboardingScreenShell = ({
               <NavBackArrow>‹</NavBackArrow>
             </NavBackButton>
           )}
-          <StepPill>
-            <StepPillText>Setup · {currentStep} of {totalSteps}</StepPillText>
-          </StepPill>
+          <StepPillLabel prefix="Setup" step={currentStep} total={totalSteps} />
         </NavBar>
 
         {/* Animated content area — slides in on mount and on re-focus.
