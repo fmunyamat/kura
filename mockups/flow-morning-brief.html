@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kura — Morning Brief · Interactive UX Flow</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Zalando+Sans:ital,wght@0,400;0,700;0,900;1,400&family=Zalando+Sans+Expanded:wght@700;900&display=swap" rel="stylesheet">
+<style>
+/* ── Kura tokens (src/config/theme.ts) ── */
+:root {
+  --primary:#2D6A2D; --primary-mid:#5A9E3A; --primary-deep:#0c3520;
+  --lime:rgba(184,229,106,0.92); --lime-solid:#b8e56a;
+  --onb-tint:rgba(10,28,10,0.60);
+  --text-on-dark:rgba(255,255,255,0.85); --text-muted:rgba(255,255,255,0.60);
+  --subtext:rgba(255,255,255,0.48); --text-on-primary:#D6EFD8;
+  --glass-panel:rgba(255,255,255,0.10); --glass-edge:rgba(255,255,255,0.32);
+  --glass-edge-btm:rgba(255,255,255,0.10); --glass-input:rgba(255,255,255,0.13);
+  --glass-divider:rgba(255,255,255,0.22);
+  --font-body:'JetBrains Mono',monospace;
+  --font-header:'Zalando Sans',sans-serif;
+  --font-header-x:'Zalando Sans Expanded','Zalando Sans',sans-serif;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  background:
+    radial-gradient(1100px 560px at 78% -8%, rgba(45,106,45,0.28), transparent 60%),
+    radial-gradient(800px 480px at 8% 108%, rgba(184,229,106,0.10), transparent 55%),
+    #07120a;
+  font-family:var(--font-body); color:var(--text-on-dark);
+  min-height:100vh; padding:48px 36px 72px;
+}
+body::after {
+  content:''; position:fixed; inset:0; pointer-events:none; opacity:.5;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.04 0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.kicker { font-size:11px; letter-spacing:4px; text-transform:uppercase; color:var(--lime); }
+h1.title { font-family:var(--font-header-x); font-weight:900; font-size:clamp(28px,3.6vw,46px); color:#fff; letter-spacing:-1px; margin-top:12px; }
+h1.title em { font-style:normal; color:var(--lime-solid); }
+.lede { margin-top:12px; max-width:560px; font-size:12px; line-height:1.8; color:var(--text-muted); }
+
+.stage { display:flex; gap:56px; justify-content:center; align-items:flex-start; flex-wrap:wrap; margin-top:48px; }
+
+/* ── Phone ── */
+.phone {
+  width:360px; height:760px; border-radius:48px; overflow:hidden; position:relative;
+  border:1px solid rgba(255,255,255,0.14); flex-shrink:0;
+  box-shadow:0 0 0 10px #0d130d, 0 0 0 11px rgba(255,255,255,0.07), 0 48px 90px -24px rgba(0,0,0,0.85);
+}
+.bg { position:absolute; inset:0; background:url('../assets/images/lawn.png') center/cover; filter:blur(7px); transform:scale(1.06); }
+.tint { position:absolute; inset:0; background:var(--onb-tint); }
+.screen { position:absolute; inset:0; display:flex; flex-direction:column; padding:0 20px; }
+.statusbar { display:flex; justify-content:space-between; align-items:center; padding:18px 8px 0; font-size:11.5px; font-weight:700; color:#fff; font-family:var(--font-header); }
+.pillcam { width:84px; height:24px; background:#000; border-radius:9999px; position:absolute; left:50%; transform:translateX(-50%); top:13px; }
+
+.glass {
+  background:var(--glass-panel);
+  backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px);
+  border-radius:16px;
+  border:1px solid var(--glass-edge-btm); border-top-color:var(--glass-edge);
+  position:relative;
+}
+.chip {
+  display:inline-flex; align-items:center; gap:5px;
+  background:var(--glass-input); border:1px solid var(--glass-edge-btm);
+  border-radius:9999px; padding:5px 12px;
+  font-size:9.5px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--text-muted);
+}
+.chip.lime { color:var(--primary-deep); background:var(--lime); border-color:transparent; }
+.eyebrow { font-size:9.5px; letter-spacing:2.5px; text-transform:uppercase; color:var(--subtext); }
+
+/* tab bar — same clear-glass recipe as the task cards: translucent white
+   panel, backdrop blur, bright top edge catching the light */
+.tabbar {
+  margin-top:auto; margin-bottom:18px; display:flex; justify-content:space-around; align-items:center;
+  padding:7px; border-radius:9999px;
+  background:var(--glass-panel);
+  backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px);
+  border:1px solid var(--glass-edge-btm); border-top-color:var(--glass-edge);
+}
+.tab { display:flex; flex-direction:column; align-items:center; gap:2px; }
+.tab .ico { font-size:16px; padding:4px 14px; border-radius:9999px; }
+.tab.active .ico { background:rgba(184,229,106,0.22); }
+.tab .lbl { font-size:8px; font-weight:700; letter-spacing:.4px; text-transform:uppercase; color:rgba(255,255,255,0.28); font-family:var(--font-header); }
+.tab.active .lbl { color:var(--lime-solid); }
+
+/* ── Today screen ── */
+.toprow { display:flex; justify-content:space-between; align-items:center; margin-top:24px; }
+.greet { font-family:var(--font-header); font-weight:900; font-size:30px; line-height:1.08; color:#fff; letter-spacing:-.5px; margin-top:14px; }
+.counter { margin-top:12px; display:flex; align-items:center; gap:9px; }
+.counter .track { flex:1; height:4px; border-radius:9999px; background:var(--glass-input); overflow:hidden; }
+.counter .track i { display:block; height:100%; width:0%; background:linear-gradient(90deg,var(--primary-mid),var(--lime-solid)); border-radius:inherit; transition:width .6s cubic-bezier(.2,.7,.2,1); }
+.counter .ct { font-size:9px; letter-spacing:1.5px; color:var(--subtext); text-transform:uppercase; white-space:nowrap; }
+
+/* hero card + its animation states. The slot keeps a min-height so the rows
+   behind don't collapse while the card is lifted out as a modal. It must NOT
+   be positioned — the expanded card centers against .screen, not the slot. */
+.hero-slot { margin-top:18px; min-height:330px; }
+.hero { overflow:hidden; position:relative; cursor:pointer;
+  transition:transform .45s cubic-bezier(.5,0,.75,.3), opacity .4s; }
+.hero.exit { transform:translateX(-115%) rotate(-5deg); opacity:0; }
+.hero.enter { animation:heroIn .55s cubic-bezier(.2,.9,.25,1.15) both; }
+@keyframes heroIn { from { transform:translateX(115%) rotate(4deg); opacity:0; } to { transform:none; opacity:1; } }
+
+.photo-hd { height:104px; background-size:cover; background-position:center; position:relative; }
+.photo-hd::after { content:''; position:absolute; inset:0; background:linear-gradient(180deg,rgba(10,28,10,0.04),rgba(10,28,10,0.58)); }
+.photo-emoji {
+  position:absolute; left:16px; bottom:-15px; z-index:2; width:44px; height:44px; border-radius:13px;
+  background:rgba(10,28,10,0.88); border:1px solid rgba(255,255,255,0.28);
+  display:grid; place-items:center; font-size:21px; box-shadow:0 6px 16px rgba(0,0,0,0.45);
+}
+.hero-body { padding:26px 20px 20px; }
+.hero-task { font-family:var(--font-header); font-weight:700; font-size:22px; color:#fff; }
+.hero-why { font-size:11.5px; line-height:1.7; color:var(--text-muted); margin-top:8px; }
+.hero-meta { display:flex; gap:8px; margin-top:15px; }
+
+/* detail drawer — collapsed by default; tapping the card slides it open.
+   max-height transition keeps the motion smooth without measuring content. */
+.detail { max-height:0; opacity:0; overflow:hidden;
+  transition:max-height .45s cubic-bezier(.2,.7,.2,1), opacity .35s; }
+.expanded .detail { max-height:300px; opacity:1; }
+.how-row { display:flex; gap:9px; align-items:flex-start; padding:5px 0; font-size:10.5px; line-height:1.6; color:var(--text-on-dark); }
+.how-row .dot { color:var(--lime-solid); font-weight:700; }
+.more-hint { margin-top:13px; text-align:center; font-size:8.5px; letter-spacing:1.6px; text-transform:uppercase; color:var(--subtext); }
+.more-hint::before { content:'tap for details ⌄'; }
+.expanded .more-hint::before { content:'tap to close ⌃'; }
+
+/* ── modal expansion ──
+   The open card lifts out of the flow to fill ~80% of the screen while a
+   scrim dims and blurs everything behind it. Tapping the card or the scrim
+   closes it again. */
+.scrim {
+  position:absolute; inset:0; z-index:40;
+  background:rgba(3,9,3,0.62);
+  backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px);
+  opacity:0; pointer-events:none; transition:opacity .35s;
+}
+.scrim.show { opacity:1; pointer-events:auto; }
+/* centered with top% (not a transform) so the FLIP zoom in the JS owns the
+   transform channel — it animates the card scaling between slot and modal */
+.hero.expanded {
+  position:absolute; left:16px; right:16px; top:11%; height:78%;
+  z-index:45;
+  background:rgba(22,42,22,0.55);
+}
+/* inside the modal the body becomes a column so the CTA pins to the bottom */
+.hero.expanded .hero-body { display:flex; flex-direction:column; height:calc(100% - 104px); }
+.hero.expanded .detail { overflow-y:auto; }
+.hero.expanded .more-hint { margin-top:auto; padding-top:10px; }
+/* applied for one frame on close so the card snaps home without a transform drift */
+.no-trans { transition:none !important; animation:none !important; }
+.cta {
+  background:var(--primary); color:var(--text-on-primary); border:none; width:100%;
+  border-radius:9999px; text-align:center; font-family:var(--font-header); font-weight:700;
+  font-size:14px; padding:15px; cursor:pointer; margin-top:18px; transition:filter .2s, transform .12s;
+}
+.cta:hover { filter:brightness(1.18); }
+.cta:active { transform:scale(.97); }
+.cta:disabled { opacity:.5; cursor:default; }
+
+/* the DONE sweep: lime circle grows from the button, check draws */
+.sweep {
+  position:absolute; inset:0; z-index:5; display:grid; place-items:center;
+  background:var(--lime-solid); border-radius:16px;
+  clip-path:circle(0% at 50% 82%); transition:clip-path .55s cubic-bezier(.3,.6,.3,1);
+  pointer-events:none;
+}
+.sweep.go { clip-path:circle(140% at 50% 82%); }
+.sweep svg path {
+  stroke:var(--primary-deep); stroke-width:9; fill:none; stroke-linecap:round; stroke-linejoin:round;
+  stroke-dasharray:120; stroke-dashoffset:120;
+}
+.sweep.go svg path { animation:draw .45s .3s cubic-bezier(.4,0,.4,1) forwards; }
+@keyframes draw { to { stroke-dashoffset:0; } }
+
+/* up-next row */
+.later { margin-top:14px; padding:13px 16px; display:flex; align-items:center; gap:11px; transition:opacity .4s, transform .4s; }
+.later.bump { animation:bump .5s cubic-bezier(.2,.9,.3,1.4); }
+@keyframes bump { 0%{transform:translateY(14px);opacity:0} 100%{transform:none;opacity:1} }
+.thumb { width:34px; height:34px; border-radius:10px; flex-shrink:0; background-size:cover; background-position:center; border:1px solid rgba(255,255,255,0.22); box-shadow:0 4px 12px rgba(0,0,0,0.35); }
+.later .t { font-size:10.5px; color:var(--text-muted); flex:1; line-height:1.5; }
+.later .arr { color:var(--subtext); }
+
+/* end-of-day state */
+.endcard { padding:30px 20px 24px; text-align:center; }
+.ring { margin:0 auto; width:92px; height:92px; position:relative; }
+.ring svg { transform:rotate(-90deg); }
+.ring circle.track { stroke:rgba(255,255,255,0.18); }
+.ring circle.fill { stroke:var(--lime-solid); stroke-dasharray:264; stroke-dashoffset:264; animation:ringfill .9s .15s cubic-bezier(.3,.6,.3,1) forwards; }
+@keyframes ringfill { to { stroke-dashoffset:0; } }
+.ring .rcheck { position:absolute; inset:0; display:grid; place-items:center; font-size:34px; animation:pop .5s .8s cubic-bezier(.2,.9,.3,1.6) both; }
+@keyframes pop { from { transform:scale(0); } to { transform:scale(1); } }
+.end-h { font-family:var(--font-header); font-weight:900; font-size:22px; color:#fff; margin-top:16px; }
+.end-p { font-size:11px; line-height:1.7; color:var(--text-muted); margin-top:8px; }
+.end-streak { margin-top:16px; display:flex; justify-content:center; }
+
+/* streak chip pop when it ticks up */
+.chip.pop { animation:chipPop .6s cubic-bezier(.2,.9,.3,1.6); }
+@keyframes chipPop { 0%{transform:scale(1)} 40%{transform:scale(1.35) rotate(-3deg)} 100%{transform:scale(1)} }
+
+/* confetti */
+.confetti { position:absolute; top:-10px; width:8px; height:13px; border-radius:2px; z-index:50; pointer-events:none; animation:fall linear forwards; }
+@keyframes fall {
+  0% { transform:translateY(0) rotate(0deg); opacity:1; }
+  100% { transform:translateY(560px) rotate(540deg); opacity:0; }
+}
+
+/* ── Annotation sidebar ── */
+.notes { width:340px; padding-top:8px; }
+.notes h2 { font-family:var(--font-header); font-weight:700; font-size:16px; color:#fff; }
+.notes .hint { font-size:10.5px; color:var(--lime); margin-top:8px; letter-spacing:.5px; }
+.steps { margin-top:22px; display:flex; flex-direction:column; gap:0; }
+.step { display:flex; gap:14px; padding:14px 16px; border-radius:14px; transition:background .3s; }
+.step.active { background:var(--glass-panel); }
+.step .num {
+  width:24px; height:24px; border-radius:50%; flex-shrink:0; display:grid; place-items:center;
+  font-size:10px; font-weight:700; border:1px solid var(--glass-divider); color:var(--text-muted);
+  transition:all .3s;
+}
+.step.active .num { background:var(--lime); border-color:transparent; color:var(--primary-deep); }
+.step.done-step .num { background:rgba(184,229,106,0.18); border-color:rgba(184,229,106,0.5); color:var(--lime); }
+.step .s-t { font-family:var(--font-header); font-weight:700; font-size:12px; color:#fff; }
+.step .s-d { font-size:10px; line-height:1.65; color:var(--text-muted); margin-top:4px; }
+.replay {
+  margin-top:26px; background:none; border:1px solid var(--glass-divider); color:var(--text-on-dark);
+  font-family:var(--font-header); font-weight:700; font-size:11px; letter-spacing:1px;
+  padding:11px 22px; border-radius:9999px; cursor:pointer; transition:all .2s;
+}
+.replay:hover { background:var(--lime); color:var(--primary-deep); border-color:transparent; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="kicker">Kura · UX Flow Prototype 01</div>
+  <h1 class="title">Morning Brief — <em>the daily loop.</em></h1>
+  <p class="lede">A live click-through of the Today tab. Two tasks queued for Friday. Tap <b style="color:#fff">Mark as done</b> on the phone and watch the full cycle: completion sweep → next task promotes → day complete → streak grows.</p>
+</header>
+
+<div class="stage">
+  <div class="phone" id="phone">
+    <div class="bg"></div>
+    <div class="tint"></div>
+    <div class="screen">
+      <div class="statusbar"><span>9:41</span><span class="pillcam"></span><span>𝍤 ⚡︎</span></div>
+      <div class="toprow">
+        <span class="eyebrow">Friday, June 12</span>
+        <span class="chip lime" id="streak">🔥 6-day streak</span>
+      </div>
+      <div class="greet" id="greet">Good morning,<br>Farai.</div>
+      <div class="counter">
+        <span class="ct" id="counterLabel">Task 1 of 2</span>
+        <span class="track"><i id="progressFill"></i></span>
+      </div>
+      <div class="hero-slot" id="heroSlot"></div>
+      <div class="glass later" id="later"></div>
+      <nav class="tabbar">
+        <div class="tab active"><span class="ico">🏠</span><span class="lbl">Today</span></div>
+        <div class="tab"><span class="ico">✅</span><span class="lbl">Tasks</span></div>
+        <div class="tab"><span class="ico">📚</span><span class="lbl">Learn</span></div>
+        <div class="tab"><span class="ico">⚙️</span><span class="lbl">Profile</span></div>
+      </nav>
+      <div class="scrim" id="scrim"></div>
+    </div>
+  </div>
+
+  <aside class="notes">
+    <h2>How the loop works</h2>
+    <div class="hint">▶ Tap the task card to expand its full details<br>▶ Click “Mark as done ✓” to advance</div>
+    <div class="steps" id="steps">
+      <div class="step" data-step="0">
+        <span class="num">1</span>
+        <div>
+          <div class="s-t">Land on today</div>
+          <div class="s-d">One hero task, condensed: photo, name, time. Tapping the card slides open the full why + how-to steps; tapping again tucks them away.</div>
+        </div>
+      </div>
+      <div class="step" data-step="1">
+        <span class="num">2</span>
+        <div>
+          <div class="s-t">Mark as done</div>
+          <div class="s-d">A lime sweep grows out of the button and a checkmark draws itself — the reward lands exactly where the finger already is.</div>
+        </div>
+      </div>
+      <div class="step" data-step="2">
+        <span class="num">3</span>
+        <div>
+          <div class="s-t">Next task promotes</div>
+          <div class="s-d">The finished card slides off left; the “up next” task springs up into the hero slot with its own photo. The queue row refills with tomorrow.</div>
+        </div>
+      </div>
+      <div class="step" data-step="3">
+        <span class="num">4</span>
+        <div>
+          <div class="s-t">Day complete</div>
+          <div class="s-d">When the queue empties, a ring seals the day, confetti falls, and the streak chip ticks 6 → 7 with a pop. Tomorrow is previewed so there's always a next step.</div>
+        </div>
+      </div>
+    </div>
+    <button class="replay" id="replay">↺ Replay the day</button>
+  </aside>
+</div>
+
+<script>
+// ── The day's task queue. On a one-task day this array simply has one entry
+//    and completing it goes straight to the day-complete state. ──
+const TASKS = [
+  {
+    emoji:'💧', img:'../assets/images/sprinkler.png',
+    name:'Water the lawn',
+    why:'No rain for 4 days and none coming. Give it a deep soak this morning before it gets hot.',
+    meta:['⏱ 15 min','🌡 Best before 10am'],
+    how:[
+      'Hook the sprinkler up on the front patch',
+      'Run 20 minutes, then move it to the back',
+      'Done when the soil looks dark, not shiny',
+    ],
+  },
+  {
+    emoji:'🔍', img:'../assets/images/grass.jpg',
+    name:'Quick weed check',
+    why:"Walk the front edges and pull anything that isn't grass. Easier now while the soil is soft.",
+    meta:['⏱ 5 min','🌿 Front walkway'],
+    how:[
+      'Walk the front path and both fence lines',
+      'Grip low and pull slowly so the root comes up',
+      'Toss everything in the green bin',
+    ],
+  },
+];
+const TOMORROW = { emoji:'✂️', img:'../assets/images/evening-mow.jpg', label:'Tomorrow: Mow the backyard · 30 min' };
+
+let idx = 0, busy = false;
+const slot = document.getElementById('heroSlot');
+const later = document.getElementById('later');
+const fill = document.getElementById('progressFill');
+const counter = document.getElementById('counterLabel');
+const streak = document.getElementById('streak');
+const phone = document.getElementById('phone');
+
+function setStep(n) {
+  document.querySelectorAll('.step').forEach(s => {
+    const i = +s.dataset.step;
+    s.classList.toggle('active', i === n);
+    s.classList.toggle('done-step', i < n);
+  });
+}
+
+// Builds the hero card for task i. Condensed by default — just the photo,
+// name, and meta chips. The why + how-to live in a detail drawer that the
+// user taps the card to open; the CTA stops the tap from bubbling so
+// completing never accidentally toggles the drawer.
+function heroHTML(t) {
+  return `
+    <div class="glass hero" onclick="toggleDetail(this)">
+      <div class="photo-hd" style="background-image:url('${t.img}')">
+        <span class="photo-emoji">${t.emoji}</span>
+      </div>
+      <div class="hero-body">
+        <div class="hero-task">${t.name}</div>
+        <div class="hero-meta">${t.meta.map(m => `<span class="chip">${m}</span>`).join('')}</div>
+        <div class="detail">
+          <div class="hero-why">${t.why}</div>
+          <div style="margin-top:10px">
+            ${t.how.map((h,i) => `<div class="how-row"><span class="dot">${i+1}.</span> ${h}</div>`).join('')}
+          </div>
+        </div>
+        <div class="more-hint"></div>
+        <button class="cta" onclick="event.stopPropagation();complete()">Mark as done ✓</button>
+      </div>
+      <div class="sweep">
+        <svg width="86" height="86" viewBox="0 0 86 86"><path d="M 18 46 L 37 64 L 70 24"/></svg>
+      </div>
+    </div>`;
+}
+
+const scrim = document.getElementById('scrim');
+
+// FLIP zoom: measure the card, apply the layout change instantly (no-trans),
+// measure again, then start the card transformed back at its old position and
+// size and release it — so it visibly zooms out to the modal on open and
+// zooms back into its slot on close.
+function flipZoom(el, change) {
+  const first = el.getBoundingClientRect();
+  el.classList.add('no-trans');
+  change();
+  void el.offsetWidth;
+  const last = el.getBoundingClientRect();
+  const dx = first.left - last.left, dy = first.top - last.top;
+  const sx = first.width / last.width, sy = first.height / last.height;
+  el.style.transformOrigin = 'top left';
+  el.style.transform = `translate(${dx}px, ${dy}px) scale(${sx}, ${sy})`;
+  void el.offsetWidth;
+  el.classList.remove('no-trans');
+  el.style.transition = 'transform .5s cubic-bezier(.2,.85,.25,1.1)';
+  el.style.transform = '';
+  setTimeout(() => { el.style.transition = ''; el.style.transformOrigin = ''; }, 520);
+}
+
+function toggleDetail(el) {
+  if (busy) return;
+  if (el.classList.contains('expanded')) closeModal(el);
+  else flipZoom(el, () => { el.classList.add('expanded'); scrim.classList.add('show'); });
+}
+
+function closeModal(el) {
+  flipZoom(el, () => { el.classList.remove('expanded'); scrim.classList.remove('show'); });
+}
+
+// Tapping the dimmed background closes the modal too.
+scrim.addEventListener('click', () => {
+  const h = slot.querySelector('.hero.expanded');
+  if (h) closeModal(h);
+});
+
+function laterHTML() {
+  const next = TASKS[idx + 1];
+  if (next) return `
+    <span class="thumb" style="background-image:url('${next.img}')"></span>
+    <span class="t">Up next: ${next.name} · today</span>
+    <span class="arr">›</span>`;
+  return `
+    <span class="thumb" style="background-image:url('${TOMORROW.img}')"></span>
+    <span class="t">${TOMORROW.label}</span>
+    <span class="arr">›</span>`;
+}
+
+function render(entering) {
+  slot.innerHTML = heroHTML(TASKS[idx]);
+  if (entering) slot.querySelector('.hero').classList.add('enter');
+  later.innerHTML = laterHTML();
+  if (entering) { later.classList.remove('bump'); void later.offsetWidth; later.classList.add('bump'); }
+  counter.textContent = `Task ${idx + 1} of ${TASKS.length}`;
+  fill.style.width = (idx / TASKS.length * 100) + '%';
+}
+
+function confetti() {
+  const colors = ['#b8e56a','#ffffff','#5A9E3A','#D6EFD8'];
+  for (let i = 0; i < 30; i++) {
+    const c = document.createElement('span');
+    c.className = 'confetti';
+    c.style.left = (6 + Math.random() * 88) + '%';
+    c.style.background = colors[Math.random() * colors.length | 0];
+    c.style.animationDuration = (1.4 + Math.random() * 1.3) + 's';
+    c.style.animationDelay = (Math.random() * .5) + 's';
+    phone.appendChild(c);
+    setTimeout(() => c.remove(), 3400);
+  }
+}
+
+function endState() {
+  slot.innerHTML = `
+    <div class="glass endcard hero enter">
+      <div class="ring">
+        <svg width="92" height="92"><circle class="track" cx="46" cy="46" r="42" fill="none" stroke-width="6"/><circle class="fill" cx="46" cy="46" r="42" fill="none" stroke-width="6" stroke-linecap="round"/></svg>
+        <span class="rcheck">✅</span>
+      </div>
+      <div class="end-h">That's everything today.</div>
+      <div class="end-p">Two for two. Your lawn got what it needed — see you tomorrow morning.</div>
+      <div class="end-streak"><span class="chip lime">🔥 7-day streak — new record</span></div>
+    </div>`;
+  later.innerHTML = laterHTML();
+  later.classList.remove('bump'); void later.offsetWidth; later.classList.add('bump');
+  counter.textContent = 'All done';
+  fill.style.width = '100%';
+  streak.textContent = '🔥 7-day streak';
+  streak.classList.add('pop');
+  confetti();
+  setStep(3);
+}
+
+// The full completion cycle: sweep → check draw → card exits → next enters.
+function complete() {
+  if (busy) return;
+  busy = true;
+  setStep(1);
+  const hero = slot.querySelector('.hero');
+  hero.querySelector('.cta').disabled = true;
+  hero.querySelector('.sweep').classList.add('go');          // lime sweep + check draw
+  // If Done was tapped inside the modal, the sweep plays there, then the
+  // card drops back into its slot mid-animation before sliding off.
+  if (hero.classList.contains('expanded')) setTimeout(() => closeModal(hero), 600);
+  setTimeout(() => {
+    hero.classList.add('exit');                               // finished card slides off
+    if (idx + 1 < TASKS.length) setStep(2);
+  }, 950);
+  setTimeout(() => {
+    idx++;
+    if (idx < TASKS.length) { render(true); }                 // next task springs in
+    else { endState(); }                                      // or the day seals shut
+    busy = false;
+  }, 1380);
+}
+
+document.getElementById('replay').addEventListener('click', () => {
+  idx = 0; busy = false;
+  streak.textContent = '🔥 6-day streak';
+  streak.classList.remove('pop');
+  scrim.classList.remove('show');
+  render(false);
+  setStep(0);
+});
+
+render(false);
+setStep(0);
+</script>
+</body>
+</html>
