@@ -29,11 +29,12 @@ src/
 │   │   └── types.ts
 │   ├── home/
 │   │   ├── screens/
-│   │   │   └── HomeScreen.tsx          # Focus Card dashboard — owns focusedId state
+│   │   │   └── HomeScreen.tsx          # Focus Deck — one card at a time (see DESIGN.md → Today)
 │   │   └── components/
-│   │       ├── FocusTaskRow/           # compact overview row (icon · name · meta · time pill · chevron)
-│   │       ├── FocusTaskDetail/        # expanded detail (why it matters / steps / CTA)
-│   │       └── CompletedTaskRow/       # struck-through row with filled check circle
+│   │       ├── DeckCard/               # single task card: photo header, emoji badge, title, detail drawer, CTA
+│   │       ├── SplitContextCard/       # streak (left) + weather (right) two-column glass card
+│   │       ├── CompletionTrack/        # "Task X of Y" label + lime gradient progress bar
+│   │       └── PeekNav/               # ‹ [label] › navigation below the deck
 │   ├── recommendations/
 │   │   ├── constants/recommendationContent.ts  # maps recommendation type → icon, copy, steps
 │   │   ├── hooks/

@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kura — Streak & Weather · 9 Variants</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --primary:#2D6A2D; --primary-mid:#5A9E3A; --primary-deep:#0c3520;
+  --lime:rgba(184,229,106,0.92); --lime-solid:#b8e56a;
+  --onb-tint:rgba(10,28,10,0.60);
+  --text-on-dark:rgba(255,255,255,0.85); --text-muted:rgba(255,255,255,0.60);
+  --subtext:rgba(255,255,255,0.48); --text-on-primary:#D6EFD8;
+  --glass-panel:rgba(255,255,255,0.10); --glass-edge:rgba(255,255,255,0.32);
+  --glass-edge-btm:rgba(255,255,255,0.10); --glass-input:rgba(255,255,255,0.13);
+  --glass-divider:rgba(255,255,255,0.22);
+  --font:'JetBrains Mono',monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+  background:
+    radial-gradient(1100px 560px at 78% -8%,rgba(45,106,45,0.28),transparent 60%),
+    radial-gradient(800px 480px at 8% 108%,rgba(184,229,106,0.10),transparent 55%),
+    #07120a;
+  font-family:var(--font); color:var(--text-on-dark);
+  min-height:100vh; padding:48px 36px 80px;
+}
+body::after{
+  content:''; position:fixed; inset:0; pointer-events:none; opacity:.5;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.04 0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ── Page header ── */
+.kicker{font-size:11px;letter-spacing:4px;text-transform:uppercase;color:var(--lime-solid);}
+h1.title{font-size:clamp(24px,3vw,38px);font-weight:800;color:#fff;letter-spacing:-1px;margin-top:10px;}
+h1.title em{font-style:normal;color:var(--lime-solid);}
+.lede{margin-top:10px;max-width:620px;font-size:12px;line-height:1.8;color:var(--text-muted);}
+
+/* ── Grid ── */
+.grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:48px 40px;
+  margin-top:52px;
+}
+@media(max-width:1100px){.grid{grid-template-columns:repeat(2,1fr);}}
+
+.variant{display:flex;flex-direction:column;align-items:center;gap:20px;}
+.v-label{
+  font-size:9.5px;letter-spacing:3px;text-transform:uppercase;
+  color:var(--lime-solid);text-align:center;
+}
+.v-name{font-size:13px;font-weight:700;color:#fff;text-align:center;margin-top:2px;}
+.v-desc{font-size:10.5px;line-height:1.65;color:var(--text-muted);text-align:center;max-width:260px;}
+
+/* ── Phone shell ── */
+.phone{
+  width:300px;height:420px;border-radius:40px;overflow:hidden;position:relative;
+  border:1px solid rgba(255,255,255,0.14);flex-shrink:0;
+  box-shadow:0 0 0 8px #0d130d, 0 0 0 9px rgba(255,255,255,0.07), 0 40px 80px -20px rgba(0,0,0,0.85);
+}
+.bg{position:absolute;inset:0;background:url('../assets/images/grass-bkg.jpg') center/cover;filter:blur(6px);transform:scale(1.06);}
+.tint{position:absolute;inset:0;background:var(--onb-tint);}
+.screen{position:absolute;inset:0;display:flex;flex-direction:column;padding:0 16px;}
+
+/* Status bar */
+.statusbar{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:14px 6px 0;font-size:10px;font-weight:700;color:#fff;
+}
+.pillcam{width:72px;height:20px;background:#000;border-radius:9999px;position:absolute;left:50%;transform:translateX(-50%);top:11px;}
+
+/* Shared atoms */
+.glass{
+  background:var(--glass-panel);
+  backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+  border-radius:14px;
+  border:1px solid var(--glass-edge-btm);border-top-color:var(--glass-edge);
+}
+.chip{
+  display:inline-flex;align-items:center;gap:4px;
+  background:var(--glass-input);border:1px solid var(--glass-edge-btm);
+  border-radius:9999px;padding:4px 10px;
+  font-size:9px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--text-muted);
+  white-space:nowrap;
+}
+.chip.lime{color:var(--primary-deep);background:var(--lime);border-color:transparent;}
+.chip.amber{color:#3b1f00;background:rgba(251,191,36,0.88);border-color:transparent;}
+.eyebrow{font-size:8.5px;letter-spacing:2px;text-transform:uppercase;color:var(--subtext);}
+.greet{font-weight:900;font-size:20px;color:#fff;letter-spacing:-.5px;margin-top:8px;line-height:1.15;}
+.toprow{display:flex;justify-content:space-between;align-items:center;margin-top:18px;}
+.counter{margin-top:10px;display:flex;align-items:center;gap:8px;}
+.track{flex:1;height:3px;border-radius:9999px;background:var(--glass-input);overflow:hidden;}
+.track i{display:block;height:100%;width:40%;background:linear-gradient(90deg,var(--primary-mid),var(--lime-solid));border-radius:inherit;}
+.ct{font-size:8px;letter-spacing:1.5px;color:var(--subtext);text-transform:uppercase;white-space:nowrap;}
+
+/* ── Card placeholder ── */
+.card-ph{
+  margin-top:18px;flex:1;border-radius:14px;overflow:hidden;
+  background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.10);border-top-color:rgba(255,255,255,0.22);
+  display:flex;flex-direction:column;
+}
+.card-img{height:58px;background:url('../assets/images/sprinkler-android.jpg') center/cover;position:relative;}
+.card-img::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,28,10,0.02),rgba(10,28,10,0.55));}
+.card-body-ph{padding:14px 14px 14px;}
+.card-task{font-weight:900;font-size:17px;color:#fff;line-height:1.1;margin-top:6px;}
+.cta{
+  background:var(--lime);color:var(--primary-deep);border:none;width:100%;
+  border-radius:9999px;font-weight:700;font-size:12px;padding:11px;
+  margin-top:10px;text-align:center;
+}
+
+/* ── TAB BAR ── */
+.tabbar{
+  margin-top:auto;margin-bottom:12px;display:flex;justify-content:space-around;align-items:center;
+  padding:5px;border-radius:9999px;
+  background:var(--glass-panel);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+  border:1px solid var(--glass-edge-btm);border-top-color:var(--glass-edge);
+}
+.tab{display:flex;flex-direction:column;align-items:center;gap:1px;}
+.tab .ico{font-size:13px;padding:3px 10px;border-radius:9999px;}
+.tab.active .ico{background:rgba(184,229,106,0.22);}
+.tab .lbl{font-size:7px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:rgba(255,255,255,0.28);}
+.tab.active .lbl{color:var(--lime-solid);}
+
+/* ════════════════════════════════════════════
+   VARIANT-SPECIFIC STYLES
+   ════════════════════════════════════════════ */
+
+/* ── V1: Dual chips ── */
+.v1-row{display:flex;gap:6px;align-items:center;}
+
+/* ── V2: Weather banner ── */
+.wx-banner{
+  margin-top:18px;padding:12px 14px;
+  display:flex;align-items:center;justify-content:space-between;
+  background:rgba(255,255,255,0.08);
+  backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,0.10);border-top-color:rgba(255,255,255,0.22);
+}
+.wx-temp{font-size:28px;font-weight:800;color:#fff;letter-spacing:-1px;line-height:1;}
+.wx-sub{font-size:9px;color:var(--text-muted);margin-top:3px;line-height:1.4;}
+.wx-ico{font-size:30px;line-height:1;}
+.wx-streak{
+  display:flex;align-items:center;gap:5px;
+  background:var(--lime);border-radius:9999px;padding:3px 10px;
+  font-size:9px;font-weight:700;color:var(--primary-deep);
+  white-space:nowrap;
+}
+
+/* ── V3: Ambient tint ── */
+.v3-header{
+  margin-top:18px;
+  background:linear-gradient(135deg,rgba(251,191,36,0.18),rgba(255,140,0,0.08));
+  border-radius:14px;border:1px solid rgba(251,191,36,0.22);
+  padding:14px;
+  position:relative;overflow:hidden;
+}
+.v3-header::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(circle at 80% 30%,rgba(251,191,36,0.12),transparent 60%);
+}
+.v3-wx-row{display:flex;align-items:flex-start;justify-content:space-between;position:relative;}
+.v3-condition{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:rgba(251,191,36,0.80);margin-top:3px;}
+.v3-big-temp{font-size:36px;font-weight:800;color:#fff;letter-spacing:-2px;line-height:1;}
+.v3-detail{font-size:9px;color:var(--text-muted);line-height:1.6;margin-top:4px;}
+.v3-dots{display:flex;gap:4px;margin-top:10px;}
+.dot{width:20px;height:6px;border-radius:3px;background:var(--glass-input);}
+.dot.filled{background:var(--lime-solid);}
+.v3-streak-lbl{font-size:8.5px;letter-spacing:1.5px;color:rgba(184,229,106,0.70);text-transform:uppercase;margin-top:6px;}
+
+/* ── V4: Context card ── */
+.ctx-card{
+  margin-top:18px;
+  display:grid;grid-template-columns:1fr 1px 1fr;
+  background:var(--glass-panel);
+  backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+  border-radius:14px;border:1px solid var(--glass-edge-btm);border-top-color:var(--glass-edge);
+  overflow:hidden;
+}
+.ctx-half{padding:13px 13px;}
+.ctx-divider{background:var(--glass-divider);}
+.ctx-eyebrow{font-size:7.5px;letter-spacing:2px;text-transform:uppercase;color:var(--subtext);}
+.ctx-val{font-size:22px;font-weight:800;color:#fff;letter-spacing:-1px;margin-top:4px;line-height:1;}
+.ctx-sub{font-size:9px;color:var(--text-muted);margin-top:4px;line-height:1.4;}
+.flame-ico{font-size:22px;line-height:1;}
+
+/* ── V5: Inline greeting + dot track ── */
+.v5-greet{font-weight:900;font-size:18px;color:#fff;letter-spacing:-.5px;line-height:1.2;margin-top:8px;}
+.v5-wx-inline{color:rgba(251,191,36,0.80);}
+.v5-streak-row{display:flex;align-items:center;gap:8px;margin-top:10px;}
+.v5-streak-dots{display:flex;gap:3px;}
+.v5-dot{width:14px;height:14px;border-radius:50%;background:var(--glass-input);border:1px solid var(--glass-divider);display:grid;place-items:center;font-size:7px;}
+.v5-dot.lit{background:var(--lime-solid);border-color:transparent;color:var(--primary-deep);font-size:7px;}
+.v5-streak-lbl{font-size:8.5px;letter-spacing:1.5px;color:var(--subtext);text-transform:uppercase;}
+
+/* ── V6: Unified capsule ── */
+.capsule{
+  display:flex;align-items:center;
+  background:var(--glass-panel);
+  backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+  border-radius:9999px;border:1px solid var(--glass-edge-btm);border-top-color:var(--glass-edge);
+  overflow:hidden;
+}
+.capsule-half{
+  display:flex;align-items:center;gap:6px;
+  padding:6px 12px;
+}
+.capsule-sep{width:1px;align-self:stretch;background:var(--glass-divider);}
+.cap-ico{font-size:15px;line-height:1;}
+.cap-val{font-size:10px;font-weight:700;color:#fff;letter-spacing:.3px;}
+.cap-sub{font-size:7.5px;color:var(--subtext);letter-spacing:.5px;}
+.cap-stack{display:flex;flex-direction:column;}
+
+/* ── V7: Lawn condition card ── */
+.condition-card{
+  margin-top:18px;
+  background:var(--glass-panel);
+  backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+  border-radius:14px;border:1px solid var(--glass-edge-btm);border-top-color:var(--glass-edge);
+  padding:12px 14px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.cond-left{display:flex;align-items:center;gap:10px;}
+.cond-dot{width:10px;height:10px;border-radius:50%;background:#4ade80;flex-shrink:0;box-shadow:0 0 8px rgba(74,222,128,0.6);}
+.cond-body{}
+.cond-verdict{font-size:13px;font-weight:800;color:#fff;letter-spacing:-.3px;}
+.cond-sub{font-size:9px;color:var(--text-muted);margin-top:2px;line-height:1.4;}
+.cond-right{text-align:right;}
+.cond-streak{font-size:20px;font-weight:800;color:var(--lime-solid);letter-spacing:-1px;line-height:1;}
+.cond-streak-lbl{font-size:7.5px;letter-spacing:1.5px;text-transform:uppercase;color:var(--subtext);margin-top:1px;}
+
+/* ── V8: Progress ring ── */
+.ring-row{
+  margin-top:18px;display:flex;align-items:center;gap:14px;
+}
+.ring-wrap{position:relative;width:58px;height:58px;flex-shrink:0;}
+.ring-wrap svg{transform:rotate(-90deg);}
+.ring-center{
+  position:absolute;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+}
+.ring-num{font-size:16px;font-weight:800;color:#fff;letter-spacing:-1px;line-height:1;}
+.ring-lbl{font-size:6.5px;letter-spacing:1px;text-transform:uppercase;color:var(--subtext);}
+.ring-info{}
+.ring-title{font-size:11px;font-weight:700;color:#fff;}
+.ring-sub{font-size:9px;color:var(--text-muted);margin-top:3px;line-height:1.5;}
+.ring-wx{
+  display:inline-flex;align-items:center;gap:4px;
+  margin-top:6px;background:rgba(251,191,36,0.14);border:1px solid rgba(251,191,36,0.25);
+  border-radius:9999px;padding:3px 8px;
+  font-size:9px;font-weight:700;color:rgba(251,191,36,0.90);
+}
+
+/* ── V9: Stacked corner stats ── */
+.corner-stats{
+  display:flex;flex-direction:column;align-items:flex-end;gap:3px;
+}
+.corner-row{
+  display:flex;align-items:center;gap:5px;
+}
+.corner-val{font-size:11px;font-weight:800;color:#fff;letter-spacing:-.2px;}
+.corner-ico{font-size:11px;line-height:1;}
+.corner-sub{font-size:7px;letter-spacing:1px;text-transform:uppercase;color:var(--subtext);text-align:right;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="kicker">Kura · Design Exploration</div>
+  <h1 class="title">Streak & Weather — <em>9 approaches.</em></h1>
+  <p class="lede">Each phone shows the same data — <b style="color:#fff">6-day streak</b> and <b style="color:#fff">☀️ 24°C · good mowing conditions</b> — presented in a different way. Everything else in the screen is constant.</p>
+</header>
+
+<div class="grid">
+
+  <!-- ════ VARIANT 1: Dual chips ════ -->
+  <div class="variant">
+    <div class="phone">
+      <div class="bg"></div>
+      <div class="tint"></div>
+      <div class="screen">
+        <div class="statusbar"><span>9:41</span><span class="pillcam"></span><span>𝍤 ⚡︎</span></div>
+        <div class="toprow">
+          <span class="eyebrow">On Deck · Friday</span>
+          <!-- Two sibling chips: streak + weather sitting side by side -->
+          <div class="v1-row">
+            <span class="chip lime">🔥 6 days</span>
+            <span class="chip amber">☀️ 24°</span>
+          </div>
+        </div>
+        <div class="greet">Morning, Farai 👋</div>
+        <div class="counter">
+          <span class="ct">Task 1 of 2</span>
+          <span class="track"><i></i></span>
+        </div>
+        <div class="card-ph">
+          <div class="card-img"></div>
+          <div class="card-body-ph">
+            <span style="font-size:8px;letter-spacing:1.5px;color:var(--lime);text-transform:uppercase;">Task 1 of 2 · Today</span>
+            <div class="card-task">Give it a<br>deep soak.</div>
+            <button class="cta">Done ✓</button>
+          </div>
+        </div>
+        <nav class="tabbar" style="margin-top:10px;">
+          <div class="tab active"><span class="ico">🏠</span><span class="lbl">Today</span></div>
+          <div class="tab"><span class="ico">✅</span><span class="lbl">Tasks</span></div>
+          <div class="tab"><span class="ico">📚</span><span class="lbl">Learn</span></div>
+          <div class="tab"><span class="ico">⚙️</span><span class="lbl">Profile</span></div>
+        </nav>
+      </div>
+    </div>
+    <div class="v-label">Variant 1</div>
+    <div class="v-name">Dual Chips</div>
+    <div class="v-desc">Streak and weather sit as sibling pills in the top-right corner. Instant recognition, minimal footprint. The current approach, extended.</div>
+  </div>
+
+  <!-- ════ VARIANT 2: Weather banner ════ -->
+  <div class="variant">
+    <div class="phone">
+      <div class="bg"></div>
+      <div class="tint"></div>
+      <div class="screen">
+        <div class="statusbar"><span>9:41</span><span class="pillcam"></span><span>𝍤 ⚡︎</span></div>
+        <div class="toprow">
+          <span class="eyebrow">On Deck · Friday</span>
+        </div>
+        <!-- Full-width weather banner with streak badge embedded -->
+        <div class="wx-banner glass">
+          <div>
+            <div style="display:flex;align-items:baseline;gap:6px;">
+              <div class="wx-temp">24°</div>
+              <div>
+                <div style="font-size:10px;font-weight:700;color:#fff;">Sunny</div>
+                <div class="wx-sub">Wind 12 km/h · Good for mowing</div>
+              </div>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
+            <div class="wx-ico">☀️</div>
+            <div class="wx-streak">🔥 6 days</div>
+          </div>
+        </div>
+        <div class="greet" style="margin-top:10px;">Morning, Farai 👋</div>
+        <div class="counter" style="margin-top:6px;">
+          <span class="ct">Task 1 of 2</span>
+          <span class="track"><i></i></span>
+        </div>
+        <div class="card-ph" style="margin-top:10px;">
+          <div class="card-img"></div>
+          <div class="card-body-ph">
+            <span style="font-size:8px;letter-spacing:1.5px;color:var(--lime);text-transform:uppercase;">Task 1 of 2 · Today</span>
+            <div class="card-task">Give it a<br>deep soak.</div>
+            <button class="cta">Done ✓</button>
+          </div>
+        </div>
+        <nav class="tabbar" style="margin-top:8px;">
+          <div class="tab active"><span class="ico">🏠</span><span class="lbl">Today</span></div>
+          <div class="tab"><span class="ico">✅</span><span class="lbl">Tasks</span></div>
+          <div class="tab"><span class="ico">📚</span><span class="lbl">Learn</span></div>
+          <div class="tab"><span class="ico">⚙️</span><span class="lbl">Profile</span></div>
+        </nav>
+      </div>
+    </div>
+    <div class="v-label">Variant 2</div>
+    <div class="v-name">Weather Banner</div>
+    <div class="v-desc">A frosted glass card spans the full width, leading with temperature and conditions. The streak badge lives inside it — weather gets top billing.</div>
+  </div>
+
+  <!-- ════ VARIANT 3: Ambient tint + dot trail ════ -->
+  <div class="variant">
+    <div class="phone">
+      <div class="bg"></div>
+      <div class="tint"></div>
+      <div class="screen">
+        <div class="statusbar"><span>9:41</span><span class="pillcam"></span><span>𝍤 ⚡︎</span></div>
+        <div class="toprow">
+          <span class="eyebrow">On Deck · Friday</span>
+        </div>
+        <!-- Amber-tinted panel, big temp, streak as dot trail -->
+        <div class="v3-header">
+          <div class="v3-wx-row">
+            <div>
+              <div class="v3-big-temp">24°</div>
+              <div class="v3-condition">Sunny · Good for mowing</div>
+              <div class="v3-detail">Wind 12 km/h &nbsp;·&nbsp; Humidity 38%</div>
+            </div>
+            <div style="font-size:40px;line-height:1;">☀️</div>
+          </div>
+          <!-- 7 dots, first 6 lit = 6-day streak -->
+          <div class="v3-dots">
+            <div class="dot filled"></div>
+            <div class="dot filled"></div>
+            <div class="dot filled"></div>
+            <div class="dot filled"></div>
+            <div class="dot filled"></div>
+            <div class="dot filled"></div>
+            <div class="dot"></div>
+          </div>
+          <div class="v3-streak-lbl">🔥 6-day streak · 1 away from record</div>
+        </div>
+        <div class="greet" style="margin-top:10px;font-size:18px;">Morning, Farai 👋</div>
+        <div class="card-ph" style="margin-top:10px;flex:0 0 140px;">
+          <div class="card-img"></div>
+          <div class="card-body-ph">
+            <div class="card-task" style="font-size:15px;">Give it a deep soak.</div>
+            <button class="cta" style="padding:9px;">Done ✓</button>
+          </div>
+        </div>
+        <nav class="tabbar" style="margin-top:auto;margin-bottom:12px;">
+          <div class="tab active"><span class="ico">🏠</span><span class="lbl">Today</span></div>
+          <div class="tab"><span class="ico">✅</span><span class="lbl">Tasks</span></div>
+          <div class="tab"><span class="ico">📚</span><span class="lbl">Learn</span></div>
+          <div class="tab"><span class="ico">⚙️</span><span class="lbl">Profile</span></div>
+        </nav>
+      </div>
+    </div>
+    <div class="v-label">Variant 3</div>
+    <div class="v-name">Ambient Tint + Dot Trail</div>
+    <div class="v-desc">Weather sets the ambient mood with a warm tint. Streak is shown as a row of progress dots — more satisfying to look at than a number.</div>
+  </div>
+
+  <!-- ════ VARIANT 4: Split context card ════ -->
+  <div class="variant">
+    <div class="phone">
+      <div class="bg"></div>
+      <div class="tint"></div>
+      <div class="screen">
+        <div class="statusbar"><span>9:41</span><span class="pillcam"></span><span>𝍤 ⚡︎</span></div>
+        <div class="toprow">
+          <span class="eyebrow">On Deck · Friday</span>
+        </div>
+        <div class="greet" style="margin-top:8px;font-size:18px;">Morning, Farai 👋</div>
+        <!-- Two-column context card: streak left, weather right -->
+        <div class="ctx-card">
+          <div class="ctx-half">
+            <div class="ctx-eyebrow">Streak</div>
+            <div style="display:flex;align-items:baseline;gap:4px;margin-top:4px;">
+              <div class="flame-ico">🔥</div>
+              <div class="ctx-val">6</div>
+            </div>
+            <div class="ctx-sub">days in a row<br><span style="color:var(--lime-solid);">+1 = record</span></div>
+          </div>
+          <div class="ctx-divider"></div>
+          <div class="ctx-half">
+            <div class="ctx-eyebrow">Weather</div>
+            <div style="display:flex;align-items:baseline;gap:4px;margin-top:4px;">
+              <div class="ctx-val">24°</div>
+              <div style="font-size:14px;line-height:1;">☀️</div>
+            </div>
+            <div class="ctx-sub">Sunny · Wind 12<br><span style="color:rgba(251,191,36,0.85);">Good for mowing</span></div>
+          </div>
+        </div>
+        <div class="counter" style="margin-top:10px;">
+          <span class="ct">Task 1 of 2</span>
+          <span class="track"><i></i></span>
+        </div>
+        <div class="card-ph" style="margin-top:10px;flex:0 0 140px;">
+          <div class="card-img"></div>
+          <div class="card-body-ph">
+            <div class="card-task" style="font-size:15px;">Give it a deep soak.</div>
+            <button class="cta" style="padding:9px;">Done ✓</button>
+          </div>
+        </div>
+        <nav class="tabbar" style="margin-top:auto;margin-bottom:12px;">
+          <div class="tab active"><span class="ico">🏠</span><span class="lbl">Today</span></div>
+          <div class="tab"><span class="ico">✅</span><span class="lbl">Tasks</span></div>
+          <div class="tab"><span class="ico">📚</span><span class="lbl">Learn</span></div>
+          <div class="tab"><span class="ico">⚙️</span><span class="lbl">Profile</span></div>
+        </nav>
+      </div>
+    </div>
+    <div class="v-label">Variant 4</div>
+    <div class="v-name">Split Context Card</div>
+    <div class="v-desc">One glass card, two columns. Streak and weather are peers — equal visual weight. More data per cell: sub-lines add context ("1 away from record", "Good for mowing").</div>
+  </div>
+
+  <!-- ════ VARIANT 5: Inline greeting + dot circles ════ -->
+  <div class="variant">
+    <div class="phone">
+      <div class="bg"></div>
+      <div class="tint"></div>
+      <div class="screen">
+        <div class="statusbar"><span>9:41</span><span class="pillcam"></span><span>𝍤 ⚡︎</span></div>
+        <div class="toprow">
+          <span class="eyebrow">On Deck · Friday</span>
+        </div>
+        <!-- Weather folded into the greeting, streak as circle dots -->
+        <div class="v5-greet">
+          Morning, Farai<br>
+          <span class="v5-wx-inline">☀️ 24° — perfect out there.</span>
+        </div>
+        <div class="v5-streak-row">
+          <!-- 6 filled circles, 1 empty = 7th goal -->
+          <div class="v5-streak-dots">
+            <div class="v5-dot lit">🔥</div>
+            <div class="v5-dot lit">✓</div>
+            <div class="v5-dot lit">✓</div>
+            <div class="v5-dot lit">✓</div>
+            <div class="v5-dot lit">✓</div>
+            <div class="v5-dot lit">✓</div>
+            <div class="v5-dot" style="font-size:8px;color:var(--subtext);">7</div>
+          </div>
+          <span class="v5-streak-lbl">6-day streak</span>
+        </div>
+        <div class="counter" style="margin-top:8px;">
+          <span class="ct">Task 1 of 2</span>
+          <span class="track"><i></i></span>
+        </div>
+        <div class="card-ph" style="margin-top:12px;">
+          <div class="card-img"></div>
+          <div class="card-body-ph">
+            <span style="font-size:8px;letter-spacing:1.5px;color:var(--lime);text-transform:uppercase;">Task 1 of 2 · Today</span>
+            <div class="card-task">Give it a<br>deep soak.</div>
+            <button class="cta">Done ✓</button>
+          </div>
+        </div>
+        <nav class="tabbar" style="margin-top:auto;margin-bottom:12px;">
+          <div class="tab active"><span class="ico">🏠</span><span class="lbl">Today</span></div>
+          <div class="tab"><span class="ico">✅</span><span class="lbl">Tasks</span></div>
+          <div class="tab"><span class="ico">📚</span><span class="lbl">Learn</span></div>
+          <div class="tab"><span class="ico">⚙️</span><span class="lbl">Profile</span></div>
+        </nav>
+      </div>
+    </div>
+    <div class="v-label">Variant 5</div>
+    <div class="v-name">Inline Greeting</div>
+    <div class="v-desc">Weather becomes part of the greeting sentence — natural, conversational. Streak is shown as filled circles with a goal slot, giving a game-like sense of progress.</div>
+  </div>
+
+  <!-- ════ VARIANT 6: Unified capsule ════ -->
+  <div class="variant">
+    <div class="phone">
+      <div class="bg"></div>
+      <div class="tint"></div>
+      <div class="screen">
+        <div class="statusbar"><span>9:41</span><span class="pillcam"></span><span>𝍤 ⚡︎</span></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:18px;">
+          <span class="eyebrow">On Deck · Friday</span>
+        </div>
+        <div class="greet" style="margin-top:6px;font-size:18px;">Morning, Farai 👋</div>
+        <!-- Single connected capsule: streak | weather in one pill -->
+        <div style="margin-top:10px;">
+          <div class="capsule" style="display:inline-flex;">
+            <div class="capsule-half">
+              <div class="cap-ico">🔥</div>
+              <div class="cap-stack">
+                <div class="cap-val">6 days</div>
+                <div class="cap-sub">streak</div>
+              </div>
+            </div>
+            <div class="capsule-sep"></div>
+            <div class="capsule-half">
+              <div class="cap-ico">☀️</div>
+              <div class="cap-stack">
+                <div class="cap-val">24° sunny</div>
+                <div class="cap-sub">good for mowing</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="counter" style="margin-top:10px;">
+          <span class="ct">Task 1 of 2</span>
+          <span class="track"><i></i></span>
+        </div>
+        <div class="card-ph" style="margin-top:12px;">
+          <div class="card-img"></div>
+          <div class="card-body-ph">
+            <span style="font-size:8px;letter-spacing:1.5px;color:var(--lime);text-transform:uppercase;">Task 1 of 2 · Today</span>
+            <div class="card-task">Give it a<br>deep soak.</div>
+            <button class="cta">Done ✓</button>
+          </div>
+        </div>
+        <nav class="tabbar" style="margin-top:auto;margin-bottom:12px;">
+          <div class="tab active"><span class="ico">🏠</span><span class="lbl">Today</span></div>
+          <div class="tab"><span class="ico">✅</span><span class="lbl">Tasks</span></div>
+          <div class="tab"><span class="ico">📚</span><span class="lbl">Learn</span></div>
+          <div class="tab"><span class="ico">⚙️</span><span class="lbl">Profile</span></div>
+        </nav>
+      </div>
+    </div>
+    <div class="v-label">Variant 6</div>
+    <div class="v-name">Unified Capsule</div>
+    <div class="v-desc">One connected pill holds both pieces of info side by side, separated by a hairline divider. Cohesive, compact — feels like a single "today's context" indicator.</div>
+  </div>
+
+  <!-- ════ VARIANT 7: Lawn condition card ════ -->
+  <div class="variant">
+    <div class="phone">
+      <div class="bg"></div>
+      <div class="tint"></div>
+      <div class="screen">
+        <div class="statusbar"><span>9:41</span><span class="pillcam"></span><span>𝍤 ⚡︎</span></div>
+        <div class="toprow">
+          <span class="eyebrow">On Deck · Friday</span>
+          <!-- streak chip stays small in the corner -->
+          <span class="chip lime">🔥 6 days</span>
+        </div>
+        <div class="greet" style="margin-top:8px;font-size:18px;">Morning, Farai 👋</div>
+        <!-- Weather reframed as a beginner-friendly verdict, not raw numbers -->
+        <div class="condition-card">
+          <div class="cond-left">
+            <div class="cond-dot"></div>
+            <div class="cond-body">
+              <div class="cond-verdict">Great day for lawn work</div>
+              <div class="cond-sub">Sunny · 24°C · Wind 12 km/h<br>Low humidity — grass dries fast</div>
+            </div>
+          </div>
+          <div style="font-size:28px;line-height:1;margin-left:8px;">☀️</div>
+        </div>
+        <div class="counter" style="margin-top:10px;">
+          <span class="ct">Task 1 of 2</span>
+          <span class="track"><i></i></span>
+        </div>
+        <div class="card-ph" style="margin-top:10px;flex:0 0 140px;">
+          <div class="card-img"></div>
+          <div class="card-body-ph">
+            <div class="card-task" style="font-size:15px;">Give it a deep soak.</div>
+            <button class="cta" style="padding:9px;">Done ✓</button>
+          </div>
+        </div>
+        <nav class="tabbar" style="margin-top:auto;margin-bottom:12px;">
+          <div class="tab active"><span class="ico">🏠</span><span class="lbl">Today</span></div>
+          <div class="tab"><span class="ico">✅</span><span class="lbl">Tasks</span></div>
+          <div class="tab"><span class="ico">📚</span><span class="lbl">Learn</span></div>
+          <div class="tab"><span class="ico">⚙️</span><span class="lbl">Profile</span></div>
+        </nav>
+      </div>
+    </div>
+    <div class="v-label">Variant 7</div>
+    <div class="v-name">Lawn Condition Verdict</div>
+    <div class="v-desc">Weather translated into plain English — "Great day for lawn work" with a green status dot. Raw numbers are secondary. Built for beginners who don't know what 24° means for grass.</div>
+  </div>
+
+  <!-- ════ VARIANT 8: Progress ring ════ -->
+  <div class="variant">
+    <div class="phone">
+      <div class="bg"></div>
+      <div class="tint"></div>
+      <div class="screen">
+        <div class="statusbar"><span>9:41</span><span class="pillcam"></span><span>𝍤 ⚡︎</span></div>
+        <div class="toprow">
+          <span class="eyebrow">On Deck · Friday</span>
+        </div>
+        <div class="greet" style="margin-top:8px;font-size:18px;">Morning, Farai 👋</div>
+        <!-- Streak as SVG arc ring, weather as a small chip below -->
+        <div class="ring-row">
+          <div class="ring-wrap">
+            <!-- 6/7 filled: circumference ≈ 163, fill = 163*(6/7) ≈ 140 -->
+            <svg width="58" height="58" viewBox="0 0 58 58">
+              <circle cx="29" cy="29" r="26" fill="none" stroke="rgba(255,255,255,0.10)" stroke-width="5"/>
+              <circle cx="29" cy="29" r="26" fill="none" stroke="var(--lime-solid)" stroke-width="5"
+                stroke-dasharray="140 163" stroke-linecap="round"/>
+            </svg>
+            <div class="ring-center">
+              <div class="ring-num">6</div>
+              <div class="ring-lbl">days</div>
+            </div>
+          </div>
+          <div class="ring-info">
+            <div class="ring-title">🔥 6-day streak</div>
+            <div class="ring-sub">One more day = your record.<br>Keep it going.</div>
+            <div class="ring-wx">☀️ 24° · Good for mowing</div>
+          </div>
+        </div>
+        <div class="counter" style="margin-top:10px;">
+          <span class="ct">Task 1 of 2</span>
+          <span class="track"><i></i></span>
+        </div>
+        <div class="card-ph" style="margin-top:10px;flex:0 0 140px;">
+          <div class="card-img"></div>
+          <div class="card-body-ph">
+            <div class="card-task" style="font-size:15px;">Give it a deep soak.</div>
+            <button class="cta" style="padding:9px;">Done ✓</button>
+          </div>
+        </div>
+        <nav class="tabbar" style="margin-top:auto;margin-bottom:12px;">
+          <div class="tab active"><span class="ico">🏠</span><span class="lbl">Today</span></div>
+          <div class="tab"><span class="ico">✅</span><span class="lbl">Tasks</span></div>
+          <div class="tab"><span class="ico">📚</span><span class="lbl">Learn</span></div>
+          <div class="tab"><span class="ico">⚙️</span><span class="lbl">Profile</span></div>
+        </nav>
+      </div>
+    </div>
+    <div class="v-label">Variant 8</div>
+    <div class="v-name">Progress Ring</div>
+    <div class="v-desc">Streak as a circular arc — 6 of 7 filled, visually close to complete. Weather slots in as a small amber chip beside the ring. The near-full arc creates urgency without saying a word.</div>
+  </div>
+
+  <!-- ════ VARIANT 9: Stacked corner stats ════ -->
+  <div class="variant">
+    <div class="phone">
+      <div class="bg"></div>
+      <div class="tint"></div>
+      <div class="screen">
+        <div class="statusbar"><span>9:41</span><span class="pillcam"></span><span>𝍤 ⚡︎</span></div>
+        <div class="toprow">
+          <span class="eyebrow">On Deck · Friday</span>
+          <!-- Two lines stacked right-aligned in the corner, ultra compact -->
+          <div class="corner-stats">
+            <div class="corner-row">
+              <div class="corner-val">6 days</div>
+              <div class="corner-ico">🔥</div>
+            </div>
+            <div class="corner-sub">streak</div>
+            <div class="corner-row" style="margin-top:4px;">
+              <div class="corner-val">24° sunny</div>
+              <div class="corner-ico">☀️</div>
+            </div>
+            <div class="corner-sub">good for mowing</div>
+          </div>
+        </div>
+        <div class="greet" style="margin-top:8px;font-size:19px;">Morning, Farai 👋</div>
+        <div class="counter" style="margin-top:10px;">
+          <span class="ct">Task 1 of 2</span>
+          <span class="track"><i></i></span>
+        </div>
+        <div class="card-ph" style="margin-top:12px;">
+          <div class="card-img"></div>
+          <div class="card-body-ph">
+            <span style="font-size:8px;letter-spacing:1.5px;color:var(--lime);text-transform:uppercase;">Task 1 of 2 · Today</span>
+            <div class="card-task">Give it a<br>deep soak.</div>
+            <button class="cta">Done ✓</button>
+          </div>
+        </div>
+        <nav class="tabbar" style="margin-top:auto;margin-bottom:12px;">
+          <div class="tab active"><span class="ico">🏠</span><span class="lbl">Today</span></div>
+          <div class="tab"><span class="ico">✅</span><span class="lbl">Tasks</span></div>
+          <div class="tab"><span class="ico">📚</span><span class="lbl">Learn</span></div>
+          <div class="tab"><span class="ico">⚙️</span><span class="lbl">Profile</span></div>
+        </nav>
+      </div>
+    </div>
+    <div class="v-label">Variant 9</div>
+    <div class="v-name">Stacked Corner</div>
+    <div class="v-desc">Both values stacked vertically in the top-right corner, right-aligned and ultra tight. Zero horizontal space taken. The card and greeting stay completely undisturbed.</div>
+  </div>
+
+</div>
+
+</body>
+</html>

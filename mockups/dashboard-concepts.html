@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kura — Dashboard Concepts · 8 Directions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Zalando+Sans:ital,wght@0,400;0,700;0,900;1,400&family=Zalando+Sans+Expanded:wght@700;900&display=swap" rel="stylesheet">
+<style>
+/* ────────────────────────────────────────────────────────────────────
+   KURA DESIGN BOARD — tokens lifted straight from src/config/theme.ts
+   ──────────────────────────────────────────────────────────────────── */
+:root {
+  --primary:        #2D6A2D;
+  --primary-mid:    #5A9E3A;
+  --primary-deep:   #0c3520;
+  --lime:           rgba(184,229,106,0.92);
+  --lime-solid:     #b8e56a;
+  --photo-tint:     rgba(5,12,5,0.58);
+  --onb-tint:       rgba(10,28,10,0.60);
+  --text-on-dark:   rgba(255,255,255,0.85);
+  --text-muted:     rgba(255,255,255,0.60);
+  --subtext:        rgba(255,255,255,0.48);
+  --text-on-primary:#D6EFD8;
+  --glass-panel:    rgba(255,255,255,0.10);
+  --glass-edge:     rgba(255,255,255,0.32);
+  --glass-edge-btm: rgba(255,255,255,0.10);
+  --glass-input:    rgba(255,255,255,0.13);
+  --glass-divider:  rgba(255,255,255,0.22);
+  --error-on-dark:  rgba(255,120,100,0.92);
+  --font-body:   'JetBrains Mono', monospace;
+  --font-header: 'Zalando Sans', sans-serif;
+  --font-header-x: 'Zalando Sans Expanded', 'Zalando Sans', sans-serif;
+  --r-sm: 4px; --r-md: 8px; --r-lg: 16px; --r-full: 9999px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+/* ── The studio backdrop the phones sit on ── */
+body {
+  background:
+    radial-gradient(1200px 600px at 80% -10%, rgba(45,106,45,0.28), transparent 60%),
+    radial-gradient(900px 500px at 10% 110%, rgba(184,229,106,0.10), transparent 55%),
+    #07120a;
+  font-family: var(--font-body);
+  color: var(--text-on-dark);
+  min-height: 100vh;
+  padding: 56px 40px 80px;
+}
+
+/* grain overlay for the studio */
+body::after {
+  content: '';
+  position: fixed; inset: 0; pointer-events: none; opacity: .5;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.04 0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.board-header { max-width: 1560px; margin: 0 auto 48px; }
+.board-kicker {
+  font-size: 11px; letter-spacing: 4px; text-transform: uppercase;
+  color: var(--lime); margin-bottom: 14px;
+}
+.board-title {
+  font-family: var(--font-header-x);
+  font-weight: 900; font-size: clamp(34px, 4.6vw, 64px);
+  line-height: 1.02; letter-spacing: -1px; color: #fff;
+}
+.board-title em { font-style: normal; color: var(--lime-solid); }
+.board-sub {
+  margin-top: 16px; max-width: 640px; font-size: 12.5px; line-height: 1.8;
+  color: var(--text-muted);
+}
+
+.grid {
+  max-width: 1560px; margin: 0 auto;
+  display: grid; gap: 56px 36px;
+  grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+}
+
+.concept { animation: rise .7s cubic-bezier(.2,.7,.2,1) both; }
+.concept:nth-child(1){animation-delay:.05s}.concept:nth-child(2){animation-delay:.12s}
+.concept:nth-child(3){animation-delay:.19s}.concept:nth-child(4){animation-delay:.26s}
+.concept:nth-child(5){animation-delay:.33s}.concept:nth-child(6){animation-delay:.40s}
+.concept:nth-child(7){animation-delay:.47s}.concept:nth-child(8){animation-delay:.54s}
+@keyframes rise { from { opacity: 0; transform: translateY(28px); } to { opacity: 1; transform: none; } }
+
+.concept-label { display: flex; align-items: baseline; gap: 12px; margin-bottom: 16px; }
+.concept-num {
+  font-family: var(--font-header-x); font-weight: 900; font-size: 30px;
+  color: transparent; -webkit-text-stroke: 1.2px rgba(184,229,106,0.65);
+}
+.concept-name { font-family: var(--font-header); font-weight: 700; font-size: 16px; color: #fff; }
+.concept-note { font-size: 10.5px; color: var(--text-muted); margin-top: 4px; line-height: 1.6; }
+
+/* ────────────────────────────────────────────────────────────────────
+   PHONE FRAME — shared chrome for every concept
+   ──────────────────────────────────────────────────────────────────── */
+.phone {
+  width: 330px; height: 700px; margin: 0 auto;
+  border-radius: 44px; overflow: hidden; position: relative;
+  border: 1px solid rgba(255,255,255,0.14);
+  box-shadow:
+    0 0 0 9px #0d130d,
+    0 0 0 10px rgba(255,255,255,0.07),
+    0 44px 80px -22px rgba(0,0,0,0.85);
+  transition: transform .45s cubic-bezier(.2,.7,.2,1);
+}
+.concept:hover .phone { transform: translateY(-8px); }
+
+.bg { position: absolute; inset: 0; background-size: cover; background-position: center; }
+.bg.blur { filter: blur(7px); transform: scale(1.06); }
+.tint { position: absolute; inset: 0; background: var(--onb-tint); }
+
+.screen { position: absolute; inset: 0; display: flex; flex-direction: column; padding: 0 18px; }
+
+.statusbar {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 16px 8px 0; font-size: 11px; font-weight: 700; color: #fff;
+  font-family: var(--font-header);
+}
+.statusbar .pillcam {
+  width: 76px; height: 22px; background: #000; border-radius: var(--r-full);
+  position: absolute; left: 50%; transform: translateX(-50%); top: 12px;
+}
+
+/* ── Glass recipe — mirrors GlassCard variant="clear" ── */
+.glass {
+  background: var(--glass-panel);
+  backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+  border-radius: var(--r-lg);
+  border: 1px solid var(--glass-edge-btm);
+  border-top-color: var(--glass-edge);
+  position: relative;
+}
+
+.divider { height: 1px; background: var(--glass-divider); }
+
+/* ── Mock tab bar — mirrors WelcomeStep3's preview bar ── */
+.tabbar {
+  margin-top: auto; margin-bottom: 16px;
+  display: flex; justify-content: space-around; align-items: center;
+  padding: 6px; background: var(--primary); border-radius: var(--r-full);
+}
+.tab { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.tab .ico { font-size: 15px; padding: 4px 13px; border-radius: var(--r-full); }
+.tab.active .ico { background: rgba(214,239,216,0.18); }
+.tab .lbl {
+  font-size: 7.5px; font-weight: 700; letter-spacing: .4px; text-transform: uppercase;
+  color: rgba(255,255,255,0.28); font-family: var(--font-header);
+}
+.tab.active .lbl { color: #D6EFD8; }
+
+/* ── Shared atoms ── */
+.cta {
+  background: var(--primary); color: var(--text-on-primary);
+  border-radius: var(--r-full); text-align: center;
+  font-family: var(--font-header); font-weight: 700; font-size: 13px;
+  padding: 14px; cursor: pointer; transition: filter .2s;
+}
+.cta:hover { filter: brightness(1.15); }
+.cta.lime { background: var(--lime); color: var(--primary-deep); }
+.chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: var(--glass-input); border: 1px solid var(--glass-edge-btm);
+  border-radius: var(--r-full); padding: 5px 11px;
+  font-size: 9px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+  color: var(--text-muted);
+}
+.chip.lime { color: var(--primary-deep); background: var(--lime); border-color: transparent; }
+
+h1.greet { font-family: var(--font-header); font-weight: 900; color: #fff; letter-spacing: -0.5px; }
+.eyebrow { font-size: 9px; letter-spacing: 2.5px; text-transform: uppercase; color: var(--subtext); }
+
+/* ════════════════════════════════════════════════════════════════════
+   01 · MORNING BRIEF — one hero task, nothing else competes
+   ════════════════════════════════════════════════════════════════════ */
+.c1 .greet { font-size: 30px; line-height: 1.08; margin-top: 26px; }
+.c1 .date { margin-top: 8px; }
+.c1 .hero { margin-top: 22px; padding: 22px 20px; }
+.c1 .hero-ico { font-size: 44px; }
+.c1 .hero-task { font-family: var(--font-header); font-weight: 700; font-size: 21px; color: #fff; margin-top: 12px; }
+.c1 .hero-why { font-size: 11px; line-height: 1.7; color: var(--text-muted); margin-top: 8px; }
+.c1 .hero-meta { display: flex; gap: 8px; margin-top: 16px; }
+.c1 .hero .cta { margin-top: 18px; }
+.c1 .later { margin-top: 14px; padding: 13px 16px; display: flex; align-items: center; gap: 10px; }
+.c1 .later .t { font-size: 10.5px; color: var(--text-muted); flex: 1; }
+.c1 .streakrow { display: flex; justify-content: space-between; align-items: center; margin-top: 26px; }
+
+/* ════════════════════════════════════════════════════════════════════
+   02 · FOCUS DECK — today's card with tomorrow peeking from behind
+   ════════════════════════════════════════════════════════════════════ */
+.c2 .greet { font-size: 24px; margin-top: 24px; }
+.c2 .deck { position: relative; margin-top: 44px; height: 320px; }
+.c2 .card { position: absolute; left: 0; right: 0; padding: 22px 20px; }
+.c2 .card.b2 { top: -24px; transform: scale(.86); opacity: .35; }
+.c2 .card.b1 { top: -12px; transform: scale(.93); opacity: .6; }
+.c2 .card.front { top: 0; background: rgba(255,255,255,0.13); }
+.c2 .count { font-size: 9px; letter-spacing: 2px; color: var(--lime); text-transform: uppercase; }
+.c2 .task { font-family: var(--font-header); font-weight: 900; font-size: 26px; color: #fff; line-height: 1.1; margin-top: 10px; }
+.c2 .desc { font-size: 11px; line-height: 1.7; color: var(--text-muted); margin-top: 10px; }
+.c2 .steps { margin-top: 14px; }
+.c2 .step { display: flex; gap: 9px; align-items: center; padding: 7px 0; font-size: 10.5px; color: var(--text-on-dark); }
+.c2 .dotn {
+  width: 17px; height: 17px; border-radius: 50%; flex-shrink: 0;
+  border: 1px solid var(--glass-divider); display: grid; place-items: center;
+  font-size: 8.5px; color: var(--lime);
+}
+.c2 .card .cta { margin-top: 16px; }
+.c2 .swipe { text-align: center; font-size: 9px; letter-spacing: 1.5px; color: var(--subtext); margin-top: 14px; text-transform: uppercase; }
+
+/* ════════════════════════════════════════════════════════════════════
+   03 · GOLDEN WINDOW — the sun sets the deadline, not the app
+   ════════════════════════════════════════════════════════════════════ */
+.c3 .greet { font-size: 22px; margin-top: 22px; }
+.c3 .arcwrap { position: relative; margin: 10px auto 0; width: 250px; height: 132px; }
+.c3 .arcwrap svg { position: absolute; inset: 0; }
+.c3 .arc-label { position: absolute; left: 0; right: 0; bottom: 4px; text-align: center; }
+.c3 .arc-label .big { font-family: var(--font-header-x); font-weight: 900; font-size: 30px; color: #fff; }
+.c3 .arc-label .sm { font-size: 8px; letter-spacing: 2px; text-transform: uppercase; color: var(--lime); margin-top: 3px; }
+.c3 .arc-ends { display: flex; justify-content: space-between; width: 250px; margin: 4px auto 0; font-size: 7.5px; letter-spacing: 1px; color: var(--subtext); text-transform: uppercase; }
+.c3 .sun {
+  position: absolute; width: 22px; height: 22px; border-radius: 50%;
+  background: var(--lime-solid); display: grid; place-items: center; font-size: 11px;
+  box-shadow: 0 0 18px rgba(184,229,106,.85); left: 84px; top: 26px;
+}
+.c3 .wincard { margin-top: 16px; padding: 16px; }
+.c3 .wc-row { display: flex; align-items: center; gap: 11px; }
+.c3 .wc-row .ico { font-size: 28px; }
+.c3 .wc-row .nm { font-family: var(--font-header); font-weight: 700; font-size: 15px; color: #fff; }
+.c3 .wc-row .mt { font-size: 9.5px; color: var(--text-muted); margin-top: 2px; }
+.c3 .wincard .cta { margin-top: 13px; padding: 11px; font-size: 12px; }
+.c3 .afterhrs { margin-top: 12px; padding: 12px 15px; display: flex; gap: 10px; align-items: flex-start; }
+.c3 .afterhrs .g { font-size: 14px; }
+.c3 .afterhrs .t { font-size: 9.5px; line-height: 1.65; color: var(--text-muted); }
+.c3 .afterhrs .t b { color: var(--error-on-dark); font-weight: 700; }
+
+/* ════════════════════════════════════════════════════════════════════
+   04 · DO & DON'T — one thing to do, one mistake not to make
+   ════════════════════════════════════════════════════════════════════ */
+.c4 .greet { font-size: 24px; margin-top: 24px; }
+.c4 .sub4 { font-size: 10.5px; color: var(--text-muted); margin-top: 6px; }
+.c4 .panel { margin-top: 16px; padding: 16px; }
+.c4 .panel.do { border-left: 3px solid var(--lime-solid); }
+.c4 .panel.dont { border-left: 3px solid var(--error-on-dark); }
+.c4 .p-tag { font-size: 8.5px; font-weight: 700; letter-spacing: 2.5px; text-transform: uppercase; }
+.c4 .panel.do .p-tag { color: var(--lime); }
+.c4 .panel.dont .p-tag { color: var(--error-on-dark); }
+.c4 .p-row { display: flex; align-items: center; gap: 12px; margin-top: 10px; }
+.c4 .p-row .ico { font-size: 30px; }
+.c4 .p-row .nm { font-family: var(--font-header); font-weight: 900; font-size: 17px; color: #fff; }
+.c4 .p-row .mt { font-size: 9.5px; color: var(--text-muted); margin-top: 2px; }
+.c4 .p-why { font-size: 10px; line-height: 1.7; color: var(--text-muted); margin-top: 10px; }
+.c4 .p-why b { color: var(--text-on-dark); }
+.c4 .panel .cta { margin-top: 13px; padding: 11px; font-size: 12px; }
+.c4 .dont-strike { text-decoration: line-through; text-decoration-color: var(--error-on-dark); text-decoration-thickness: 2px; }
+.c4 .learnrow { display: flex; justify-content: center; margin-top: 13px; }
+
+/* ════════════════════════════════════════════════════════════════════
+   05 · PUNCH TICKET — admit one: you, the lawn, fifteen minutes
+   ════════════════════════════════════════════════════════════════════ */
+.c5 .eyebrow5 { text-align: center; margin-top: 22px; }
+.c5 .ticket { margin: 14px 6px 0; position: relative; }
+.c5 .tk-top { padding: 16px 18px 14px; }
+.c5 .tk-head { display: flex; justify-content: space-between; align-items: baseline; }
+.c5 .tk-brand { font-family: var(--font-header-x); font-weight: 900; font-size: 11px; letter-spacing: 2.5px; color: #fff; }
+.c5 .tk-admit { font-size: 7.5px; letter-spacing: 2px; color: var(--lime); text-transform: uppercase; }
+.c5 .tk-task { font-family: var(--font-header); font-weight: 900; font-size: 25px; color: #fff; margin-top: 12px; line-height: 1.08; }
+.c5 .tk-cols { display: flex; gap: 18px; margin-top: 14px; }
+.c5 .tk-col .k { font-size: 7px; letter-spacing: 1.6px; text-transform: uppercase; color: var(--subtext); }
+.c5 .tk-col .v { font-family: var(--font-header); font-weight: 700; font-size: 11.5px; color: #fff; margin-top: 3px; }
+.c5 .perf { position: relative; height: 0; border-top: 2px dashed rgba(255,255,255,0.30); margin: 0 10px; }
+.c5 .perf::before, .c5 .perf::after {
+  content: ''; position: absolute; top: -9px; width: 18px; height: 18px; border-radius: 50%;
+  background: #10110f; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.10);
+}
+.c5 .perf::before { left: -20px; }
+.c5 .perf::after { right: -20px; }
+.c5 .tk-stub { padding: 13px 18px 16px; display: flex; align-items: center; gap: 14px; }
+.c5 .barcode {
+  flex: 1; height: 34px; border-radius: 3px; opacity: .85;
+  background: repeating-linear-gradient(90deg,
+    rgba(255,255,255,0.9) 0 2px, transparent 2px 5px,
+    rgba(255,255,255,0.9) 5px 6px, transparent 6px 11px,
+    rgba(255,255,255,0.9) 11px 14px, transparent 14px 17px);
+}
+.c5 .punch {
+  flex-shrink: 0; width: 64px; height: 64px; border-radius: 50%;
+  border: 2px dashed var(--lime-solid); display: grid; place-items: center;
+  text-align: center; cursor: pointer; transition: all .25s;
+  font-size: 8px; font-weight: 700; letter-spacing: 1px; color: var(--lime); text-transform: uppercase;
+  line-height: 1.5;
+}
+.c5 .punch:hover { background: var(--lime); color: var(--primary-deep); border-style: solid; }
+.c5 .stamped { margin-top: 14px; display: flex; justify-content: center; gap: 7px; }
+.c5 .stamp {
+  font-size: 8px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--subtext);
+  border: 1px solid var(--glass-divider); border-radius: var(--r-full); padding: 5px 11px;
+  transform: rotate(-2deg);
+}
+.c5 .stamp.hit { color: var(--lime); border-color: rgba(184,229,106,0.5); transform: rotate(1.5deg); }
+
+/* ════════════════════════════════════════════════════════════════════
+   06 · LAWN BUDDY — the lawn is a creature; today you keep it happy
+   ════════════════════════════════════════════════════════════════════ */
+.c6 .buddywrap { display: flex; flex-direction: column; align-items: center; margin-top: 20px; }
+.c6 .buddy {
+  width: 108px; height: 108px; border-radius: 50%;
+  background: var(--glass-panel); backdrop-filter: blur(14px);
+  border: 1px solid var(--glass-edge);
+  display: grid; place-items: center; font-size: 54px;
+  animation: buddybob 3.2s ease-in-out infinite;
+  box-shadow: 0 18px 40px -12px rgba(0,0,0,.6);
+}
+@keyframes buddybob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
+.c6 .b-говорит { display: none; }
+.c6 .b-speech {
+  margin-top: 14px; padding: 11px 16px; border-radius: 16px;
+  font-size: 11px; color: var(--text-on-dark); position: relative; text-align: center;
+  max-width: 240px; line-height: 1.6;
+}
+.c6 .b-speech b { color: var(--lime); }
+.c6 .b-speech::before {
+  content: ''; position: absolute; top: -6px; left: 50%; transform: translateX(-50%) rotate(45deg);
+  width: 12px; height: 12px; background: var(--glass-panel);
+  border-left: 1px solid var(--glass-edge); border-top: 1px solid var(--glass-edge);
+}
+.c6 .vitals { margin-top: 18px; padding: 15px 16px; align-self: stretch; }
+.c6 .vital { display: flex; align-items: center; gap: 10px; padding: 8px 0; }
+.c6 .vital .vi { font-size: 16px; width: 22px; }
+.c6 .vital .vn { font-size: 9px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--text-muted); width: 64px; }
+.c6 .vital .vbar { flex: 1; height: 6px; border-radius: var(--r-full); background: var(--glass-input); overflow: hidden; }
+.c6 .vital .vbar i { display: block; height: 100%; border-radius: inherit; background: var(--lime-solid); }
+.c6 .vital.low .vbar i { background: var(--error-on-dark); animation: lowpulse 1.8s ease-in-out infinite; }
+@keyframes lowpulse { 50% { opacity: .45; } }
+.c6 .vital .vv { font-size: 8.5px; color: var(--subtext); width: 30px; text-align: right; }
+.c6 .vital.low .vv { color: var(--error-on-dark); font-weight: 700; }
+.c6 .fixrow { margin-top: 12px; align-self: stretch; padding: 13px 15px; display: flex; align-items: center; gap: 11px; }
+.c6 .fixrow .ico { font-size: 24px; }
+.c6 .fixrow .nm { font-family: var(--font-header); font-weight: 700; font-size: 13px; color: #fff; }
+.c6 .fixrow .mt { font-size: 9px; color: var(--lime); margin-top: 2px; }
+.c6 .fixrow .go {
+  margin-left: auto; font-size: 10px; font-weight: 700; padding: 8px 14px;
+  border-radius: var(--r-full); background: var(--lime); color: var(--primary-deep);
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   07 · TOOLBOX — grab these three things; the rest takes care of itself
+   ════════════════════════════════════════════════════════════════════ */
+.c7 .greet { font-size: 23px; margin-top: 22px; line-height: 1.15; }
+.c7 .sub7 { font-size: 10.5px; color: var(--text-muted); margin-top: 6px; }
+.c7 .gear { display: flex; gap: 9px; margin-top: 18px; }
+.c7 .g-tile { flex: 1; padding: 14px 8px; text-align: center; position: relative; }
+.c7 .g-tile .gi { font-size: 28px; }
+.c7 .g-tile .gn { font-family: var(--font-header); font-weight: 700; font-size: 10px; color: #fff; margin-top: 8px; }
+.c7 .g-tile .gd { font-size: 7.5px; color: var(--subtext); margin-top: 3px; letter-spacing: .5px; text-transform: uppercase; }
+.c7 .g-tile .gchk {
+  position: absolute; top: 7px; right: 7px; width: 16px; height: 16px; border-radius: 50%;
+  border: 1px solid var(--glass-divider); font-size: 9px; color: transparent;
+  display: grid; place-items: center; cursor: pointer; transition: all .2s;
+}
+.c7 .g-tile.got .gchk { background: var(--lime); border-color: transparent; color: var(--primary-deep); }
+.c7 .then { margin-top: 16px; padding: 16px; }
+.c7 .then .eyebrow { color: var(--lime); }
+.c7 .then .nm { font-family: var(--font-header); font-weight: 900; font-size: 19px; color: #fff; margin-top: 8px; }
+.c7 .then .steps7 { margin-top: 10px; }
+.c7 .then .s7 { display: flex; gap: 9px; padding: 6px 0; font-size: 10px; color: var(--text-muted); line-height: 1.55; }
+.c7 .then .s7 .n { color: var(--lime); font-weight: 700; flex-shrink: 0; }
+.c7 .then .cta { margin-top: 12px; padding: 11px; font-size: 12px; }
+.c7 .noskill { margin-top: 12px; display: flex; justify-content: center; }
+
+/* ════════════════════════════════════════════════════════════════════
+   08 · LOCK SCREEN — the task reaches you before you even unlock
+   ════════════════════════════════════════════════════════════════════ */
+.c8 .screen { align-items: center; }
+.c8 .ls-date { margin-top: 38px; font-size: 11px; color: var(--text-on-dark); font-family: var(--font-header); font-weight: 700; }
+.c8 .ls-clock {
+  font-family: var(--font-header-x); font-weight: 900; font-size: 76px;
+  letter-spacing: -3px; color: #fff; line-height: 1; margin-top: 4px;
+  text-shadow: 0 8px 40px rgba(0,0,0,.45);
+}
+.c8 .widgets { display: flex; gap: 9px; margin-top: 16px; }
+.c8 .wdg { width: 76px; padding: 10px 8px; text-align: center; }
+.c8 .wdg .wi { font-size: 16px; }
+.c8 .wdg .wv { font-family: var(--font-header); font-weight: 900; font-size: 13px; color: #fff; margin-top: 4px; }
+.c8 .wdg .wl { font-size: 6.5px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--subtext); margin-top: 2px; }
+.c8 .notif { margin-top: 56px; align-self: stretch; padding: 14px 15px; }
+.c8 .n-head { display: flex; align-items: center; gap: 7px; }
+.c8 .n-app {
+  width: 20px; height: 20px; border-radius: 5px; background: var(--primary);
+  display: grid; place-items: center; font-size: 10px;
+}
+.c8 .n-name { font-size: 9px; font-weight: 700; letter-spacing: 1px; color: var(--text-muted); text-transform: uppercase; }
+.c8 .n-time { margin-left: auto; font-size: 8.5px; color: var(--subtext); }
+.c8 .n-title { font-family: var(--font-header); font-weight: 700; font-size: 14px; color: #fff; margin-top: 9px; }
+.c8 .n-body { font-size: 10px; line-height: 1.65; color: var(--text-muted); margin-top: 4px; }
+.c8 .n-actions { display: flex; gap: 8px; margin-top: 12px; }
+.c8 .n-act {
+  flex: 1; text-align: center; font-size: 10.5px; font-weight: 700; padding: 9px;
+  border-radius: var(--r-full); border: 1px solid var(--glass-divider);
+  color: var(--text-on-dark); cursor: pointer; transition: all .2s;
+}
+.c8 .n-act.primary { background: var(--lime); color: var(--primary-deep); border-color: transparent; }
+.c8 .n-act:hover { filter: brightness(1.2); }
+.c8 .ls-foot { margin-top: auto; margin-bottom: 14px; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.c8 .ls-hint { font-size: 8.5px; letter-spacing: 2px; text-transform: uppercase; color: var(--subtext); }
+.c8 .homebar { width: 120px; height: 5px; border-radius: var(--r-full); background: rgba(255,255,255,0.5); }
+
+/* ════════════════════════════════════════════════════════════════════
+   TASK IMAGERY — every task carries a real photo of the work itself.
+   One treatment everywhere: cover crop, hairline border, soft shadow,
+   and a green-tinted gradient foot so any overlapping text stays legible.
+   ════════════════════════════════════════════════════════════════════ */
+.photo-hd {
+  height: 92px; background-size: cover; background-position: center;
+  position: relative;
+}
+.photo-hd::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(10,28,10,0.04), rgba(10,28,10,0.58));
+}
+.photo-emoji {
+  position: absolute; left: 14px; bottom: -14px; z-index: 2;
+  width: 40px; height: 40px; border-radius: 12px;
+  background: rgba(10,28,10,0.88); border: 1px solid rgba(255,255,255,0.28);
+  display: grid; place-items: center; font-size: 19px;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.45);
+}
+.thumb {
+  width: 46px; height: 46px; border-radius: 12px; flex-shrink: 0;
+  background-size: cover; background-position: center;
+  border: 1px solid rgba(255,255,255,0.22);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.35);
+}
+.thumb.sm { width: 32px; height: 32px; border-radius: 9px; }
+.thumb.round { border-radius: 50%; }
+.thumb.no { filter: saturate(0.25) brightness(0.65); }
+.banner-img {
+  height: 56px; border-radius: 10px; margin-top: 11px;
+  background-size: cover; background-position: center 60%;
+  border: 1px solid rgba(255,255,255,0.20);
+}
+.c1 .hero { padding: 0; overflow: hidden; }
+.c1 .hero-body { padding: 24px 20px 20px; }
+.c1 .hero-body .hero-task { margin-top: 0; }
+.c2 .card.front { padding: 0; overflow: hidden; }
+.c2 .front-body { padding: 22px 20px 20px; }
+.c2 .photo-hd { height: 72px; }
+.c2 .deck { height: 402px; }
+.c8 .n-main { display: flex; gap: 12px; margin-top: 9px; align-items: center; }
+.c8 .n-main .n-title { margin-top: 0; }
+</style>
+</head>
+<body>
+
+<header class="board-header">
+  <div class="board-kicker">Kura · Today Tab Exploration</div>
+  <h1 class="board-title">Eight ways to say<br><em>"water the lawn."</em></h1>
+  <p class="board-sub">Every concept keeps the established language — full-bleed photo, deep green tint, clear glass panels, JetBrains Mono + Zalando Sans — and bends only the information architecture. A beginner should know what to do within two seconds of unlock.</p>
+</header>
+
+<main class="grid">
+
+<!-- ═══════════ 01 · MORNING BRIEF ═══════════ -->
+<section class="concept c1">
+  <div class="concept-label">
+    <span class="concept-num">01</span>
+    <div>
+      <div class="concept-name">Morning Brief</div>
+      <div class="concept-note">One hero task, everything else whispers. The default recommendation.</div>
+    </div>
+  </div>
+  <div class="phone">
+    <div class="bg blur" style="background-image:url('../assets/images/lawn.png')"></div>
+    <div class="tint"></div>
+    <div class="screen">
+      <div class="statusbar"><span>9:41</span><span class="pillcam"></span><span>𝍤 ⚡︎</span></div>
+      <div class="c1-body" style="display:flex;flex-direction:column;flex:1">
+        <div class="streakrow">
+          <span class="eyebrow">Tuesday, June 11</span>
+          <span class="chip lime">🔥 6-day streak</span>
+        </div>
+        <h1 class="greet">Good morning,<br>Farai.</h1>
+        <div class="glass hero">
+          <div class="photo-hd" style="background-image:url('../assets/images/sprinkler.png')">
+            <span class="photo-emoji">💧</span>
+          </div>
+          <div class="hero-body">
+          <div class="hero-task">Water the lawn</div>
+          <div class="hero-why">No rain for 4 days and none coming. Your grass is thirsty — give it a deep soak this morning before it gets hot.</div>
+          <div class="hero-meta">
+            <span class="chip">⏱ 15 min</span>
+            <span class="chip">🌡 Best before 10am</span>
+          </div>
+          <div class="cta">Mark as done ✓</div>
+          </div>
+        </div>
+        <div class="glass later">
+          <span class="thumb sm" style="background-image:url('../assets/images/evening-mow.jpg')"></span>
+          <span class="t">Up next: Mow the backyard · tomorrow</span>
+          <span style="color:var(--subtext)">›</span>
+        </div>
+        <nav class="tabbar">
+          <div class="tab active"><span class="ico">🏠</span><span class="lbl">Today</span></div>
+          <div class="tab"><span class="ico">✅</span><span class="lbl">Tasks</span></div>
+          <div class="tab"><span class="ico">📚</span><span class="lbl">Learn</span></div>
+          <div class="tab"><span class="ico">⚙️</span><span class="lbl">Profile</span></div>
+        </nav>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ 02 · FOCUS DECK ═══════════ -->
+<section class="concept c2">
+  <div class="concept-label">
+    <span class="concept-num">02</span>
+    <div>
+      <div class="concept-name">Focus Deck</div>
+      <div class="concept-note">Tomorrow peeks from behind today. Depth implies a plan without showing it.</div>
+    </div>
+  </div>
+  <div class="phone">
+    <div class="bg blur" style="background-image:url('../assets/images/sprinkler.png')"></div>
+    <div class="tint"></div>
+    <div class="screen">
+      <div class="statusbar"><span>9:41</span><span class="pillcam"></span><span>𝍤 ⚡︎</span></div>
+      <div style="display:flex;flex-direction:column;flex:1">
+        <span class="eyebrow" style="margin-top:24px">Your one thing today</span>
+        <h1 class="greet">Morning, Farai 🌤</h1>
+        <div class="deck">
+          <div class="glass card b2"></div>
+          <div class="glass card b1"></div>
+          <div class="glass card front">
+            <div class="photo-hd" style="background-image:url('../assets/images/sprinkler-android.jpg')">
+              <span class="photo-emoji">💧</span>
+            </div>
+            <div class="front-body">
+            <span class="count">Task 1 of 1 · Today</span>
+            <div class="task">Give it a<br>deep soak.</div>
+            <div class="desc">Water slowly so it sinks in — quick sprinkles only wet the surface.</div>
+            <div class="steps">
+              <div class="step"><span class="dotn">1</span> Set sprinkler on the front patch</div>
+              <div class="step"><span class="dotn">2</span> Run 20 minutes, then move it</div>
+              <div class="step"><span class="dotn">3</span> Repeat on the back half</div>
+            </div>
+            <div class="cta lime">Start now →</div>
+            </div>
+          </div>
+        </div>
+        <div class="swipe">⌃ swipe up for tomorrow</div>
+        <nav class="tabbar">
+          <div class="tab active"><span class="ico">🏠</span><span class="lbl">Today</span></div>
+          <div class="tab"><span class="ico">✅</span><span class="lbl">Tasks</span></div>
+          <div class="tab"><span class="ico">📚</span><span class="lbl">Learn</span></div>
+          <div class="tab"><span class="ico">⚙️</span><span class="lbl">Profile</span></div>
+        </nav>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ 03 · GOLDEN WINDOW ═══════════ -->
+<section class="concept c3">
+  <div class="concept-label">
+    <span class="concept-num">03</span>
+    <div>
+      <div class="concept-name">Golden Window</div>
+      <div class="concept-note">The sun sets the deadline, not the app. Watch the window close in real time.</div>
+    </div>
+  </div>
+  <div class="phone">
+    <div class="bg blur" style="background-image:url('../assets/images/evening-mow.jpg')"></div>
+    <div class="tint"></div>
+    <div class="screen">
+      <div class="statusbar"><span>9:41</span><span class="pillcam"></span><span>𝍤 ⚡︎</span></div>
+      <h1 class="greet">Morning window ☀️</h1>
+      <div class="arcwrap">
+        <svg width="250" height="132" viewBox="0 0 250 132">
+          <path d="M 15 125 A 110 110 0 0 1 235 125" fill="none" stroke="rgba(255,255,255,0.14)" stroke-width="5" stroke-linecap="round"/>
+          <path d="M 15 125 A 110 110 0 0 1 95 33" fill="none" stroke="#b8e56a" stroke-width="5" stroke-linecap="round"/>
+        </svg>
+        <div class="sun">☀️</div>
+        <div class="arc-label">
+          <div class="big">2h 19m</div>
+          <div class="sm">left in today's window</div>
+        </div>
+      </div>
+      <div class="arc-ends"><span>6:04 sunrise</span><span>12:00 too hot</span></div>
+      <div class="glass wincard">
+        <div class="wc-row">
+          <span class="ico">💧</span>
+          <div>
+            <div class="nm">Water the lawn</div>
+            <div class="mt">15 min · while it's cool, the water sinks in</div>
+          </div>
+          <span class="thumb" style="margin-left:auto;background-image:url('../assets/images/sprinkler-android.jpg')"></span>
+        </div>
+        <div class="cta">Use the window →</div>
+      </div>
+      <div class="glass afterhrs">
+        <span class="g">🌡</span>
+        <span class="t"><b>After 12pm:</b> most of the water evaporates before reaching the roots — you'd be watering the air.</span>
+      </div>
+      <nav class="tabbar">
+        <div class="tab active"><span class="ico">🏠</span><span class="lbl">Today</span></div>
+        <div class="tab"><span class="ico">✅</span><span class="lbl">Tasks</span></div>
+        <div class="tab"><span class="ico">📚</span><span class="lbl">Learn</span></div>
+        <div class="tab"><span class="ico">⚙️</span><span class="lbl">Profile</span></div>
+      </nav>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ 04 · DO & DON'T ═══════════ -->
+<section class="concept c4">
+  <div class="concept-label">
+    <span class="concept-num">04</span>
+    <div>
+      <div class="concept-name">Do &amp; Don't</div>
+      <div class="concept-note">One thing to do, one mistake not to make. Beginners fear doing it wrong more than not doing it.</div>
+    </div>
+  </div>
+  <div class="phone">
+    <div class="bg blur" style="background-image:url('../assets/images/grass.jpg')"></div>
+    <div class="tint"></div>
+    <div class="screen">
+      <div class="statusbar"><span>9:41</span><span class="pillcam"></span><span>𝍤 ⚡︎</span></div>
+      <h1 class="greet">Today's calls 👍👎</h1>
+      <div class="sub4">One job, one thing to leave alone.</div>
+      <div class="glass panel do">
+        <span class="p-tag">✓ Do this</span>
+        <div class="p-row">
+          <span class="ico">💧</span>
+          <div>
+            <div class="nm">Water deeply</div>
+            <div class="mt">15 min · front and back · before 10am</div>
+          </div>
+          <span class="thumb" style="margin-left:auto;background-image:url('../assets/images/sprinkler.png')"></span>
+        </div>
+        <div class="p-why">Four dry days. A slow, deep soak now sets the lawn up for the hot afternoon.</div>
+        <div class="cta">Mark as done ✓</div>
+      </div>
+      <div class="glass panel dont">
+        <span class="p-tag">✕ Not today</span>
+        <div class="p-row">
+          <span class="ico">✂️</span>
+          <div>
+            <div class="nm"><span class="dont-strike">Mow the lawn</span></div>
+            <div class="mt">Wait 2 more days</div>
+          </div>
+          <span class="thumb no" style="margin-left:auto;background-image:url('../assets/images/mowing-photo.jpg')"></span>
+        </div>
+        <div class="p-why"><b>Why not?</b> Dry grass is stressed grass — cutting it now tears the blades and browns the tips. Water first, mow Thursday.</div>
+      </div>
+      <div class="learnrow"><span class="chip">📚 Learn: why timing matters</span></div>
+      <nav class="tabbar">
+        <div class="tab active"><span class="ico">🏠</span><span class="lbl">Today</span></div>
+        <div class="tab"><span class="ico">✅</span><span class="lbl">Tasks</span></div>
+        <div class="tab"><span class="ico">📚</span><span class="lbl">Learn</span></div>
+        <div class="tab"><span class="ico">⚙️</span><span class="lbl">Profile</span></div>
+      </nav>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ 05 · PUNCH TICKET ═══════════ -->
+<section class="concept c5">
+  <div class="concept-label">
+    <span class="concept-num">05</span>
+    <div>
+      <div class="concept-name">Punch Ticket</div>
+      <div class="concept-note">Admit one: you, the lawn, fifteen minutes. Hold the circle to punch it.</div>
+    </div>
+  </div>
+  <div class="phone">
+    <div class="bg blur" style="background-image:url('../assets/images/sprinkler.png')"></div>
+    <div class="tint" style="background:rgba(10,28,10,0.68)"></div>
+    <div class="screen">
+      <div class="statusbar"><span>9:41</span><span class="pillcam"></span><span>𝍤 ⚡︎</span></div>
+      <span class="eyebrow eyebrow5">Today's ticket · one ride</span>
+      <div class="ticket">
+        <div class="glass tk-top" style="border-radius:16px 16px 0 0">
+          <div class="tk-head">
+            <span class="tk-brand">KURA DAILY</span>
+            <span class="tk-admit">★ Admit one</span>
+          </div>
+          <div class="tk-task">Water<br>the lawn.</div>
+          <div class="banner-img" style="margin-top:12px;background-image:url('../assets/images/sprinkler.png')"></div>
+          <div class="tk-cols">
+            <div class="tk-col"><div class="k">Date</div><div class="v">JUN 12</div></div>
+            <div class="tk-col"><div class="k">Window</div><div class="v">6A – 10A</div></div>
+            <div class="tk-col"><div class="k">Duration</div><div class="v">15 MIN</div></div>
+            <div class="tk-col"><div class="k">Zone</div><div class="v">FULL YD</div></div>
+          </div>
+        </div>
+        <div class="perf"></div>
+        <div class="glass tk-stub" style="border-radius:0 0 16px 16px">
+          <div class="barcode"></div>
+          <div class="punch">Hold to<br>punch</div>
+        </div>
+      </div>
+      <div class="stamped">
+        <span class="stamp hit">Mon ✓</span>
+        <span class="stamp hit">Tue ✓</span>
+        <span class="stamp hit">Wed ✓</span>
+        <span class="stamp">Thu</span>
+      </div>
+      <nav class="tabbar">
+        <div class="tab active"><span class="ico">🏠</span><span class="lbl">Today</span></div>
+        <div class="tab"><span class="ico">✅</span><span class="lbl">Tasks</span></div>
+        <div class="tab"><span class="ico">📚</span><span class="lbl">Learn</span></div>
+        <div class="tab"><span class="ico">⚙️</span><span class="lbl">Profile</span></div>
+      </nav>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ 06 · LAWN BUDDY ═══════════ -->
+<section class="concept c6">
+  <div class="concept-label">
+    <span class="concept-num">06</span>
+    <div>
+      <div class="concept-name">Lawn Buddy</div>
+      <div class="concept-note">The lawn is a creature with vitals. One bar is low — today's task tops it up.</div>
+    </div>
+  </div>
+  <div class="phone">
+    <div class="bg blur" style="background-image:url('../assets/images/lawn.png')"></div>
+    <div class="tint"></div>
+    <div class="screen">
+      <div class="statusbar"><span>9:41</span><span class="pillcam"></span><span>𝍤 ⚡︎</span></div>
+      <div class="buddywrap">
+        <div class="buddy">🥵</div>
+        <div class="glass b-speech">
+          "Day four with no water… <b>I'm parched, Farai.</b>"
+        </div>
+        <div class="glass vitals">
+          <div class="vital low">
+            <span class="vi">💧</span><span class="vn">Hydration</span>
+            <span class="vbar"><i style="width:22%"></i></span><span class="vv">22%</span>
+          </div>
+          <div class="vital">
+            <span class="vi">☀️</span><span class="vn">Sunlight</span>
+            <span class="vbar"><i style="width:88%"></i></span><span class="vv">88%</span>
+          </div>
+          <div class="vital">
+            <span class="vi">✂️</span><span class="vn">Trim</span>
+            <span class="vbar"><i style="width:64%"></i></span><span class="vv">64%</span>
+          </div>
+          <div class="vital">
+            <span class="vi">🍃</span><span class="vn">Nutrition</span>
+            <span class="vbar"><i style="width:71%"></i></span><span class="vv">71%</span>
+          </div>
+        </div>
+        <div class="glass fixrow">
+          <span class="thumb round" style="background-image:url('../assets/images/sprinkler.png')"></span>
+          <div>
+            <div class="nm">Water the lawn</div>
+            <div class="mt">Refills hydration to ~90% · 15 min</div>
+          </div>
+          <span class="go">Fix it</span>
+        </div>
+      </div>
+      <nav class="tabbar">
+        <div class="tab active"><span class="ico">🏠</span><span class="lbl">Today</span></div>
+        <div class="tab"><span class="ico">✅</span><span class="lbl">Tasks</span></div>
+        <div class="tab"><span class="ico">📚</span><span class="lbl">Learn</span></div>
+        <div class="tab"><span class="ico">⚙️</span><span class="lbl">Profile</span></div>
+      </nav>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ 07 · TOOLBOX ═══════════ -->
+<section class="concept c7">
+  <div class="concept-label">
+    <span class="concept-num">07</span>
+    <div>
+      <div class="concept-name">Toolbox</div>
+      <div class="concept-note">Beginners stall at "what do I even need?" — answer that first, the task follows.</div>
+    </div>
+  </div>
+  <div class="phone">
+    <div class="bg blur" style="background-image:url('../assets/images/mowing-photo.jpg')"></div>
+    <div class="tint"></div>
+    <div class="screen">
+      <div class="statusbar"><span>9:41</span><span class="pillcam"></span><span>𝍤 ⚡︎</span></div>
+      <h1 class="greet">Grab these three<br>things first. 🧰</h1>
+      <div class="sub7">That's all the prep today's job needs.</div>
+      <div class="gear">
+        <div class="glass g-tile got">
+          <span class="gchk">✓</span>
+          <div class="gi">🚿</div>
+          <div class="gn">Hose + sprinkler</div>
+          <div class="gd">In the garage</div>
+        </div>
+        <div class="glass g-tile">
+          <span class="gchk">✓</span>
+          <div class="gi">⏱</div>
+          <div class="gn">15 minutes</div>
+          <div class="gd">Set a timer</div>
+        </div>
+        <div class="glass g-tile">
+          <span class="gchk">✓</span>
+          <div class="gi">👟</div>
+          <div class="gn">Outdoor shoes</div>
+          <div class="gd">Grass is dewy</div>
+        </div>
+      </div>
+      <div class="glass then">
+        <span class="eyebrow">Once you're out there</span>
+        <div class="nm">💧 Water the lawn</div>
+        <div class="banner-img" style="background-image:url('../assets/images/sprinkler-android.jpg')"></div>
+        <div class="steps7">
+          <div class="s7"><span class="n">1.</span> Hook the sprinkler to the front spigot</div>
+          <div class="s7"><span class="n">2.</span> Run 8 minutes, then drag it to the back</div>
+          <div class="s7"><span class="n">3.</span> Done when the soil looks dark, not shiny</div>
+        </div>
+        <div class="cta">I've got everything →</div>
+      </div>
+      <div class="noskill"><span class="chip">No experience needed · we'll talk you through it</span></div>
+      <nav class="tabbar">
+        <div class="tab active"><span class="ico">🏠</span><span class="lbl">Today</span></div>
+        <div class="tab"><span class="ico">✅</span><span class="lbl">Tasks</span></div>
+        <div class="tab"><span class="ico">📚</span><span class="lbl">Learn</span></div>
+        <div class="tab"><span class="ico">⚙️</span><span class="lbl">Profile</span></div>
+      </nav>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ 08 · LOCK SCREEN ═══════════ -->
+<section class="concept c8">
+  <div class="concept-label">
+    <span class="concept-num">08</span>
+    <div>
+      <div class="concept-name">Lock Screen</div>
+      <div class="concept-note">The dashboard is a notification — the task reaches you before you even unlock.</div>
+    </div>
+  </div>
+  <div class="phone">
+    <div class="bg blur" style="background-image:url('../assets/images/lawn-android.jpg')"></div>
+    <div class="tint" style="background:rgba(5,12,5,0.50)"></div>
+    <div class="screen">
+      <div class="statusbar"><span></span><span class="pillcam"></span><span>𝍤 ⚡︎</span></div>
+      <div class="ls-date">Friday, June 12</div>
+      <div class="ls-clock">9:41</div>
+      <div class="widgets">
+        <div class="glass wdg">
+          <div class="wi">🔥</div>
+          <div class="wv">6</div>
+          <div class="wl">Streak</div>
+        </div>
+        <div class="glass wdg">
+          <div class="wi">☀️</div>
+          <div class="wv">81°</div>
+          <div class="wl">Dry all day</div>
+        </div>
+        <div class="glass wdg">
+          <div class="wi">💧</div>
+          <div class="wv">1</div>
+          <div class="wl">Task today</div>
+        </div>
+      </div>
+      <div class="glass notif">
+        <div class="n-head">
+          <span class="n-app">🌱</span>
+          <span class="n-name">Kura</span>
+          <span class="n-time">now</span>
+        </div>
+        <div class="n-main">
+          <div>
+            <div class="n-title">💧 Your lawn needs water this morning</div>
+            <div class="n-body">No rain in 4 days. 15 minutes before 10am keeps your streak — and your grass — alive.</div>
+          </div>
+          <span class="thumb" style="background-image:url('../assets/images/sprinkler-android.jpg')"></span>
+        </div>
+        <div class="n-actions">
+          <span class="n-act primary">Done ✓</span>
+          <span class="n-act">Snooze 1h</span>
+        </div>
+      </div>
+      <div class="ls-foot">
+        <span class="ls-hint">↑ swipe up to open Kura</span>
+        <span class="homebar"></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+</body>
+</html>
