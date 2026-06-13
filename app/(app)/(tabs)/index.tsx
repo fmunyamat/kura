@@ -1,3 +1,3 @@
-import Dashboard from '~/features/dashboard/screens/Dashboard';
+import HomeScreen from '~/features/home/screens/HomeScreen';
 
-export default Dashboard;
+export default HomeScreen;

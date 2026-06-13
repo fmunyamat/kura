@@ -12,7 +12,12 @@ const brandColors = {
   // errorOnDark — soft red that reads clearly on dark or semi-transparent
   // glass surfaces (e.g. the sign-in glass card over a dark photo background).
   errorOnDark: 'rgba(255,120,100,0.92)',
-  errorOnLight: 'rgba(177, 24, 0, 0.92)'
+  errorOnLight: 'rgba(177, 24, 0, 0.92)',
+  // limeSolid — the fully-opaque lime used as a fill (not a tint): the "Done ✓"
+  // pill, the DONE stamp, the active tab label, the completion-bar gradient end,
+  // and confetti. `lime` above is the same hue at 92% for text/accents; this is
+  // the version you fill shapes with.
+  limeSolid: '#b8e56a',
 };
 
 // ─── Light theme ─────────────────────────────────────────────────────────────
@@ -72,6 +77,32 @@ export const lightTheme = {
     glassClearInputBorder:  'rgba(255,255,255,0.14)',
     // Divider rule between the email form and the social buttons.
     glassClearDivider:      'rgba(255,255,255,0.22)',
+
+    // ── Today / Focus Deck ──────────────────────────────────────────────
+    // These all sit over the same dark, blurred photo as the sign-in glass,
+    // so they never change with the light/dark theme (darkTheme inherits them
+    // via the spread below).
+    // deckCardSurface — the front card's fill: a touch brighter than the clear
+    // glass panel so the active card reads as lifted above the ones behind it.
+    deckCardSurface:       'rgba(255,255,255,0.13)',
+    // deckCardExpanded — the card's fill once it grows into the full-screen
+    // modal: a deep green tint so the opened card feels like its own surface.
+    deckCardExpanded:      'rgba(22,42,22,0.55)',
+    // scrimDark — the dimmer drawn behind an expanded card so everything below
+    // it recedes while the card is open.
+    scrimDark:             'rgba(3,9,3,0.62)',
+    // limeGlow — the soft lime pad behind the active tab's icon.
+    limeGlow:              'rgba(184,229,106,0.22)',
+    // photoHeaderFadeTop / Bottom — the top-to-bottom gradient laid over each
+    // card's photo so the title and emoji badge stay readable on any image.
+    photoHeaderFadeTop:    'rgba(10,28,10,0.04)',
+    photoHeaderFadeBottom: 'rgba(10,28,10,0.58)',
+    // emojiBadgeSurface — the dark rounded square the task emoji sits in (also
+    // the backing of the DONE stamp); emojiBadgeEdge is its faint 1px rim.
+    emojiBadgeSurface:     'rgba(10,28,10,0.88)',
+    emojiBadgeEdge:        'rgba(255,255,255,0.28)',
+    // textFaintOnDark — the dimmest text tier, used for inactive tab labels.
+    textFaintOnDark:       'rgba(255,255,255,0.28)',
 
     // Onboarding background gradient — rich forest green, four stops.
     gradientDark:     '#0c3520',
