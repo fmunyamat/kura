@@ -44,6 +44,10 @@ export interface CreateUserProfileInput {
   lawnSize: number;
   grassType: GrassTypeList;
   effortLevel: 1 | 2 | 3;
+  // true = in-ground / automatic sprinkler; false = hose or hand watering.
+  // Stored in user_profiles.has_sprinkler_system — used by the recommendation
+  // engine to tailor watering task steps.
+  hasSprinklerSystem: boolean;
 }
 
 // upsertUserProfile — inserts a user_profiles row if none exists, or updates
@@ -56,6 +60,7 @@ export const upsertUserProfile = async ({
   lawnSize,
   grassType,
   effortLevel,
+  hasSprinklerSystem,
 }: CreateUserProfileInput): Promise<void> => {
   const { lat, lng } = await geocodeZip(zipCode);
 
@@ -67,6 +72,7 @@ export const upsertUserProfile = async ({
     lat,
     lng,
     effort_level: effortLevel,
+    has_sprinkler_system: hasSprinklerSystem,
   }, { onConflict: 'user_id' }).select();
 
   if (__DEV__) console.log('[upsertUserProfile] status:', status, statusText, 'data:', JSON.stringify(data), 'error:', JSON.stringify(error));

@@ -83,11 +83,11 @@ export const EffortLevel = () => {
   const handleContinue = () => {
     if (!selected) return;
     setEffortLevel(selected);
-    router.push('/onboarding/photo-capture');
+    router.push('/onboarding/sprinkler-system');
   };
 
   return (
-    <OnboardingScreenShell currentStep={3} totalSteps={4}>
+    <OnboardingScreenShell currentStep={3} totalSteps={5}>
       <ScrollView
         style={{ flex: 1 }}
         contentContainerStyle={{ flexGrow: 1 }}

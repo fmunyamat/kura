@@ -48,7 +48,7 @@ const CameraLabel = styled.Text`
 // components.
 export const PhotoCapture = () => {
   const user = useAuthStore((state) => state.user);
-  const { zipCode, lawnSize, grassType, effortLevel } = useOnboardingStore();
+  const { zipCode, lawnSize, grassType, effortLevel, hasSprinklerSystem } = useOnboardingStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -65,13 +65,13 @@ export const PhotoCapture = () => {
   // On failure we show a generic message — never the raw Supabase error
   // (MAVSV-CODE-4, MASWE-0087).
   const handleComplete = async () => {
-    if (isSubmitting || !user || !lawnSize || !grassType || !effortLevel) return;
+    if (isSubmitting || !user || !lawnSize || !grassType || !effortLevel || hasSprinklerSystem === null) return;
 
     setErrorMessage(null);
     setIsSubmitting(true);
 
     try {
-      await upsertUserProfile({ userId: user.id, zipCode, lawnSize, grassType, effortLevel });
+      await upsertUserProfile({ userId: user.id, zipCode, lawnSize, grassType, effortLevel, hasSprinklerSystem });
 
       // Update auth store directly so the routing guard sees hasCompletedOnboarding
       // = true on the next render without waiting for an onAuthStateChange event.
@@ -86,7 +86,7 @@ export const PhotoCapture = () => {
   };
 
   return (
-    <OnboardingScreenShell currentStep={4} totalSteps={4}>
+    <OnboardingScreenShell currentStep={5} totalSteps={5}>
       <ContentArea>
         <TopSpacer />
         <ContentGroup>

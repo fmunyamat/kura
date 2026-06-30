@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Task Detail — 6 Concepts</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --lime:           #b8e56a;
+    --lime-dim:       rgba(184,229,106,0.12);
+    --lime-border:    rgba(184,229,106,0.25);
+    --lime-text:      rgba(184,229,106,0.82);
+    --deep:           #0c3520;
+    --grad-dark:      #0c3520;
+    --grad-mid:       #135633;
+    --row-surface:    rgba(8,22,10,0.72);
+    --row-done:       rgba(8,22,10,0.42);
+    --row-border:     rgba(255,255,255,0.08);
+    --glass-edge:     rgba(255,255,255,0.32);
+    --glass-edge-bot: rgba(255,255,255,0.10);
+    --glass-panel:    rgba(255,255,255,0.10);
+    --glass-input:    rgba(255,255,255,0.13);
+    --text:           rgba(255,255,255,0.86);
+    --text-muted:     rgba(255,255,255,0.60);
+    --text-faint:     rgba(255,255,255,0.30);
+    --badge-bg:       rgba(10,28,10,0.88);
+    --badge-edge:     rgba(255,255,255,0.28);
+    --fade-top:       rgba(10,28,10,0.04);
+    --fade-bot:       rgba(10,28,10,0.62);
+    --font:           'DM Sans', sans-serif;
+    --mono:           'DM Mono', monospace;
+  }
+
+  body {
+    background: radial-gradient(ellipse at top, #0a1f10 0%, #04120a 60%, #020a05 100%);
+    font-family: var(--font);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 48px 28px 100px;
+  }
+
+  /* ── page head ── */
+  .head { text-align: center; margin-bottom: 56px; }
+  .head-kicker {
+    font-size: 11px; letter-spacing: 3px; text-transform: uppercase;
+    color: var(--lime); font-family: var(--mono); margin-bottom: 12px;
+  }
+  .head-title { font-size: 30px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 10px; }
+  .head-sub { font-size: 14px; color: var(--text-muted); max-width: 540px; margin: 0 auto; line-height: 1.6; }
+
+  /* ── grid ── */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 56px 40px;
+    max-width: 1200px;
+    margin: 0 auto;
+    justify-items: center;
+  }
+  @media (max-width: 1080px) { .grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 760px)  { .grid { grid-template-columns: 1fr; } }
+
+  .concept { display: flex; flex-direction: column; align-items: center; gap: 16px; width: 300px; }
+  .concept-head { text-align: center; }
+  .concept-num {
+    display: inline-block; font-family: var(--mono); font-size: 11px; font-weight: 500;
+    color: var(--deep); background: var(--lime); border-radius: 100px;
+    padding: 2px 10px; margin-bottom: 10px; letter-spacing: 1px;
+  }
+  .concept-name { font-size: 17px; font-weight: 700; margin-bottom: 6px; }
+  .concept-desc { font-size: 12px; color: var(--text-muted); line-height: 1.55; max-width: 280px; }
+
+  /* ── phone shell ── */
+  .phone {
+    width: 300px; height: 600px; border-radius: 42px; overflow: hidden;
+    position: relative;
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.07), 0 30px 60px rgba(0,0,0,0.7);
+  }
+  .bg {
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse at 28% 55%, rgba(36,82,18,0.55) 0%, transparent 55%),
+      radial-gradient(ellipse at 78% 28%, rgba(20,58,14,0.45) 0%, transparent 50%),
+      linear-gradient(155deg, #1a4a10 0%, #0d3010 45%, #091e07 100%);
+  }
+  .tint { position: absolute; inset: 0; background: rgba(4,10,4,0.55); }
+  .inner { position: relative; z-index: 1; height: 100%; padding: 34px 14px 18px; overflow: hidden; }
+
+  /* screen chrome */
+  .eyebrow { font-size: 8.5px; letter-spacing: 1.8px; text-transform: uppercase; color: var(--text-muted); font-family: var(--mono); margin-bottom: 3px; }
+  .greet { font-size: 18px; font-weight: 700; margin-bottom: 12px; }
+
+  /* photo strip (grass) */
+  .photo { height: 80px; border-radius: 12px; position: relative; overflow: hidden;
+    background:
+      radial-gradient(ellipse at 35% 55%, rgba(50,110,22,0.85) 0%, transparent 65%),
+      radial-gradient(ellipse at 75% 35%, rgba(30,80,14,0.65) 0%, transparent 55%),
+      linear-gradient(130deg, #205c10 0%, #2d6a1a 55%, #1a4a0e 100%); }
+  .photo::before { content:''; position:absolute; inset:0;
+    background-image: radial-gradient(circle, rgba(90,170,40,0.25) 1px, transparent 1px), radial-gradient(circle, rgba(60,130,20,0.18) 1px, transparent 1px);
+    background-size: 11px 11px, 6px 6px; background-position: 0 0, 3px 4px; }
+  .photo::after { content:''; position:absolute; inset:0; background: linear-gradient(to bottom, var(--fade-top), var(--fade-bot)); }
+  .photo .drop { position:absolute; bottom:8px; right:12px; font-size:18px; opacity:0.6; z-index:1; }
+
+  /* open task card */
+  .card {
+    border-radius: 16px; border: 1px solid var(--glass-edge-bot); border-top-color: var(--glass-edge);
+    background: var(--glass-panel); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); overflow: hidden;
+  }
+  .card-head { display:flex; align-items:center; gap:10px; padding: 12px 13px 0; }
+  .badge { width:34px; height:34px; border-radius:10px; background:var(--badge-bg); border:1px solid var(--badge-edge); display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0; }
+  .card-count { font-size:8px; letter-spacing:1.4px; text-transform:uppercase; color:var(--lime); }
+  .card-title { font-size:15px; font-weight:700; margin-top:1px; }
+  .card-body { padding: 11px 13px 13px; }
+  .desc { font-size: 11px; color: var(--text-muted); line-height: 1.5; margin-bottom: 11px; }
+
+  .steps { display:flex; flex-direction:column; gap:6px; }
+  .step { display:flex; gap:9px; align-items:flex-start; }
+  .step-n { width:17px; height:17px; border-radius:50%; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.13); display:flex; align-items:center; justify-content:center; font-size:8.5px; font-family:var(--mono); color:var(--text-muted); flex-shrink:0; margin-top:1px; }
+  .step-t { font-size:11px; color:var(--text); line-height:1.45; flex:1; }
+
+  .pill { display:flex; align-items:center; justify-content:center; background:var(--lime); border-radius:100px; padding:11px; font-size:12px; font-weight:700; color:var(--deep); margin-top:13px; }
+
+  .more-link { display:flex; align-items:center; justify-content:center; gap:5px; margin-top:13px; }
+  .more-link span { font-size:11px; color:var(--lime); text-decoration:underline; text-decoration-style:dotted; text-underline-offset:3px; }
+
+  /* lime detail step (used in detail panels) */
+  .dstep { display:flex; gap:10px; align-items:flex-start; padding: 6px 0; }
+  .dstep-n { width:19px; height:19px; border-radius:50%; background:var(--lime-dim); border:1px solid var(--lime-border); display:flex; align-items:center; justify-content:center; font-size:9px; font-family:var(--mono); color:var(--lime); flex-shrink:0; margin-top:1px; }
+  .dstep-t { font-size:11.5px; color:var(--text); line-height:1.5; flex:1; }
+  .note { display:flex; gap:7px; align-items:flex-start; background:rgba(184,229,106,0.08); border:1px solid rgba(184,229,106,0.18); border-radius:10px; padding:9px 11px; margin-top:12px; }
+  .note-i { font-size:12px; flex-shrink:0; margin-top:1px; }
+  .note-t { font-size:10.5px; color:var(--lime-text); line-height:1.5; }
+
+  .section-label { font-size:8.5px; letter-spacing:2px; text-transform:uppercase; color:var(--text-faint); font-family:var(--mono); margin-bottom:9px; }
+
+  /* ════════ CONCEPT 1 — INLINE UNFOLD ════════ */
+  .c1 .arrow { display:inline-block; transition:none; animation: c1arrow 7s ease-in-out infinite; }
+  @keyframes c1arrow { 0%,12% {transform:rotate(0);} 22%,72% {transform:rotate(90deg);} 82%,100% {transform:rotate(0);} }
+  .c1 .unfold { overflow:hidden; max-height:0; opacity:0; animation: c1unfold 7s ease-in-out infinite; }
+  .c1 .unfold-inner { border-top:1px solid var(--row-border); margin-top:12px; padding-top:11px; }
+  @keyframes c1unfold {
+    0%,12% { max-height:0; opacity:0; }
+    22% { opacity:1; }
+    22%,72% { max-height:340px; opacity:1; }
+    82%,100% { max-height:0; opacity:0; }
+  }
+
+  /* ════════ CONCEPT 2 — FULL GUIDE PAGE ════════ */
+  .c2 .guide {
+    position:absolute; inset:0; z-index:5; background: linear-gradient(165deg, var(--grad-mid) 0%, var(--grad-dark) 55%, #061d10 100%);
+    transform: translateX(100%); animation: c2slide 8s ease-in-out infinite;
+    display:flex; flex-direction:column;
+  }
+  @keyframes c2slide { 0%,8% {transform:translateX(100%);} 18%,82% {transform:translateX(0);} 92%,100% {transform:translateX(100%);} }
+  .c2 .guide-hero { height:150px; position:relative; overflow:hidden;
+    background: radial-gradient(ellipse at 40% 50%, rgba(50,110,22,0.9) 0%, transparent 70%), linear-gradient(130deg,#205c10,#2d6a1a 55%,#1a4a0e); }
+  .c2 .guide-hero::after { content:''; position:absolute; inset:0; background:linear-gradient(to bottom, transparent 30%, var(--grad-mid)); }
+  .c2 .guide-back { position:absolute; top:34px; left:14px; z-index:2; width:30px; height:30px; border-radius:50%; background:rgba(0,0,0,0.4); backdrop-filter:blur(8px); display:flex; align-items:center; justify-content:center; font-size:14px; color:#fff; }
+  .c2 .guide-kick { position:absolute; bottom:14px; left:16px; z-index:2; font-size:8.5px; letter-spacing:1.6px; text-transform:uppercase; color:var(--lime); font-family:var(--mono); }
+  .c2 .guide-body { padding: 4px 18px 18px; flex:1; }
+  .c2 .guide-title { font-size:22px; font-weight:700; line-height:1.15; margin-bottom:14px; }
+
+  /* ════════ CONCEPT 3 — CARD FLIP ════════ */
+  .c3 .flip-wrap { perspective: 1400px; }
+  .c3 .flip { position:relative; transform-style:preserve-3d; animation: c3flip 7s ease-in-out infinite; }
+  @keyframes c3flip { 0%,14% {transform:rotateY(0);} 28%,72% {transform:rotateY(180deg);} 86%,100% {transform:rotateY(0);} }
+  .c3 .face { backface-visibility:hidden; -webkit-backface-visibility:hidden; }
+  .c3 .face-back { position:absolute; inset:0; transform:rotateY(180deg);
+    border-radius:16px; border:1px solid var(--glass-edge-bot); border-top-color:var(--glass-edge);
+    background: linear-gradient(165deg, rgba(19,86,51,0.85), rgba(12,53,32,0.92)); backdrop-filter:blur(16px); overflow:hidden; padding:14px 14px; }
+  .c3 .flip-hint { position:absolute; top:10px; right:12px; font-size:13px; color:var(--text-faint); }
+
+  /* ════════ CONCEPT 4 — SEGMENTED SWITCH ════════ */
+  .seg { position:relative; display:flex; background:rgba(0,0,0,0.28); border:1px solid var(--row-border); border-radius:100px; padding:3px; margin-bottom:13px; }
+  .seg-opt { flex:1; text-align:center; font-size:10.5px; font-weight:600; padding:7px 0; z-index:1; color:var(--text-muted); }
+  .seg-opt.on { color:var(--deep); }
+  .seg-knob { position:absolute; top:3px; bottom:3px; left:3px; width:calc(50% - 3px); background:var(--lime); border-radius:100px; animation: c4knob 7s ease-in-out infinite; }
+  @keyframes c4knob { 0%,14% {transform:translateX(0);} 28%,72% {transform:translateX(100%);} 86%,100% {transform:translateX(0);} }
+  .c4 .pane-steps { animation: c4steps 7s ease-in-out infinite; }
+  .c4 .pane-learn { position:absolute; left:13px; right:13px; animation: c4learn 7s ease-in-out infinite; }
+  @keyframes c4steps { 0%,16% {opacity:1;} 26%,74% {opacity:0;} 84%,100% {opacity:1;} }
+  @keyframes c4learn { 0%,16% {opacity:0;} 26%,74% {opacity:1;} 84%,100% {opacity:0;} }
+  .c4 .seg-opt.lbl-steps { animation: c4lblsteps 7s ease-in-out infinite; }
+  .c4 .seg-opt.lbl-learn { animation: c4lbllearn 7s ease-in-out infinite; }
+  @keyframes c4lblsteps { 0%,16% {color:var(--deep);} 28%,72% {color:var(--text-muted);} 86%,100% {color:var(--deep);} }
+  @keyframes c4lbllearn { 0%,16% {color:var(--text-muted);} 28%,72% {color:var(--deep);} 86%,100% {color:var(--text-muted);} }
+
+  /* ════════ CONCEPT 5 — COACHED STEPS ════════ */
+  .c5 .coach { position:absolute; inset:0; z-index:5; background:rgba(2,8,4,0.78); backdrop-filter:blur(6px); display:flex; flex-direction:column; justify-content:flex-end; padding:18px 16px; }
+  .c5 .coach-sheet { background: linear-gradient(165deg, var(--grad-mid), var(--grad-dark)); border:1px solid var(--glass-edge); border-radius:22px; padding:20px 18px 18px; }
+  .c5 .coach-dots { display:flex; gap:6px; justify-content:center; margin-bottom:18px; }
+  .c5 .cdot { width:24px; height:4px; border-radius:2px; background:rgba(255,255,255,0.16); }
+  .c5 .cdot.a1 { animation: cdot1 9s ease-in-out infinite; }
+  .c5 .cdot.a2 { animation: cdot2 9s ease-in-out infinite; }
+  .c5 .cdot.a3 { animation: cdot3 9s ease-in-out infinite; }
+  @keyframes cdot1 { 0%,30% {background:var(--lime);} 33%,100% {background:rgba(255,255,255,0.16);} }
+  @keyframes cdot2 { 0%,33% {background:rgba(255,255,255,0.16);} 36%,63% {background:var(--lime);} 66%,100% {background:rgba(255,255,255,0.16);} }
+  @keyframes cdot3 { 0%,66% {background:rgba(255,255,255,0.16);} 69%,100% {background:var(--lime);} }
+  .c5 .coach-num { font-family:var(--mono); font-size:11px; color:var(--lime); margin-bottom:10px; }
+  .c5 .coach-track { position:relative; height:120px; overflow:hidden; }
+  .c5 .coach-panel { position:absolute; inset:0; opacity:0; }
+  .c5 .cp1 { animation: cp1 9s ease-in-out infinite; }
+  .c5 .cp2 { animation: cp2 9s ease-in-out infinite; }
+  .c5 .cp3 { animation: cp3 9s ease-in-out infinite; }
+  @keyframes cp1 { 0% {opacity:0; transform:translateX(20px);} 4%,30% {opacity:1; transform:translateX(0);} 34%,100% {opacity:0; transform:translateX(-20px);} }
+  @keyframes cp2 { 0%,34% {opacity:0; transform:translateX(20px);} 38%,63% {opacity:1; transform:translateX(0);} 67%,100% {opacity:0; transform:translateX(-20px);} }
+  @keyframes cp3 { 0%,67% {opacity:0; transform:translateX(20px);} 71%,96% {opacity:1; transform:translateX(0);} 100% {opacity:0;} }
+  .c5 .coach-big { font-size:14px; line-height:1.5; color:var(--text); }
+  .c5 .coach-next { display:flex; align-items:center; justify-content:center; background:var(--lime); border-radius:100px; padding:11px; font-size:12px; font-weight:700; color:var(--deep); margin-top:16px; }
+
+  /* ════════ CONCEPT 6 — STEP CAROUSEL ════════ */
+  .c6 .caro-view { overflow:hidden; border-radius:14px; }
+  .c6 .caro-track { display:flex; width:300%; animation: c6track 9s ease-in-out infinite; }
+  @keyframes c6track {
+    0%,26% {transform:translateX(0);}
+    33%,59% {transform:translateX(-33.333%);}
+    66%,93% {transform:translateX(-66.666%);}
+    100% {transform:translateX(0);}
+  }
+  .c6 .caro-card { width:33.333%; padding:0 5px; }
+  .c6 .caro-inner { background: linear-gradient(165deg, rgba(19,86,51,0.55), rgba(12,53,32,0.7)); border:1px solid var(--glass-edge-bot); border-top-color:var(--glass-edge); border-radius:14px; padding:16px 14px; min-height:170px; }
+  .c6 .caro-big-n { width:32px; height:32px; border-radius:50%; background:var(--lime-dim); border:1px solid var(--lime-border); display:flex; align-items:center; justify-content:center; font-family:var(--mono); font-size:14px; color:var(--lime); margin-bottom:12px; }
+  .c6 .caro-t { font-size:13px; line-height:1.5; color:var(--text); }
+  .c6 .caro-dots { display:flex; gap:6px; justify-content:center; margin-top:14px; }
+  .c6 .odot { width:6px; height:6px; border-radius:50%; background:rgba(255,255,255,0.18); }
+  .c6 .odot.a1 { animation: odot1 9s ease-in-out infinite; }
+  .c6 .odot.a2 { animation: odot2 9s ease-in-out infinite; }
+  .c6 .odot.a3 { animation: odot3 9s ease-in-out infinite; }
+  @keyframes odot1 { 0%,26% {background:var(--lime); width:16px; border-radius:3px;} 33%,100% {background:rgba(255,255,255,0.18); width:6px; border-radius:50%;} }
+  @keyframes odot2 { 0%,32% {background:rgba(255,255,255,0.18); width:6px;} 33%,59% {background:var(--lime); width:16px; border-radius:3px;} 66%,100% {background:rgba(255,255,255,0.18); width:6px;} }
+  @keyframes odot3 { 0%,65% {background:rgba(255,255,255,0.18); width:6px;} 66%,93% {background:var(--lime); width:16px; border-radius:3px;} 100% {background:rgba(255,255,255,0.18); width:6px;} }
+  .c6 .caro-cta { display:flex; align-items:center; justify-content:center; background:var(--lime); border-radius:100px; padding:11px; font-size:12px; font-weight:700; color:var(--deep); margin-top:14px; }
+</style>
+</head>
+<body>
+
+<div class="head">
+  <div class="head-kicker">Kura · Today tab</div>
+  <h1 class="head-title">Task detail — 6 directions</h1>
+  <p class="head-sub">Six ways to surface the deeper "how do I actually do this" content, replacing the bottom-sheet modal. Each phone loops its interaction. Anchored on the watering task's tuna-can calibration.</p>
+</div>
+
+<div class="grid">
+
+  <!-- ═══ 1. INLINE UNFOLD ═══ -->
+  <div class="concept c1">
+    <div class="concept-head">
+      <span class="concept-num">01</span>
+      <div class="concept-name">Inline Unfold</div>
+      <div class="concept-desc">No overlay. Details grow inside the card, pushing the button down. Quietest option — never leaves the list.</div>
+    </div>
+    <div class="phone"><div class="bg"></div><div class="tint"></div><div class="inner">
+      <div class="eyebrow">On Deck · Friday</div>
+      <div class="greet">Morning, John</div>
+      <div class="card">
+        <div class="card-head"><div class="badge">💧</div><div><div class="card-count">Task 1 of 3 · Today</div><div class="card-title">Give it a deep soak.</div></div></div>
+        <div class="card-body">
+          <div class="desc">Your lawn needs 1 inch of water a week. Water on 1 or 2 mornings — never more.</div>
+          <div class="steps">
+            <div class="step"><div class="step-n">1</div><div class="step-t">Run each zone for its set time</div></div>
+            <div class="step"><div class="step-n">2</div><div class="step-t">Stop if puddles form</div></div>
+          </div>
+          <div class="more-link"><span>How do I find my zone times?</span><span class="arrow" style="text-decoration:none;">›</span></div>
+          <div class="unfold"><div class="unfold-inner">
+            <div class="section-label">Finding your zone times — once</div>
+            <div class="dstep"><div class="dstep-n">1</div><div class="dstep-t">Put a tuna can in zone 1 and run until full — note the minutes</div></div>
+            <div class="dstep"><div class="dstep-n">2</div><div class="dstep-t">Repeat per zone — heads differ, times vary</div></div>
+            <div class="dstep"><div class="dstep-n">3</div><div class="dstep-t">Divide by 1 or 2 watering days = run time</div></div>
+            <div class="note"><div class="note-i">📌</div><div class="note-t">Times won't change unless you adjust the heads.</div></div>
+          </div></div>
+          <div class="pill">Mark complete ✓</div>
+        </div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- ═══ 2. FULL GUIDE PAGE ═══ -->
+  <div class="concept c2">
+    <div class="concept-head">
+      <span class="concept-num">02</span>
+      <div class="concept-name">Full Guide Page</div>
+      <div class="concept-desc">Taps push to a dedicated screen with a photo hero. Most room — reads like a proper how-to lesson. Back arrow returns.</div>
+    </div>
+    <div class="phone"><div class="bg"></div><div class="tint"></div><div class="inner">
+      <div class="eyebrow">On Deck · Friday</div>
+      <div class="greet">Morning, John</div>
+      <div class="card">
+        <div class="card-head"><div class="badge">💧</div><div><div class="card-count">Task 1 of 3 · Today</div><div class="card-title">Give it a deep soak.</div></div></div>
+        <div class="card-body">
+          <div class="desc">Your lawn needs 1 inch of water a week.</div>
+          <div class="steps"><div class="step"><div class="step-n">1</div><div class="step-t">Run each zone for its set time</div></div></div>
+          <div class="more-link"><span>How do I find my zone times? →</span></div>
+          <div class="pill">Mark complete ✓</div>
+        </div>
+      </div>
+      <!-- guide page overlay -->
+      <div class="guide">
+        <div class="guide-hero"><div class="photo drop" style="position:absolute;">💧</div><div class="guide-back">‹</div><div class="guide-kick">Watering · How-to</div></div>
+        <div class="guide-body">
+          <div class="guide-title">Finding your<br>zone times</div>
+          <div class="dstep"><div class="dstep-n">1</div><div class="dstep-t">Put an empty tuna can in zone 1's spray path and run until it's full — write down the minutes</div></div>
+          <div class="dstep"><div class="dstep-n">2</div><div class="dstep-t">Repeat for every zone and note each time — head types differ, so times vary</div></div>
+          <div class="dstep"><div class="dstep-n">3</div><div class="dstep-t">Divide each by 1 or 2 watering days — that's your per-session run time</div></div>
+          <div class="note"><div class="note-i">📌</div><div class="note-t">Your times won't change unless you adjust or replace the sprinkler heads.</div></div>
+        </div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- ═══ 3. CARD FLIP ═══ -->
+  <div class="concept c3">
+    <div class="concept-head">
+      <span class="concept-num">03</span>
+      <div class="concept-name">Card Flip</div>
+      <div class="concept-desc">The task card flips on its axis to reveal the detail on its back. Spatial and playful — the detail "belongs" to the card.</div>
+    </div>
+    <div class="phone"><div class="bg"></div><div class="tint"></div><div class="inner">
+      <div class="eyebrow">On Deck · Friday</div>
+      <div class="greet">Morning, John</div>
+      <div class="flip-wrap"><div class="flip">
+        <div class="face card">
+          <div class="card-head"><div class="badge">💧</div><div><div class="card-count">Task 1 of 3 · Today</div><div class="card-title">Give it a deep soak.</div></div></div>
+          <div class="flip-hint">⤿</div>
+          <div class="card-body">
+            <div class="desc">Your lawn needs 1 inch of water a week. Water on 1 or 2 mornings.</div>
+            <div class="steps">
+              <div class="step"><div class="step-n">1</div><div class="step-t">Run each zone for its set time</div></div>
+              <div class="step"><div class="step-n">2</div><div class="step-t">Stop if puddles form</div></div>
+              <div class="step"><div class="step-n">3</div><div class="step-t">Morning is best</div></div>
+            </div>
+            <div class="more-link"><span>Flip for how-to ⤿</span></div>
+            <div class="pill">Mark complete ✓</div>
+          </div>
+        </div>
+        <div class="face-back">
+          <div class="flip-hint">⤾</div>
+          <div class="section-label">Finding your zone times</div>
+          <div class="dstep"><div class="dstep-n">1</div><div class="dstep-t">Tuna can in zone 1, run until full — note minutes</div></div>
+          <div class="dstep"><div class="dstep-n">2</div><div class="dstep-t">Repeat per zone — times vary by head</div></div>
+          <div class="dstep"><div class="dstep-n">3</div><div class="dstep-t">Divide by 1–2 watering days = run time</div></div>
+          <div class="note"><div class="note-i">📌</div><div class="note-t">Won't change unless you adjust the heads.</div></div>
+        </div>
+      </div></div>
+    </div></div>
+  </div>
+
+  <!-- ═══ 4. SEGMENTED SWITCH ═══ -->
+  <div class="concept c4">
+    <div class="concept-head">
+      <span class="concept-num">04</span>
+      <div class="concept-name">Segmented Switch</div>
+      <div class="concept-desc">A "Do it / Learn it" toggle at the top swaps the card body in place. No height jump, no overlay — both layers always one tap away.</div>
+    </div>
+    <div class="phone"><div class="bg"></div><div class="tint"></div><div class="inner">
+      <div class="eyebrow">On Deck · Friday</div>
+      <div class="greet">Morning, John</div>
+      <div class="card">
+        <div class="card-head"><div class="badge">💧</div><div><div class="card-count">Task 1 of 3 · Today</div><div class="card-title">Give it a deep soak.</div></div></div>
+        <div class="card-body">
+          <div class="seg">
+            <div class="seg-knob"></div>
+            <div class="seg-opt lbl-steps">Do it</div>
+            <div class="seg-opt lbl-learn">Learn it</div>
+          </div>
+          <div style="position:relative; min-height:150px;">
+            <div class="pane-steps">
+              <div class="desc">Water on 1 or 2 mornings — never more.</div>
+              <div class="steps">
+                <div class="step"><div class="step-n">1</div><div class="step-t">Run each zone for its set time</div></div>
+                <div class="step"><div class="step-n">2</div><div class="step-t">Stop if puddles form</div></div>
+                <div class="step"><div class="step-n">3</div><div class="step-t">Morning is best — less evaporates</div></div>
+              </div>
+            </div>
+            <div class="pane-learn">
+              <div class="section-label">Finding your zone times</div>
+              <div class="dstep"><div class="dstep-n">1</div><div class="dstep-t">Tuna can in zone 1, run until full</div></div>
+              <div class="dstep"><div class="dstep-n">2</div><div class="dstep-t">Repeat per zone — times vary</div></div>
+              <div class="dstep"><div class="dstep-n">3</div><div class="dstep-t">Divide by 1–2 watering days</div></div>
+            </div>
+          </div>
+          <div class="pill">Mark complete ✓</div>
+        </div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- ═══ 5. COACHED STEPS ═══ -->
+  <div class="concept c5">
+    <div class="concept-head">
+      <span class="concept-num">05</span>
+      <div class="concept-name">Coached Steps</div>
+      <div class="concept-desc">One detail step at a time, big, with progress dots and a Next button. Guided-tutorial feel — built for true first-timers.</div>
+    </div>
+    <div class="phone"><div class="bg"></div><div class="tint"></div><div class="inner">
+      <div class="eyebrow">On Deck · Friday</div>
+      <div class="greet">Morning, John</div>
+      <div class="card">
+        <div class="card-head"><div class="badge">💧</div><div><div class="card-count">Task 1 of 3 · Today</div><div class="card-title">Give it a deep soak.</div></div></div>
+        <div class="card-body">
+          <div class="desc">Your lawn needs 1 inch of water a week.</div>
+          <div class="more-link"><span>Walk me through it →</span></div>
+          <div class="pill">Mark complete ✓</div>
+        </div>
+      </div>
+      <!-- coach overlay -->
+      <div class="coach"><div class="coach-sheet">
+        <div class="coach-dots"><div class="cdot a1"></div><div class="cdot a2"></div><div class="cdot a3"></div></div>
+        <div class="coach-track">
+          <div class="coach-panel cp1"><div class="coach-num">Step 1 of 3</div><div class="coach-big">Put an empty <b>tuna can</b> in zone 1's spray path and run it until the can is full. Write down the minutes.</div></div>
+          <div class="coach-panel cp2"><div class="coach-num">Step 2 of 3</div><div class="coach-big">Repeat for <b>every zone</b>, noting each time separately. Different heads fill at different speeds.</div></div>
+          <div class="coach-panel cp3"><div class="coach-num">Step 3 of 3</div><div class="coach-big">Divide each zone's time by your <b>1 or 2</b> watering days. That's how long to run it each session.</div></div>
+        </div>
+        <div class="coach-next">Next →</div>
+      </div></div>
+    </div></div>
+  </div>
+
+  <!-- ═══ 6. STEP CAROUSEL ═══ -->
+  <div class="concept c6">
+    <div class="concept-head">
+      <span class="concept-num">06</span>
+      <div class="concept-name">Step Carousel</div>
+      <div class="concept-desc">Detail steps become swipeable cards, one per screen. Inline under the task — no overlay, but each step gets room to breathe.</div>
+    </div>
+    <div class="phone"><div class="bg"></div><div class="tint"></div><div class="inner">
+      <div class="eyebrow">On Deck · Friday</div>
+      <div class="greet">Morning, John</div>
+      <div class="card">
+        <div class="card-head"><div class="badge">💧</div><div><div class="card-count">Task 1 of 3 · Today</div><div class="card-title">Give it a deep soak.</div></div></div>
+        <div class="card-body">
+          <div class="desc">Your lawn needs 1 inch of water a week.</div>
+          <div class="section-label" style="margin-top:4px;">Finding your zone times — swipe</div>
+          <div class="caro-view"><div class="caro-track">
+            <div class="caro-card"><div class="caro-inner"><div class="caro-big-n">1</div><div class="caro-t">Put a tuna can in zone 1's spray path and run until it's full — write down the minutes.</div></div></div>
+            <div class="caro-card"><div class="caro-inner"><div class="caro-big-n">2</div><div class="caro-t">Repeat for every zone, noting each time. Heads differ, so the times will vary.</div></div></div>
+            <div class="caro-card"><div class="caro-inner"><div class="caro-big-n">3</div><div class="caro-t">Divide each zone's time by your 1 or 2 watering days = per-session run time.</div></div></div>
+          </div></div>
+          <div class="caro-dots"><div class="odot a1"></div><div class="odot a2"></div><div class="odot a3"></div></div>
+          <div class="caro-cta">Mark complete ✓</div>
+        </div>
+      </div>
+    </div></div>
+  </div>
+
+</div>
+
+</body>
+</html>
