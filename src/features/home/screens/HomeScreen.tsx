@@ -1,8 +1,8 @@
 // HomeScreen — the Today tab. A blurred lawn photo under a dark green tint sets
 // the scene; on top sits the greeting, the streak/weather context card, the
-// progress track, the card deck itself, and the peek nav. All deck state and
-// behaviour live in useFocusDeck; this screen is pure composition. Confetti
-// rains over everything once the deck is cleared.
+// progress track, and the task accordion. All deck state and behaviour live in
+// useFocusDeck; this screen is pure composition. Confetti rains over everything
+// once every task is done.
 
 import { ImageBackground } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -17,10 +17,11 @@ import {
 import { useFocusDeck } from '../hooks/useFocusDeck';
 import { CompletionTrack } from '../components/CompletionTrack';
 import { ConfettiBurst } from '../components/ConfettiBurst';
-import { Deck } from '../components/Deck';
 import { HomeHeader } from '../components/HomeHeader';
-import { PeekNav } from '../components/PeekNav';
 import { SplitContextCard } from '../components/SplitContextCard';
+import { TaskAccordion } from '../components/TaskAccordion';
+import { BottomScrim } from '~/shared/components/BottomScrim';
+import { FLOATING_TAB_BAR_CLEARANCE } from '~/shared/components/FloatingTabBar';
 
 const SCREEN_BG = require('../../../../assets/images/sprinkler.png');
 
@@ -51,11 +52,26 @@ const Safe = styled(SafeAreaView)`
   flex: 1;
 `;
 
-// Content — the padded column. The generous bottom padding keeps the peek nav
-// clear of the tab bar below.
+// Content — the padded column holding the fixed header block (greeting, context
+// card, progress) above the scrolling task list.
 const Content = styled.View`
   flex: 1;
-  padding: 24px 20px 28px;
+  padding: 24px 20px 0;
+`;
+
+// Scroll — the task accordion scrolls so the open card's button is always
+// reachable even when an expanded row would otherwise run off the bottom of the
+// screen. It simply doesn't scroll when everything already fits.
+const Scroll = styled.ScrollView`
+  flex: 1;
+`;
+
+// BottomSpacer — keeps the last row clear of the floating tab bar at the bottom
+// of the scroll, standing in for the padding the scroll view can't take
+// directly. Sized to the pill's clearance so an expanded last row stays fully
+// reachable above the nav.
+const BottomSpacer = styled.View`
+  height: ${FLOATING_TAB_BAR_CLEARANCE}px;
 `;
 
 export const HomeScreen = () => {
@@ -76,16 +92,15 @@ export const HomeScreen = () => {
             label={deck.completionLabel}
             progress={deck.completionProgress}
           />
-          <Deck deck={deck} recordLabel={RECORD_STREAK_LABEL} />
-          <PeekNav
-            label={deck.peekLabel}
-            canPeekBack={deck.canPeekBack}
-            canPeekForward={deck.canPeekForward}
-            onPeekBack={() => deck.handlePeek(-1)}
-            onPeekForward={() => deck.handlePeek(1)}
-          />
+          <Scroll showsVerticalScrollIndicator={false}>
+            <TaskAccordion deck={deck} recordLabel={RECORD_STREAK_LABEL} />
+            <BottomSpacer />
+          </Scroll>
         </Content>
       </Safe>
+      {/* Fades the scrolling accordion into the background before it reaches the
+          floating tab bar. Sits above the content but below the confetti. */}
+      <BottomScrim />
       {deck.isCleared && <ConfettiBurst />}
     </Screen>
   );

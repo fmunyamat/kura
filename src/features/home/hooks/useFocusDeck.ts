@@ -1,187 +1,139 @@
-// useFocusDeck — the single source of truth for the Today screen's card deck.
+// useFocusDeck — the single source of truth for the Today screen's task list.
 //
-// It tracks which cards are still in the deck, which one the user is looking at
-// (peeking), whether an action is mid-animation (busy), whether the front card
-// is opened into its modal, and the streak count. The screen reads the derived
-// labels and positions from here and calls the handlers; all the animation
-// lives in the card components, which call back into `handleCardFlyOutEnd` when
-// a completed card has finished flying away.
+// The Today tab shows today's tasks as an accordion: a column of rows where one
+// row is open (its full card on show) and the rest are collapsed. This hook
+// tracks which row is open, which tasks have been ticked off, and the streak,
+// and hands the screen the derived labels it needs. There is no overlap between
+// rows, so unlike the old stacked deck nothing bleeds through the glass.
 
 import { useCallback, useMemo, useState } from 'react';
 
-import { DECK_CARDS, INITIAL_STREAK_DAYS } from '../constants/deck-cards';
-import type { DeckCardData, DeckPosition } from '../types';
+import {
+  DECK_CARDS,
+  INITIAL_STREAK_DAYS,
+  SOAK_DETAILS_HOSE,
+  SOAK_STEPS_HOSE,
+} from '../constants/deck-cards';
+import { useLawnStore } from '../stores/lawnStore';
+import type { DeckCardData } from '../types';
 
 // How many of today's real (unlocked) tasks there are — the denominator of the
-// "Task X of Y" counter. Computed once from the source data.
+// "Task X of 3" counter. Computed once from the source data.
 const TODAY_TOTAL = DECK_CARDS.filter((card) => !card.isLocked).length;
 
-// Look up a card's content by id without scanning the array each time.
-const CARD_BY_ID: Record<string, DeckCardData> = Object.fromEntries(
-  DECK_CARDS.map((card) => [card.id, card])
-);
+// The id of the first unlocked task — the row that starts open on load.
+const FIRST_TASK_ID = DECK_CARDS.find((card) => !card.isLocked)?.id ?? null;
 
 export interface FocusDeck {
-  // The cards still in the deck, front-most first.
-  remainingCards: DeckCardData[];
-  // Index of the card currently facing the user (0 = the real front of the deck).
-  peekIndex: number;
-  isBusy: boolean;
-  isExpanded: boolean;
-  // The id of the card playing its "stamp and fly away" completion animation,
-  // or null when nothing is completing.
-  completingCardId: string | null;
+  // Every card in display order: today's tasks, then tomorrow's locked preview.
+  cards: DeckCardData[];
+  // The id of the row currently expanded, or null if every row is collapsed.
+  openId: string | null;
+  // The ids of tasks the user has ticked off.
+  doneIds: string[];
   streakDays: number;
-  // True once every unlocked task is done — only the locked preview remains.
+  // True once every unlocked task is done — the screen swaps to the celebration.
   isCleared: boolean;
 
   // Derived display strings + the progress bar fraction (0–1).
   completionLabel: string;
   completionProgress: number;
-  peekLabel: string;
-  canPeekBack: boolean;
-  canPeekForward: boolean;
 
-  // Where the card at `index` in `remainingCards` should sit right now.
-  getPositionFor: (index: number) => DeckPosition;
+  // Whether a given card has been completed.
+  isDone: (id: string) => boolean;
 
-  handlePeek: (direction: 1 | -1) => void;
-  handleToggleExpanded: () => void;
-  handleCloseExpanded: () => void;
-  handleComplete: () => void;
-  handleCardFlyOutEnd: () => void;
+  // Open the tapped row (and close whatever was open); tapping the open row
+  // closes it.
+  handleToggleRow: (id: string) => void;
+  // Tick a task off: mark it done, advance the streak if it was the last one,
+  // and open the next task still to do.
+  handleComplete: (id: string) => void;
 }
 
 export const useFocusDeck = (): FocusDeck => {
-  // The deck's identity list, front first. Completing a card drops its id here.
-  const [remainingIds, setRemainingIds] = useState<string[]>(() =>
-    DECK_CARDS.map((card) => card.id)
-  );
-  const [peekIndex, setPeekIndex] = useState(0);
-  const [isBusy, setIsBusy] = useState(false);
-  const [isExpanded, setIsExpanded] = useState(false);
-  const [completingCardId, setCompletingCardId] = useState<string | null>(null);
+  // hasSprinklerSystem drives which steps we show on the soak card. null (not
+  // yet answered — before onboarding is complete) falls through to sprinkler
+  // steps, which is the default in DECK_CARDS.
+  const hasSprinklerSystem = useLawnStore((state) => state.hasSprinklerSystem);
+
+  // Swap the soak card's steps and detail modal content based on the user's
+  // watering setup. Every other card is unchanged. We derive this instead of
+  // mutating DECK_CARDS so the source list stays pure.
+  const cards = useMemo<DeckCardData[]>(() => {
+    if (hasSprinklerSystem === false) {
+      return DECK_CARDS.map((card) =>
+        card.id === 'soak'
+          ? { ...card, steps: SOAK_STEPS_HOSE, details: SOAK_DETAILS_HOSE }
+          : card
+      );
+    }
+    return DECK_CARDS;
+  }, [hasSprinklerSystem]);
+
+  // Which row is expanded. Starts on the first real task.
+  const [openId, setOpenId] = useState<string | null>(FIRST_TASK_ID);
+  // The set of completed task ids, kept as an array so it's easy to expose.
+  const [doneIds, setDoneIds] = useState<string[]>([]);
   const [streakDays, setStreakDays] = useState(INITIAL_STREAK_DAYS);
 
-  const remainingCards = useMemo(
-    () => remainingIds.map((id) => CARD_BY_ID[id]),
-    [remainingIds]
-  );
+  // Fast membership check used by both the derived values and the screen.
+  const doneSet = useMemo(() => new Set(doneIds), [doneIds]);
+  const isDone = useCallback((id: string) => doneSet.has(id), [doneSet]);
 
-  // How many unlocked tasks are left, and therefore how many are done.
-  const unlockedLeft = remainingCards.filter((card) => !card.isLocked).length;
-  const doneCount = TODAY_TOTAL - unlockedLeft;
-  const isCleared = unlockedLeft === 0;
+  // How many tasks are done, and whether that clears the whole day.
+  const doneCount = doneIds.length;
+  const isCleared = doneCount >= TODAY_TOTAL;
 
   // "Task 2 of 3" while there's work left, otherwise "All done".
-  const completionLabel = unlockedLeft
-    ? `Task ${doneCount + 1} of ${TODAY_TOTAL}`
-    : 'All done';
+  const completionLabel = isCleared
+    ? 'All done'
+    : `Task ${doneCount + 1} of ${TODAY_TOTAL}`;
   const completionProgress = doneCount / TODAY_TOTAL;
 
-  // The label under the deck. Cleared deck and the locked preview get their own
-  // wording; everything else is a plain "Card X of Y".
-  const peekedCard = remainingCards[peekIndex];
-  const peekLabel = isCleared
-    ? 'See you tomorrow'
-    : peekedCard?.isLocked
-      ? 'Tomorrow · locked'
-      : `Card ${peekIndex + 1} of ${remainingCards.length}`;
+  // Open the tapped row, or close it if it was already open.
+  const handleToggleRow = useCallback((id: string) => {
+    setOpenId((current) => (current === id ? null : id));
+  }, []);
 
-  // Peeking is blocked while a card is animating or once the deck is cleared.
-  const canPeekBack = peekIndex > 0 && !isBusy && !isCleared;
-  const canPeekForward =
-    peekIndex < remainingCards.length - 1 && !isBusy && !isCleared;
+  // Tick a task off. Guarded so the locked preview and already-done tasks can't
+  // be completed. After marking it done, jump the open row to the next task
+  // that still needs doing (or close everything once the day is cleared).
+  const handleComplete = useCallback(
+    (id: string) => {
+      const card = cards.find((item) => item.id === id);
+      if (!card || card.isLocked) return;
 
-  // Turn an array index into a deck position relative to the peek cursor:
-  // before it → slid aside, at it → front, then b1 / b2 / hidden behind.
-  const getPositionFor = useCallback(
-    (index: number): DeckPosition => {
-      const relative = index - peekIndex;
-      if (relative < 0) return 'aside';
-      if (relative === 0) return 'front';
-      if (relative === 1) return 'b1';
-      if (relative === 2) return 'b2';
-      return 'hidden';
-    },
-    [peekIndex]
-  );
+      setDoneIds((current) => {
+        if (current.includes(id)) return current;
+        const next = [...current, id];
 
-  // Lean the front card aside to reveal the next/previous card. Closes any open
-  // modal first so cards always arrive condensed, and respects the bounds.
-  const handlePeek = useCallback(
-    (direction: 1 | -1) => {
-      if (isBusy || isCleared) return;
-      setIsExpanded(false);
-      setPeekIndex((current) => {
-        const next = current + direction;
-        if (next < 0 || next > remainingIds.length - 1) return current;
+        // Find the next unlocked task that isn't done yet and open it; if there
+        // are none left, collapse everything so the cleared view can take over.
+        const nextTask = cards.find(
+          (item) => !item.isLocked && !next.includes(item.id)
+        );
+        setOpenId(nextTask ? nextTask.id : null);
+
+        // Clearing the last task bumps the streak by one.
+        if (next.length >= TODAY_TOTAL) {
+          setStreakDays(INITIAL_STREAK_DAYS + 1);
+        }
         return next;
       });
     },
-    [isBusy, isCleared, remainingIds.length]
+    [cards]
   );
 
-  // Open or close the modal for whichever card is currently facing the user
-  // (the one at the peek cursor). Never opens mid-animation.
-  const handleToggleExpanded = useCallback(() => {
-    if (isBusy) return;
-    setIsExpanded((open) => !open);
-  }, [isBusy]);
-
-  const handleCloseExpanded = useCallback(() => {
-    setIsExpanded(false);
-  }, []);
-
-  // Begin completing the front card: flag it busy and hand the card its cue to
-  // play the stamp + fly-away animation. Guarded so you can't complete a peeked
-  // card, a card mid-animation, or the locked preview.
-  const handleComplete = useCallback(() => {
-    if (isBusy || peekIndex !== 0) return;
-    const frontCard = remainingCards[0];
-    if (!frontCard || frontCard.isLocked) return;
-    // Close the modal first so the card flies away condensed, then arm it.
-    setIsExpanded(false);
-    setIsBusy(true);
-    setCompletingCardId(frontCard.id);
-  }, [isBusy, peekIndex, remainingCards]);
-
-  // Called by the card once it has finished flying off the top of the deck.
-  // Drops the front card, resets the cursor, and — if that emptied today's
-  // tasks — ticks the streak up by one.
-  const handleCardFlyOutEnd = useCallback(() => {
-    setRemainingIds((current) => {
-      const next = current.slice(1);
-      const stillToDo = next.filter((id) => !CARD_BY_ID[id].isLocked).length;
-      if (stillToDo === 0) {
-        setStreakDays(INITIAL_STREAK_DAYS + 1);
-      }
-      return next;
-    });
-    setPeekIndex(0);
-    setCompletingCardId(null);
-    setIsExpanded(false);
-    setIsBusy(false);
-  }, []);
-
   return {
-    remainingCards,
-    peekIndex,
-    isBusy,
-    isExpanded,
-    completingCardId,
+    cards,
+    openId,
+    doneIds,
     streakDays,
     isCleared,
     completionLabel,
     completionProgress,
-    peekLabel,
-    canPeekBack,
-    canPeekForward,
-    getPositionFor,
-    handlePeek,
-    handleToggleExpanded,
-    handleCloseExpanded,
+    isDone,
+    handleToggleRow,
     handleComplete,
-    handleCardFlyOutEnd,
   };
 };

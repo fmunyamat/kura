@@ -91,8 +91,27 @@ export const lightTheme = {
     // scrimDark — the dimmer drawn behind an expanded card so everything below
     // it recedes while the card is open.
     scrimDark:             'rgba(3,9,3,0.62)',
+    // deckRowSurface — the fill of a collapsed accordion row on the Today tab.
+    // A quiet, near-opaque dark green so an unopened task recedes into the
+    // background and the one open glass card stands out as the focus.
+    deckRowSurface:        'rgba(8,22,10,0.72)',
+    // deckRowSurfaceDone — a collapsed row for a task that's already been
+    // ticked off: dimmer still, so finished work fades back without vanishing.
+    deckRowSurfaceDone:    'rgba(8,22,10,0.42)',
+    // deckRowBorder — the faint 1px rim around a collapsed row.
+    deckRowBorder:         'rgba(255,255,255,0.08)',
     // limeGlow — the soft lime pad behind the active tab's icon.
     limeGlow:              'rgba(184,229,106,0.22)',
+    // navPillSurface — the dark green tint laid over the BlurView in the
+    // floating tab bar so the frosted pill reads as a solid-ish surface over
+    // the bright lawn photo behind it.
+    navPillSurface:       'rgba(10,26,12,0.62)',
+    // scrimFadeTop / scrimFadeBottom — the two stops of the bottom fade scrim.
+    // Content scrolling toward the floating tab bar dissolves from fully clear
+    // (top) into the dark background green (bottom) so nothing sharp smears
+    // behind the frosted pill. Same base green as the home DarkOverlay.
+    scrimFadeTop:         'rgba(10,28,10,0)',
+    scrimFadeBottom:      'rgba(10,28,10,1.0)',
     // photoHeaderFadeTop / Bottom — the top-to-bottom gradient laid over each
     // card's photo so the title and emoji badge stay readable on any image.
     photoHeaderFadeTop:    'rgba(10,28,10,0.04)',

@@ -2,13 +2,23 @@
 
 import type { ImageSourcePropType } from 'react-native';
 
-// DeckPosition — where a card sits in the deck right now, relative to the card
-// the user is currently looking at. The screen turns this into a transform:
-//   aside  — slid off to the left (the user peeked past it)
-//   front  — face-up, the card you act on
-//   b1/b2  — stacked behind the front card, peeking out the top
-//   hidden — further back than b2, faded fully out
-export type DeckPosition = 'aside' | 'front' | 'b1' | 'b2' | 'hidden';
+// TaskDetails — the deeper information shown in the editorial detail modal when
+// the user taps "More details →". Separate from the main steps so the card
+// stays clean and only curious users dig into this layer.
+export interface TaskDetails {
+  // title — displayed as a small uppercase kicker at the top of the modal,
+  // e.g. "Watering · The one rule". Sets the category and framing.
+  title: string;
+  // hero / heroSub — the editorial hero block: a large stat or phrase and a
+  // supporting line beneath it. Optional — tasks without a single core fact
+  // skip the hero block and go straight to steps.
+  hero?: string;
+  heroSub?: string;
+  // steps — the full numbered walkthrough, more granular than the card steps.
+  steps: string[];
+  // note — shown as a pull-quote at the bottom (lime left-border block).
+  note?: string;
+}
 
 // DeckCardData — one task card's content. `isLocked` cards are previews of a
 // future day: they can't be completed, only looked at.
@@ -23,6 +33,9 @@ export interface DeckCardData {
   description: string;
   steps: string[];
   isLocked: boolean;
+  // details — optional. When present a "More details →" link appears in the
+  // open card above the CTA; tapping it opens a bottom-sheet modal.
+  details?: TaskDetails;
 }
 
 // WeatherInfo — the right half of the split context card. All hardcoded for now.
