@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Hold-to-Complete — 9 Variations · 2s Hold</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=DM+Sans:opsz,wght@9..40,400;9..40,600;9..40,700&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --lime:        #b8e56a;
+    --lime-text:   rgba(184,229,106,0.92);
+    --lime-glow:   rgba(184,229,106,0.32);
+    --deep:        #0c3520;
+    --curtain:     rgba(7,22,9,0.90);
+    --row-surface: rgba(8,22,10,0.72);
+    --row-border:  rgba(255,255,255,0.08);
+    --glass-edge:  rgba(255,255,255,0.30);
+    --glass-edge-b:rgba(255,255,255,0.10);
+    --card-exp:    rgba(22,42,22,0.55);
+    --divider:     rgba(255,255,255,0.22);
+    --badge-bg:    rgba(10,28,10,0.88);
+    --badge-edge:  rgba(255,255,255,0.28);
+    --text:        rgba(255,255,255,0.85);
+    --text-muted:  rgba(255,255,255,0.60);
+    --text-faint:  rgba(255,255,255,0.28);
+    --font:        'DM Sans', sans-serif;
+    --mono:        'JetBrains Mono', monospace;
+  }
+
+  body {
+    background: radial-gradient(ellipse at top, #0a1f10 0%, #04120a 60%, #020a05 100%);
+    font-family: var(--font); color: var(--text); min-height: 100vh;
+    padding: 48px 28px 120px;
+  }
+
+  /* ── page header ──────────────────────────────────────────────────────── */
+  .head { text-align:center; margin-bottom:0; }
+  .head-kicker { font-size:11px; letter-spacing:3px; text-transform:uppercase; color:var(--lime-text); font-family:var(--mono); margin-bottom:12px; }
+  .head-title { font-size:30px; font-weight:700; letter-spacing:-0.5px; margin-bottom:10px; }
+  .head-sub { font-size:14px; color:var(--text-muted); max-width:620px; margin:0 auto; line-height:1.6; }
+  .instruction { display:inline-block; margin-top:16px; font-family:var(--mono); font-size:11px; color:var(--deep); background:var(--lime); border-radius:100px; padding:4px 16px; letter-spacing:0.5px; }
+
+  /* ── group layout ─────────────────────────────────────────────────────── */
+  .group { margin-top:60px; }
+  .group-label {
+    display:flex; align-items:center; gap:16px; margin-bottom:28px; max-width:1100px; margin-left:auto; margin-right:auto;
+  }
+  .group-label-text { font-size:11px; letter-spacing:3px; text-transform:uppercase; font-family:var(--mono); color:var(--lime-text); white-space:nowrap; }
+  .group-rule { flex:1; height:1px; background:rgba(255,255,255,0.08); }
+
+  .group-grid {
+    display:grid; grid-template-columns:repeat(3,1fr); gap:32px;
+    max-width:1100px; margin:0 auto; justify-items:center;
+  }
+  @media (max-width:960px)  { .group-grid { grid-template-columns:repeat(2,1fr); } }
+  @media (max-width:680px)  { .group-grid { grid-template-columns:1fr; } }
+
+  /* ── concept card ─────────────────────────────────────────────────────── */
+  .concept { display:flex; flex-direction:column; align-items:center; gap:12px; width:320px; }
+  .concept-head { text-align:center; }
+  .concept-num { display:inline-block; font-family:var(--mono); font-size:10px; font-weight:700; color:var(--deep); background:var(--lime); border-radius:100px; padding:2px 10px; margin-bottom:8px; letter-spacing:1px; }
+  .concept-name { font-size:15px; font-weight:700; margin-bottom:4px; }
+  .concept-desc { font-size:11.5px; color:var(--text-muted); line-height:1.55; max-width:280px; }
+
+  /* ── phone shell ──────────────────────────────────────────────────────── */
+  .phone {
+    width:300px; height:560px; border-radius:42px; overflow:visible; position:relative;
+    box-shadow:0 0 0 1px rgba(255,255,255,0.07), 0 30px 60px rgba(0,0,0,0.7);
+  }
+  /* separate clip layer so rings can escape the phone boundary */
+  .phone-clip {
+    position:absolute; inset:0; border-radius:42px; overflow:hidden;
+  }
+  .bg { position:absolute; inset:0; background:
+      radial-gradient(ellipse at 28% 55%, rgba(36,82,18,0.55) 0%, transparent 55%),
+      radial-gradient(ellipse at 78% 28%, rgba(20,58,14,0.45) 0%, transparent 50%),
+      linear-gradient(155deg,#1a4a10 0%,#0d3010 45%,#091e07 100%); }
+  .tint { position:absolute; inset:0; background:rgba(4,10,4,0.55); }
+  .inner { position:relative; z-index:1; height:100%; padding:30px 14px 14px; display:flex; flex-direction:column; gap:8px; overflow:hidden; }
+
+  /* ── screen chrome ────────────────────────────────────────────────────── */
+  .eyebrow { font-size:8px; letter-spacing:1.8px; text-transform:uppercase; color:var(--text-muted); font-family:var(--mono); margin-bottom:1px; }
+  .greet { font-size:17px; font-weight:700; margin-bottom:2px; }
+  .mini-row { display:flex; align-items:center; gap:10px; padding:9px 11px; background:var(--row-surface); border:1px solid var(--row-border); border-radius:11px; }
+  .mbadge { width:26px; height:26px; border-radius:7px; background:var(--badge-bg); border:1px solid var(--badge-edge); display:flex; align-items:center; justify-content:center; font-size:12px; flex-shrink:0; }
+  .mcount { font-size:7px; letter-spacing:1.2px; text-transform:uppercase; color:var(--lime-text); font-family:var(--mono); }
+  .mtitle { font-size:11px; font-weight:600; margin-top:1px; }
+  .mchev { font-size:10px; color:var(--text-faint); margin-left:auto; }
+
+  /* open task card glass drawer */
+  .open-card { border-radius:13px; overflow:hidden; border:1px solid var(--glass-edge-b); border-top-color:var(--glass-edge); position:relative; flex:1; }
+  .open-blur { position:absolute; inset:0; background:var(--card-exp); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); }
+  .drawer { position:relative; z-index:1; padding:11px 12px 11px; display:flex; flex-direction:column; height:100%; }
+  .step-row { display:flex; align-items:flex-start; gap:8px; padding:7px 0; border-top:1px solid var(--divider); }
+  .step-row:first-child { border-top:none; }
+  .dot { width:15px; height:15px; border-radius:50%; border:1px solid var(--divider); display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:1px; }
+  .dot-n { font-family:var(--mono); font-size:7.5px; font-weight:700; color:var(--lime-text); }
+  .step-text { font-family:var(--mono); font-size:9px; line-height:1.5; color:var(--text); }
+  .details-link { font-family:var(--mono); font-size:9px; color:var(--lime-text); text-align:center; text-decoration:underline; text-decoration-style:dotted; margin-top:auto; padding-top:8px; }
+
+  /* ── hold button base ─────────────────────────────────────────────────── */
+  .hold-btn {
+    display: flex; align-items: center; justify-content: center;
+    position: relative; overflow: hidden;
+    width: 100%; margin-top: 9px; padding: 13px 0;
+    border: none; outline: none; border-radius: 9999px;
+    background: var(--lime);
+    cursor: pointer; user-select: none; -webkit-user-select: none; touch-action: none;
+  }
+  .hold-btn.done { cursor: default; }
+  .pill-label {
+    font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 700;
+    color: var(--deep); position: relative; z-index: 3;
+    pointer-events: none; letter-spacing: -0.2px;
+  }
+
+  /* reset hint below phone */
+  .reset-hint { font-family:var(--mono); font-size:9px; color:var(--text-faint); text-align:center; height:14px; letter-spacing:0.5px; }
+
+  /* ─────────────────────────────────────────────────────────────────────────
+     CURTAIN PEEL — 3 VARIATIONS
+  ───────────────────────────────────────────────────────────────────────── */
+
+  /* A · Classic — single dark panel peels from right to left */
+  .ca .curtain {
+    position:absolute; inset:0; border-radius:inherit;
+    background: var(--curtain);
+    transform-origin: right center;
+    pointer-events:none; z-index:1;
+  }
+
+  /* B · Stage Curtains — panels start off-screen (left at -100%, right at
+     +100%) so the button opens on bare lime. On hold they slide IN toward
+     center covering the lime in deep green. On done they retreat, leaving
+     the original lime and the Done label. */
+  .cb .cl, .cb .cr {
+    position:absolute; top:0; bottom:0; width:50%;
+    background: #4a9e28; /* deep saturated green — clearly green, never black */
+    pointer-events:none; z-index:1;
+  }
+  .cb .cl { left:0; border-radius: inherit 0 0 inherit; transform: translateX(-100%); }
+  .cb .cr { right:0; border-radius: 0 inherit inherit 0; transform: translateX(100%); }
+  /* They slide outward: left curtain to -100%, right curtain to +100% */
+
+  /* C · Venetian Blinds — 4 horizontal slats open simultaneously */
+  .cc .blind-wrap {
+    position:absolute; inset:0; border-radius:inherit; overflow:hidden;
+    display:flex; flex-direction:column; pointer-events:none; z-index:1;
+  }
+  .cc .blind {
+    flex:1; background:var(--curtain);
+    transform-origin: center center; /* collapses from both edges of each slat */
+  }
+
+  /* ─────────────────────────────────────────────────────────────────────────
+     GLOW EXPAND — 3 VARIATIONS
+  ───────────────────────────────────────────────────────────────────────── */
+
+  /* Glow host: position:relative, overflow:visible so rings escape phone */
+  .glow-host {
+    position:relative; width:100%; margin-top:9px;
+  }
+  .glow-host .hold-btn { margin-top:0; }
+
+  /* shared dim overlay inside the button */
+  .dim-ov {
+    position:absolute; inset:0; border-radius:inherit;
+    background:rgba(8,26,10,0);
+    pointer-events:none; z-index:1;
+    transition: background 0.08s ease;
+  }
+
+  /* A · Radiate — 3 staggered rings expand outward */
+  .ga .ring {
+    position:absolute; border-radius:9999px;
+    border: 1.5px solid rgba(184,229,106,0);
+    pointer-events:none; z-index:0;
+    top:50%; left:50%; transform:translate(-50%,-50%);
+  }
+
+  /* B · Pulse Beats — single ring pulses rhythmically */
+  @keyframes beat {
+    0%   { transform:translate(-50%,-50%) scale(1);   opacity:0.85; }
+    100% { transform:translate(-50%,-50%) scale(2.2); opacity:0; }
+  }
+  .gb .beat-ring {
+    position:absolute; border-radius:9999px;
+    border: 2px solid rgba(184,229,106,0);
+    pointer-events:none; z-index:0;
+    top:50%; left:50%; transform:translate(-50%,-50%);
+    /* size will be set to match button size in JS */
+    width:100%; height:100%;
+  }
+  .gb .beat-ring.pulsing {
+    border-color: rgba(184,229,106,0.75);
+    animation: beat 0.55s ease-out infinite;
+  }
+
+  /* C · Aura Breathe — single soft continuous halo grows */
+  .gc .aura-ring {
+    position:absolute; border-radius:9999px;
+    border: 2px solid rgba(184,229,106,0);
+    pointer-events:none; z-index:0;
+    top:50%; left:50%; transform:translate(-50%,-50%);
+    transition: none;
+    box-shadow: none;
+  }
+
+  /* ─────────────────────────────────────────────────────────────────────────
+     FLOOD FILL — 3 VARIATIONS
+  ───────────────────────────────────────────────────────────────────────── */
+
+  /* A · Center Bloom — bright disc expands from center */
+  .fa .bloom {
+    position:absolute; width:20px; height:20px;
+    top:50%; left:50%; transform:translate(-50%,-50%) scale(0);
+    border-radius:50%;
+    background:radial-gradient(circle, rgba(255,255,255,0.58) 0%, rgba(210,245,130,0.35) 45%, transparent 68%);
+    pointer-events:none; z-index:1;
+  }
+  .fa.flash-done { animation: flash-a 0.4s ease forwards; }
+  @keyframes flash-a {
+    0%   { background: var(--lime); }
+    35%  { background: #e8ffa0; }
+    70%  { background: #ffffff; }
+    100% { background: var(--lime); }
+  }
+
+  /* B · Rising Tide — bright wash rises from the bottom */
+  .fb .tide {
+    position:absolute; left:0; right:0; bottom:0; height:0;
+    background: linear-gradient(0deg, rgba(255,255,255,0.40) 0%, rgba(220,248,140,0.22) 60%, transparent 100%);
+    border-radius: 0 0 9999px 9999px;
+    pointer-events:none; z-index:1;
+  }
+  .fb .tide-line {
+    position:absolute; left:0; right:0; height:2px;
+    background:rgba(255,255,255,0.55);
+    pointer-events:none; z-index:2;
+    /* top position set by JS = tide height */
+    bottom: 100%; /* sits at top of tide */
+  }
+  .fb.flash-done { animation: flash-b 0.4s ease forwards; }
+  @keyframes flash-b {
+    0%   { background: var(--lime); }
+    40%  { background: #d8f898; }
+    75%  { background: #ffffff; }
+    100% { background: var(--lime); }
+  }
+
+  /* C · Corner Source — bloom erupts from the bottom-left corner */
+  .fc .corner-bloom {
+    position:absolute; width:20px; height:20px;
+    bottom:-6px; left:-6px;
+    transform:scale(0);
+    border-radius:50%;
+    background:radial-gradient(circle, rgba(255,255,255,0.55) 0%, rgba(210,245,130,0.35) 42%, transparent 65%);
+    pointer-events:none; z-index:1;
+    transform-origin: bottom left;
+  }
+  .fc.flash-done { animation: flash-c 0.4s ease forwards; }
+  @keyframes flash-c {
+    0%   { background: var(--lime); }
+    35%  { background: #e0f8a8; }
+    70%  { background: #f8fff0; }
+    100% { background: var(--lime); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .beat-ring.pulsing,
+    .fa.flash-done, .fb.flash-done, .fc.flash-done { animation:none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="head">
+  <div class="head-kicker">Hold-to-Complete · 2 second hold</div>
+  <div class="head-title">Three families · three variations each</div>
+  <div class="head-sub">All buttons are interactive. Press and hold for 2 seconds — release early to cancel. Auto-resets so you can try again.</div>
+  <div class="instruction">Press and hold any button for 2 seconds →</div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════
+     GROUP 1 — CURTAIN PEEL
+════════════════════════════════════════════════════════ -->
+<div class="group">
+  <div class="group-label">
+    <div class="group-rule"></div>
+    <div class="group-label-text">Curtain Peel</div>
+    <div class="group-rule"></div>
+  </div>
+  <div class="group-grid">
+
+    <!-- 1A · Classic -->
+    <div class="concept">
+      <div class="concept-head">
+        <span class="concept-num">Curtain A</span>
+        <div class="concept-name">Classic</div>
+        <div class="concept-desc">One dark layer peels from right to left. The lime exposed so far = how far along you are.</div>
+      </div>
+      <div class="phone">
+        <div class="phone-clip">
+          <div class="bg"></div><div class="tint"></div>
+          <div class="inner">
+            <div class="eyebrow">On Deck · Today</div>
+            <div class="greet">Morning, John</div>
+            <div class="mini-row"><div class="mbadge">🔍</div><div><div class="mcount">Task 2 of 3</div><div class="mtitle">Walk the edges.</div></div><div class="mchev">›</div></div>
+            <div class="open-card"><div class="open-blur"></div>
+              <div class="drawer">
+                <div class="step-row"><div class="dot"><span class="dot-n">1</span></div><div class="step-text">If it wasn't planted and didn't grow in a patch — it's a weed.</div></div>
+                <div class="step-row"><div class="dot"><span class="dot-n">2</span></div><div class="step-text">Pull from the base so the root comes out — leaving it means it grows back.</div></div>
+                <div class="details-link">More details →</div>
+                <button class="hold-btn ca" id="btn-ca">
+                  <div class="curtain" id="el-ca-curtain"></div>
+                  <span class="pill-label" id="lbl-ca">Mark complete ✓</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="reset-hint" id="hint-ca"></div>
+    </div>
+
+    <!-- 1B · Stage Curtains -->
+    <div class="concept">
+      <div class="concept-head">
+        <span class="concept-num">Curtain B</span>
+        <div class="concept-name">Stage Curtains</div>
+        <div class="concept-desc">Opens on lime. Hold: two deep-green panels slide in from both edges, covering the button. Done: they retreat back out — original lime returns with "✓ Done!".</div>
+      </div>
+      <div class="phone">
+        <div class="phone-clip">
+          <div class="bg"></div><div class="tint"></div>
+          <div class="inner">
+            <div class="eyebrow">On Deck · Today</div>
+            <div class="greet">Morning, John</div>
+            <div class="mini-row"><div class="mbadge">🔍</div><div><div class="mcount">Task 2 of 3</div><div class="mtitle">Walk the edges.</div></div><div class="mchev">›</div></div>
+            <div class="open-card"><div class="open-blur"></div>
+              <div class="drawer">
+                <div class="step-row"><div class="dot"><span class="dot-n">1</span></div><div class="step-text">If it wasn't planted and didn't grow in a patch — it's a weed.</div></div>
+                <div class="step-row"><div class="dot"><span class="dot-n">2</span></div><div class="step-text">Pull from the base so the root comes out — leaving it means it grows back.</div></div>
+                <div class="details-link">More details →</div>
+                <button class="hold-btn cb" id="btn-cb">
+                  <div class="cl" id="el-cb-l"></div>
+                  <div class="cr" id="el-cb-r"></div>
+                  <span class="pill-label" id="lbl-cb">Mark complete ✓</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="reset-hint" id="hint-cb"></div>
+    </div>
+
+    <!-- 1C · Venetian Blinds -->
+    <div class="concept">
+      <div class="concept-head">
+        <span class="concept-num">Curtain C</span>
+        <div class="concept-name">Venetian Blinds</div>
+        <div class="concept-desc">Four horizontal slats fold open at once, all collapsing to reveal the lime behind them.</div>
+      </div>
+      <div class="phone">
+        <div class="phone-clip">
+          <div class="bg"></div><div class="tint"></div>
+          <div class="inner">
+            <div class="eyebrow">On Deck · Today</div>
+            <div class="greet">Morning, John</div>
+            <div class="mini-row"><div class="mbadge">🔍</div><div><div class="mcount">Task 2 of 3</div><div class="mtitle">Walk the edges.</div></div><div class="mchev">›</div></div>
+            <div class="open-card"><div class="open-blur"></div>
+              <div class="drawer">
+                <div class="step-row"><div class="dot"><span class="dot-n">1</span></div><div class="step-text">If it wasn't planted and didn't grow in a patch — it's a weed.</div></div>
+                <div class="step-row"><div class="dot"><span class="dot-n">2</span></div><div class="step-text">Pull from the base so the root comes out — leaving it means it grows back.</div></div>
+                <div class="details-link">More details →</div>
+                <button class="hold-btn cc" id="btn-cc">
+                  <div class="blind-wrap" id="el-cc-blinds">
+                    <div class="blind"></div><div class="blind"></div>
+                    <div class="blind"></div><div class="blind"></div>
+                  </div>
+                  <span class="pill-label" id="lbl-cc">Mark complete ✓</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="reset-hint" id="hint-cc"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════
+     GROUP 2 — GLOW EXPAND
+════════════════════════════════════════════════════════ -->
+<div class="group">
+  <div class="group-label">
+    <div class="group-rule"></div>
+    <div class="group-label-text">Glow Expand</div>
+    <div class="group-rule"></div>
+  </div>
+  <div class="group-grid">
+
+    <!-- 2A · Radiate -->
+    <div class="concept">
+      <div class="concept-head">
+        <span class="concept-num">Glow A</span>
+        <div class="concept-name">Radiate</div>
+        <div class="concept-desc">Three staggered lime rings expand outward, each one larger and slightly delayed — charging up as you hold.</div>
+      </div>
+      <div class="phone">
+        <div class="phone-clip">
+          <div class="bg"></div><div class="tint"></div>
+          <div class="inner">
+            <div class="eyebrow">On Deck · Today</div>
+            <div class="greet">Morning, John</div>
+            <div class="mini-row"><div class="mbadge">🔍</div><div><div class="mcount">Task 2 of 3</div><div class="mtitle">Walk the edges.</div></div><div class="mchev">›</div></div>
+            <div class="open-card"><div class="open-blur"></div>
+              <div class="drawer">
+                <div class="step-row"><div class="dot"><span class="dot-n">1</span></div><div class="step-text">If it wasn't planted and didn't grow in a patch — it's a weed.</div></div>
+                <div class="step-row"><div class="dot"><span class="dot-n">2</span></div><div class="step-text">Pull from the base so the root comes out — leaving it means it grows back.</div></div>
+                <div class="details-link">More details →</div>
+                <div class="glow-host" id="host-ga">
+                  <div class="ring" id="el-ga-r1"></div>
+                  <div class="ring" id="el-ga-r2"></div>
+                  <div class="ring" id="el-ga-r3"></div>
+                  <button class="hold-btn ga" id="btn-ga">
+                    <div class="dim-ov" id="el-ga-dim"></div>
+                    <span class="pill-label" id="lbl-ga">Mark complete ✓</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="reset-hint" id="hint-ga"></div>
+    </div>
+
+    <!-- 2B · Pulse Beats -->
+    <div class="concept">
+      <div class="concept-head">
+        <span class="concept-num">Glow B</span>
+        <div class="concept-name">Pulse Beats</div>
+        <div class="concept-desc">A single ring pulses outward rhythmically — three beats per hold. Each beat feels like a heartbeat confirming your intent.</div>
+      </div>
+      <div class="phone">
+        <div class="phone-clip">
+          <div class="bg"></div><div class="tint"></div>
+          <div class="inner">
+            <div class="eyebrow">On Deck · Today</div>
+            <div class="greet">Morning, John</div>
+            <div class="mini-row"><div class="mbadge">🔍</div><div><div class="mcount">Task 2 of 3</div><div class="mtitle">Walk the edges.</div></div><div class="mchev">›</div></div>
+            <div class="open-card"><div class="open-blur"></div>
+              <div class="drawer">
+                <div class="step-row"><div class="dot"><span class="dot-n">1</span></div><div class="step-text">If it wasn't planted and didn't grow in a patch — it's a weed.</div></div>
+                <div class="step-row"><div class="dot"><span class="dot-n">2</span></div><div class="step-text">Pull from the base so the root comes out — leaving it means it grows back.</div></div>
+                <div class="details-link">More details →</div>
+                <div class="glow-host" id="host-gb">
+                  <div class="beat-ring" id="el-gb-ring"></div>
+                  <button class="hold-btn gb" id="btn-gb">
+                    <div class="dim-ov" id="el-gb-dim"></div>
+                    <span class="pill-label" id="lbl-gb">Mark complete ✓</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="reset-hint" id="hint-gb"></div>
+    </div>
+
+    <!-- 2C · Aura Breathe -->
+    <div class="concept">
+      <div class="concept-head">
+        <span class="concept-num">Glow C</span>
+        <div class="concept-name">Aura Breathe</div>
+        <div class="concept-desc">One soft halo grows continuously from nothing to a full surrounding aura. No pulses — just a steady intensifying glow.</div>
+      </div>
+      <div class="phone">
+        <div class="phone-clip">
+          <div class="bg"></div><div class="tint"></div>
+          <div class="inner">
+            <div class="eyebrow">On Deck · Today</div>
+            <div class="greet">Morning, John</div>
+            <div class="mini-row"><div class="mbadge">🔍</div><div><div class="mcount">Task 2 of 3</div><div class="mtitle">Walk the edges.</div></div><div class="mchev">›</div></div>
+            <div class="open-card"><div class="open-blur"></div>
+              <div class="drawer">
+                <div class="step-row"><div class="dot"><span class="dot-n">1</span></div><div class="step-text">If it wasn't planted and didn't grow in a patch — it's a weed.</div></div>
+                <div class="step-row"><div class="dot"><span class="dot-n">2</span></div><div class="step-text">Pull from the base so the root comes out — leaving it means it grows back.</div></div>
+                <div class="details-link">More details →</div>
+                <div class="glow-host" id="host-gc">
+                  <div class="aura-ring" id="el-gc-aura"></div>
+                  <button class="hold-btn gc" id="btn-gc">
+                    <div class="dim-ov" id="el-gc-dim"></div>
+                    <span class="pill-label" id="lbl-gc">Mark complete ✓</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="reset-hint" id="hint-gc"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════
+     GROUP 3 — FLOOD FILL
+════════════════════════════════════════════════════════ -->
+<div class="group">
+  <div class="group-label">
+    <div class="group-rule"></div>
+    <div class="group-label-text">Flood Fill</div>
+    <div class="group-rule"></div>
+  </div>
+  <div class="group-grid">
+
+    <!-- 3A · Center Bloom -->
+    <div class="concept">
+      <div class="concept-head">
+        <span class="concept-num">Flood A</span>
+        <div class="concept-name">Center Bloom</div>
+        <div class="concept-desc">A bright disc expands from the exact center of the button, spreading outward until it fills the whole pill.</div>
+      </div>
+      <div class="phone">
+        <div class="phone-clip">
+          <div class="bg"></div><div class="tint"></div>
+          <div class="inner">
+            <div class="eyebrow">On Deck · Today</div>
+            <div class="greet">Morning, John</div>
+            <div class="mini-row"><div class="mbadge">🔍</div><div><div class="mcount">Task 2 of 3</div><div class="mtitle">Walk the edges.</div></div><div class="mchev">›</div></div>
+            <div class="open-card"><div class="open-blur"></div>
+              <div class="drawer">
+                <div class="step-row"><div class="dot"><span class="dot-n">1</span></div><div class="step-text">If it wasn't planted and didn't grow in a patch — it's a weed.</div></div>
+                <div class="step-row"><div class="dot"><span class="dot-n">2</span></div><div class="step-text">Pull from the base so the root comes out — leaving it means it grows back.</div></div>
+                <div class="details-link">More details →</div>
+                <button class="hold-btn fa" id="btn-fa">
+                  <div class="bloom" id="el-fa-bloom"></div>
+                  <span class="pill-label" id="lbl-fa">Mark complete ✓</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="reset-hint" id="hint-fa"></div>
+    </div>
+
+    <!-- 3B · Rising Tide -->
+    <div class="concept">
+      <div class="concept-head">
+        <span class="concept-num">Flood B</span>
+        <div class="concept-name">Rising Tide</div>
+        <div class="concept-desc">A bright wash rises from the bottom of the pill like water filling a container. A crisp line marks the waterline.</div>
+      </div>
+      <div class="phone">
+        <div class="phone-clip">
+          <div class="bg"></div><div class="tint"></div>
+          <div class="inner">
+            <div class="eyebrow">On Deck · Today</div>
+            <div class="greet">Morning, John</div>
+            <div class="mini-row"><div class="mbadge">🔍</div><div><div class="mcount">Task 2 of 3</div><div class="mtitle">Walk the edges.</div></div><div class="mchev">›</div></div>
+            <div class="open-card"><div class="open-blur"></div>
+              <div class="drawer">
+                <div class="step-row"><div class="dot"><span class="dot-n">1</span></div><div class="step-text">If it wasn't planted and didn't grow in a patch — it's a weed.</div></div>
+                <div class="step-row"><div class="dot"><span class="dot-n">2</span></div><div class="step-text">Pull from the base so the root comes out — leaving it means it grows back.</div></div>
+                <div class="details-link">More details →</div>
+                <button class="hold-btn fb" id="btn-fb">
+                  <div class="tide" id="el-fb-tide">
+                    <div class="tide-line" id="el-fb-line"></div>
+                  </div>
+                  <span class="pill-label" id="lbl-fb">Mark complete ✓</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="reset-hint" id="hint-fb"></div>
+    </div>
+
+    <!-- 3C · Corner Source -->
+    <div class="concept">
+      <div class="concept-head">
+        <span class="concept-num">Flood C</span>
+        <div class="concept-name">Corner Source</div>
+        <div class="concept-desc">The flood erupts from the bottom-left corner and sweeps diagonally across the button, filling it corner to corner.</div>
+      </div>
+      <div class="phone">
+        <div class="phone-clip">
+          <div class="bg"></div><div class="tint"></div>
+          <div class="inner">
+            <div class="eyebrow">On Deck · Today</div>
+            <div class="greet">Morning, John</div>
+            <div class="mini-row"><div class="mbadge">🔍</div><div><div class="mcount">Task 2 of 3</div><div class="mtitle">Walk the edges.</div></div><div class="mchev">›</div></div>
+            <div class="open-card"><div class="open-blur"></div>
+              <div class="drawer">
+                <div class="step-row"><div class="dot"><span class="dot-n">1</span></div><div class="step-text">If it wasn't planted and didn't grow in a patch — it's a weed.</div></div>
+                <div class="step-row"><div class="dot"><span class="dot-n">2</span></div><div class="step-text">Pull from the base so the root comes out — leaving it means it grows back.</div></div>
+                <div class="details-link">More details →</div>
+                <button class="hold-btn fc" id="btn-fc">
+                  <div class="corner-bloom" id="el-fc-bloom"></div>
+                  <span class="pill-label" id="lbl-fc">Mark complete ✓</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="reset-hint" id="hint-fc"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const HOLD_MS = 2000;
+const TICK    = 40;
+
+// ── per-button update / complete / reset ─────────────────────────────────────
+const buttons = {
+
+  ca: {
+    update(p) {
+      document.getElementById('el-ca-curtain').style.transform = `scaleX(${1-p})`;
+      if (p > 0 && p < 1) lbl('ca','Hold...');
+    },
+    complete() {
+      document.getElementById('el-ca-curtain').style.transform = 'scaleX(0)';
+      lbl('ca','✓ Done!');
+    },
+    reset() {
+      document.getElementById('el-ca-curtain').style.transform = 'scaleX(1)';
+    }
+  },
+
+  cb: {
+    update(p) {
+      const l = document.getElementById('el-cb-l');
+      const r = document.getElementById('el-cb-r');
+      // Panels start fully off-screen (left at -100%, right at +100%) so the
+      // button opens on lime. As p goes 0→1 they slide IN toward the center,
+      // progressively covering the lime with deeper green. On complete() they
+      // slide back out, returning the button to its original lime + Done label.
+      l.style.transition = 'none';
+      r.style.transition = 'none';
+      l.style.transform = `translateX(${(p - 1) * 100}%)`;  // -100% → 0%
+      r.style.transform = `translateX(${(1 - p) * 100}%)`;  // +100% → 0%
+      if (p > 0 && p < 1) lbl('cb', 'Hold...');
+    },
+    complete() {
+      const l = document.getElementById('el-cb-l');
+      const r = document.getElementById('el-cb-r');
+      // Panels slide back out with a quick ease — lime is revealed underneath,
+      // then the label updates to Done once the panels have cleared.
+      l.style.transition = 'transform 0.22s ease-out';
+      r.style.transition = 'transform 0.22s ease-out';
+      l.style.transform = 'translateX(-100%)';
+      r.style.transform = 'translateX(100%)';
+      setTimeout(() => lbl('cb', '✓ Done!'), 200);
+    },
+    reset() {
+      const l = document.getElementById('el-cb-l');
+      const r = document.getElementById('el-cb-r');
+      // Snap off-screen instantly on cancel so there's no reverse animation.
+      l.style.transition = 'none';
+      r.style.transition = 'none';
+      l.style.transform = 'translateX(-100%)';
+      r.style.transform = 'translateX(100%)';
+    }
+  },
+
+  cc: {
+    update(p) {
+      const blinds = document.getElementById('el-cc-blinds').querySelectorAll('.blind');
+      blinds.forEach(b => b.style.transform = `scaleY(${1-p})`);
+      if (p > 0 && p < 1) lbl('cc','Hold...');
+    },
+    complete() {
+      const blinds = document.getElementById('el-cc-blinds').querySelectorAll('.blind');
+      blinds.forEach(b => b.style.transform = 'scaleY(0)');
+      lbl('cc','✓ Done!');
+    },
+    reset() {
+      const blinds = document.getElementById('el-cc-blinds').querySelectorAll('.blind');
+      blinds.forEach(b => b.style.transform = 'scaleY(1)');
+    }
+  },
+
+  ga: {
+    update(p) {
+      const dim = document.getElementById('el-ga-dim');
+      dim.style.background = `rgba(8,26,10,${p * 0.2})`;
+      // Three rings: each activates at a staggered threshold
+      const rings = [
+        { id:'el-ga-r1', start:0,    end:1,   maxPx:10, maxOp:0.7 },
+        { id:'el-ga-r2', start:0.2,  end:1,   maxPx:22, maxOp:0.5 },
+        { id:'el-ga-r3', start:0.45, end:1,   maxPx:38, maxOp:0.3 },
+      ];
+      const btn = document.getElementById('btn-ga');
+      const bw = btn.offsetWidth;
+      const bh = btn.offsetHeight;
+      rings.forEach(({id, start, maxPx, maxOp}) => {
+        const el = document.getElementById(id);
+        const rp = Math.max(0, Math.min(1, (p - start) / (1 - start)));
+        const spreadPx = rp * maxPx;
+        const opacity  = rp * maxOp;
+        const w = bw + spreadPx * 2;
+        const h = bh + spreadPx * 2;
+        el.style.width  = `${w}px`;
+        el.style.height = `${h}px`;
+        el.style.marginLeft = `${-spreadPx}px`;
+        el.style.marginTop  = `${-spreadPx}px`;
+        el.style.top  = '50%';
+        el.style.left = '50%';
+        el.style.transform = 'translate(-50%,-50%)';
+        el.style.borderColor = `rgba(184,229,106,${opacity})`;
+        el.style.boxShadow   = `0 0 ${rp*14}px rgba(184,229,106,${opacity*0.5})`;
+      });
+      if (p > 0 && p < 1) lbl('ga','Hold...');
+    },
+    complete() {
+      lbl('ga','✓ Done!');
+      // flash then fade rings out
+      ['el-ga-r1','el-ga-r2','el-ga-r3'].forEach((id, i) => {
+        const el = document.getElementById(id);
+        el.style.transition = `all 0.6s ease`;
+        el.style.borderColor = 'rgba(184,229,106,0)';
+        el.style.boxShadow = 'none';
+      });
+    },
+    reset() {
+      document.getElementById('el-ga-dim').style.background = 'rgba(8,26,10,0)';
+      ['el-ga-r1','el-ga-r2','el-ga-r3'].forEach(id => {
+        const el = document.getElementById(id);
+        el.style.transition = '';
+        el.style.borderColor = 'rgba(184,229,106,0)';
+        el.style.boxShadow = 'none';
+        el.style.width = '0'; el.style.height = '0';
+      });
+    }
+  },
+
+  gb: {
+    update(p) {
+      const dim  = document.getElementById('el-gb-dim');
+      const ring = document.getElementById('el-gb-ring');
+      const btn  = document.getElementById('btn-gb');
+      dim.style.background = `rgba(8,26,10,${p * 0.18})`;
+      if (p > 0) {
+        // size ring to match button exactly
+        ring.style.width  = `${btn.offsetWidth}px`;
+        ring.style.height = `${btn.offsetHeight}px`;
+        ring.classList.add('pulsing');
+        // border gets brighter as progress climbs
+        ring.style.setProperty('--beat-opacity', (0.5 + p * 0.4).toString());
+      } else {
+        ring.classList.remove('pulsing');
+        ring.style.borderColor = 'rgba(184,229,106,0)';
+      }
+      if (p > 0 && p < 1) lbl('gb','Hold...');
+    },
+    complete() {
+      const ring = document.getElementById('el-gb-ring');
+      ring.classList.remove('pulsing');
+      ring.style.borderColor = 'rgba(184,229,106,0)';
+      document.getElementById('el-gb-dim').style.background = 'rgba(8,26,10,0)';
+      lbl('gb','✓ Done!');
+    },
+    reset() {
+      const ring = document.getElementById('el-gb-ring');
+      ring.classList.remove('pulsing');
+      ring.style.borderColor = 'rgba(184,229,106,0)';
+      document.getElementById('el-gb-dim').style.background = 'rgba(8,26,10,0)';
+    }
+  },
+
+  gc: {
+    update(p) {
+      const aura = document.getElementById('el-gc-aura');
+      const dim  = document.getElementById('el-gc-dim');
+      const btn  = document.getElementById('btn-gc');
+      const bw = btn.offsetWidth;
+      const bh = btn.offsetHeight;
+      const spread = p * 28;
+      const w = bw + spread * 2;
+      const h = bh + spread * 2;
+      aura.style.width  = `${w}px`;
+      aura.style.height = `${h}px`;
+      aura.style.borderColor = `rgba(184,229,106,${p * 0.6})`;
+      aura.style.boxShadow = `0 0 ${p*24}px ${p*12}px rgba(184,229,106,${p*0.28}), 0 0 ${p*50}px rgba(184,229,106,${p*0.14})`;
+      dim.style.background = `rgba(8,26,10,${p * 0.15})`;
+      if (p > 0 && p < 1) lbl('gc','Hold...');
+    },
+    complete() {
+      lbl('gc','✓ Done!');
+      const aura = document.getElementById('el-gc-aura');
+      aura.style.transition = 'all 0.5s ease';
+      aura.style.borderColor = 'rgba(184,229,106,0)';
+      aura.style.boxShadow = 'none';
+    },
+    reset() {
+      const aura = document.getElementById('el-gc-aura');
+      aura.style.transition = '';
+      aura.style.borderColor = 'rgba(184,229,106,0)';
+      aura.style.boxShadow = 'none';
+      aura.style.width = '0'; aura.style.height = '0';
+      document.getElementById('el-gc-dim').style.background = 'rgba(8,26,10,0)';
+    }
+  },
+
+  fa: {
+    update(p) {
+      const bloom = document.getElementById('el-fa-bloom');
+      bloom.style.transform = `translate(-50%,-50%) scale(${p * 16})`;
+      // fade out so it doesn't blot the label at full size
+      bloom.style.opacity = `${Math.max(0, 1 - p * 1.2)}`;
+      if (p > 0 && p < 1) lbl('fa','Hold...');
+    },
+    complete() {
+      document.getElementById('el-fa-bloom').style.opacity = '0';
+      const btn = document.getElementById('btn-fa');
+      btn.classList.add('flash-done');
+      lbl('fa','✓ Done!');
+    },
+    reset() {
+      const bloom = document.getElementById('el-fa-bloom');
+      bloom.style.transform = 'translate(-50%,-50%) scale(0)';
+      bloom.style.opacity = '1';
+      document.getElementById('btn-fa').classList.remove('flash-done');
+    }
+  },
+
+  fb: {
+    update(p) {
+      const tide = document.getElementById('el-fb-tide');
+      tide.style.height = `${p * 100}%`;
+      if (p > 0 && p < 1) lbl('fb','Hold...');
+    },
+    complete() {
+      document.getElementById('el-fb-tide').style.height = '100%';
+      document.getElementById('el-fb-tide').style.borderRadius = 'inherit';
+      const btn = document.getElementById('btn-fb');
+      btn.classList.add('flash-done');
+      lbl('fb','✓ Done!');
+    },
+    reset() {
+      const tide = document.getElementById('el-fb-tide');
+      tide.style.height = '0';
+      tide.style.borderRadius = '0 0 9999px 9999px';
+      document.getElementById('btn-fb').classList.remove('flash-done');
+    }
+  },
+
+  fc: {
+    update(p) {
+      const bloom = document.getElementById('el-fc-bloom');
+      bloom.style.transform = `scale(${p * 20})`;
+      bloom.style.opacity = `${Math.max(0, 1 - p * 1.1)}`;
+      if (p > 0 && p < 1) lbl('fc','Hold...');
+    },
+    complete() {
+      document.getElementById('el-fc-bloom').style.opacity = '0';
+      const btn = document.getElementById('btn-fc');
+      btn.classList.add('flash-done');
+      lbl('fc','✓ Done!');
+    },
+    reset() {
+      const bloom = document.getElementById('el-fc-bloom');
+      bloom.style.transform = 'scale(0)';
+      bloom.style.opacity = '1';
+      document.getElementById('btn-fc').classList.remove('flash-done');
+    }
+  },
+};
+
+// ── generic hold engine ───────────────────────────────────────────────────────
+const ORIGINAL_LABEL = 'Mark complete ✓';
+function lbl(key, text) {
+  const el = document.getElementById(`lbl-${key}`);
+  if (el) el.textContent = text;
+}
+function hint(key, text) {
+  const el = document.getElementById(`hint-${key}`);
+  if (el) el.textContent = text;
+}
+
+const holdState = {};
+Object.keys(buttons).forEach(key => {
+  holdState[key] = { elapsed: 0, interval: null, done: false, resetTimer: null };
+
+  const btnEl = document.getElementById(`btn-${key}`);
+  if (!btnEl) return;
+
+  function startHold() {
+    const s = holdState[key];
+    if (s.done || s.interval) return;
+    hint(key, '');
+    s.interval = setInterval(() => {
+      s.elapsed = Math.min(s.elapsed + TICK, HOLD_MS);
+      const p = s.elapsed / HOLD_MS;
+      buttons[key].update(p);
+      if (s.elapsed >= HOLD_MS) {
+        clearInterval(s.interval);
+        s.interval = null;
+        s.done = true;
+        btnEl.classList.add('done');
+        btnEl.disabled = true;
+        buttons[key].complete();
+        hint(key, '✓ Resets in 2s — try again');
+        s.resetTimer = setTimeout(() => {
+          buttons[key].reset();
+          lbl(key, ORIGINAL_LABEL);
+          hint(key, '');
+          btnEl.classList.remove('done');
+          btnEl.disabled = false;
+          s.elapsed = 0;
+          s.done = false;
+          s.resetTimer = null;
+        }, 2000);
+      }
+    }, TICK);
+  }
+
+  function endHold() {
+    const s = holdState[key];
+    if (s.done) return;
+    if (s.interval) { clearInterval(s.interval); s.interval = null; }
+    s.elapsed = 0;
+    buttons[key].update(0);
+    lbl(key, ORIGINAL_LABEL);
+  }
+
+  btnEl.addEventListener('mousedown',   startHold);
+  btnEl.addEventListener('mouseup',     endHold);
+  btnEl.addEventListener('mouseleave',  endHold);
+  btnEl.addEventListener('touchstart',  e => { e.preventDefault(); startHold(); }, { passive:false });
+  btnEl.addEventListener('touchend',    e => { e.preventDefault(); endHold(); },   { passive:false });
+  btnEl.addEventListener('touchcancel', e => { e.preventDefault(); endHold(); },   { passive:false });
+});
+
+// size glow rings to their button on load
+window.addEventListener('load', () => {
+  ['ga','gb','gc'].forEach(key => {
+    const btn = document.getElementById(`btn-${key}`);
+    if (!btn) return;
+    // initialize aura/beat-ring size to zero — will grow via JS
+  });
+});
+</script>
+</body>
+</html>

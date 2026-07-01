@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Hold-to-Complete — 6 Animation Concepts</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=DM+Sans:opsz,wght@9..40,400;9..40,600;9..40,700&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --lime:        #b8e56a;
+    --lime-text:   rgba(184,229,106,0.92);
+    --lime-glow:   rgba(184,229,106,0.3);
+    --deep:        #0c3520;
+    --row-surface: rgba(8,22,10,0.72);
+    --row-border:  rgba(255,255,255,0.08);
+    --glass-edge:  rgba(255,255,255,0.30);
+    --glass-edge-b:rgba(255,255,255,0.10);
+    --card-exp:    rgba(22,42,22,0.55);
+    --divider:     rgba(255,255,255,0.22);
+    --badge-bg:    rgba(10,28,10,0.88);
+    --badge-edge:  rgba(255,255,255,0.28);
+    --text:        rgba(255,255,255,0.85);
+    --text-muted:  rgba(255,255,255,0.60);
+    --text-faint:  rgba(255,255,255,0.28);
+    --font:        'DM Sans', sans-serif;
+    --mono:        'JetBrains Mono', monospace;
+  }
+
+  body {
+    background: radial-gradient(ellipse at top, #0a1f10 0%, #04120a 60%, #020a05 100%);
+    font-family: var(--font); color: var(--text); min-height: 100vh; padding: 48px 28px 100px;
+  }
+
+  /* ── page header ────────────────────────────────────────────────────── */
+  .head { text-align:center; margin-bottom:8px; }
+  .head-kicker { font-size:11px; letter-spacing:3px; text-transform:uppercase; color:var(--lime-text); font-family:var(--mono); margin-bottom:12px; }
+  .head-title { font-size:30px; font-weight:700; letter-spacing:-0.5px; margin-bottom:10px; }
+  .head-sub { font-size:14px; color:var(--text-muted); max-width:620px; margin:0 auto; line-height:1.6; }
+  .instruction { display:inline-block; margin-top:16px; font-family:var(--mono); font-size:11px; color:var(--deep); background:var(--lime); border-radius:100px; padding:4px 16px; letter-spacing:0.5px; }
+
+  /* ── grid ───────────────────────────────────────────────────────────── */
+  .grid { display:grid; grid-template-columns:repeat(3,1fr); gap:56px 40px; max-width:1200px; margin:48px auto 0; justify-items:center; }
+  @media (max-width:1080px){ .grid{ grid-template-columns:repeat(2,1fr); } }
+  @media (max-width:740px){ .grid{ grid-template-columns:1fr; } }
+
+  .concept { display:flex; flex-direction:column; align-items:center; gap:16px; width:300px; }
+  .concept-head { text-align:center; }
+  .concept-num { display:inline-block; font-family:var(--mono); font-size:11px; font-weight:500; color:var(--deep); background:var(--lime); border-radius:100px; padding:2px 10px; margin-bottom:10px; letter-spacing:1px; }
+  .concept-name { font-size:17px; font-weight:700; margin-bottom:6px; }
+  .concept-desc { font-size:12px; color:var(--text-muted); line-height:1.55; max-width:280px; }
+
+  /* ── phone shell ─────────────────────────────────────────────────────── */
+  .phone { width:300px; height:580px; border-radius:42px; overflow:hidden; position:relative;
+    box-shadow:0 0 0 1px rgba(255,255,255,0.07), 0 30px 60px rgba(0,0,0,0.7); }
+  .bg { position:absolute; inset:0; background:
+      radial-gradient(ellipse at 28% 55%, rgba(36,82,18,0.55) 0%, transparent 55%),
+      radial-gradient(ellipse at 78% 28%, rgba(20,58,14,0.45) 0%, transparent 50%),
+      linear-gradient(155deg,#1a4a10 0%,#0d3010 45%,#091e07 100%); }
+  .tint { position:absolute; inset:0; background:rgba(4,10,4,0.55); }
+  .inner { position:relative; z-index:1; height:100%; padding:34px 14px 14px; display:flex; flex-direction:column; gap:8px; overflow:hidden; }
+
+  /* ── screen chrome ───────────────────────────────────────────────────── */
+  .eyebrow { font-size:8.5px; letter-spacing:1.8px; text-transform:uppercase; color:var(--text-muted); font-family:var(--mono); margin-bottom:2px; }
+  .greet { font-size:18px; font-weight:700; margin-bottom:2px; }
+
+  /* collapsed task rows above the open card */
+  .mini-row { display:flex; align-items:center; gap:10px; padding:10px 12px; background:var(--row-surface); border:1px solid var(--row-border); border-radius:12px; }
+  .mbadge { width:28px; height:28px; border-radius:8px; background:var(--badge-bg); border:1px solid var(--badge-edge); display:flex; align-items:center; justify-content:center; font-size:13px; flex-shrink:0; }
+  .mcount { font-size:7.5px; letter-spacing:1.2px; text-transform:uppercase; color:var(--lime-text); font-family:var(--mono); }
+  .mtitle { font-size:12px; font-weight:600; margin-top:1px; }
+  .mchev { font-size:11px; color:var(--text-faint); margin-left:auto; }
+
+  /* open task card — the glass drawer where the button lives */
+  .open-card { border-radius:14px; overflow:hidden; border:1px solid var(--glass-edge-b); border-top-color:var(--glass-edge); position:relative; flex:1; }
+  .open-blur { position:absolute; inset:0; background:var(--card-exp); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); }
+  .drawer { position:relative; z-index:1; padding:13px 13px 12px; display:flex; flex-direction:column; height:100%; }
+
+  /* step list inside the drawer */
+  .step-row { display:flex; align-items:flex-start; gap:9px; padding:8px 0; border-top:1px solid var(--divider); }
+  .step-row:first-child { border-top: none; }
+  .dot { width:16px; height:16px; border-radius:50%; border:1px solid var(--divider); display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:1px; }
+  .dot-n { font-family:var(--mono); font-size:8px; font-weight:700; color:var(--lime-text); }
+  .step-text { font-family:var(--mono); font-size:9.5px; line-height:1.5; color:var(--text); }
+
+  /* "more details →" link */
+  .details-link { font-family:var(--mono); font-size:9.5px; color:var(--lime-text); text-align:center; text-decoration:underline; text-decoration-style:dotted; margin-top:auto; padding-top:10px; cursor:pointer; }
+
+  /* ── the hold button — base styles ──────────────────────────────────── */
+  .hold-btn {
+    display: flex; align-items: center; justify-content: center;
+    position: relative; overflow: hidden;
+    width: 100%;
+    margin-top: 10px;
+    padding: 14px 0;
+    border: none; outline: none;
+    border-radius: 9999px;
+    background: var(--lime);
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: none;
+    transition: transform 0.05s ease;
+  }
+  .hold-btn:active { transform: scale(0.985); }
+  .hold-btn.done { cursor: default; }
+
+  .pill-label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--deep);
+    position: relative; z-index: 2;
+    pointer-events: none;
+    letter-spacing: -0.2px;
+    transition: opacity 0.15s;
+  }
+
+  /* ══════════════════════════════════════════════════════
+     CONCEPT 1 — CURTAIN PEEL
+     A dark overlay sits on top of the lime button and peels
+     back from right to left as you hold. What's left exposed
+     = confirmed. Simple, unambiguous direction.
+  ══════════════════════════════════════════════════════ */
+  .c1 .curtain {
+    position: absolute; inset: 0;
+    background: linear-gradient(90deg, rgba(7,24,10,0.92) 0%, rgba(10,30,12,0.88) 100%);
+    border-radius: inherit;
+    transform-origin: right center;
+    pointer-events: none;
+    z-index: 1;
+    transition: transform 0.05s linear;
+  }
+  .c1 .pill-label { mix-blend-mode: normal; }
+  .c1.done .curtain { display: none; }
+
+  /* ══════════════════════════════════════════════════════
+     CONCEPT 2 — FLOOR TRACK
+     A thin dark progress bar grows across the button's inner
+     floor left-to-right. Quiet — the button stays lime, only
+     the bottom strip moves. Clean, iOS-familiar feel.
+  ══════════════════════════════════════════════════════ */
+  .c2 .track-wrap {
+    position: absolute; left: 14px; right: 14px; bottom: 8px;
+    height: 3px; border-radius: 2px;
+    background: rgba(12,53,32,0.28);
+    overflow: hidden; pointer-events: none;
+    z-index: 1;
+  }
+  .c2 .track-fill {
+    height: 100%; width: 0; border-radius: 2px;
+    background: rgba(12,53,32,0.7);
+  }
+
+  /* ══════════════════════════════════════════════════════
+     CONCEPT 3 — GLOW EXPAND
+     While held, the button dims slightly and a lime halo
+     radiates outward — growing wider and brighter with each
+     second. Three staggered rings give it depth.
+  ══════════════════════════════════════════════════════ */
+  .c3 .dim-overlay {
+    position: absolute; inset: 0; border-radius: inherit;
+    background: rgba(8,26,10,0); pointer-events: none; z-index: 1;
+    transition: background 0.1s ease;
+  }
+  /* Glow rings live OUTSIDE the button — need a wrapper */
+  .c3-wrap { position: relative; width: 100%; margin-top: 10px; }
+  .c3-wrap .hold-btn { margin-top: 0; }
+  .ring {
+    position: absolute; inset: 0; border-radius: 9999px;
+    border: 2px solid rgba(184,229,106,0);
+    pointer-events: none; z-index: 0;
+  }
+  .ring1 { inset: -4px; }
+  .ring2 { inset: -10px; }
+  .ring3 { inset: -18px; }
+
+  /* ══════════════════════════════════════════════════════
+     CONCEPT 4 — TEXT MORPH
+     The label IS the animation. It counts down through
+     stages: "Hold…" → "Almost…" → "Done!" A thin underline
+     track below the text shows progress without obscuring it.
+  ══════════════════════════════════════════════════════ */
+  .c4 .underline-wrap {
+    position: absolute; left: 18px; right: 18px; bottom: 8px;
+    height: 2px; border-radius: 1px;
+    background: rgba(12,53,32,0.22); overflow: hidden;
+    pointer-events: none; z-index: 1;
+  }
+  .c4 .underline-fill {
+    height: 100%; width: 0; border-radius: 1px;
+    background: var(--deep);
+  }
+  /* label morphs via JS — no extra CSS needed */
+
+  /* ══════════════════════════════════════════════════════
+     CONCEPT 5 — SQUEEZE
+     The pill physically compresses (scaleY shrinks) while
+     you hold, like pressing a spring into a surface. On
+     completion it springs back with an overshoot before
+     settling. Purely tactile — the animation is the feedback.
+  ══════════════════════════════════════════════════════ */
+  .c5.hold-btn { transform-origin: center bottom; }
+  .c5.spring { animation: spring-back 0.45s cubic-bezier(0.34,1.56,0.64,1) forwards; }
+  @keyframes spring-back {
+    0%   { transform: scaleY(0.62); }
+    60%  { transform: scaleY(1.06); }
+    100% { transform: scaleY(1); }
+  }
+
+  /* ══════════════════════════════════════════════════════
+     CONCEPT 6 — FLOOD FILL
+     A brighter disc blooms outward from the center of the
+     button like ink dropped in water. The spreading wash
+     "confirms" the surface from the inside out. On done:
+     the whole button flashes white then settles.
+  ══════════════════════════════════════════════════════ */
+  .c6 .flood-circle {
+    position: absolute;
+    width: 24px; height: 24px;
+    top: 50%; left: 50%;
+    transform: translate(-50%,-50%) scale(0);
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,255,255,0.55) 0%, rgba(184,229,106,0.3) 50%, transparent 70%);
+    pointer-events: none; z-index: 1;
+  }
+  .c6.flash { animation: lime-flash 0.35s ease forwards; }
+  @keyframes lime-flash {
+    0%   { background: #d4f48a; }
+    40%  { background: #ffffff; }
+    100% { background: var(--lime); }
+  }
+
+  /* ── shared done state ───────────────────────────────────────────────── */
+  .hold-btn.done .pill-label { color: var(--deep); }
+
+  /* ── reset hint ──────────────────────────────────────────────────────── */
+  .reset-hint { font-family:var(--mono); font-size:9px; color:var(--text-faint); text-align:center; letter-spacing:0.5px; margin-top:6px; height:14px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hold-btn, .c5.spring { animation: none; transition: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="head">
+  <div class="head-kicker">Mark Complete · Hold Interaction</div>
+  <div class="head-title">6 hold-to-complete animations</div>
+  <div class="head-sub">Each button requires a 3-second press-and-hold to complete the task. Releasing early cancels it. Try them — they're fully interactive.</div>
+  <div class="instruction">Press and hold each button for 3 seconds →</div>
+</div>
+
+<div class="grid">
+
+  <!-- ══ 01 CURTAIN PEEL ══ -->
+  <div class="concept">
+    <div class="concept-head">
+      <span class="concept-num">01</span>
+      <div class="concept-name">Curtain Peel</div>
+      <div class="concept-desc">A dark layer sits on top of the lime button and peels back left-to-right. The exposed lime is your confirmed progress. Release early and it snaps back.</div>
+    </div>
+    <div class="phone">
+      <div class="bg"></div><div class="tint"></div>
+      <div class="inner">
+        <div class="eyebrow">On Deck · Friday</div>
+        <div class="greet">Morning, John</div>
+        <div class="mini-row"><div class="mbadge">🔍</div><div><div class="mcount">Task 2 of 3</div><div class="mtitle">Walk the edges.</div></div><div class="mchev">›</div></div>
+        <div class="open-card">
+          <div class="open-blur"></div>
+          <div class="drawer">
+            <div class="step-row"><div class="dot"><span class="dot-n">1</span></div><div class="step-text">Put a tuna can in zone 1's spray path and run until full — write down the minutes.</div></div>
+            <div class="step-row"><div class="dot"><span class="dot-n">2</span></div><div class="step-text">Repeat for every zone — head types differ, so times will vary.</div></div>
+            <div class="details-link">More details →</div>
+            <button class="hold-btn c1" id="btn1" data-concept="1">
+              <span class="curtain" id="curtain1"></span>
+              <span class="pill-label" id="label1">Mark complete ✓</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="reset-hint" id="hint1"></div>
+  </div>
+
+  <!-- ══ 02 FLOOR TRACK ══ -->
+  <div class="concept">
+    <div class="concept-head">
+      <span class="concept-num">02</span>
+      <div class="concept-name">Floor Track</div>
+      <div class="concept-desc">A thin dark progress bar grows across the bottom of the lime pill. The button stays lime — only the bottom strip moves. Quiet and minimal.</div>
+    </div>
+    <div class="phone">
+      <div class="bg"></div><div class="tint"></div>
+      <div class="inner">
+        <div class="eyebrow">On Deck · Friday</div>
+        <div class="greet">Morning, John</div>
+        <div class="mini-row"><div class="mbadge">🔍</div><div><div class="mcount">Task 2 of 3</div><div class="mtitle">Walk the edges.</div></div><div class="mchev">›</div></div>
+        <div class="open-card">
+          <div class="open-blur"></div>
+          <div class="drawer">
+            <div class="step-row"><div class="dot"><span class="dot-n">1</span></div><div class="step-text">Put a tuna can in zone 1's spray path and run until full — write down the minutes.</div></div>
+            <div class="step-row"><div class="dot"><span class="dot-n">2</span></div><div class="step-text">Repeat for every zone — head types differ, so times will vary.</div></div>
+            <div class="details-link">More details →</div>
+            <button class="hold-btn c2" id="btn2" data-concept="2">
+              <span class="pill-label" id="label2">Mark complete ✓</span>
+              <div class="track-wrap"><div class="track-fill" id="track2"></div></div>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="reset-hint" id="hint2"></div>
+  </div>
+
+  <!-- ══ 03 GLOW EXPAND ══ -->
+  <div class="concept">
+    <div class="concept-head">
+      <span class="concept-num">03</span>
+      <div class="concept-name">Glow Expand</div>
+      <div class="concept-desc">The button dims slightly while held. A lime halo radiates outward from the button's edge, growing wider and brighter over 3 seconds.</div>
+    </div>
+    <div class="phone">
+      <div class="bg"></div><div class="tint"></div>
+      <div class="inner">
+        <div class="eyebrow">On Deck · Friday</div>
+        <div class="greet">Morning, John</div>
+        <div class="mini-row"><div class="mbadge">🔍</div><div><div class="mcount">Task 2 of 3</div><div class="mtitle">Walk the edges.</div></div><div class="mchev">›</div></div>
+        <div class="open-card">
+          <div class="open-blur"></div>
+          <div class="drawer">
+            <div class="step-row"><div class="dot"><span class="dot-n">1</span></div><div class="step-text">Put a tuna can in zone 1's spray path and run until full — write down the minutes.</div></div>
+            <div class="step-row"><div class="dot"><span class="dot-n">2</span></div><div class="step-text">Repeat for every zone — head types differ, so times will vary.</div></div>
+            <div class="details-link">More details →</div>
+            <div class="c3-wrap" id="wrap3">
+              <div class="ring ring1" id="ring3a"></div>
+              <div class="ring ring2" id="ring3b"></div>
+              <div class="ring ring3" id="ring3c"></div>
+              <button class="hold-btn c3" id="btn3" data-concept="3">
+                <div class="dim-overlay" id="dim3"></div>
+                <span class="pill-label" id="label3">Mark complete ✓</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="reset-hint" id="hint3"></div>
+  </div>
+
+  <!-- ══ 04 TEXT MORPH ══ -->
+  <div class="concept">
+    <div class="concept-head">
+      <span class="concept-num">04</span>
+      <div class="concept-name">Text Morph</div>
+      <div class="concept-desc">The label is the animation. It counts down through three stages as you hold. A thin underline track grows underneath so the progress is clear.</div>
+    </div>
+    <div class="phone">
+      <div class="bg"></div><div class="tint"></div>
+      <div class="inner">
+        <div class="eyebrow">On Deck · Friday</div>
+        <div class="greet">Morning, John</div>
+        <div class="mini-row"><div class="mbadge">🔍</div><div><div class="mcount">Task 2 of 3</div><div class="mtitle">Walk the edges.</div></div><div class="mchev">›</div></div>
+        <div class="open-card">
+          <div class="open-blur"></div>
+          <div class="drawer">
+            <div class="step-row"><div class="dot"><span class="dot-n">1</span></div><div class="step-text">Put a tuna can in zone 1's spray path and run until full — write down the minutes.</div></div>
+            <div class="step-row"><div class="dot"><span class="dot-n">2</span></div><div class="step-text">Repeat for every zone — head types differ, so times will vary.</div></div>
+            <div class="details-link">More details →</div>
+            <button class="hold-btn c4" id="btn4" data-concept="4">
+              <span class="pill-label" id="label4">Mark complete ✓</span>
+              <div class="underline-wrap"><div class="underline-fill" id="uline4"></div></div>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="reset-hint" id="hint4"></div>
+  </div>
+
+  <!-- ══ 05 SQUEEZE ══ -->
+  <div class="concept">
+    <div class="concept-head">
+      <span class="concept-num">05</span>
+      <div class="concept-name">Squeeze</div>
+      <div class="concept-desc">The pill compresses vertically as you hold — like pressing a spring into a surface. On completion it snaps back with a slight overshoot. The physics are the whole experience.</div>
+    </div>
+    <div class="phone">
+      <div class="bg"></div><div class="tint"></div>
+      <div class="inner">
+        <div class="eyebrow">On Deck · Friday</div>
+        <div class="greet">Morning, John</div>
+        <div class="mini-row"><div class="mbadge">🔍</div><div><div class="mcount">Task 2 of 3</div><div class="mtitle">Walk the edges.</div></div><div class="mchev">›</div></div>
+        <div class="open-card">
+          <div class="open-blur"></div>
+          <div class="drawer">
+            <div class="step-row"><div class="dot"><span class="dot-n">1</span></div><div class="step-text">Put a tuna can in zone 1's spray path and run until full — write down the minutes.</div></div>
+            <div class="step-row"><div class="dot"><span class="dot-n">2</span></div><div class="step-text">Repeat for every zone — head types differ, so times will vary.</div></div>
+            <div class="details-link">More details →</div>
+            <button class="hold-btn c5" id="btn5" data-concept="5">
+              <span class="pill-label" id="label5">Mark complete ✓</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="reset-hint" id="hint5"></div>
+  </div>
+
+  <!-- ══ 06 FLOOD FILL ══ -->
+  <div class="concept">
+    <div class="concept-head">
+      <span class="concept-num">06</span>
+      <div class="concept-name">Flood Fill</div>
+      <div class="concept-desc">A bright disc blooms outward from the center of the button — like ink dropped in water. The surface "confirms" from the inside out. On done: a full white flash.</div>
+    </div>
+    <div class="phone">
+      <div class="bg"></div><div class="tint"></div>
+      <div class="inner">
+        <div class="eyebrow">On Deck · Friday</div>
+        <div class="greet">Morning, John</div>
+        <div class="mini-row"><div class="mbadge">🔍</div><div><div class="mcount">Task 2 of 3</div><div class="mtitle">Walk the edges.</div></div><div class="mchev">›</div></div>
+        <div class="open-card">
+          <div class="open-blur"></div>
+          <div class="drawer">
+            <div class="step-row"><div class="dot"><span class="dot-n">1</span></div><div class="step-text">Put a tuna can in zone 1's spray path and run until full — write down the minutes.</div></div>
+            <div class="step-row"><div class="dot"><span class="dot-n">2</span></div><div class="step-text">Repeat for every zone — head types differ, so times will vary.</div></div>
+            <div class="details-link">More details →</div>
+            <button class="hold-btn c6" id="btn6" data-concept="6">
+              <div class="flood-circle" id="flood6"></div>
+              <span class="pill-label" id="label6">Mark complete ✓</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="reset-hint" id="hint6"></div>
+  </div>
+
+</div>
+
+<script>
+  // ── hold state per button ────────────────────────────────────────────────
+  const HOLD_DURATION = 3000; // ms
+  const TICK = 40; // ms between progress updates
+
+  const state = {};
+  for (let i = 1; i <= 6; i++) {
+    state[i] = { holding: false, elapsed: 0, interval: null, done: false, resetTimer: null };
+  }
+
+  // ── text morph stages for concept 4 ─────────────────────────────────────
+  const textStages = [
+    { threshold: 0,    label: 'Mark complete ✓' },
+    { threshold: 0.01, label: 'Hold...' },
+    { threshold: 0.38, label: 'Confirming ✦ ✦ ✦' },
+    { threshold: 0.65, label: 'Almost ✦ ✦ ○' },
+    { threshold: 0.86, label: 'Almost ✦ ○ ○' },
+  ];
+
+  // ── update visual per concept ────────────────────────────────────────────
+  function updateVisual(id, pct) {
+    switch (id) {
+      case 1: {
+        const curtain = document.getElementById('curtain1');
+        // Curtain peels from right to left: scaleX goes from 1 (full cover) → 0 (gone)
+        curtain.style.transform = `scaleX(${1 - pct})`;
+        if (pct > 0 && pct < 1) {
+          document.getElementById('label1').textContent = 'Keep holding...';
+        }
+        break;
+      }
+      case 2: {
+        document.getElementById('track2').style.width = `${pct * 100}%`;
+        if (pct > 0 && pct < 1) {
+          document.getElementById('label2').textContent = 'Keep holding...';
+        }
+        break;
+      }
+      case 3: {
+        // Dim the button surface slightly
+        const dimAlpha = pct * 0.22;
+        document.getElementById('dim3').style.background = `rgba(8,26,10,${dimAlpha})`;
+        // Three rings expand outward and grow more opaque
+        const rings = [
+          { el: document.getElementById('ring3a'), delay: 0,    maxOpacity: 0.7, maxSpread: 4  },
+          { el: document.getElementById('ring3b'), delay: 0.2,  maxOpacity: 0.5, maxSpread: 8  },
+          { el: document.getElementById('ring3c'), delay: 0.4,  maxOpacity: 0.3, maxSpread: 14 },
+        ];
+        rings.forEach(({ el, delay, maxOpacity, maxSpread }) => {
+          const ringPct = Math.max(0, Math.min(1, (pct - delay) / (1 - delay)));
+          const spread = ringPct * maxSpread;
+          const opacity = ringPct * maxOpacity;
+          el.style.inset = `-${spread}px`;
+          el.style.borderColor = `rgba(184,229,106,${opacity})`;
+          el.style.boxShadow = `0 0 ${ringPct * 12}px rgba(184,229,106,${opacity * 0.5})`;
+        });
+        if (pct > 0 && pct < 1) {
+          document.getElementById('label3').textContent = 'Keep holding...';
+        }
+        break;
+      }
+      case 4: {
+        document.getElementById('uline4').style.width = `${pct * 100}%`;
+        // Morph label through stages
+        const label = document.getElementById('label4');
+        let currentLabel = textStages[0].label;
+        for (const stage of textStages) {
+          if (pct >= stage.threshold) currentLabel = stage.label;
+        }
+        label.textContent = currentLabel;
+        break;
+      }
+      case 5: {
+        // Squeeze: scaleY from 1.0 → 0.62 as pct goes 0 → 1
+        if (!state[5].done) {
+          const btn = document.getElementById('btn5');
+          const scaleY = 1 - pct * 0.38;
+          btn.style.transform = `scaleY(${scaleY})`;
+        }
+        if (pct > 0 && pct < 1) {
+          document.getElementById('label5').textContent = 'Keep holding...';
+        }
+        break;
+      }
+      case 6: {
+        const flood = document.getElementById('flood6');
+        // Circle grows from center outward
+        flood.style.transform = `translate(-50%,-50%) scale(${pct * 14})`;
+        // Fades out as it fills so it doesn't obscure the label
+        flood.style.opacity = Math.max(0, 1 - pct * 1.1).toString();
+        if (pct > 0 && pct < 1) {
+          document.getElementById('label6').textContent = 'Keep holding...';
+        }
+        break;
+      }
+    }
+  }
+
+  // ── completion per concept ────────────────────────────────────────────────
+  function completeConcept(id) {
+    switch (id) {
+      case 1: {
+        document.getElementById('curtain1').style.transform = 'scaleX(0)';
+        document.getElementById('label1').textContent = '✓ Done!';
+        break;
+      }
+      case 2: {
+        document.getElementById('track2').style.width = '100%';
+        document.getElementById('label2').textContent = '✓ Done!';
+        break;
+      }
+      case 3: {
+        document.getElementById('label3').textContent = '✓ Done!';
+        // Flash all rings bright
+        ['ring3a','ring3b','ring3c'].forEach((rid, i) => {
+          const el = document.getElementById(rid);
+          el.style.borderColor = `rgba(184,229,106,${0.8 - i * 0.2})`;
+          el.style.transition = 'border-color 0.3s ease, inset 0.3s ease';
+          setTimeout(() => {
+            el.style.borderColor = 'rgba(184,229,106,0)';
+            el.style.inset = `${-30 - i * 12}px`;
+          }, 200);
+        });
+        break;
+      }
+      case 4: {
+        document.getElementById('label4').textContent = '✓ Done!';
+        document.getElementById('uline4').style.width = '100%';
+        break;
+      }
+      case 5: {
+        const btn = document.getElementById('btn5');
+        btn.style.transform = '';
+        btn.classList.add('spring');
+        document.getElementById('label5').textContent = '✓ Done!';
+        break;
+      }
+      case 6: {
+        const btn = document.getElementById('btn6');
+        const flood = document.getElementById('flood6');
+        flood.style.opacity = '0';
+        btn.classList.add('flash');
+        document.getElementById('label6').textContent = '✓ Done!';
+        break;
+      }
+    }
+    showHint(id, '✓ Resets in 2s — try again');
+  }
+
+  // ── reset per concept ─────────────────────────────────────────────────────
+  function resetConcept(id) {
+    const btn = document.getElementById(`btn${id}`);
+    btn.classList.remove('done', 'flash', 'spring');
+    btn.disabled = false;
+    btn.style.transform = '';
+    btn.style.boxShadow = '';
+
+    const label = document.getElementById(`label${id}`);
+    label.textContent = 'Mark complete ✓';
+
+    switch (id) {
+      case 1:
+        document.getElementById('curtain1').style.transform = 'scaleX(1)';
+        break;
+      case 2:
+        document.getElementById('track2').style.width = '0';
+        break;
+      case 3:
+        document.getElementById('dim3').style.background = 'rgba(8,26,10,0)';
+        ['ring3a','ring3b','ring3c'].forEach(rid => {
+          const el = document.getElementById(rid);
+          el.style.transition = '';
+          el.style.borderColor = 'rgba(184,229,106,0)';
+          el.style.inset = '0';
+          el.style.boxShadow = '';
+        });
+        break;
+      case 4:
+        document.getElementById('uline4').style.width = '0';
+        break;
+      case 5:
+        // nothing extra
+        break;
+      case 6:
+        const flood = document.getElementById('flood6');
+        flood.style.transform = 'translate(-50%,-50%) scale(0)';
+        flood.style.opacity = '1';
+        break;
+    }
+
+    state[id].elapsed = 0;
+    state[id].done = false;
+    state[id].resetTimer = null;
+    clearHint(id);
+  }
+
+  function showHint(id, msg) {
+    const el = document.getElementById(`hint${id}`);
+    if (el) el.textContent = msg;
+  }
+  function clearHint(id) {
+    const el = document.getElementById(`hint${id}`);
+    if (el) el.textContent = '';
+  }
+
+  // ── hold start / end ──────────────────────────────────────────────────────
+  function startHold(id) {
+    const s = state[id];
+    if (s.done || s.interval) return;
+    s.holding = true;
+    showHint(id, '');
+
+    s.interval = setInterval(() => {
+      if (!s.holding) return;
+      s.elapsed += TICK;
+      const pct = Math.min(s.elapsed / HOLD_DURATION, 1);
+      updateVisual(id, pct);
+
+      if (pct >= 1) {
+        clearInterval(s.interval);
+        s.interval = null;
+        s.done = true;
+        const btn = document.getElementById(`btn${id}`);
+        btn.classList.add('done');
+        btn.disabled = true;
+        completeConcept(id);
+        s.resetTimer = setTimeout(() => resetConcept(id), 2000);
+      }
+    }, TICK);
+  }
+
+  function endHold(id) {
+    const s = state[id];
+    if (s.done) return;
+    s.holding = false;
+    if (s.interval) {
+      clearInterval(s.interval);
+      s.interval = null;
+    }
+    // snap back to zero
+    s.elapsed = 0;
+    updateVisual(id, 0);
+    const label = document.getElementById(`label${id}`);
+    if (label) label.textContent = 'Mark complete ✓';
+
+    // extra per-concept snap-back
+    if (id === 5) {
+      document.getElementById('btn5').style.transform = '';
+    }
+    if (id === 3) {
+      ['ring3a','ring3b','ring3c'].forEach(rid => {
+        const el = document.getElementById(rid);
+        el.style.borderColor = 'rgba(184,229,106,0)';
+        el.style.inset = '0';
+        el.style.boxShadow = '';
+      });
+      document.getElementById('dim3').style.background = 'rgba(8,26,10,0)';
+    }
+    if (id === 6) {
+      const flood = document.getElementById('flood6');
+      flood.style.transform = 'translate(-50%,-50%) scale(0)';
+      flood.style.opacity = '1';
+    }
+  }
+
+  // ── wire events to all 6 buttons ─────────────────────────────────────────
+  for (let i = 1; i <= 6; i++) {
+    const btn = document.getElementById(`btn${i}`);
+    const id = i;
+    btn.addEventListener('mousedown',   () => startHold(id));
+    btn.addEventListener('mouseup',     () => endHold(id));
+    btn.addEventListener('mouseleave',  () => endHold(id));
+    btn.addEventListener('touchstart',  (e) => { e.preventDefault(); startHold(id); }, { passive: false });
+    btn.addEventListener('touchend',    (e) => { e.preventDefault(); endHold(id); }, { passive: false });
+    btn.addEventListener('touchcancel', (e) => { e.preventDefault(); endHold(id); }, { passive: false });
+  }
+</script>
+</body>
+</html>
