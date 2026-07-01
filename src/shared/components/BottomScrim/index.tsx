@@ -1,0 +1,1 @@
+export { BottomScrim } from './BottomScrim';

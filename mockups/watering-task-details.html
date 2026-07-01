@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Watering Task — Details expand</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --lime:             #b8e56a;
+    --lime-dim:         rgba(184,229,106,0.10);
+    --lime-border:      rgba(184,229,106,0.18);
+    --lime-text:        rgba(184,229,106,0.80);
+    --primary-deep:     #0c3520;
+    --row-surface:      rgba(8,22,10,0.72);
+    --row-done:         rgba(8,22,10,0.42);
+    --row-border:       rgba(255,255,255,0.08);
+    --glass-edge:       rgba(255,255,255,0.32);
+    --glass-edge-bot:   rgba(255,255,255,0.10);
+    --glass-panel:      rgba(255,255,255,0.10);
+    --text:             rgba(255,255,255,0.85);
+    --text-muted:       rgba(255,255,255,0.60);
+    --text-faint:       rgba(255,255,255,0.28);
+    --badge-bg:         rgba(10,28,10,0.88);
+    --badge-edge:       rgba(255,255,255,0.28);
+    --photo-fade-top:   rgba(10,28,10,0.04);
+    --photo-fade-bot:   rgba(10,28,10,0.58);
+    --divider:          rgba(255,255,255,0.08);
+    --details-bg:       rgba(255,255,255,0.05);
+    --font:             'DM Sans', sans-serif;
+    --mono:             'DM Mono', monospace;
+  }
+
+  body {
+    background: #04120a;
+    font-family: var(--font);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 40px 24px 80px;
+  }
+
+  /* ── page header ── */
+  .page-label {
+    text-align: center;
+    font-size: 10px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    font-family: var(--mono);
+    margin-bottom: 8px;
+  }
+  .page-title {
+    text-align: center;
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .page-sub {
+    text-align: center;
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 52px;
+    max-width: 520px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.5;
+  }
+
+  /* ── layout ── */
+  .stage {
+    display: flex;
+    gap: 36px;
+    justify-content: center;
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .column {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    flex: 0 0 auto;
+  }
+
+  .col-tag {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--lime);
+    font-family: var(--mono);
+    font-weight: 500;
+  }
+  .col-note {
+    font-size: 12px;
+    color: var(--text-muted);
+    text-align: center;
+    max-width: 240px;
+    line-height: 1.5;
+  }
+
+  /* ── phone shell ── */
+  .phone {
+    width: 320px;
+    border-radius: 46px;
+    overflow: hidden;
+    position: relative;
+    box-shadow:
+      0 0 0 1px rgba(255,255,255,0.07),
+      0 28px 60px rgba(0,0,0,0.75);
+  }
+
+  .phone-bg {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at 25% 55%, rgba(36,82,18,0.55) 0%, transparent 55%),
+      radial-gradient(ellipse at 75% 30%, rgba(20,58,14,0.45) 0%, transparent 50%),
+      linear-gradient(155deg, #1a4a10 0%, #0d3010 45%, #091e07 100%);
+  }
+  .phone-tint {
+    position: absolute;
+    inset: 0;
+    background: rgba(4,10,4,0.55);
+  }
+  .phone-inner {
+    position: relative;
+    z-index: 1;
+    padding: 38px 16px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  /* ── screen chrome ── */
+  .eyebrow {
+    font-size: 9px;
+    letter-spacing: 1.8px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    font-family: var(--mono);
+    margin-bottom: 3px;
+  }
+  .greeting {
+    font-size: 21px;
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+
+  .ctx-strip {
+    display: flex;
+    gap: 7px;
+    margin-bottom: 8px;
+  }
+  .ctx-pill {
+    flex: 1;
+    background: var(--row-surface);
+    border: 1px solid var(--row-border);
+    border-radius: 11px;
+    padding: 7px 10px;
+    font-size: 10px;
+    color: var(--text-muted);
+    line-height: 1.4;
+  }
+  .ctx-pill strong {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .prog-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .prog-label {
+    font-size: 10px;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+  .prog-bar {
+    flex: 1;
+    height: 3px;
+    background: rgba(255,255,255,0.10);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .prog-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--lime), rgba(184,229,106,0.55));
+    border-radius: 2px;
+  }
+
+  /* ── accordion list ── */
+  .accordion {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  /* collapsed rows */
+  .row-col {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 11px 13px;
+    background: var(--row-surface);
+    border: 1px solid var(--row-border);
+    border-radius: 14px;
+  }
+  .row-col.locked { opacity: 0.45; }
+
+  .badge {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: var(--badge-bg);
+    border: 1px solid var(--badge-edge);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    flex-shrink: 0;
+  }
+  .row-text { flex: 1; min-width: 0; }
+  .row-count {
+    font-size: 8.5px;
+    color: var(--text-faint);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    font-family: var(--mono);
+  }
+  .row-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .row-chev { font-size: 13px; color: var(--text-faint); }
+
+  /* ── open glass card ── */
+  .row-open {
+    border-radius: 16px;
+    border: 1px solid var(--glass-edge-bot);
+    border-top-color: var(--glass-edge);
+    background: var(--glass-panel);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    overflow: hidden;
+  }
+
+  /* photo strip */
+  .photo {
+    height: 86px;
+    position: relative;
+    background:
+      radial-gradient(ellipse at 35% 55%, rgba(50,110,22,0.85) 0%, transparent 65%),
+      radial-gradient(ellipse at 75% 35%, rgba(30,80,14,0.65) 0%, transparent 55%),
+      linear-gradient(130deg, #205c10 0%, #2d6a1a 55%, #1a4a0e 100%);
+    overflow: hidden;
+  }
+  /* grass texture */
+  .photo::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      radial-gradient(circle, rgba(90,170,40,0.25) 1px, transparent 1px),
+      radial-gradient(circle, rgba(60,130,20,0.18) 1px, transparent 1px);
+    background-size: 11px 11px, 6px 6px;
+    background-position: 0 0, 3px 4px;
+  }
+  .photo-fade {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, var(--photo-fade-top) 0%, var(--photo-fade-bot) 100%);
+  }
+  /* sprinkler glow hint */
+  .photo::after {
+    content: '💧';
+    position: absolute;
+    bottom: 12px;
+    right: 16px;
+    font-size: 20px;
+    opacity: 0.55;
+  }
+
+  /* card body */
+  .card-body { padding: 12px 14px 14px; }
+
+  .card-desc {
+    font-size: 11.5px;
+    color: var(--text-muted);
+    line-height: 1.58;
+    margin-bottom: 12px;
+  }
+
+  /* main steps */
+  .steps {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    margin-bottom: 12px;
+  }
+  .step {
+    display: flex;
+    gap: 9px;
+    align-items: flex-start;
+  }
+  .step-num {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.13);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9px;
+    font-family: var(--mono);
+    color: var(--text-muted);
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .step-text {
+    font-size: 11.5px;
+    color: var(--text);
+    line-height: 1.5;
+    flex: 1;
+  }
+
+  /* ── "More details" toggle ── */
+  .more-toggle {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+    margin-bottom: 12px;
+    width: fit-content;
+  }
+  .more-toggle-text {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--lime);
+    text-decoration: underline;
+    text-decoration-style: dotted;
+    text-underline-offset: 3px;
+    text-decoration-color: rgba(184,229,106,0.45);
+  }
+  .more-toggle-arrow {
+    font-size: 11px;
+    color: var(--lime);
+    transition: transform 0.25s ease;
+  }
+  .more-toggle-arrow.open { transform: rotate(90deg); }
+
+  /* ── details panel ── */
+  .details-panel {
+    border-top: 1px solid var(--divider);
+    padding-top: 12px;
+    margin-bottom: 12px;
+    display: none; /* hidden state — JS toggles this */
+  }
+  .details-panel.visible { display: block; }
+
+  .details-eyebrow {
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    font-family: var(--mono);
+    margin-bottom: 8px;
+  }
+  .details-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .detail-step {
+    display: flex;
+    gap: 9px;
+    align-items: flex-start;
+  }
+  .detail-num {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--lime-dim);
+    border: 1px solid var(--lime-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9px;
+    font-family: var(--mono);
+    color: var(--lime-text);
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .detail-text {
+    font-size: 11px;
+    color: var(--text-muted);
+    line-height: 1.55;
+    flex: 1;
+  }
+  .detail-text strong {
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  /* calibration note inside details */
+  .cal-note {
+    display: flex;
+    gap: 7px;
+    align-items: flex-start;
+    background: var(--lime-dim);
+    border: 1px solid var(--lime-border);
+    border-radius: 9px;
+    padding: 8px 10px;
+    margin-top: 2px;
+  }
+  .cal-note-icon { font-size: 11px; flex-shrink: 0; margin-top: 1px; }
+  .cal-note-text {
+    font-size: 10px;
+    color: var(--lime-text);
+    line-height: 1.5;
+  }
+
+  /* CTA */
+  .cta-pill {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    background: var(--lime);
+    border-radius: 100px;
+    padding: 10px 16px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--primary-deep);
+    letter-spacing: 0.2px;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  /* ── arrow between phones ── */
+  .arrow-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding-top: 120px;
+    gap: 6px;
+    flex: 0 0 auto;
+  }
+  .arrow-line {
+    width: 32px;
+    height: 2px;
+    background: linear-gradient(90deg, var(--row-border), rgba(184,229,106,0.3));
+    border-radius: 1px;
+  }
+  .arrow-tip {
+    font-size: 13px;
+    color: rgba(184,229,106,0.4);
+  }
+  .arrow-label {
+    font-size: 9.5px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    font-family: var(--mono);
+    text-align: center;
+    max-width: 60px;
+    line-height: 1.4;
+  }
+
+  /* ── content spec table ── */
+  .spec-box {
+    max-width: 680px;
+    margin: 52px auto 0;
+    border-radius: 18px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.07);
+  }
+  .spec-header {
+    background: rgba(255,255,255,0.04);
+    padding: 18px 24px 14px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .spec-header-label {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--lime);
+    font-family: var(--mono);
+    margin-bottom: 4px;
+  }
+  .spec-header-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .spec-section {
+    padding: 16px 24px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+  .spec-section:last-child { border-bottom: none; }
+  .spec-section-tag {
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    font-family: var(--mono);
+    margin-bottom: 8px;
+  }
+  .spec-section-tag.lime { color: var(--lime-text); }
+  .spec-body {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+  .spec-body ol {
+    padding-left: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 6px;
+  }
+  .spec-body li { color: var(--text-muted); }
+  .spec-body strong { color: var(--text); font-weight: 600; }
+  .spec-rule {
+    font-size: 11px;
+    color: var(--text-faint);
+    margin-top: 8px;
+    font-style: italic;
+  }
+</style>
+</head>
+<body>
+
+<p class="page-label">Kura · Today tab · Watering task — sprinkler system</p>
+<h1 class="page-title">Tap for more details</h1>
+<p class="page-sub">The main card stays clean. All the zone-timing and calibration detail lives one tap away — only for people who need it.</p>
+
+<div class="stage">
+
+  <!-- ── STATE 1: basic card ── -->
+  <div class="column">
+    <span class="col-tag">Default state</span>
+    <p class="col-note">What every user sees when the card opens</p>
+
+    <div class="phone">
+      <div class="phone-bg"></div>
+      <div class="phone-tint"></div>
+      <div class="phone-inner">
+
+        <div class="eyebrow">On Deck · Friday</div>
+        <div class="greeting">Morning, John</div>
+
+        <div class="ctx-strip">
+          <div class="ctx-pill"><strong>6</strong>day streak</div>
+          <div class="ctx-pill"><strong>24° ☀️</strong>Sunny</div>
+        </div>
+
+        <div class="prog-row">
+          <span class="prog-label">Task 1 of 3</span>
+          <div class="prog-bar"><div class="prog-fill"></div></div>
+        </div>
+
+        <div class="accordion">
+
+          <!-- open: soak — basic only -->
+          <div class="row-open">
+            <div class="photo"><div class="photo-fade"></div></div>
+            <div class="card-body">
+
+              <div class="card-desc">
+                Your lawn needs 1 inch of water a week. Water on 1 or 2 mornings — never more.
+              </div>
+
+              <div class="steps">
+                <div class="step">
+                  <div class="step-num">1</div>
+                  <div class="step-text">Run each zone for its set amount of time</div>
+                </div>
+                <div class="step">
+                  <div class="step-num">2</div>
+                  <div class="step-text">Stop if puddles form — move to the next zone</div>
+                </div>
+                <div class="step">
+                  <div class="step-num">3</div>
+                  <div class="step-text">Morning is best — less water evaporates</div>
+                </div>
+              </div>
+
+              <!-- more details link — not yet tapped -->
+              <div class="more-toggle">
+                <span class="more-toggle-text">How do I find my zone times?</span>
+                <span class="more-toggle-arrow">›</span>
+              </div>
+
+              <div class="cta-pill">Mark complete ✓</div>
+            </div>
+          </div>
+
+          <div class="row-col">
+            <div class="badge">🔍</div>
+            <div class="row-text">
+              <div class="row-count">Task 2 of 3 · Today</div>
+              <div class="row-title">Walk the edges.</div>
+            </div>
+            <div class="row-chev">›</div>
+          </div>
+
+          <div class="row-col">
+            <div class="badge">🌱</div>
+            <div class="row-text">
+              <div class="row-count">Task 3 of 3 · Today</div>
+              <div class="row-title">Feed the lawn.</div>
+            </div>
+            <div class="row-chev">›</div>
+          </div>
+
+          <div class="row-col locked">
+            <div class="badge">✂️</div>
+            <div class="row-text">
+              <div class="row-count">Tomorrow · Saturday</div>
+              <div class="row-title">First mow of the week.</div>
+            </div>
+            <div class="row-chev">🔒</div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- arrow -->
+  <div class="arrow-col">
+    <div class="arrow-label">tap link</div>
+    <div class="arrow-tip">›</div>
+  </div>
+
+  <!-- ── STATE 2: details expanded ── -->
+  <div class="column">
+    <span class="col-tag">Details expanded</span>
+    <p class="col-note">Tapping the link reveals calibration steps inline — card grows, nothing navigates away</p>
+
+    <div class="phone">
+      <div class="phone-bg"></div>
+      <div class="phone-tint"></div>
+      <div class="phone-inner" style="overflow-y: auto; max-height: 700px;">
+
+        <div class="eyebrow">On Deck · Friday</div>
+        <div class="greeting">Morning, John</div>
+
+        <div class="ctx-strip">
+          <div class="ctx-pill"><strong>6</strong>day streak</div>
+          <div class="ctx-pill"><strong>24° ☀️</strong>Sunny</div>
+        </div>
+
+        <div class="prog-row">
+          <span class="prog-label">Task 1 of 3</span>
+          <div class="prog-bar"><div class="prog-fill"></div></div>
+        </div>
+
+        <div class="accordion">
+
+          <!-- open: soak — details revealed -->
+          <div class="row-open">
+            <div class="photo"><div class="photo-fade"></div></div>
+            <div class="card-body">
+
+              <div class="card-desc">
+                Your lawn needs 1 inch of water a week. Water on 1 or 2 mornings — never more.
+              </div>
+
+              <div class="steps">
+                <div class="step">
+                  <div class="step-num">1</div>
+                  <div class="step-text">Run each zone for its set amount of time</div>
+                </div>
+                <div class="step">
+                  <div class="step-num">2</div>
+                  <div class="step-text">Stop if puddles form — move to the next zone</div>
+                </div>
+                <div class="step">
+                  <div class="step-num">3</div>
+                  <div class="step-text">Morning is best — less water evaporates</div>
+                </div>
+              </div>
+
+              <!-- more details link — now open -->
+              <div class="more-toggle" style="margin-bottom: 12px;">
+                <span class="more-toggle-text">How do I find my zone times?</span>
+                <span class="more-toggle-arrow open">›</span>
+              </div>
+
+              <!-- details panel — visible -->
+              <div class="details-panel visible">
+                <div class="details-eyebrow">Finding your zone times — do this once</div>
+                <div class="details-steps">
+                  <div class="detail-step">
+                    <div class="detail-num">1</div>
+                    <div class="detail-text">Put an empty <strong>tuna can</strong> in zone 1's spray path and run until it's full — write down the minutes</div>
+                  </div>
+                  <div class="detail-step">
+                    <div class="detail-num">2</div>
+                    <div class="detail-text">Repeat for <strong>every zone</strong> and note each time separately — heads differ, so times will vary</div>
+                  </div>
+                  <div class="detail-step">
+                    <div class="detail-num">3</div>
+                    <div class="detail-text">Divide each time by <strong>1 or 2</strong> (your watering days per week) — that's your per-session run time per zone</div>
+                  </div>
+                </div>
+                <div class="cal-note">
+                  <div class="cal-note-icon">📌</div>
+                  <div class="cal-note-text">Your times won't change unless you adjust or replace the sprinkler heads.</div>
+                </div>
+              </div>
+
+              <div class="cta-pill" style="margin-top: 12px;">Mark complete ✓</div>
+            </div>
+          </div>
+
+          <div class="row-col">
+            <div class="badge">🔍</div>
+            <div class="row-text">
+              <div class="row-count">Task 2 of 3 · Today</div>
+              <div class="row-title">Walk the edges.</div>
+            </div>
+            <div class="row-chev">›</div>
+          </div>
+
+          <div class="row-col">
+            <div class="badge">🌱</div>
+            <div class="row-text">
+              <div class="row-count">Task 3 of 3 · Today</div>
+              <div class="row-title">Feed the lawn.</div>
+            </div>
+            <div class="row-chev">›</div>
+          </div>
+
+          <div class="row-col locked">
+            <div class="badge">✂️</div>
+            <div class="row-text">
+              <div class="row-count">Tomorrow · Saturday</div>
+              <div class="row-title">First mow of the week.</div>
+            </div>
+            <div class="row-chev">🔒</div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- content spec -->
+<div class="spec-box">
+  <div class="spec-header">
+    <div class="spec-header-label">Content spec</div>
+    <div class="spec-header-title">What goes where, and why</div>
+  </div>
+
+  <div class="spec-section">
+    <div class="spec-section-tag">Main card — always visible</div>
+    <div class="spec-body">
+      <strong>Description:</strong> "Your lawn needs 1 inch of water a week. Water on 1 or 2 mornings — never more."<br><br>
+      <strong>Steps:</strong>
+      <ol>
+        <li>Run each zone for its set amount of time</li>
+        <li>Stop if puddles form — move to the next zone</li>
+        <li>Morning is best — less water evaporates</li>
+      </ol>
+      <p class="spec-rule">These steps work for anyone who already knows their zone times. No math, no calibration language.</p>
+    </div>
+  </div>
+
+  <div class="spec-section">
+    <div class="spec-section-tag lime">Details panel — tap to reveal</div>
+    <div class="spec-body">
+      <strong>Link label:</strong> "How do I find my zone times?" — a real question, not a generic "More details". Self-selects the people who need it.<br><br>
+      <strong>Section header:</strong> "Finding your zone times — do this once"<br><br>
+      <strong>Detail steps:</strong>
+      <ol>
+        <li>Put an empty tuna can in zone 1's spray path and run until full — write down the minutes</li>
+        <li>Repeat for every zone and note each time separately — heads differ, so times will vary</li>
+        <li>Divide each time by 1 or 2 (your watering days per week) — that's your per-session run time per zone</li>
+      </ol>
+      <strong>Note:</strong> "Your times won't change unless you adjust or replace the sprinkler heads."
+    </div>
+  </div>
+
+  <div class="spec-section">
+    <div class="spec-section-tag">Design decision</div>
+    <div class="spec-body">
+      The link reads <strong>"How do I find my zone times?"</strong> rather than "More details" or "Learn more". Phrasing it as the user's own question means only people who actually have that question tap it — the rest see clean steps and move on.
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

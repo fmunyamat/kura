@@ -10,13 +10,9 @@ interface ClearedCardProps {
   streakLabel: string;
 }
 
-// Card — sits at the front position, same glass surface as a real front card.
+// Card — the celebration panel at the top of the cleared list. Same glass
+// surface as a real card; it sits in normal flow above the locked preview row.
 const Card = styled.View`
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  z-index: 3;
   border-radius: ${({ theme }) => theme.radii.lg}px;
   border-width: 1px;
   border-color: ${({ theme }) => theme.colors.glassClearEdgeBottom};

@@ -136,7 +136,7 @@ export const Location = () => {
   };
 
   return (
-    <OnboardingScreenShell currentStep={1} totalSteps={4}>
+    <OnboardingScreenShell currentStep={1} totalSteps={5}>
       {/* KeyboardAvoidingView shrinks the available height when the keyboard
           appears, keeping the CTA visible above the keyboard at all times. */}
       <KeyboardAvoidingView

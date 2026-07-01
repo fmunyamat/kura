@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Task Card Expand — 6 Concepts</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=DM+Mono:wght@400;500&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --lime:           #b8e56a;
+    --lime-dim:       rgba(184,229,106,0.12);
+    --lime-border:    rgba(184,229,106,0.25);
+    --lime-text:      rgba(184,229,106,0.82);
+    --deep:           #0c3520;
+    --grad-dark:      #0c3520;
+    --grad-mid:       #135633;
+    --grad-midlt:     #1e6b3c;
+    --row-surface:    rgba(8,22,10,0.72);
+    --row-border:     rgba(255,255,255,0.08);
+    --glass-edge:     rgba(255,255,255,0.32);
+    --glass-edge-bot: rgba(255,255,255,0.10);
+    --glass-panel:    rgba(255,255,255,0.10);
+    --glass-input:    rgba(255,255,255,0.13);
+    --text:           rgba(255,255,255,0.86);
+    --text-muted:     rgba(255,255,255,0.60);
+    --text-faint:     rgba(255,255,255,0.30);
+    --badge-bg:       rgba(10,28,10,0.88);
+    --badge-edge:     rgba(255,255,255,0.28);
+    --fade-top:       rgba(10,28,10,0.0);
+    --fade-bot:       rgba(10,28,10,0.78);
+    --font:           'DM Sans', sans-serif;
+    --mono:           'DM Mono', monospace;
+    --serif:          'Fraunces', serif;
+  }
+
+  body {
+    background: radial-gradient(ellipse at top, #0a1f10 0%, #04120a 60%, #020a05 100%);
+    font-family: var(--font); color: var(--text); min-height: 100vh; padding: 48px 28px 100px;
+  }
+
+  .head { text-align:center; margin-bottom:56px; }
+  .head-kicker { font-size:11px; letter-spacing:3px; text-transform:uppercase; color:var(--lime); font-family:var(--mono); margin-bottom:12px; }
+  .head-title { font-size:30px; font-weight:700; letter-spacing:-0.5px; margin-bottom:10px; }
+  .head-sub { font-size:14px; color:var(--text-muted); max-width:560px; margin:0 auto; line-height:1.6; }
+
+  .grid { display:grid; grid-template-columns:repeat(3,1fr); gap:56px 40px; max-width:1200px; margin:0 auto; justify-items:center; }
+  @media (max-width:1080px){ .grid{ grid-template-columns:repeat(2,1fr);} }
+  @media (max-width:760px){ .grid{ grid-template-columns:1fr;} }
+
+  .concept { display:flex; flex-direction:column; align-items:center; gap:16px; width:300px; }
+  .concept-head { text-align:center; }
+  .concept-num { display:inline-block; font-family:var(--mono); font-size:11px; font-weight:500; color:var(--deep); background:var(--lime); border-radius:100px; padding:2px 10px; margin-bottom:10px; letter-spacing:1px; }
+  .concept-name { font-size:17px; font-weight:700; margin-bottom:6px; }
+  .concept-desc { font-size:12px; color:var(--text-muted); line-height:1.55; max-width:280px; }
+
+  /* phone */
+  .phone { width:300px; height:600px; border-radius:42px; overflow:hidden; position:relative; box-shadow:0 0 0 1px rgba(255,255,255,0.07), 0 30px 60px rgba(0,0,0,0.7); }
+  .bg { position:absolute; inset:0; background:
+      radial-gradient(ellipse at 28% 55%, rgba(36,82,18,0.55) 0%, transparent 55%),
+      radial-gradient(ellipse at 78% 28%, rgba(20,58,14,0.45) 0%, transparent 50%),
+      linear-gradient(155deg,#1a4a10 0%,#0d3010 45%,#091e07 100%); }
+  .tint { position:absolute; inset:0; background:rgba(4,10,4,0.55); }
+  .inner { position:relative; z-index:1; height:100%; padding:34px 14px 18px; overflow:hidden; }
+
+  .eyebrow { font-size:8.5px; letter-spacing:1.8px; text-transform:uppercase; color:var(--text-muted); font-family:var(--mono); margin-bottom:3px; }
+  .greet { font-size:18px; font-weight:700; margin-bottom:12px; }
+
+  /* mini collapsed accordion behind */
+  .mini-row { display:flex; align-items:center; gap:10px; padding:11px 12px; background:var(--row-surface); border:1px solid var(--row-border); border-radius:13px; margin-bottom:8px; }
+  .mini-row.lit { border-color:var(--glass-edge); }
+  .mbadge { width:30px; height:30px; border-radius:9px; background:var(--badge-bg); border:1px solid var(--badge-edge); display:flex; align-items:center; justify-content:center; font-size:14px; flex-shrink:0; }
+  .mcount { font-size:8px; letter-spacing:1.2px; text-transform:uppercase; color:var(--lime); }
+  .mtitle { font-size:12.5px; font-weight:600; margin-top:1px; }
+  .mchev { font-size:12px; color:var(--text-faint); margin-left:auto; }
+
+  /* dim + expand shared animation */
+  .dim { position:absolute; inset:0; z-index:4; background:rgba(2,7,3,0.74); opacity:0; animation:dimIn 8s ease-in-out infinite; }
+  @keyframes dimIn { 0%,9%{opacity:0;} 18%,84%{opacity:1;} 93%,100%{opacity:0;} }
+  .expand { position:absolute; z-index:5; opacity:0; transform-origin:50% 32%;
+    animation:expandIn 8s cubic-bezier(.22,1,.36,1) infinite; overflow:hidden; }
+  @keyframes expandIn {
+    0%,9%   { opacity:0; transform:scale(.5) translateY(40px); }
+    18%,84% { opacity:1; transform:scale(1) translateY(0); }
+    93%,100%{ opacity:0; transform:scale(.5) translateY(40px); }
+  }
+  /* most concepts: inset card leaving dim sliver around */
+  .expand.inset { top:20px; left:12px; right:12px; bottom:14px; border-radius:26px; }
+  .expand.floaty { top:60px; left:26px; right:26px; bottom:60px; border-radius:26px; }
+  .expand.bleed { inset:0; border-radius:42px; }
+
+  .closeX { position:absolute; top:14px; right:14px; z-index:8; width:28px; height:28px; border-radius:50%; background:rgba(0,0,0,0.4); backdrop-filter:blur(8px); display:flex; align-items:center; justify-content:center; font-size:13px; color:#fff; }
+
+  /* shared content atoms */
+  .photo { position:relative; overflow:hidden; background:
+      radial-gradient(ellipse at 35% 50%, rgba(50,110,22,0.9) 0%, transparent 68%),
+      linear-gradient(130deg,#205c10,#2d6a1a 55%,#1a4a0e); }
+  .photo::before { content:''; position:absolute; inset:0; background-image:radial-gradient(circle, rgba(90,170,40,0.22) 1px, transparent 1px), radial-gradient(circle, rgba(60,130,20,0.16) 1px, transparent 1px); background-size:12px 12px,7px 7px; background-position:0 0,3px 4px; }
+  .pfade { position:absolute; inset:0; background:linear-gradient(to bottom,var(--fade-top),var(--fade-bot)); }
+
+  .count { font-size:8.5px; letter-spacing:1.5px; text-transform:uppercase; color:var(--lime); }
+  .desc { font-size:11.5px; color:var(--text-muted); line-height:1.55; }
+  .seclbl { font-size:8.5px; letter-spacing:2px; text-transform:uppercase; color:var(--text-faint); font-family:var(--mono); }
+  .qstep { display:flex; gap:9px; align-items:flex-start; padding:5px 0; }
+  .qn { width:17px; height:17px; border-radius:50%; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.13); display:flex; align-items:center; justify-content:center; font-size:8.5px; font-family:var(--mono); color:var(--text-muted); flex-shrink:0; margin-top:1px; }
+  .qt { font-size:11px; color:var(--text); line-height:1.45; flex:1; }
+  .dstep { display:flex; gap:10px; align-items:flex-start; padding:6px 0; }
+  .dn { width:19px; height:19px; border-radius:50%; background:var(--lime-dim); border:1px solid var(--lime-border); display:flex; align-items:center; justify-content:center; font-size:9px; font-family:var(--mono); color:var(--lime); flex-shrink:0; margin-top:1px; }
+  .dt { font-size:11.5px; color:var(--text); line-height:1.5; flex:1; }
+  .note { display:flex; gap:7px; align-items:flex-start; background:rgba(184,229,106,0.08); border:1px solid rgba(184,229,106,0.18); border-radius:10px; padding:9px 11px; }
+  .note-i { font-size:12px; flex-shrink:0; margin-top:1px; }
+  .note-t { font-size:10.5px; color:var(--lime-text); line-height:1.5; }
+  .cta { display:flex; align-items:center; justify-content:center; background:var(--lime); border-radius:100px; padding:12px; font-size:12px; font-weight:700; color:var(--deep); }
+  .divline { height:1px; background:var(--row-border); margin:13px 0; }
+
+  /* ═══ 1 HERO PHOTO TOP ═══ */
+  .c1 .expand { background:linear-gradient(180deg,var(--grad-mid),var(--grad-dark)); display:flex; flex-direction:column; }
+  .c1 .ex-hero { height:140px; flex-shrink:0; position:relative; }
+  .c1 .ex-hero .htitle { position:absolute; left:16px; bottom:12px; z-index:2; }
+  .c1 .ex-hero .htitle .count { margin-bottom:3px; }
+  .c1 .ex-hero .htitle .h { font-size:22px; font-weight:700; }
+  .c1 .ex-scroll { flex:1; padding:14px 16px; overflow:hidden; }
+  .c1 .ex-foot { padding:12px 16px 16px; flex-shrink:0; }
+
+  /* ═══ 2 FULL-BLEED IMMERSIVE ═══ */
+  .c2 .expand { background:#0a1f0c; }
+  .c2 .ex-photo { position:absolute; inset:0; }
+  .c2 .ex-photo .pfade { background:linear-gradient(to bottom, rgba(8,20,8,0.1) 0%, rgba(8,20,8,0.2) 30%, rgba(8,20,8,0.96) 72%); }
+  .c2 .ex-glass { position:absolute; left:0; right:0; bottom:0; top:42%; background:rgba(10,28,12,0.5); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); border-top:1px solid var(--glass-edge); border-radius:26px 26px 42px 42px; padding:18px 18px 18px; }
+  .c2 .ex-glass .h { font-size:21px; font-weight:700; margin-bottom:2px; }
+
+  /* ═══ 3 FLOATING FOCUS CARD ═══ */
+  .c3 .expand { background:linear-gradient(165deg,rgba(30,107,60,0.96),rgba(12,53,32,0.98)); border:1px solid var(--glass-edge); padding:22px 18px 18px; display:flex; flex-direction:column; gap:0; box-shadow:0 24px 50px rgba(0,0,0,0.5); }
+  .c3 .fc-badge { width:46px; height:46px; border-radius:14px; background:var(--badge-bg); border:1px solid var(--badge-edge); display:flex; align-items:center; justify-content:center; font-size:22px; margin-bottom:12px; }
+  .c3 .fc-h { font-size:21px; font-weight:700; line-height:1.1; margin-bottom:6px; }
+
+  /* ═══ 4 SPLIT HEADER ═══ */
+  .c4 .expand { background:var(--grad-dark); display:flex; flex-direction:column; }
+  .c4 .sh-head { background:linear-gradient(160deg,var(--grad-midlt),var(--grad-mid)); padding:26px 18px 18px; flex-shrink:0; }
+  .c4 .sh-badge { width:42px; height:42px; border-radius:13px; background:rgba(0,0,0,0.28); border:1px solid var(--badge-edge); display:flex; align-items:center; justify-content:center; font-size:20px; margin-bottom:10px; }
+  .c4 .sh-h { font-size:21px; font-weight:700; margin-bottom:8px; }
+  .c4 .sh-chip { display:inline-flex; align-items:center; gap:5px; background:var(--lime-dim); border:1px solid var(--lime-border); border-radius:100px; padding:4px 10px; font-size:10px; color:var(--lime); font-weight:600; }
+  .c4 .sh-body { flex:1; padding:16px 18px; overflow:hidden; }
+  .c4 .sh-foot { padding:12px 16px 16px; border-top:1px solid var(--row-border); background:rgba(0,0,0,0.2); flex-shrink:0; }
+
+  /* ═══ 5 SECTIONED ACCORDION ═══ */
+  .c5 .expand { background:linear-gradient(180deg,var(--grad-mid),var(--grad-dark)); display:flex; flex-direction:column; padding:22px 16px 16px; }
+  .c5 .sa-h { font-size:20px; font-weight:700; margin-bottom:14px; }
+  .c5 .sa-sec { background:rgba(0,0,0,0.22); border:1px solid var(--row-border); border-radius:14px; margin-bottom:9px; overflow:hidden; }
+  .c5 .sa-secbar { display:flex; align-items:center; gap:9px; padding:12px 13px; }
+  .c5 .sa-ico { font-size:14px; }
+  .c5 .sa-sectitle { font-size:12.5px; font-weight:600; flex:1; }
+  .c5 .sa-arrow { font-size:12px; color:var(--text-faint); }
+  .c5 .sa-arrow.open { color:var(--lime); }
+  .c5 .sa-secbody { padding:0 13px 12px; }
+  .c5 .sa-foot { margin-top:auto; padding-top:12px; }
+
+  /* ═══ 6 EDITORIAL ═══ */
+  .c6 .expand { background:linear-gradient(170deg,#0e3d24,#071d10); padding:30px 22px 18px; display:flex; flex-direction:column; }
+  .c6 .ed-kick { font-family:var(--mono); font-size:9px; letter-spacing:2.5px; text-transform:uppercase; color:var(--lime); margin-bottom:14px; }
+  .c6 .ed-big { font-family:var(--serif); font-size:54px; font-weight:600; line-height:0.9; color:#fff; margin-bottom:4px; }
+  .c6 .ed-bigsub { font-family:var(--serif); font-size:24px; font-weight:600; line-height:1.05; color:var(--text); margin-bottom:18px; }
+  .c6 .ed-step { padding:11px 0; border-top:1px solid rgba(255,255,255,0.1); display:flex; gap:12px; }
+  .c6 .ed-step:last-of-type { border-bottom:1px solid rgba(255,255,255,0.1); }
+  .c6 .ed-sn { font-family:var(--serif); font-size:15px; color:var(--lime); flex-shrink:0; width:16px; }
+  .c6 .ed-st { font-size:11.5px; line-height:1.55; color:var(--text); flex:1; }
+  .c6 .ed-quote { border-left:2px solid var(--lime); padding-left:12px; margin-top:16px; font-family:var(--serif); font-size:12.5px; font-style:italic; color:var(--lime-text); line-height:1.5; }
+  .c6 .ed-cta { margin-top:auto; padding-top:16px; }
+  .c6 .ed-ctabtn { display:flex; align-items:center; justify-content:space-between; border-top:1px solid rgba(255,255,255,0.15); padding-top:14px; font-size:13px; font-weight:700; color:var(--lime); }
+</style>
+</head>
+<body>
+
+<div class="head">
+  <div class="head-kicker">Kura · Today tab</div>
+  <h1 class="head-title">Card expands to full screen — 6 layouts</h1>
+  <p class="head-sub">Same behaviour everywhere: tap the open task and it grows to near-fullscreen as the background dims. What differs is how the expanded card is laid out inside. Each phone loops the expand → hold → collapse.</p>
+</div>
+
+<div class="grid">
+
+  <!-- ═══ 1 HERO PHOTO TOP ═══ -->
+  <div class="concept c1">
+    <div class="concept-head"><span class="concept-num">01</span><div class="concept-name">Hero Photo Top</div><div class="concept-desc">Photo becomes a banner with the title on it; everything scrolls beneath, Mark complete pinned at the bottom.</div></div>
+    <div class="phone"><div class="bg"></div><div class="tint"></div><div class="inner">
+      <div class="eyebrow">On Deck · Friday</div><div class="greet">Morning, John</div>
+      <div class="mini-row lit"><div class="mbadge">💧</div><div><div class="mcount">Task 1 of 3</div><div class="mtitle">Give it a deep soak.</div></div><div class="mchev">⌄</div></div>
+      <div class="mini-row"><div class="mbadge">🔍</div><div><div class="mcount">Task 2 of 3</div><div class="mtitle">Walk the edges.</div></div><div class="mchev">›</div></div>
+      <div class="dim"></div>
+      <div class="expand inset c1x">
+        <div class="ex-hero photo"><div class="pfade"></div><div class="closeX">✕</div><div class="htitle"><div class="count">Task 1 of 3 · Today</div><div class="h">Give it a deep soak.</div></div></div>
+        <div class="ex-scroll">
+          <div class="desc">Your lawn needs 1 inch of water a week. Water on 1 or 2 mornings — never more.</div>
+          <div style="margin-top:12px;">
+            <div class="qstep"><div class="qn">1</div><div class="qt">Run each zone for its set time</div></div>
+            <div class="qstep"><div class="qn">2</div><div class="qt">Stop if puddles form — move on</div></div>
+            <div class="qstep"><div class="qn">3</div><div class="qt">Morning is best — less evaporates</div></div>
+          </div>
+          <div class="divline"></div>
+          <div class="seclbl" style="margin-bottom:8px;">Finding your zone times — once</div>
+          <div class="dstep"><div class="dn">1</div><div class="dt">Tuna can in zone 1, run until full — note the minutes</div></div>
+          <div class="dstep"><div class="dn">2</div><div class="dt">Repeat per zone — heads differ, times vary</div></div>
+        </div>
+        <div class="ex-foot"><div class="cta">Mark complete ✓</div></div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- ═══ 2 FULL-BLEED IMMERSIVE ═══ -->
+  <div class="concept c2">
+    <div class="concept-head"><span class="concept-num">02</span><div class="concept-name">Full-Bleed Immersive</div><div class="concept-desc">The photo fills the whole screen; a frosted glass panel holds the steps and rises over the image. Most cinematic.</div></div>
+    <div class="phone"><div class="bg"></div><div class="tint"></div><div class="inner">
+      <div class="eyebrow">On Deck · Friday</div><div class="greet">Morning, John</div>
+      <div class="mini-row lit"><div class="mbadge">💧</div><div><div class="mcount">Task 1 of 3</div><div class="mtitle">Give it a deep soak.</div></div><div class="mchev">⌄</div></div>
+      <div class="mini-row"><div class="mbadge">🔍</div><div><div class="mcount">Task 2 of 3</div><div class="mtitle">Walk the edges.</div></div><div class="mchev">›</div></div>
+      <div class="dim"></div>
+      <div class="expand bleed">
+        <div class="ex-photo photo"><div class="pfade"></div></div>
+        <div class="closeX">✕</div>
+        <div class="ex-glass">
+          <div class="count" style="margin-bottom:3px;">Task 1 of 3 · Today</div>
+          <div class="h">Give it a deep soak.</div>
+          <div class="desc" style="margin:6px 0 12px;">1 inch of water a week, on 1 or 2 mornings.</div>
+          <div class="seclbl" style="margin-bottom:7px;">Finding your zone times</div>
+          <div class="dstep"><div class="dn">1</div><div class="dt">Tuna can in zone 1, run until full</div></div>
+          <div class="dstep"><div class="dn">2</div><div class="dt">Repeat per zone — times vary</div></div>
+          <div class="dstep"><div class="dn">3</div><div class="dt">Divide by 1–2 watering days = run time</div></div>
+          <div class="cta" style="margin-top:13px;">Mark complete ✓</div>
+        </div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- ═══ 3 FLOATING FOCUS CARD ═══ -->
+  <div class="concept c3">
+    <div class="concept-head"><span class="concept-num">03</span><div class="concept-name">Floating Focus Card</div><div class="concept-desc">Doesn't go edge-to-edge — floats centered with dim all around. Feels like a focused index card, compact, no photo.</div></div>
+    <div class="phone"><div class="bg"></div><div class="tint"></div><div class="inner">
+      <div class="eyebrow">On Deck · Friday</div><div class="greet">Morning, John</div>
+      <div class="mini-row lit"><div class="mbadge">💧</div><div><div class="mcount">Task 1 of 3</div><div class="mtitle">Give it a deep soak.</div></div><div class="mchev">⌄</div></div>
+      <div class="mini-row"><div class="mbadge">🔍</div><div><div class="mcount">Task 2 of 3</div><div class="mtitle">Walk the edges.</div></div><div class="mchev">›</div></div>
+      <div class="mini-row"><div class="mbadge">🌱</div><div><div class="mcount">Task 3 of 3</div><div class="mtitle">Feed the lawn.</div></div><div class="mchev">›</div></div>
+      <div class="dim"></div>
+      <div class="expand floaty">
+        <div class="closeX">✕</div>
+        <div class="fc-badge">💧</div>
+        <div class="count" style="margin-bottom:3px;">Task 1 of 3 · Today</div>
+        <div class="fc-h">Give it a deep soak.</div>
+        <div class="desc" style="margin-bottom:14px;">1 inch a week, on 1 or 2 mornings.</div>
+        <div class="seclbl" style="margin-bottom:7px;">Finding your zone times</div>
+        <div class="dstep"><div class="dn">1</div><div class="dt">Tuna can in zone 1, run until full</div></div>
+        <div class="dstep"><div class="dn">2</div><div class="dt">Repeat per zone — times vary</div></div>
+        <div class="dstep"><div class="dn">3</div><div class="dt">Divide by 1–2 watering days</div></div>
+        <div class="note" style="margin-top:12px;"><div class="note-i">📌</div><div class="note-t">Won't change unless you adjust the heads.</div></div>
+        <div class="cta" style="margin-top:14px;">Mark complete ✓</div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- ═══ 4 SPLIT HEADER ═══ -->
+  <div class="concept c4">
+    <div class="concept-head"><span class="concept-num">04</span><div class="concept-name">Split Header</div><div class="concept-desc">A coloured header zone (badge, title, the 1-inch goal chip) stays fixed; the how-to scrolls below; CTA pinned in its own bar.</div></div>
+    <div class="phone"><div class="bg"></div><div class="tint"></div><div class="inner">
+      <div class="eyebrow">On Deck · Friday</div><div class="greet">Morning, John</div>
+      <div class="mini-row lit"><div class="mbadge">💧</div><div><div class="mcount">Task 1 of 3</div><div class="mtitle">Give it a deep soak.</div></div><div class="mchev">⌄</div></div>
+      <div class="mini-row"><div class="mbadge">🔍</div><div><div class="mcount">Task 2 of 3</div><div class="mtitle">Walk the edges.</div></div><div class="mchev">›</div></div>
+      <div class="dim"></div>
+      <div class="expand inset">
+        <div class="sh-head">
+          <div class="closeX">✕</div>
+          <div class="sh-badge">💧</div>
+          <div class="count" style="margin-bottom:3px;">Task 1 of 3 · Today</div>
+          <div class="sh-h">Give it a deep soak.</div>
+          <div class="sh-chip">🎯 1 inch of water this week</div>
+        </div>
+        <div class="sh-body">
+          <div class="seclbl" style="margin-bottom:8px;">Finding your zone times — do once</div>
+          <div class="dstep"><div class="dn">1</div><div class="dt">Tuna can in zone 1, run until full — note minutes</div></div>
+          <div class="dstep"><div class="dn">2</div><div class="dt">Repeat per zone — heads differ, times vary</div></div>
+          <div class="dstep"><div class="dn">3</div><div class="dt">Divide by 1–2 watering days = run time</div></div>
+          <div class="note" style="margin-top:10px;"><div class="note-i">📌</div><div class="note-t">Times won't change unless you adjust the heads.</div></div>
+        </div>
+        <div class="sh-foot"><div class="cta">Mark complete ✓</div></div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- ═══ 5 SECTIONED ACCORDION ═══ -->
+  <div class="concept c5">
+    <div class="concept-head"><span class="concept-num">05</span><div class="concept-name">Sectioned Accordion</div><div class="concept-desc">Full screen, but content is grouped into tappable sections — Today's steps, Finding your times, Why 1 inch. Open only what you need.</div></div>
+    <div class="phone"><div class="bg"></div><div class="tint"></div><div class="inner">
+      <div class="eyebrow">On Deck · Friday</div><div class="greet">Morning, John</div>
+      <div class="mini-row lit"><div class="mbadge">💧</div><div><div class="mcount">Task 1 of 3</div><div class="mtitle">Give it a deep soak.</div></div><div class="mchev">⌄</div></div>
+      <div class="mini-row"><div class="mbadge">🔍</div><div><div class="mcount">Task 2 of 3</div><div class="mtitle">Walk the edges.</div></div><div class="mchev">›</div></div>
+      <div class="dim"></div>
+      <div class="expand inset">
+        <div class="closeX">✕</div>
+        <div class="count" style="margin-bottom:3px;">Task 1 of 3 · Today</div>
+        <div class="sa-h">Give it a deep soak.</div>
+        <div class="sa-sec">
+          <div class="sa-secbar"><span class="sa-ico">✅</span><span class="sa-sectitle">Today's steps</span><span class="sa-arrow open">⌄</span></div>
+          <div class="sa-secbody">
+            <div class="qstep"><div class="qn">1</div><div class="qt">Run each zone for its set time</div></div>
+            <div class="qstep"><div class="qn">2</div><div class="qt">Stop if puddles form</div></div>
+            <div class="qstep"><div class="qn">3</div><div class="qt">Morning is best</div></div>
+          </div>
+        </div>
+        <div class="sa-sec">
+          <div class="sa-secbar"><span class="sa-ico">🥫</span><span class="sa-sectitle">Finding your zone times</span><span class="sa-arrow open">⌄</span></div>
+          <div class="sa-secbody">
+            <div class="dstep"><div class="dn">1</div><div class="dt">Tuna can in zone 1, run until full</div></div>
+            <div class="dstep"><div class="dn">2</div><div class="dt">Repeat per zone — times vary</div></div>
+          </div>
+        </div>
+        <div class="sa-sec"><div class="sa-secbar"><span class="sa-ico">💡</span><span class="sa-sectitle">Why 1 inch?</span><span class="sa-arrow">›</span></div></div>
+        <div class="sa-foot"><div class="cta">Mark complete ✓</div></div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- ═══ 6 EDITORIAL ═══ -->
+  <div class="concept c6">
+    <div class="concept-head"><span class="concept-num">06</span><div class="concept-name">Editorial</div><div class="concept-desc">A magazine spread: a giant "1 inch" as the hero, refined serif headings, the note as a pull-quote. Detail as something worth reading.</div></div>
+    <div class="phone"><div class="bg"></div><div class="tint"></div><div class="inner">
+      <div class="eyebrow">On Deck · Friday</div><div class="greet">Morning, John</div>
+      <div class="mini-row lit"><div class="mbadge">💧</div><div><div class="mcount">Task 1 of 3</div><div class="mtitle">Give it a deep soak.</div></div><div class="mchev">⌄</div></div>
+      <div class="mini-row"><div class="mbadge">🔍</div><div><div class="mcount">Task 2 of 3</div><div class="mtitle">Walk the edges.</div></div><div class="mchev">›</div></div>
+      <div class="dim"></div>
+      <div class="expand inset">
+        <div class="closeX">✕</div>
+        <div class="ed-kick">Watering · The one rule</div>
+        <div class="ed-big">1 inch</div>
+        <div class="ed-bigsub">of water,<br>once a week.</div>
+        <div class="ed-step"><div class="ed-sn">1</div><div class="ed-st">Set a tuna can in the spray path and run until it's full — that's your one-inch time.</div></div>
+        <div class="ed-step"><div class="ed-sn">2</div><div class="ed-st">Repeat for every zone — different heads fill at different speeds.</div></div>
+        <div class="ed-step"><div class="ed-sn">3</div><div class="ed-st">Split it across 1 or 2 mornings — never more than two.</div></div>
+        <div class="ed-quote">Get this once and you'll never guess again.</div>
+        <div class="ed-cta"><div class="ed-ctabtn"><span>Mark complete</span><span>✓</span></div></div>
+      </div>
+    </div></div>
+  </div>
+
+</div>
+
+</body>
+</html>
