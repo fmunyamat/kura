@@ -46,9 +46,9 @@ const Pill = styled(Pressable)<{ $isLocked: boolean }>`
   align-items: center;
   overflow: hidden;
   background-color: ${({ theme, $isLocked }) =>
-    $isLocked ? theme.colors.glassClearInput : theme.colors.limeSolid};
+    $isLocked ? theme.colors.glassInput : theme.colors.accentPrimary};
   border-width: ${({ $isLocked }) => ($isLocked ? 1 : 0)}px;
-  border-color: ${({ theme }) => theme.colors.glassClearDivider};
+  border-color: ${({ theme }) => theme.colors.glassDivider};
 `;
 
 // PillLabel — the button text. Sits after the curtain panels in the JSX tree
@@ -58,7 +58,7 @@ const PillLabel = styled.Text<{ $isLocked: boolean }>`
   font-family: ${({ theme }) => theme.typography.fontHeaderBold};
   font-size: 14px;
   color: ${({ theme, $isLocked }) =>
-    $isLocked ? theme.colors.subtextOnPhoto : theme.colors.primaryDeep};
+    $isLocked ? theme.colors.textPhotoSubtle : theme.colors.accentPrimaryInk};
 `;
 
 // CurtainPanel — one half of the two-panel wipe. `left` and `width` are
@@ -69,7 +69,7 @@ const CurtainPanel = styled(Animated.View)`
   position: absolute;
   top: 0;
   bottom: 0;
-  background-color: ${({ theme }) => theme.colors.primaryMid};
+  background-color: ${({ theme }) => theme.colors.accentPrimaryPressed};
 `;
 
 // DetailsLink — the small text link above the pill that opens the modal.
@@ -83,10 +83,10 @@ const DetailsLink = styled(Pressable)`
 const DetailsLinkText = styled.Text`
   font-family: ${({ theme }) => theme.typography.fontBody};
   font-size: 11px;
-  color: ${({ theme }) => theme.colors.lime};
+  color: ${({ theme }) => theme.colors.accentText};
   text-decoration-line: underline;
   text-decoration-style: dotted;
-  text-decoration-color: ${({ theme }) => theme.colors.lime};
+  text-decoration-color: ${({ theme }) => theme.colors.accentText};
 `;
 
 export const TaskRowCta = ({ isLocked, details, onComplete }: TaskRowCtaProps) => {

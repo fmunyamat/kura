@@ -4,6 +4,7 @@
 // useFocusDeck; this screen is pure composition. Confetti rains over everything
 // once every task is done.
 
+import { LinearGradient } from 'expo-linear-gradient';
 import { ImageBackground } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import styled from 'styled-components/native';
@@ -38,14 +39,17 @@ const PhotoBackground = styled(ImageBackground)`
   bottom: 0;
 `;
 
-// DarkOverlay — the dark green wash that keeps white text readable.
-const DarkOverlay = styled.View`
+// PhotoWash — the tint over the photo that keeps text readable. It runs as a
+// soft top-to-bottom gradient between two theme stops: a bright blue-white wash
+// in light mode (Clear Sky), a flat dark green wash in dark mode.
+const PhotoWash = styled(LinearGradient).attrs(({ theme }) => ({
+  colors: [theme.colors.photoWashTop, theme.colors.photoWashBottom] as const,
+}))`
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: ${({ theme }) => theme.colors.onboardingPhotoTint};
 `;
 
 const Safe = styled(SafeAreaView)`
@@ -80,7 +84,7 @@ export const HomeScreen = () => {
   return (
     <Screen>
       <PhotoBackground source={SCREEN_BG} resizeMode="cover" blurRadius={7} />
-      <DarkOverlay />
+      <PhotoWash />
       <Safe edges={['top']}>
         <Content>
           <HomeHeader

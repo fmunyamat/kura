@@ -13,14 +13,14 @@ const Eyebrow = styled.Text`
   font-size: 9.5px;
   letter-spacing: 2.5px;
   text-transform: uppercase;
-  color: ${({ theme }) => theme.colors.subtextOnPhoto};
+  color: ${({ theme }) => theme.colors.textPhotoSubtle};
 `;
 
 const Greeting = styled.Text`
   margin-top: 12px;
   font-family: ${({ theme }) => theme.typography.fontHeaderHeavy};
   font-size: 24px;
-  color: ${({ theme }) => theme.colors.white};
+  color: ${({ theme }) => theme.colors.textPhotoHeading};
 `;
 
 export const HomeHeader = ({ eyebrow, greeting }: HomeHeaderProps) => (
