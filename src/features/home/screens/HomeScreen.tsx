@@ -20,6 +20,8 @@ import { ConfettiBurst } from '../components/ConfettiBurst';
 import { HomeHeader } from '../components/HomeHeader';
 import { SplitContextCard } from '../components/SplitContextCard';
 import { TaskAccordion } from '../components/TaskAccordion';
+import { BottomScrim } from '~/shared/components/BottomScrim';
+import { FLOATING_TAB_BAR_CLEARANCE } from '~/shared/components/FloatingTabBar';
 
 const SCREEN_BG = require('../../../../assets/images/sprinkler.png');
 
@@ -64,10 +66,12 @@ const Scroll = styled.ScrollView`
   flex: 1;
 `;
 
-// BottomSpacer — keeps the last row clear of the tab bar at the bottom of the
-// scroll, standing in for the padding the scroll view can't take directly.
+// BottomSpacer — keeps the last row clear of the floating tab bar at the bottom
+// of the scroll, standing in for the padding the scroll view can't take
+// directly. Sized to the pill's clearance so an expanded last row stays fully
+// reachable above the nav.
 const BottomSpacer = styled.View`
-  height: ${({ theme }) => theme.spacing.xl}px;
+  height: ${FLOATING_TAB_BAR_CLEARANCE}px;
 `;
 
 export const HomeScreen = () => {
@@ -94,6 +98,9 @@ export const HomeScreen = () => {
           </Scroll>
         </Content>
       </Safe>
+      {/* Fades the scrolling accordion into the background before it reaches the
+          floating tab bar. Sits above the content but below the confetti. */}
+      <BottomScrim />
       {deck.isCleared && <ConfettiBurst />}
     </Screen>
   );

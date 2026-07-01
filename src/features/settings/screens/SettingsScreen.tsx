@@ -4,6 +4,7 @@ import { Pressable, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import styled from 'styled-components/native';
 import { signOut } from '~/features/auth/services/authService';
+import { FLOATING_TAB_BAR_CLEARANCE } from '~/shared/components/FloatingTabBar';
 import { OptionCard } from '~/shared/components/OptionCard';
 
 // EFFORT_OPTIONS — same three tiers shown during onboarding, reused here so
@@ -272,7 +273,11 @@ export const SettingsScreen = () => {
   return (
     <Background>
       <Safe>
-        <ScrollView bounces={false} showsVerticalScrollIndicator={false}>
+        <ScrollView
+          bounces={false}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: FLOATING_TAB_BAR_CLEARANCE }}
+        >
           <ScreenHeading>Settings</ScreenHeading>
 
           {/* ── Your lawn ──────────────────────────────────────────────── */}

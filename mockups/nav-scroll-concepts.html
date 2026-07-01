@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Nav + Scroll — 6 Concepts</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=DM+Sans:opsz,wght@9..40,400;9..40,600;9..40,700&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --lime:        #b8e56a;
+    --lime-glow:   rgba(184,229,106,0.22);
+    --deep:        #0c3520;
+    --bgdark:      #04120a;
+    --row-surface: rgba(8,22,10,0.72);
+    --row-border:  rgba(255,255,255,0.08);
+    --glass-edge:  rgba(255,255,255,0.30);
+    --glass-edge-b:rgba(255,255,255,0.10);
+    --nav-glass:   rgba(10,26,12,0.55);
+    --text:        rgba(255,255,255,0.86);
+    --text-muted:  rgba(255,255,255,0.55);
+    --text-faint:  rgba(255,255,255,0.34);
+    --badge-bg:    rgba(10,28,10,0.88);
+    --badge-edge:  rgba(255,255,255,0.28);
+    --font:        'DM Sans', sans-serif;
+    --mono:        'JetBrains Mono', monospace;
+  }
+
+  body { background: radial-gradient(ellipse at top,#0a1f10 0%,#04120a 60%,#020a05 100%); font-family:var(--font); color:var(--text); min-height:100vh; padding:48px 28px 100px; }
+
+  .head { text-align:center; margin-bottom:14px; }
+  .head-kicker { font-size:11px; letter-spacing:3px; text-transform:uppercase; color:var(--lime); font-family:var(--mono); margin-bottom:12px; }
+  .head-title { font-size:30px; font-weight:700; letter-spacing:-0.5px; margin-bottom:10px; }
+  .head-sub { font-size:14px; color:var(--text-muted); max-width:580px; margin:0 auto; line-height:1.6; }
+
+  .grid { display:grid; grid-template-columns:repeat(3,1fr); gap:56px 40px; max-width:1200px; margin:48px auto 0; justify-items:center; }
+  @media (max-width:1080px){ .grid{ grid-template-columns:repeat(2,1fr);} }
+  @media (max-width:760px){ .grid{ grid-template-columns:1fr;} }
+
+  .concept { display:flex; flex-direction:column; align-items:center; gap:16px; width:300px; }
+  .concept-head { text-align:center; }
+  .concept-num { display:inline-block; font-family:var(--mono); font-size:11px; font-weight:500; color:var(--deep); background:var(--lime); border-radius:100px; padding:2px 10px; margin-bottom:10px; letter-spacing:1px; }
+  .concept-name { font-size:17px; font-weight:700; margin-bottom:6px; }
+  .concept-desc { font-size:12px; color:var(--text-muted); line-height:1.55; max-width:280px; }
+
+  /* phone */
+  .phone { width:300px; height:600px; border-radius:42px; overflow:hidden; position:relative; box-shadow:0 0 0 1px rgba(255,255,255,0.07),0 30px 60px rgba(0,0,0,0.7); }
+  .bg { position:absolute; inset:0; background:
+      radial-gradient(ellipse at 28% 55%, rgba(36,82,18,0.55) 0%, transparent 55%),
+      radial-gradient(ellipse at 78% 28%, rgba(20,58,14,0.45) 0%, transparent 50%),
+      linear-gradient(155deg,#1a4a10 0%,#0d3010 45%,#091e07 100%); }
+  .tint { position:absolute; inset:0; background:rgba(4,10,4,0.55); }
+  .inner { position:relative; z-index:1; height:100%; padding:34px 14px 0; display:flex; flex-direction:column; overflow:hidden; }
+
+  .eyebrow { font-size:8.5px; letter-spacing:1.8px; text-transform:uppercase; color:var(--text-muted); font-family:var(--mono); margin-bottom:3px; }
+  .greet { font-size:18px; font-weight:700; margin-bottom:12px; }
+
+  /* scrolling viewport */
+  .viewport { position:relative; flex:1; overflow:hidden; }
+  .list { display:flex; flex-direction:column; gap:8px; animation: scroll 9s ease-in-out infinite; }
+  @keyframes scroll {
+    0%,10%  { transform:translateY(0); }
+    45%     { transform:translateY(-210px); }
+    58%     { transform:translateY(-210px); }
+    93%,100%{ transform:translateY(0); }
+  }
+
+  /* an open glass card with bright photo (something vivid to smear behind glass) */
+  .card { border-radius:16px; border:1px solid var(--glass-edge-b); border-top-color:var(--glass-edge); background:rgba(255,255,255,0.10); overflow:hidden; }
+  .card-photo { height:74px; position:relative; background:
+      radial-gradient(ellipse at 35% 50%, rgba(60,140,28,0.95) 0%, transparent 68%),
+      linear-gradient(130deg,#2a7414,#3d8a1a 55%,#1f5a0e); }
+  .card-photo::before { content:''; position:absolute; inset:0; background-image:radial-gradient(circle, rgba(120,200,50,0.3) 1px, transparent 1px); background-size:9px 9px; }
+  .card-body { padding:10px 12px 12px; }
+  .card-count { font-size:8px; letter-spacing:1.2px; text-transform:uppercase; color:var(--lime); }
+  .card-title { font-size:14px; font-weight:700; margin-top:1px; }
+
+  /* rows */
+  .row { display:flex; align-items:center; gap:10px; padding:11px 12px; background:var(--row-surface); border:1px solid var(--row-border); border-radius:13px; }
+  .mbadge { width:30px; height:30px; border-radius:9px; background:var(--badge-bg); border:1px solid var(--badge-edge); display:flex; align-items:center; justify-content:center; font-size:14px; flex-shrink:0; }
+  .mcount { font-size:8px; letter-spacing:1.2px; text-transform:uppercase; color:var(--lime); }
+  .mtitle { font-size:12.5px; font-weight:600; margin-top:1px; }
+  .mchev { font-size:12px; color:var(--text-faint); margin-left:auto; }
+
+  /* icons */
+  .ico { width:22px; height:22px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; display:block; }
+  .lbl { font-family:var(--mono); font-size:8px; letter-spacing:1px; text-transform:uppercase; }
+
+  /* floating glass pill nav (shared base) */
+  .nav { position:absolute; left:16px; right:16px; bottom:18px; z-index:5; display:flex; align-self:stretch;
+    background:transparent; border:1px solid var(--glass-edge-b); border-top-color:var(--glass-edge);
+    border-radius:26px; padding:4px 6px; box-shadow:0 12px 30px rgba(0,0,0,0.4); overflow:hidden; }
+  .nav-blur { position:absolute; inset:0; backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); }
+  .nav-tint { position:absolute; inset:0; background:var(--nav-glass); }
+  .navrow { position:relative; display:flex; flex:1; z-index:1; }
+  .tab { flex:1; display:flex; flex-direction:column; align-items:center; gap:5px; padding:9px 0; color:var(--text-faint); }
+  .tab.on { color:var(--lime); }
+  .tab .glow { position:absolute; width:42px; height:42px; border-radius:50%; background:radial-gradient(circle,var(--lime-glow) 0%,transparent 70%); top:2px; }
+  .caption { position:absolute; left:0; right:0; bottom:84px; text-align:center; font-family:var(--mono); font-size:8px; letter-spacing:1px; text-transform:uppercase; color:rgba(255,255,255,0.32); z-index:6; }
+</style>
+</head>
+<body>
+
+<svg style="display:none" xmlns="http://www.w3.org/2000/svg">
+  <symbol id="ic-today" viewBox="0 0 24 24"><path d="M3 18h18"/><path d="M6.5 18a5.5 5.5 0 0 1 11 0"/><path d="M12 3.5V6"/><path d="M4.7 8.7l1.6 1.6"/><path d="M19.3 8.7l-1.6 1.6"/></symbol>
+  <symbol id="ic-tasks" viewBox="0 0 24 24"><rect x="4.5" y="4" width="15" height="16.5" rx="2.5"/><path d="M9 3.2h6v2.4H9z"/><path d="m8.5 13 2 2 4.2-4.2"/></symbol>
+  <symbol id="ic-learn" viewBox="0 0 24 24"><path d="M6 4.5h11a1 1 0 0 1 1 1v13.5a1 1 0 0 1-1 1H6.5A2.5 2.5 0 0 1 4 18.5V7A2.5 2.5 0 0 1 6.5 4.5"/><path d="M9 4.7V20"/></symbol>
+  <symbol id="ic-profile" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.3"/><path d="M5.5 20a6.5 6.5 0 0 1 13 0"/></symbol>
+</svg>
+
+<div class="head">
+  <div class="head-kicker">Kura · Bottom nav · Scroll behaviour</div>
+  <h1 class="head-title">Cards behind the nav — 6 fixes</h1>
+  <p class="head-sub">The floating glass pill blurs whatever scrolls behind it, which reads busy. Six ways to calm that down — each phone auto-scrolls a list so you can see the technique work.</p>
+</div>
+
+<div class="grid">
+
+  <!-- ═══ 1 BOTTOM FADE SCRIM ═══ -->
+  <div class="concept">
+    <div class="concept-head"><span class="concept-num">01</span><div class="concept-name">Bottom Fade Scrim</div><div class="concept-desc">Content dissolves into the dark background in a soft gradient before it ever reaches the pill — so nothing sharp sits behind the glass.</div></div>
+    <div class="phone"><div class="bg"></div><div class="tint"></div><div class="inner">
+      <div class="eyebrow">On Deck · Friday</div><div class="greet">Morning, John</div>
+      <div class="viewport">
+        <div class="list">
+          <div class="card"><div class="card-photo"></div><div class="card-body"><div class="card-count">Task 1 of 3</div><div class="card-title">Give it a deep soak.</div></div></div>
+          <div class="row"><div class="mbadge">🔍</div><div><div class="mcount">Task 2 of 3</div><div class="mtitle">Walk the edges.</div></div><div class="mchev">›</div></div>
+          <div class="row"><div class="mbadge">🌱</div><div><div class="mcount">Task 3 of 3</div><div class="mtitle">Feed the lawn.</div></div><div class="mchev">›</div></div>
+          <div class="row"><div class="mbadge">✂️</div><div><div class="mcount">Tomorrow</div><div class="mtitle">First mow.</div></div><div class="mchev">›</div></div>
+          <div class="row"><div class="mbadge">💧</div><div><div class="mcount">Wed</div><div class="mtitle">Deep soak again.</div></div><div class="mchev">›</div></div>
+          <div class="row"><div class="mbadge">🌿</div><div><div class="mcount">Thu</div><div class="mtitle">Spot-treat weeds.</div></div><div class="mchev">›</div></div>
+          <div class="row"><div class="mbadge">🍂</div><div><div class="mcount">Fri</div><div class="mtitle">Rake & tidy.</div></div><div class="mchev">›</div></div>
+        </div>
+        <div style="position:absolute;left:0;right:0;bottom:0;height:160px;background:linear-gradient(to bottom,transparent 0%,rgba(4,18,10,0.85) 70%,#04120a 100%);z-index:3;pointer-events:none;"></div>
+      </div>
+      <div class="caption">↕ auto-scrolling</div>
+      <div class="nav"><div class="nav-blur"></div><div class="nav-tint"></div><div class="navrow">
+        <div class="tab on"><span class="glow"></span><svg class="ico"><use href="#ic-today"/></svg><span class="lbl">Today</span></div>
+        <div class="tab"><svg class="ico"><use href="#ic-tasks"/></svg><span class="lbl">Tasks</span></div>
+        <div class="tab"><svg class="ico"><use href="#ic-learn"/></svg><span class="lbl">Learn</span></div>
+        <div class="tab"><svg class="ico"><use href="#ic-profile"/></svg><span class="lbl">Profile</span></div>
+      </div></div>
+    </div></div>
+  </div>
+
+  <!-- ═══ 2 FROSTED APPROACH BAND ═══ -->
+  <div class="concept">
+    <div class="concept-head"><span class="concept-num">02</span><div class="concept-name">Frosted Approach Band</div><div class="concept-desc">A frosted strip sits just above the pill. Anything scrolling into it goes soft and abstract, so card edges blur out before they crowd the nav.</div></div>
+    <div class="phone"><div class="bg"></div><div class="tint"></div><div class="inner">
+      <div class="eyebrow">On Deck · Friday</div><div class="greet">Morning, John</div>
+      <div class="viewport">
+        <div class="list">
+          <div class="card"><div class="card-photo"></div><div class="card-body"><div class="card-count">Task 1 of 3</div><div class="card-title">Give it a deep soak.</div></div></div>
+          <div class="row"><div class="mbadge">🔍</div><div><div class="mcount">Task 2 of 3</div><div class="mtitle">Walk the edges.</div></div><div class="mchev">›</div></div>
+          <div class="row"><div class="mbadge">🌱</div><div><div class="mcount">Task 3 of 3</div><div class="mtitle">Feed the lawn.</div></div><div class="mchev">›</div></div>
+          <div class="row"><div class="mbadge">✂️</div><div><div class="mcount">Tomorrow</div><div class="mtitle">First mow.</div></div><div class="mchev">›</div></div>
+          <div class="row"><div class="mbadge">💧</div><div><div class="mcount">Wed</div><div class="mtitle">Deep soak again.</div></div><div class="mchev">›</div></div>
+          <div class="row"><div class="mbadge">🌿</div><div><div class="mcount">Thu</div><div class="mtitle">Spot-treat weeds.</div></div><div class="mchev">›</div></div>
+          <div class="row"><div class="mbadge">🍂</div><div><div class="mcount">Fri</div><div class="mtitle">Rake & tidy.</div></div><div class="mchev">›</div></div>
+        </div>
+        <div style="position:absolute;left:0;right:0;bottom:72px;height:64px;backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);background:linear-gradient(to bottom,rgba(8,20,8,0) 0%,rgba(8,20,8,0.35) 100%);-webkit-mask-image:linear-gradient(to bottom,transparent,black 60%);mask-image:linear-gradient(to bottom,transparent,black 60%);z-index:3;pointer-events:none;"></div>
+      </div>
+      <div class="caption">↕ auto-scrolling</div>
+      <div class="nav"><div class="nav-blur"></div><div class="nav-tint"></div><div class="navrow">
+        <div class="tab on"><span class="glow"></span><svg class="ico"><use href="#ic-today"/></svg><span class="lbl">Today</span></div>
+        <div class="tab"><svg class="ico"><use href="#ic-tasks"/></svg><span class="lbl">Tasks</span></div>
+        <div class="tab"><svg class="ico"><use href="#ic-learn"/></svg><span class="lbl">Learn</span></div>
+        <div class="tab"><svg class="ico"><use href="#ic-profile"/></svg><span class="lbl">Profile</span></div>
+      </div></div>
+    </div></div>
+  </div>
+
+  <!-- ═══ 3 SOLID-ON-SCROLL PILL ═══ -->
+  <div class="concept">
+    <div class="concept-head"><span class="concept-num">03</span><div class="concept-name">Solid-on-Scroll Pill</div><div class="concept-desc">The pill is glassy at rest, but its fill ramps to near-opaque the instant you scroll — hiding the smear — then melts back to glass when you stop.</div></div>
+    <div class="phone"><div class="bg"></div><div class="tint"></div><div class="inner">
+      <div class="eyebrow">On Deck · Friday</div><div class="greet">Morning, John</div>
+      <div class="viewport">
+        <div class="list">
+          <div class="card"><div class="card-photo"></div><div class="card-body"><div class="card-count">Task 1 of 3</div><div class="card-title">Give it a deep soak.</div></div></div>
+          <div class="row"><div class="mbadge">🔍</div><div><div class="mcount">Task 2 of 3</div><div class="mtitle">Walk the edges.</div></div><div class="mchev">›</div></div>
+          <div class="row"><div class="mbadge">🌱</div><div><div class="mcount">Task 3 of 3</div><div class="mtitle">Feed the lawn.</div></div><div class="mchev">›</div></div>
+          <div class="row"><div class="mbadge">✂️</div><div><div class="mcount">Tomorrow</div><div class="mtitle">First mow.</div></div><div class="mchev">›</div></div>
+          <div class="row"><div class="mbadge">💧</div><div><div class="mcount">Wed</div><div class="mtitle">Deep soak again.</div></div><div class="mchev">›</div></div>
+          <div class="row"><div class="mbadge">🌿</div><div><div class="mcount">Thu</div><div class="mtitle">Spot-treat weeds.</div></div><div class="mchev">›</div></div>
+          <div class="row"><div class="mbadge">🍂</div><div><div class="mcount">Fri</div><div class="mtitle">Rake & tidy.</div></div><div class="mchev">›</div></div>
+        </div>
+      </div>
+      <div class="caption">↕ auto-scrolling</div>
+      <div class="nav"><div class="nav-blur"></div><div class="nav-tint" style="background:#0a1a0c;animation:pillSolid 9s ease-in-out infinite;"></div><div class="navrow">
+        <div class="tab on"><span class="glow"></span><svg class="ico"><use href="#ic-today"/></svg><span class="lbl">Today</span></div>
+        <div class="tab"><svg class="ico"><use href="#ic-tasks"/></svg><span class="lbl">Tasks</span></div>
+        <div class="tab"><svg class="ico"><use href="#ic-learn"/></svg><span class="lbl">Learn</span></div>
+        <div class="tab"><svg class="ico"><use href="#ic-profile"/></svg><span class="lbl">Profile</span></div>
+      </div></div>
+    </div></div>
+  </div>
+  <style>
+    @keyframes pillSolid {
+      0%,10% { opacity:0.55; } 18%,43% { opacity:0.98; }
+      52%,58% { opacity:0.55; } 66%,91% { opacity:0.98; } 96%,100% { opacity:0.55; }
+    }
+  </style>
+
+  <!-- ═══ 4 HIDE ON SCROLL ═══ -->
+  <div class="concept">
+    <div class="concept-head"><span class="concept-num">04</span><div class="concept-name">Hide on Scroll</div><div class="concept-desc">The pill tucks away when you scroll down and springs back when you scroll up or stop — so nothing sits behind it mid-scroll, and the list gets the full screen.</div></div>
+    <div class="phone"><div class="bg"></div><div class="tint"></div><div class="inner">
+      <div class="eyebrow">On Deck · Friday</div><div class="greet">Morning, John</div>
+      <div class="viewport">
+        <div class="list">
+          <div class="card"><div class="card-photo"></div><div class="card-body"><div class="card-count">Task 1 of 3</div><div class="card-title">Give it a deep soak.</div></div></div>
+          <div class="row"><div class="mbadge">🔍</div><div><div class="mcount">Task 2 of 3</div><div class="mtitle">Walk the edges.</div></div><div class="mchev">›</div></div>
+          <div class="row"><div class="mbadge">🌱</div><div><div class="mcount">Task 3 of 3</div><div class="mtitle">Feed the lawn.</div></div><div class="mchev">›</div></div>
+          <div class="row"><div class="mbadge">✂️</div><div><div class="mcount">Tomorrow</div><div class="mtitle">First mow.</div></div><div class="mchev">›</div></div>
+          <div class="row"><div class="mbadge">💧</div><div><div class="mcount">Wed</div><div class="mtitle">Deep soak again.</div></div><div class="mchev">›</div></div>
+          <div class="row"><div class="mbadge">🌿</div><div><div class="mcount">Thu</div><div class="mtitle">Spot-treat weeds.</div></div><div class="mchev">›</div></div>
+          <div class="row"><div class="mbadge">🍂</div><div><div class="mcount">Fri</div><div class="mtitle">Rake & tidy.</div></div><div class="mchev">›</div></div>
+        </div>
+      </div>
+      <div class="caption">↕ auto-scrolling</div>
+      <div class="nav" style="animation:pillHide 9s ease-in-out infinite;"><div class="nav-blur"></div><div class="nav-tint"></div><div class="navrow">
+        <div class="tab on"><span class="glow"></span><svg class="ico"><use href="#ic-today"/></svg><span class="lbl">Today</span></div>
+        <div class="tab"><svg class="ico"><use href="#ic-tasks"/></svg><span class="lbl">Tasks</span></div>
+        <div class="tab"><svg class="ico"><use href="#ic-learn"/></svg><span class="lbl">Learn</span></div>
+        <div class="tab"><svg class="ico"><use href="#ic-profile"/></svg><span class="lbl">Profile</span></div>
+      </div></div>
+    </div></div>
+  </div>
+  <style>
+    @keyframes pillHide {
+      0%,10% { transform:translateY(0); opacity:1; }
+      22%,43% { transform:translateY(150%); opacity:0; }
+      52%,100% { transform:translateY(0); opacity:1; }
+    }
+  </style>
+
+  <!-- ═══ 5 SHRINK TO DOCK ═══ -->
+  <div class="concept">
+    <div class="concept-head"><span class="concept-num">05</span><div class="concept-name">Shrink to Dock</div><div class="concept-desc">While scrolling, the pill collapses to a compact icon-only dock — a smaller target for content to pass behind — then reopens to the full labelled pill when idle.</div></div>
+    <div class="phone"><div class="bg"></div><div class="tint"></div><div class="inner">
+      <div class="eyebrow">On Deck · Friday</div><div class="greet">Morning, John</div>
+      <div class="viewport">
+        <div class="list">
+          <div class="card"><div class="card-photo"></div><div class="card-body"><div class="card-count">Task 1 of 3</div><div class="card-title">Give it a deep soak.</div></div></div>
+          <div class="row"><div class="mbadge">🔍</div><div><div class="mcount">Task 2 of 3</div><div class="mtitle">Walk the edges.</div></div><div class="mchev">›</div></div>
+          <div class="row"><div class="mbadge">🌱</div><div><div class="mcount">Task 3 of 3</div><div class="mtitle">Feed the lawn.</div></div><div class="mchev">›</div></div>
+          <div class="row"><div class="mbadge">✂️</div><div><div class="mcount">Tomorrow</div><div class="mtitle">First mow.</div></div><div class="mchev">›</div></div>
+          <div class="row"><div class="mbadge">💧</div><div><div class="mcount">Wed</div><div class="mtitle">Deep soak again.</div></div><div class="mchev">›</div></div>
+          <div class="row"><div class="mbadge">🌿</div><div><div class="mcount">Thu</div><div class="mtitle">Spot-treat weeds.</div></div><div class="mchev">›</div></div>
+          <div class="row"><div class="mbadge">🍂</div><div><div class="mcount">Fri</div><div class="mtitle">Rake & tidy.</div></div><div class="mchev">›</div></div>
+        </div>
+      </div>
+      <div class="caption">↕ auto-scrolling</div>
+      <div class="nav" style="left:auto;right:auto;align-self:center;animation:dockW 9s ease-in-out infinite;"><div class="nav-blur"></div><div class="nav-tint" style="background:#0a1a0c;animation:pillSolid 9s ease-in-out infinite;"></div><div class="navrow">
+        <div class="tab on"><span class="glow"></span><svg class="ico"><use href="#ic-today"/></svg><span class="lbl dl">Today</span></div>
+        <div class="tab"><svg class="ico"><use href="#ic-tasks"/></svg><span class="lbl dl">Tasks</span></div>
+        <div class="tab"><svg class="ico"><use href="#ic-learn"/></svg><span class="lbl dl">Learn</span></div>
+        <div class="tab"><svg class="ico"><use href="#ic-profile"/></svg><span class="lbl dl">Profile</span></div>
+      </div></div>
+    </div></div>
+  </div>
+  <style>
+    /* shrink the whole pill in from the sides, centred */
+    @keyframes dockW {
+      0%,10% { left:16px; right:16px; } 18%,43% { left:64px; right:64px; }
+      52%,58% { left:16px; right:16px; } 66%,91% { left:64px; right:64px; } 96%,100% { left:16px; right:16px; }
+    }
+    /* collapse the labels while docked */
+    .dl { overflow:hidden; animation:dockL 9s ease-in-out infinite; }
+    @keyframes dockL {
+      0%,10% { max-height:12px; opacity:1; margin-top:0; }
+      18%,43% { max-height:0; opacity:0; margin-top:-5px; }
+      52%,58% { max-height:12px; opacity:1; margin-top:0; }
+      66%,91% { max-height:0; opacity:0; margin-top:-5px; }
+      96%,100% { max-height:12px; opacity:1; margin-top:0; }
+    }
+  </style>
+
+  <!-- ═══ 6 RISING TRAY ═══ -->
+  <div class="concept">
+    <div class="concept-head"><span class="concept-num">06</span><div class="concept-name">Rising Tray</div><div class="concept-desc">A soft dark tray sits behind the floating pill and rises as you scroll, giving the glass a calm, consistent backdrop instead of live card content.</div></div>
+    <div class="phone"><div class="bg"></div><div class="tint"></div><div class="inner">
+      <div class="eyebrow">On Deck · Friday</div><div class="greet">Morning, John</div>
+      <div class="viewport">
+        <div class="list">
+          <div class="card"><div class="card-photo"></div><div class="card-body"><div class="card-count">Task 1 of 3</div><div class="card-title">Give it a deep soak.</div></div></div>
+          <div class="row"><div class="mbadge">🔍</div><div><div class="mcount">Task 2 of 3</div><div class="mtitle">Walk the edges.</div></div><div class="mchev">›</div></div>
+          <div class="row"><div class="mbadge">🌱</div><div><div class="mcount">Task 3 of 3</div><div class="mtitle">Feed the lawn.</div></div><div class="mchev">›</div></div>
+          <div class="row"><div class="mbadge">✂️</div><div><div class="mcount">Tomorrow</div><div class="mtitle">First mow.</div></div><div class="mchev">›</div></div>
+          <div class="row"><div class="mbadge">💧</div><div><div class="mcount">Wed</div><div class="mtitle">Deep soak again.</div></div><div class="mchev">›</div></div>
+          <div class="row"><div class="mbadge">🌿</div><div><div class="mcount">Thu</div><div class="mtitle">Spot-treat weeds.</div></div><div class="mchev">›</div></div>
+          <div class="row"><div class="mbadge">🍂</div><div><div class="mcount">Fri</div><div class="mtitle">Rake & tidy.</div></div><div class="mchev">›</div></div>
+        </div>
+        <div style="position:absolute;left:0;right:0;bottom:0;background:linear-gradient(to bottom,transparent,#061d10 70%);z-index:3;pointer-events:none;animation:trayRise 9s ease-in-out infinite;"></div>
+      </div>
+      <div class="caption">↕ auto-scrolling</div>
+      <div class="nav"><div class="nav-blur"></div><div class="nav-tint"></div><div class="navrow">
+        <div class="tab on"><span class="glow"></span><svg class="ico"><use href="#ic-today"/></svg><span class="lbl">Today</span></div>
+        <div class="tab"><svg class="ico"><use href="#ic-tasks"/></svg><span class="lbl">Tasks</span></div>
+        <div class="tab"><svg class="ico"><use href="#ic-learn"/></svg><span class="lbl">Learn</span></div>
+        <div class="tab"><svg class="ico"><use href="#ic-profile"/></svg><span class="lbl">Profile</span></div>
+      </div></div>
+    </div></div>
+  </div>
+  <style>
+    @keyframes trayRise {
+      0%,10% { height:54px; opacity:0.5; } 18%,43% { height:140px; opacity:1; }
+      52%,58% { height:54px; opacity:0.5; } 66%,91% { height:140px; opacity:1; } 96%,100% { height:54px; opacity:0.5; }
+    }
+  </style>
+
+</div>
+
+</body>
+</html>
