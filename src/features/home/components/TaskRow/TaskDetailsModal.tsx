@@ -1,17 +1,16 @@
 // TaskDetailsModal — a floating focus card that reveals the full detail for a
-// task when the user taps "More details →". The card uses the exact same glass
-// surface as an open task row — BlurView backdrop, deckCardExpanded tint,
-// glassClearEdge border — but without the photo strip. The background dims and
-// the card scales up into the centre of the screen. Tapping outside or the ×
-// button dismisses it.
+// task when the user taps "More details →". The outer shell (BlurView, tint,
+// glass border, ZoomIn animation, dimmed backdrop) is unchanged from the open
+// task row. The interior uses an editorial layout: a small kicker, a large hero
+// stat, numbered steps separated by thin rules, and a pull-quote at the bottom.
 
 import { BlurView } from 'expo-blur';
-import { Platform, ScrollView } from 'react-native';
+import { Modal, Platform, ScrollView } from 'react-native';
 import Animated, { ZoomIn } from 'react-native-reanimated';
+import { Pressable } from 'react-native';
 import styled from 'styled-components/native';
 
 import type { TaskDetails } from '../../types';
-import { Pressable } from 'react-native';
 
 interface TaskDetailsModalProps {
   details: TaskDetails;
@@ -19,10 +18,9 @@ interface TaskDetailsModalProps {
   onClose: () => void;
 }
 
-// ── layout shells ───────────────────────────────────────────────────────────
+// ── outer shell (unchanged) ──────────────────────────────────────────────────
 
 // Root — full-screen flex container that centres the floating card.
-// spacing.lg padding on both sides lets the dimmed backdrop show around it.
 const Root = styled.View`
   flex: 1;
   justify-content: center;
@@ -41,10 +39,8 @@ const Dim = styled(Pressable)`
   background-color: rgba(0, 0, 0, 0.65);
 `;
 
-// CardShell — the floating card container. Matches the open TaskRow exactly:
-// same border-radius, same 1px rim (bright on top, dimmer on the other three
-// sides), overflow:hidden so the BlurView is clipped to the rounded corners.
-// max-height keeps long detail lists scrollable inside the card.
+// CardShell — the floating card. Matches the open TaskRow: same border-radius,
+// same 1px rim (bright top, dimmer elsewhere), overflow:hidden clips the blur.
 const CardShell = styled(Animated.View)`
   border-radius: ${({ theme }) => theme.radii.lg}px;
   overflow: hidden;
@@ -54,8 +50,7 @@ const CardShell = styled(Animated.View)`
   max-height: 78%;
 `;
 
-// Backdrop — the frosted-glass blur layer, absolutely positioned to fill the
-// card. Same intensity and tint as the open task row.
+// Backdrop — frosted-glass blur layer, absolutely filling the card.
 const Backdrop = styled(BlurView)`
   position: absolute;
   top: 0;
@@ -64,8 +59,7 @@ const Backdrop = styled(BlurView)`
   bottom: 0;
 `;
 
-// Tint — the thin dark-green wash over the blur that gives the surface its
-// glassy fill, matching the deckCardExpanded colour used by open task rows.
+// Tint — dark-green wash over the blur, matching deckCardExpanded on open rows.
 const Tint = styled.View`
   position: absolute;
   top: 0;
@@ -75,33 +69,39 @@ const Tint = styled.View`
   background-color: ${({ theme }) => theme.colors.deckCardExpanded};
 `;
 
-// Content — the z-indexed wrapper that sits above the blur/tint layers.
-// Horizontal padding matches DrawerInner in TaskRow (15px each side).
+// Content — sits above the blur/tint layers.
 const Content = styled.View`
   position: relative;
   z-index: 1;
 `;
 
-// ── title area ───────────────────────────────────────────────────────────────
+// ── editorial interior ───────────────────────────────────────────────────────
 
-// TitleRow — the modal title and × close button, padded to match the card
-// header area. The title uses fontHeaderBold matching the task row's Title.
-const TitleRow = styled.View`
+// TopRow — kicker text on the left, close button on the right. The kicker
+// sets the category and framing (e.g. "Watering · The one rule").
+const TopRow = styled.View`
   flex-direction: row;
   align-items: flex-start;
-  padding: 16px 15px 14px;
+  justify-content: space-between;
+  padding: 18px 16px 0;
 `;
 
-const ModalTitle = styled.Text`
+// Kicker — tiny all-caps lime mono label. Matches ed-kick from the editorial
+// concept: 9px JetBrains, 2.5px letter-spacing, uppercase. Sets the scene
+// before the hero stat lands.
+const Kicker = styled.Text`
   flex: 1;
-  font-family: ${({ theme }) => theme.typography.fontHeaderBold};
-  font-size: 16px;
-  color: ${({ theme }) => theme.colors.white};
+  font-family: ${({ theme }) => theme.typography.fontBodyMedium};
+  font-size: 9px;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: ${({ theme }) => theme.colors.lime};
   padding-right: 12px;
+  margin-top: 2px;
 `;
 
-// CloseButton — small rounded circle, same glass-input fill used elsewhere
-// for secondary controls on the dark glass surface.
+// CloseButton — small rounded circle, same glass-input fill as other secondary
+// controls on the dark glass surface.
 const CloseButton = styled(Pressable)`
   width: 26px;
   height: 26px;
@@ -119,90 +119,109 @@ const CloseX = styled.Text`
   color: ${({ theme }) => theme.colors.textMutedOnDark};
 `;
 
-// ── scrollable content ────────────────────────────────────────────────────────
+// HeroBlock — the editorial splash zone between the kicker and the steps.
+// Only rendered when the TaskDetails includes a hero value; tasks without a
+// single core fact skip this block entirely.
+const HeroBlock = styled.View`
+  padding: 14px 16px 0;
+`;
 
-// ScrollArea — lets long detail lists scroll inside the fixed-height card.
-// Side padding matches DrawerInner's 15px.
+// HeroStat — the big number or phrase. ZalandoSans-Bold at 48px with tight
+// leading so multi-line values (e.g. "Pull\nthe root.") still read as a unit.
+const HeroStat = styled.Text`
+  font-family: ${({ theme }) => theme.typography.fontHeaderBold};
+  font-size: 48px;
+  line-height: 50px;
+  color: ${({ theme }) => theme.colors.white};
+`;
+
+// HeroSubLine — the supporting line beneath the stat. Medium-weight header
+// font at 20px — large enough to balance the hero above, quiet enough not to
+// compete with it.
+const HeroSubLine = styled.Text`
+  font-family: ${({ theme }) => theme.typography.fontHeader};
+  font-size: 20px;
+  line-height: 24px;
+  color: ${({ theme }) => theme.colors.textMutedOnDark};
+  margin-top: 2px;
+`;
+
+// ── step list ────────────────────────────────────────────────────────────────
+
+// ScrollArea — scrolls when the step list + hero exceed the card's max-height.
 const ScrollArea = styled(ScrollView)`
-  padding: 0 15px;
+  padding: 0;
 `;
 
-// Divider — the faint rule between the title and the steps, matching the
-// glassClearDivider used inside glass cards elsewhere.
-const Divider = styled.View`
-  height: 1px;
-  background-color: ${({ theme }) => theme.colors.glassClearDivider};
-  margin: 0 15px;
+// StepList — the vertical container for all step rows. Top margin creates
+// breathing room below the hero block (or kicker if there is no hero).
+const StepList = styled.View`
+  margin-top: 16px;
+  margin-horizontal: 16px;
 `;
 
-// Steps / StepRow / StepDot / StepNumber / StepText — pixel-for-pixel copies
-// of the same elements in TaskRowDetail, so the detail steps look like a
-// natural continuation of the main card's steps.
-const Steps = styled.View`
-  margin-top: 13px;
-`;
-
+// StepRow — one numbered step. A thin rule along the top separates it from the
+// row above, matching the ed-step border-top pattern from the editorial concept.
+// The last row also draws a border on the bottom via StepRowLast.
 const StepRow = styled.View`
   flex-direction: row;
-  align-items: center;
-  gap: 10px;
-  padding: 7px 0;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 0;
+  border-top-width: 1px;
+  border-top-color: ${({ theme }) => theme.colors.glassClearDivider};
 `;
 
-const StepDot = styled.View`
-  width: 18px;
-  height: 18px;
-  border-radius: ${({ theme }) => theme.radii.full}px;
-  border-width: 1px;
-  border-color: ${({ theme }) => theme.colors.glassClearDivider};
-  align-items: center;
-  justify-content: center;
+// StepRowLast — same as StepRow but adds a bottom border so the list has a
+// closed bottom edge before the pull-quote.
+const StepRowLast = styled(StepRow)`
+  border-bottom-width: 1px;
+  border-bottom-color: ${({ theme }) => theme.colors.glassClearDivider};
 `;
 
-const StepNumber = styled.Text`
-  font-family: ${({ theme }) => theme.typography.fontBodyBold};
-  font-size: 9px;
+// StepNum — the inline lime number. No dot circle — editorial uses the number
+// directly as a typographic element, in the header font at 15px.
+const StepNum = styled.Text`
+  font-family: ${({ theme }) => theme.typography.fontHeaderBold};
+  font-size: 15px;
+  line-height: 18px;
   color: ${({ theme }) => theme.colors.lime};
+  width: 16px;
+  flex-shrink: 0;
 `;
 
+// StepText — the step body copy. Matches ed-st: 11.5px mono, 1.55 leading,
+// white at 85% so it reads clearly on the dark glass surface.
 const StepText = styled.Text`
   flex: 1;
   font-family: ${({ theme }) => theme.typography.fontBody};
-  font-size: 11px;
+  font-size: 11.5px;
+  line-height: 18px;
   color: ${({ theme }) => theme.colors.textOnDark};
 `;
 
-// Note — the optional callout at the bottom. Lime tint marks it as a helpful
-// aside, not an action step.
-const Note = styled.View`
-  flex-direction: row;
-  gap: 8px;
-  align-items: flex-start;
-  background-color: rgba(184, 229, 106, 0.08);
-  border-width: 1px;
-  border-color: rgba(184, 229, 106, 0.18);
-  border-radius: ${({ theme }) => theme.radii.md}px;
-  padding: 10px 12px;
-  margin-top: 12px;
-  margin-bottom: 16px;
+// ── pull-quote ────────────────────────────────────────────────────────────────
+
+// PullQuote — the editorial note treatment: a 2px lime left border with the
+// note text as an italicised aside. Replaces the old lime-tinted box so the
+// note feels like a magazine pull-quote, not a warning callout.
+const PullQuote = styled.View`
+  border-left-width: 2px;
+  border-left-color: ${({ theme }) => theme.colors.lime};
+  padding-left: 12px;
+  margin: 16px 16px 20px;
 `;
 
-const NoteIcon = styled.Text`
-  font-size: 13px;
-  margin-top: 1px;
-`;
-
-const NoteText = styled.Text`
-  flex: 1;
-  font-family: ${({ theme }) => theme.typography.fontBody};
-  font-size: 11px;
-  line-height: 17px;
+// PullQuoteText — header font (serif feel) italicised at 12.5px lime-tinted.
+// fontHeader is the closest to the mockup's serif italic.
+const PullQuoteText = styled.Text`
+  font-family: ${({ theme }) => theme.typography.fontHeader};
+  font-size: 12.5px;
+  line-height: 19px;
   color: ${({ theme }) => theme.colors.lime};
 `;
 
 // ── component ────────────────────────────────────────────────────────────────
-
-import { Modal } from 'react-native';
 
 export const TaskDetailsModal = ({
   details,
@@ -218,8 +237,7 @@ export const TaskDetailsModal = ({
     <Root>
       <Dim onPress={onClose} accessibilityLabel="Close details" />
 
-      {/* ZoomIn scales the card up from the centre as it appears, the same
-          Reanimated entering pattern used by ClearedCard elsewhere. */}
+      {/* ZoomIn scales the card up from the centre as it appears. */}
       <CardShell entering={ZoomIn.duration(240)}>
         <Backdrop
           intensity={60}
@@ -231,8 +249,9 @@ export const TaskDetailsModal = ({
         <Tint />
 
         <Content>
-          <TitleRow>
-            <ModalTitle>{details.title}</ModalTitle>
+          {/* Kicker + close button — always present */}
+          <TopRow>
+            <Kicker>{details.title}</Kicker>
             <CloseButton
               onPress={onClose}
               accessibilityRole="button"
@@ -240,30 +259,39 @@ export const TaskDetailsModal = ({
             >
               <CloseX>✕</CloseX>
             </CloseButton>
-          </TitleRow>
+          </TopRow>
 
-          <Divider />
+          {/* Hero stat block — only when the task has a single core fact */}
+          {details.hero != null && (
+            <HeroBlock>
+              <HeroStat>{details.hero}</HeroStat>
+              {details.heroSub != null && (
+                <HeroSubLine>{details.heroSub}</HeroSubLine>
+              )}
+            </HeroBlock>
+          )}
 
           <ScrollArea
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ paddingBottom: 0 }}
           >
-            <Steps>
-              {details.steps.map((step, index) => (
-                <StepRow key={step}>
-                  <StepDot>
-                    <StepNumber>{index + 1}</StepNumber>
-                  </StepDot>
-                  <StepText>{step}</StepText>
-                </StepRow>
-              ))}
-            </Steps>
+            <StepList>
+              {details.steps.map((step, index) => {
+                const isLast = index === details.steps.length - 1;
+                const Row = isLast ? StepRowLast : StepRow;
+                return (
+                  <Row key={step}>
+                    <StepNum>{index + 1}</StepNum>
+                    <StepText>{step}</StepText>
+                  </Row>
+                );
+              })}
+            </StepList>
 
-            {details.note && (
-              <Note>
-                <NoteIcon>📌</NoteIcon>
-                <NoteText>{details.note}</NoteText>
-              </Note>
+            {details.note != null && (
+              <PullQuote>
+                <PullQuoteText>{details.note}</PullQuoteText>
+              </PullQuote>
             )}
           </ScrollArea>
         </Content>

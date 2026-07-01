@@ -2,15 +2,21 @@
 
 import type { ImageSourcePropType } from 'react-native';
 
-// TaskDetails — the deeper information shown in the bottom-sheet modal when the
-// user taps "More details →". Separate from the main steps so the card stays
-// clean and only curious users dig into this layer.
+// TaskDetails — the deeper information shown in the editorial detail modal when
+// the user taps "More details →". Separate from the main steps so the card
+// stays clean and only curious users dig into this layer.
 export interface TaskDetails {
-  // Short heading shown at the top of the modal.
+  // title — displayed as a small uppercase kicker at the top of the modal,
+  // e.g. "Watering · The one rule". Sets the category and framing.
   title: string;
-  // Full numbered walkthrough — more granular than the main card's steps.
+  // hero / heroSub — the editorial hero block: a large stat or phrase and a
+  // supporting line beneath it. Optional — tasks without a single core fact
+  // skip the hero block and go straight to steps.
+  hero?: string;
+  heroSub?: string;
+  // steps — the full numbered walkthrough, more granular than the card steps.
   steps: string[];
-  // Optional caveat or reminder pinned at the bottom of the modal.
+  // note — shown as a pull-quote at the bottom (lime left-border block).
   note?: string;
 }
 

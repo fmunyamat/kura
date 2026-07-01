@@ -41,29 +41,35 @@ export const SOAK_STEPS_HOSE = [
 // Detail modal content for users with an automatic sprinkler system.
 // Teaches the one-time tuna-can calibration so they know their zone run times.
 export const SOAK_DETAILS_SPRINKLER: TaskDetails = {
-  title: 'Finding your zone times',
+  title: 'Watering · The one rule',
+  hero: '1 inch',
+  heroSub: 'of water, once a week.',
   steps: [
     "Put an empty tuna can in zone 1's spray path and run until full — write down the minutes",
     'Repeat for every zone and note each time separately — head types differ, so times will vary',
     'Pick 1 or 2 watering days per week. Divide each zone\'s time by that number — that\'s how long to run it each session',
   ],
-  note: "Your times won't change unless you adjust or replace the sprinkler heads.",
+  note: "Get this once and your sprinkler does the thinking for you.",
 };
 
 // Detail modal content for users who water by hand or with a portable sprinkler.
 export const SOAK_DETAILS_HOSE: TaskDetails = {
-  title: 'Finding your section times',
+  title: 'Watering · The one rule',
+  hero: '1 inch',
+  heroSub: 'of water, once a week.',
   steps: [
     'Put an empty tuna can where your sprinkler reaches and run until it\'s full — write down the minutes',
     'Move to each new section and repeat — times may vary depending on water pressure and the sprinkler head',
     'Pick 1 or 2 watering days per week. Divide your time by that number — that\'s how long to run it each session',
   ],
-  note: "Your times may shift if you change hose fittings or move to a new sprinkler head.",
+  note: "Get this once and you'll never guess again.",
 };
 
 // ── Edges (weeding) card — detail content ────────────────────────────────────
 const EDGES_DETAILS: TaskDetails = {
-  title: 'What counts as a weed',
+  title: 'Weeds · How to clear them',
+  hero: 'Pull\nthe root.',
+  heroSub: 'The leaf will grow back.',
   steps: [
     "If it wasn't planted and didn't grow in an even patch — it's a weed",
     'Broad flat leaves in a grass lawn, dandelions, clover, and creeping vines are the most common ones',
@@ -74,7 +80,9 @@ const EDGES_DETAILS: TaskDetails = {
 
 // ── Feed (fertiliser) card — detail content ───────────────────────────────────
 const FEED_DETAILS: TaskDetails = {
-  title: 'Setting up your spreader',
+  title: 'Feed · How to spread',
+  hero: 'Steady\npace.',
+  heroSub: 'Even speed, even coverage.',
   steps: [
     'Find the spreader setting on the fertiliser bag — it\'s usually listed by brand name',
     'Walk at a steady, even pace — stopping mid-row concentrates product in one spot and can burn the grass',
