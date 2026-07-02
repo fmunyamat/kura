@@ -8,7 +8,7 @@
 
 import { BlurView } from 'expo-blur';
 import { Platform, Pressable } from 'react-native';
-import Animated, { LinearTransition } from 'react-native-reanimated';
+import Animated from 'react-native-reanimated';
 import styled, { useTheme } from 'styled-components/native';
 
 import type { DeckCardData } from '../../types';
@@ -28,8 +28,11 @@ interface TaskRowProps {
   onComplete: () => void;
 }
 
-// Container — the animated wrapper for the whole row. LinearTransition makes the
-// rows below glide down/up when this one opens or closes. The 1px rim brightens
+// Container — the animated wrapper for the whole row. It has no layout
+// animation of its own: as the drawer's real height changes every frame (see
+// useTaskRowAnimation), ordinary flex layout reflows the rows below in the
+// same frame, so opening and closing move the rest of the list in lockstep
+// instead of on a second, separately-timed animation. The 1px rim brightens
 // along the top when the row is open, the way the app's other glass surfaces do.
 const Container = styled(Animated.View)<{ $open: boolean }>`
   border-radius: ${({ theme }) => theme.radii.lg}px;
@@ -161,7 +164,9 @@ export const TaskRow = ({
   onToggle,
   onComplete,
 }: TaskRowProps) => {
-  const { drawerStyle, chevronStyle } = useTaskRowAnimation({ isOpen });
+  const { drawerStyle, chevronStyle, handleContentLayout } = useTaskRowAnimation({
+    isOpen,
+  });
   // The frosted blur behind an open row matches the theme: a light frost in
   // light mode, a dark frost in dark mode.
   const { mode } = useTheme();
@@ -172,7 +177,7 @@ export const TaskRow = ({
   const rowTitle = card.title.replace(/\n/g, ' ');
 
   return (
-    <Container $open={isOpen} layout={LinearTransition.duration(420)}>
+    <Container $open={isOpen}>
       <Solid $open={isOpen} $done={isDone} />
       {isOpen && (
         <>
@@ -209,7 +214,7 @@ export const TaskRow = ({
       </Header>
 
       <Drawer style={drawerStyle}>
-        <DrawerInner>
+        <DrawerInner onLayout={handleContentLayout}>
           <TaskRowDetail
             image={card.image}
             description={card.description}
