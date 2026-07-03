@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kura — Hold to Reset, Blur Ramp</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Zalando+Sans:ital,wght@0,400;0,700;0,900;1,400&family=Zalando+Sans+Expanded:wght@700;900&display=swap" rel="stylesheet">
+<style>
+/* ── Studio board chrome (same system as the other concept boards) ───────── */
+:root {
+  --studio-lime: rgba(184,229,106,0.92);
+  --font-body:   'JetBrains Mono', monospace;
+  --font-header: 'Zalando Sans', sans-serif;
+  --font-header-x: 'Zalando Sans Expanded', 'Zalando Sans', sans-serif;
+
+  /* Clear Sky light-theme tokens, copied from src/config/theme.ts */
+  --photo-wash: rgba(226,241,251,0.42);
+  --glass-fill: rgba(248,252,255,0.55);
+  --glass-edge: rgba(255,255,255,0.85);
+  --glass-edge-soft: rgba(255,255,255,0.45);
+  --glass-divider: rgba(22,48,58,0.14);
+  --glass-input: rgba(255,255,255,0.55);
+  --text-heading: #16303a;
+  --text-body: rgba(22,48,58,0.80);
+  --text-muted: rgba(22,48,58,0.62);
+  --text-subtle: rgba(22,48,58,0.46);
+  --text-faint: rgba(22,48,58,0.34);
+  --accent: #3E9A5E;
+  --accent-ink: #FFFFFF;
+  --accent-text: #2478A6;
+  --badge-bg: rgba(255,255,255,0.62);
+  --badge-edge: rgba(255,255,255,0.75);
+  --nav-pill: rgba(244,250,255,0.55);
+  --tab-glow: rgba(36,120,166,0.18);
+
+  /* Red family */
+  --danger: rgba(177,24,0,0.92);
+  --danger-strong: #d33417;
+  --danger-fill: rgba(239,68,68,0.08);
+  --danger-edge: rgba(239,68,68,0.18);
+  --danger-edge-top: rgba(239,68,68,0.32);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background:
+    radial-gradient(1200px 600px at 80% -10%, rgba(45,106,45,0.28), transparent 60%),
+    radial-gradient(900px 500px at 10% 110%, rgba(184,229,106,0.10), transparent 55%),
+    #07120a;
+  font-family: var(--font-body);
+  color: rgba(255,255,255,0.7);
+  min-height: 100vh;
+  padding: 56px 40px 90px;
+}
+body::after {
+  content: ''; position: fixed; inset: 0; pointer-events: none; opacity: .5;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.04 0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.board-header { max-width: 1240px; margin: 0 auto 48px; }
+.board-kicker { font-size: 11px; letter-spacing: 4px; text-transform: uppercase; color: var(--studio-lime); margin-bottom: 14px; }
+.board-title { font-family: var(--font-header-x); font-weight: 900; font-size: clamp(32px, 4.2vw, 58px); line-height: 1.04; letter-spacing: -1px; color: #fff; }
+.board-title em { font-style: normal; color: #b8e56a; }
+.board-sub { margin-top: 16px; max-width: 720px; font-size: 12.5px; line-height: 1.8; color: rgba(255,255,255,0.55); }
+.board-sub b { color: var(--studio-lime); font-weight: 700; }
+
+.grid {
+  max-width: 1240px; margin: 0 auto;
+  display: grid; gap: 60px 36px;
+  grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+}
+.concept { animation: rise .7s cubic-bezier(.2,.7,.2,1) both; }
+.concept:nth-child(1){animation-delay:.04s}.concept:nth-child(2){animation-delay:.09s}
+.concept:nth-child(3){animation-delay:.14s}.concept:nth-child(4){animation-delay:.19s}
+.concept:nth-child(5){animation-delay:.24s}.concept:nth-child(6){animation-delay:.29s}
+@keyframes rise { from { opacity: 0; transform: translateY(28px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .concept { animation: none; } }
+
+.concept-label { display: flex; align-items: baseline; gap: 12px; margin-bottom: 16px; }
+.concept-num { font-family: var(--font-header-x); font-weight: 900; font-size: 28px; color: transparent; -webkit-text-stroke: 1.2px rgba(184,229,106,0.65); }
+.concept-name { font-family: var(--font-header); font-weight: 700; font-size: 16px; color: #fff; }
+.concept-tag { font-family: var(--font-body); font-weight: 700; font-size: 10px; letter-spacing: 1px; color: var(--studio-lime); background: rgba(184,229,106,0.12); border: 1px solid rgba(184,229,106,0.3); border-radius: 999px; padding: 3px 9px; }
+.concept-note { font-size: 10.5px; color: rgba(255,255,255,0.55); margin-top: 5px; line-height: 1.65; max-width: 330px; }
+.concept-note b { color: var(--studio-lime); font-weight: 700; }
+
+/* ── Phone frame ─────────────────────────────────────────────────────────── */
+.phone {
+  width: 330px; height: 700px; margin: 0 auto;
+  border-radius: 44px; overflow: hidden; position: relative;
+  border: 1px solid rgba(255,255,255,0.14);
+  box-shadow: 0 0 0 9px #0d130d, 0 0 0 10px rgba(255,255,255,0.07), 0 44px 80px -22px rgba(0,0,0,0.85);
+  background: #cfe0c2;
+}
+.p-photo { position: absolute; inset: 0; background: url('../assets/images/sprinkler.png') center/cover; filter: blur(7px); transform: scale(1.06); }
+.p-tint { position: absolute; inset: 0; background: var(--photo-wash); }
+
+.screen { position: absolute; inset: 0; display: flex; flex-direction: column; }
+.statusbar { display: flex; justify-content: space-between; align-items: center; padding: 16px 26px 0; font-size: 11px; font-weight: 700; color: var(--text-heading); font-family: var(--font-header); position: relative; z-index: 5; }
+.statusbar .pillcam { width: 76px; height: 22px; background: rgba(20,40,20,0.7); border-radius: 9999px; position: absolute; left: 50%; transform: translateX(-50%); top: 12px; }
+
+.p-head { padding: 22px 20px 14px; flex-shrink: 0; position: relative; z-index: 4; }
+.p-eyebrow { font-size: 9.5px; letter-spacing: 2.5px; text-transform: uppercase; color: var(--text-subtle); }
+.p-heading { margin-top: 10px; font-family: var(--font-header); font-weight: 900; font-size: 26px; color: var(--text-heading); letter-spacing: -0.3px; }
+
+.p-body { flex: 1; overflow-y: auto; padding: 0 20px 120px; -webkit-overflow-scrolling: touch; }
+.p-body::-webkit-scrollbar { display: none; }
+
+.s-lbl { font-size: 9.5px; letter-spacing: 2.5px; text-transform: uppercase; color: var(--text-subtle); margin: 18px 0 8px 4px; }
+.s-lbl:first-child { margin-top: 0; }
+
+/* Shared lawn-profile tiles + account row, identical across every variant —
+   only the hold-to-reset button's blur amount changes. */
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.tile { background: var(--glass-fill); border: 1px solid var(--glass-edge-soft); border-top-color: var(--glass-edge); border-radius: 16px; padding: 12px; display: flex; flex-direction: column; gap: 6px; }
+.tile-lbl { font-size: 8.5px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-subtle); }
+.tile-emoji { font-size: 22px; }
+.tile-val { font-family: var(--font-header); font-weight: 700; font-size: 12px; color: var(--text-heading); }
+.tile-sub { font-size: 9px; color: var(--text-muted); }
+
+.gcard { background: var(--glass-fill); border: 1px solid var(--glass-edge-soft); border-top-color: var(--glass-edge); border-radius: 16px; overflow: hidden; }
+.grow { display: flex; align-items: center; gap: 10px; padding: 12px 14px; }
+.grow-ico { width: 34px; height: 34px; border-radius: 10px; background: var(--badge-bg); border: 1px solid var(--badge-edge); display: grid; place-items: center; font-size: 15px; flex-shrink: 0; }
+.grow-name { flex: 1; font-family: var(--font-body); font-weight: 700; font-size: 12px; color: var(--text-body); }
+
+.tabbar { position: absolute; bottom: 22px; left: 50%; transform: translateX(-50%); z-index: 6;
+  display: flex; gap: 6px; padding: 7px; border-radius: 9999px;
+  background: var(--nav-pill); border: 1px solid var(--glass-edge-soft);
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
+.tab { width: 42px; height: 42px; border-radius: 9999px; display: grid; place-items: center; font-size: 17px; opacity: .45; }
+.tab.on { opacity: 1; background: var(--tab-glow); }
+.p-scrim { position: absolute; left: 0; right: 0; bottom: 0; height: 130px; z-index: 5; pointer-events: none;
+  background: linear-gradient(rgba(234,245,250,0), rgba(120,150,120,0.55)); }
+
+/* ── Hold-to-reset button — identical across all six, only backdrop-filter
+   blur changes. Everything else (fill opacity, border, copy, fill-sweep)
+   is held constant so the blur amount is the only variable being judged. ── */
+.hold-wrap { position: relative; }
+.hold-btn {
+  position: relative; overflow: hidden; border-radius: 9999px;
+  border: 1px solid var(--danger-edge-top);
+  background: var(--danger-fill);
+  padding: 13px 16px; display: flex; align-items: center; gap: 9px;
+}
+.hold-fill { position: absolute; inset: 0; width: 62%;
+  background: linear-gradient(90deg, rgba(239,68,68,0.35), rgba(211,52,23,0.55)); }
+.hold-ico { position: relative; font-size: 14px; }
+.hold-label { position: relative; flex: 1; font-family: var(--font-body); font-weight: 700; font-size: 11.5px; color: var(--danger-strong); }
+.hold-hint { margin-top: 8px; font-size: 8.5px; letter-spacing: 1.5px; text-transform: uppercase; color: rgba(177,24,0,0.5); text-align: center; }
+
+.blur-0  { backdrop-filter: blur(0px);  -webkit-backdrop-filter: blur(0px); }
+.blur-6  { backdrop-filter: blur(6px);  -webkit-backdrop-filter: blur(6px); }
+.blur-12 { backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+.blur-20 { backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+.blur-30 { backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px); }
+.blur-45 { backdrop-filter: blur(45px); -webkit-backdrop-filter: blur(45px); }
+</style>
+</head>
+<body>
+
+<div class="board-header">
+  <div class="board-kicker">Kura · Settings concept board</div>
+  <div class="board-title">Hold to reset, <em>blur ramp.</em></div>
+  <div class="board-sub">You picked <b>Hold to Confirm</b> for "I've moved." These six hold the button's fill,
+  copy, and hold-sweep exactly the same — the only thing that changes is <b>backdrop blur behind the button itself</b>,
+  from none up to a very heavy frost. Judge how much the lawn photo should show through versus how "glassy" the
+  button should read.</div>
+</div>
+
+<div class="grid">
+
+  <!-- 01 -->
+  <div class="concept">
+    <div class="concept-label"><span class="concept-num">01</span><span class="concept-name">No blur</span><span class="concept-tag">0px</span></div>
+    <div class="concept-note">Flat tint, no frost. The button reads as a thin red wash directly on the photo — crisp,
+    but doesn't feel like the app's other glass surfaces.</div>
+    <div class="phone">
+      <div class="p-photo"></div><div class="p-tint"></div>
+      <div class="screen">
+        <div class="statusbar"><span>9:41</span><span class="pillcam"></span><span>🔋</span></div>
+        <div class="p-head"><div class="p-eyebrow">Kura · Your lawn</div><div class="p-heading">Settings</div></div>
+        <div class="p-body">
+          <div class="s-lbl">Lawn profile</div>
+          <div class="grid2">
+            <div class="tile"><div class="tile-lbl">Grass type</div><div class="tile-emoji">❄️</div><div><div class="tile-val">Cool-season grass</div><div class="tile-sub">Tap to change</div></div></div>
+            <div class="tile"><div class="tile-lbl">Effort</div><div class="tile-emoji">🌿</div><div><div class="tile-val">Nice-looking lawn</div><div class="tile-sub">Tap to change</div></div></div>
+          </div>
+          <div class="s-lbl">Account</div>
+          <div class="gcard"><div class="grow"><div class="grow-ico">🚪</div><div class="grow-name">Log out</div></div></div>
+          <div class="s-lbl">Data</div>
+          <div class="hold-wrap">
+            <div class="hold-btn blur-0"><div class="hold-fill"></div><div class="hold-ico">📦</div><div class="hold-label">Keep holding to reset…</div></div>
+          </div>
+          <div class="hold-hint">Hold 2 seconds · I've moved</div>
+        </div>
+        <div class="p-scrim"></div>
+        <div class="tabbar"><div class="tab">☀️</div><div class="tab">📷</div><div class="tab on">⚙️</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 02 -->
+  <div class="concept">
+    <div class="concept-label"><span class="concept-num">02</span><span class="concept-name">Light frost</span><span class="concept-tag">6px</span></div>
+    <div class="concept-note">A whisper of blur — just enough to soften the photo's texture behind the button
+    without losing it. Subtlest step where it starts to feel like glass.</div>
+    <div class="phone">
+      <div class="p-photo"></div><div class="p-tint"></div>
+      <div class="screen">
+        <div class="statusbar"><span>9:41</span><span class="pillcam"></span><span>🔋</span></div>
+        <div class="p-head"><div class="p-eyebrow">Kura · Your lawn</div><div class="p-heading">Settings</div></div>
+        <div class="p-body">
+          <div class="s-lbl">Lawn profile</div>
+          <div class="grid2">
+            <div class="tile"><div class="tile-lbl">Grass type</div><div class="tile-emoji">❄️</div><div><div class="tile-val">Cool-season grass</div><div class="tile-sub">Tap to change</div></div></div>
+            <div class="tile"><div class="tile-lbl">Effort</div><div class="tile-emoji">🌿</div><div><div class="tile-val">Nice-looking lawn</div><div class="tile-sub">Tap to change</div></div></div>
+          </div>
+          <div class="s-lbl">Account</div>
+          <div class="gcard"><div class="grow"><div class="grow-ico">🚪</div><div class="grow-name">Log out</div></div></div>
+          <div class="s-lbl">Data</div>
+          <div class="hold-wrap">
+            <div class="hold-btn blur-6"><div class="hold-fill"></div><div class="hold-ico">📦</div><div class="hold-label">Keep holding to reset…</div></div>
+          </div>
+          <div class="hold-hint">Hold 2 seconds · I've moved</div>
+        </div>
+        <div class="p-scrim"></div>
+        <div class="tabbar"><div class="tab">☀️</div><div class="tab">📷</div><div class="tab on">⚙️</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 03 -->
+  <div class="concept">
+    <div class="concept-label"><span class="concept-num">03</span><span class="concept-name">Soft glass</span><span class="concept-tag">12px</span></div>
+    <div class="concept-note">Matches the weight of the app's ordinary glass cards (tiles, rows). This is the
+    "consistent with everything else on screen" option.</div>
+    <div class="phone">
+      <div class="p-photo"></div><div class="p-tint"></div>
+      <div class="screen">
+        <div class="statusbar"><span>9:41</span><span class="pillcam"></span><span>🔋</span></div>
+        <div class="p-head"><div class="p-eyebrow">Kura · Your lawn</div><div class="p-heading">Settings</div></div>
+        <div class="p-body">
+          <div class="s-lbl">Lawn profile</div>
+          <div class="grid2">
+            <div class="tile"><div class="tile-lbl">Grass type</div><div class="tile-emoji">❄️</div><div><div class="tile-val">Cool-season grass</div><div class="tile-sub">Tap to change</div></div></div>
+            <div class="tile"><div class="tile-lbl">Effort</div><div class="tile-emoji">🌿</div><div><div class="tile-val">Nice-looking lawn</div><div class="tile-sub">Tap to change</div></div></div>
+          </div>
+          <div class="s-lbl">Account</div>
+          <div class="gcard"><div class="grow"><div class="grow-ico">🚪</div><div class="grow-name">Log out</div></div></div>
+          <div class="s-lbl">Data</div>
+          <div class="hold-wrap">
+            <div class="hold-btn blur-12"><div class="hold-fill"></div><div class="hold-ico">📦</div><div class="hold-label">Keep holding to reset…</div></div>
+          </div>
+          <div class="hold-hint">Hold 2 seconds · I've moved</div>
+        </div>
+        <div class="p-scrim"></div>
+        <div class="tabbar"><div class="tab">☀️</div><div class="tab">📷</div><div class="tab on">⚙️</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 04 -->
+  <div class="concept">
+    <div class="concept-label"><span class="concept-num">04</span><span class="concept-name">Deep frost</span><span class="concept-tag">20px</span></div>
+    <div class="concept-note">Noticeably heavier than the rest of the screen's glass — starts to single the button
+    out as its own distinct surface rather than blending in.</div>
+    <div class="phone">
+      <div class="p-photo"></div><div class="p-tint"></div>
+      <div class="screen">
+        <div class="statusbar"><span>9:41</span><span class="pillcam"></span><span>🔋</span></div>
+        <div class="p-head"><div class="p-eyebrow">Kura · Your lawn</div><div class="p-heading">Settings</div></div>
+        <div class="p-body">
+          <div class="s-lbl">Lawn profile</div>
+          <div class="grid2">
+            <div class="tile"><div class="tile-lbl">Grass type</div><div class="tile-emoji">❄️</div><div><div class="tile-val">Cool-season grass</div><div class="tile-sub">Tap to change</div></div></div>
+            <div class="tile"><div class="tile-lbl">Effort</div><div class="tile-emoji">🌿</div><div><div class="tile-val">Nice-looking lawn</div><div class="tile-sub">Tap to change</div></div></div>
+          </div>
+          <div class="s-lbl">Account</div>
+          <div class="gcard"><div class="grow"><div class="grow-ico">🚪</div><div class="grow-name">Log out</div></div></div>
+          <div class="s-lbl">Data</div>
+          <div class="hold-wrap">
+            <div class="hold-btn blur-20"><div class="hold-fill"></div><div class="hold-ico">📦</div><div class="hold-label">Keep holding to reset…</div></div>
+          </div>
+          <div class="hold-hint">Hold 2 seconds · I've moved</div>
+        </div>
+        <div class="p-scrim"></div>
+        <div class="tabbar"><div class="tab">☀️</div><div class="tab">📷</div><div class="tab on">⚙️</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 05 -->
+  <div class="concept">
+    <div class="concept-label"><span class="concept-num">05</span><span class="concept-name">Heavy frost</span><span class="concept-tag">30px</span></div>
+    <div class="concept-note">Photo behind the button is essentially gone — just soft color. Reads as a fully
+    opaque-feeling pill even though the fill is still semi-transparent underneath.</div>
+    <div class="phone">
+      <div class="p-photo"></div><div class="p-tint"></div>
+      <div class="screen">
+        <div class="statusbar"><span>9:41</span><span class="pillcam"></span><span>🔋</span></div>
+        <div class="p-head"><div class="p-eyebrow">Kura · Your lawn</div><div class="p-heading">Settings</div></div>
+        <div class="p-body">
+          <div class="s-lbl">Lawn profile</div>
+          <div class="grid2">
+            <div class="tile"><div class="tile-lbl">Grass type</div><div class="tile-emoji">❄️</div><div><div class="tile-val">Cool-season grass</div><div class="tile-sub">Tap to change</div></div></div>
+            <div class="tile"><div class="tile-lbl">Effort</div><div class="tile-emoji">🌿</div><div><div class="tile-val">Nice-looking lawn</div><div class="tile-sub">Tap to change</div></div></div>
+          </div>
+          <div class="s-lbl">Account</div>
+          <div class="gcard"><div class="grow"><div class="grow-ico">🚪</div><div class="grow-name">Log out</div></div></div>
+          <div class="s-lbl">Data</div>
+          <div class="hold-wrap">
+            <div class="hold-btn blur-30"><div class="hold-fill"></div><div class="hold-ico">📦</div><div class="hold-label">Keep holding to reset…</div></div>
+          </div>
+          <div class="hold-hint">Hold 2 seconds · I've moved</div>
+        </div>
+        <div class="p-scrim"></div>
+        <div class="tabbar"><div class="tab">☀️</div><div class="tab">📷</div><div class="tab on">⚙️</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 06 -->
+  <div class="concept">
+    <div class="concept-label"><span class="concept-num">06</span><span class="concept-name">Maximum frost</span><span class="concept-tag">45px</span></div>
+    <div class="concept-note">Heaviest step. The button becomes a near-solid frosted slab — most "important object
+    in the room" feeling, at the cost of matching the rest of the screen's lighter glass.</div>
+    <div class="phone">
+      <div class="p-photo"></div><div class="p-tint"></div>
+      <div class="screen">
+        <div class="statusbar"><span>9:41</span><span class="pillcam"></span><span>🔋</span></div>
+        <div class="p-head"><div class="p-eyebrow">Kura · Your lawn</div><div class="p-heading">Settings</div></div>
+        <div class="p-body">
+          <div class="s-lbl">Lawn profile</div>
+          <div class="grid2">
+            <div class="tile"><div class="tile-lbl">Grass type</div><div class="tile-emoji">❄️</div><div><div class="tile-val">Cool-season grass</div><div class="tile-sub">Tap to change</div></div></div>
+            <div class="tile"><div class="tile-lbl">Effort</div><div class="tile-emoji">🌿</div><div><div class="tile-val">Nice-looking lawn</div><div class="tile-sub">Tap to change</div></div></div>
+          </div>
+          <div class="s-lbl">Account</div>
+          <div class="gcard"><div class="grow"><div class="grow-ico">🚪</div><div class="grow-name">Log out</div></div></div>
+          <div class="s-lbl">Data</div>
+          <div class="hold-wrap">
+            <div class="hold-btn blur-45"><div class="hold-fill"></div><div class="hold-ico">📦</div><div class="hold-label">Keep holding to reset…</div></div>
+          </div>
+          <div class="hold-hint">Hold 2 seconds · I've moved</div>
+        </div>
+        <div class="p-scrim"></div>
+        <div class="tabbar"><div class="tab">☀️</div><div class="tab">📷</div><div class="tab on">⚙️</div></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

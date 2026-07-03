@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kura — Settings, Six Ways</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Zalando+Sans:ital,wght@0,400;0,700;0,900;1,400&family=Zalando+Sans+Expanded:wght@700;900&display=swap" rel="stylesheet">
+<style>
+/* ── Studio board chrome (same system as the other concept boards) ───────── */
+:root {
+  --studio-lime: rgba(184,229,106,0.92);
+  --font-body:   'JetBrains Mono', monospace;
+  --font-header: 'Zalando Sans', sans-serif;
+  --font-header-x: 'Zalando Sans Expanded', 'Zalando Sans', sans-serif;
+
+  /* Clear Sky light-theme tokens, copied from src/config/theme.ts */
+  --photo-wash: rgba(226,241,251,0.42);
+  --glass-fill: rgba(248,252,255,0.55);
+  --glass-edge: rgba(255,255,255,0.85);
+  --glass-edge-soft: rgba(255,255,255,0.45);
+  --glass-divider: rgba(22,48,58,0.14);
+  --glass-input: rgba(255,255,255,0.55);
+  --text-heading: #16303a;
+  --text-body: rgba(22,48,58,0.80);
+  --text-muted: rgba(22,48,58,0.62);
+  --text-subtle: rgba(22,48,58,0.46);
+  --text-faint: rgba(22,48,58,0.34);
+  --accent: #3E9A5E;
+  --accent-ink: #FFFFFF;
+  --accent-text: #2478A6;
+  --badge-bg: rgba(255,255,255,0.62);
+  --badge-edge: rgba(255,255,255,0.75);
+  --nav-pill: rgba(244,250,255,0.55);
+  --tab-glow: rgba(36,120,166,0.18);
+  --danger: rgba(177,24,0,0.92);
+  --danger-fill: rgba(239,68,68,0.10);
+  --danger-edge: rgba(239,68,68,0.22);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background:
+    radial-gradient(1200px 600px at 80% -10%, rgba(45,106,45,0.28), transparent 60%),
+    radial-gradient(900px 500px at 10% 110%, rgba(184,229,106,0.10), transparent 55%),
+    #07120a;
+  font-family: var(--font-body);
+  color: rgba(255,255,255,0.7);
+  min-height: 100vh;
+  padding: 56px 40px 90px;
+}
+body::after {
+  content: ''; position: fixed; inset: 0; pointer-events: none; opacity: .5;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.04 0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.board-header { max-width: 1240px; margin: 0 auto 48px; }
+.board-kicker { font-size: 11px; letter-spacing: 4px; text-transform: uppercase; color: var(--studio-lime); margin-bottom: 14px; }
+.board-title { font-family: var(--font-header-x); font-weight: 900; font-size: clamp(32px, 4.2vw, 58px); line-height: 1.04; letter-spacing: -1px; color: #fff; }
+.board-title em { font-style: normal; color: #b8e56a; }
+.board-sub { margin-top: 16px; max-width: 720px; font-size: 12.5px; line-height: 1.8; color: rgba(255,255,255,0.55); }
+.board-sub b { color: var(--studio-lime); font-weight: 700; }
+
+.grid {
+  max-width: 1240px; margin: 0 auto;
+  display: grid; gap: 60px 36px;
+  grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+}
+.concept { animation: rise .7s cubic-bezier(.2,.7,.2,1) both; }
+.concept:nth-child(1){animation-delay:.04s}.concept:nth-child(2){animation-delay:.09s}
+.concept:nth-child(3){animation-delay:.14s}.concept:nth-child(4){animation-delay:.19s}
+.concept:nth-child(5){animation-delay:.24s}.concept:nth-child(6){animation-delay:.29s}
+.concept:nth-child(7){animation-delay:.34s}.concept:nth-child(8){animation-delay:.39s}
+.concept:nth-child(9){animation-delay:.44s}.concept:nth-child(10){animation-delay:.49s}
+@keyframes rise { from { opacity: 0; transform: translateY(28px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .concept { animation: none; } }
+
+.concept-label { display: flex; align-items: baseline; gap: 12px; margin-bottom: 16px; }
+.concept-num { font-family: var(--font-header-x); font-weight: 900; font-size: 28px; color: transparent; -webkit-text-stroke: 1.2px rgba(184,229,106,0.65); }
+.concept-name { font-family: var(--font-header); font-weight: 700; font-size: 16px; color: #fff; }
+.concept-note { font-size: 10.5px; color: rgba(255,255,255,0.55); margin-top: 5px; line-height: 1.65; max-width: 330px; }
+.concept-note b { color: var(--studio-lime); font-weight: 700; }
+
+/* ── Phone frame ─────────────────────────────────────────────────────────── */
+.phone {
+  width: 330px; height: 700px; margin: 0 auto;
+  border-radius: 44px; overflow: hidden; position: relative;
+  border: 1px solid rgba(255,255,255,0.14);
+  box-shadow: 0 0 0 9px #0d130d, 0 0 0 10px rgba(255,255,255,0.07), 0 44px 80px -22px rgba(0,0,0,0.85);
+  background: #cfe0c2;
+}
+.p-photo { position: absolute; inset: 0; background: url('../assets/images/sprinkler.png') center/cover; filter: blur(7px); transform: scale(1.06); }
+.p-tint { position: absolute; inset: 0; background: var(--photo-wash); }
+
+.screen { position: absolute; inset: 0; display: flex; flex-direction: column; }
+.statusbar { display: flex; justify-content: space-between; align-items: center; padding: 16px 26px 0; font-size: 11px; font-weight: 700; color: var(--text-heading); font-family: var(--font-header); position: relative; z-index: 5; }
+.statusbar .pillcam { width: 76px; height: 22px; background: rgba(20,40,20,0.7); border-radius: 9999px; position: absolute; left: 50%; transform: translateX(-50%); top: 12px; }
+
+.p-head { padding: 22px 20px 14px; flex-shrink: 0; position: relative; z-index: 4; }
+.p-eyebrow { font-size: 9.5px; letter-spacing: 2.5px; text-transform: uppercase; color: var(--text-subtle); }
+.p-heading { margin-top: 10px; font-family: var(--font-header); font-weight: 900; font-size: 26px; color: var(--text-heading); letter-spacing: -0.3px; }
+
+.p-body { flex: 1; overflow-y: auto; padding: 0 20px 120px; -webkit-overflow-scrolling: touch; }
+.p-body::-webkit-scrollbar { display: none; }
+
+/* Shared section label — same tiny eyebrow the Today screen uses */
+.s-lbl { font-size: 9.5px; letter-spacing: 2.5px; text-transform: uppercase; color: var(--text-subtle); margin: 18px 0 8px 4px; }
+.s-lbl:first-child { margin-top: 0; }
+
+/* Shared glass card + rows */
+.gcard { background: var(--glass-fill); border: 1px solid var(--glass-edge-soft); border-top-color: var(--glass-edge); border-radius: 16px; overflow: hidden; }
+.grow { display: flex; align-items: center; gap: 10px; padding: 12px 14px; }
+.grow + .grow { border-top: 1px solid var(--glass-divider); }
+.grow-ico { width: 34px; height: 34px; border-radius: 10px; background: var(--badge-bg); border: 1px solid var(--badge-edge); display: grid; place-items: center; font-size: 15px; flex-shrink: 0; }
+.grow-name { flex: 1; font-family: var(--font-body); font-weight: 700; font-size: 12px; color: var(--text-body); }
+.grow-val { font-size: 10.5px; color: var(--text-muted); }
+.grow-chev { color: var(--text-faint); font-size: 13px; }
+.grow-name.red, .grow-val.red { color: var(--danger); }
+
+/* Danger card — full red tint, reserved for "I've moved" */
+.danger { background: var(--danger-fill); border: 1px solid var(--danger-edge); border-radius: 16px; display: flex; align-items: center; gap: 10px; padding: 12px 14px; }
+.danger-ico { width: 34px; height: 34px; border-radius: 10px; background: rgba(239,68,68,0.12); display: grid; place-items: center; font-size: 15px; flex-shrink: 0; }
+.danger-name { font-family: var(--font-body); font-weight: 700; font-size: 12px; color: var(--danger); }
+.danger-desc { font-size: 9.5px; line-height: 1.5; color: rgba(177,24,0,0.55); margin-top: 2px; }
+
+/* Floating tab bar */
+.tabbar { position: absolute; bottom: 22px; left: 50%; transform: translateX(-50%); z-index: 6;
+  display: flex; gap: 6px; padding: 7px; border-radius: 9999px;
+  background: var(--nav-pill); border: 1px solid var(--glass-edge-soft);
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
+.tab { width: 42px; height: 42px; border-radius: 9999px; display: grid; place-items: center; font-size: 17px; opacity: .45; }
+.tab.on { opacity: 1; background: var(--tab-glow); }
+.p-scrim { position: absolute; left: 0; right: 0; bottom: 0; height: 130px; z-index: 5; pointer-events: none;
+  background: linear-gradient(rgba(234,245,250,0), rgba(120,150,120,0.55)); }
+
+/* ── 01 · Lawn Passport ──────────────────────────────────────────────────── */
+.c1-passport { background: var(--glass-fill); border: 1px solid var(--glass-edge-soft); border-top-color: var(--glass-edge); border-radius: 20px; padding: 18px 16px 14px; position: relative; overflow: hidden; }
+.c1-top { display: flex; align-items: center; gap: 13px; }
+.c1-crest { width: 54px; height: 54px; border-radius: 16px; background: var(--badge-bg); border: 1px solid var(--badge-edge); display: grid; place-items: center; font-size: 27px; }
+.c1-name { font-family: var(--font-header); font-weight: 900; font-size: 17px; color: var(--text-heading); }
+.c1-since { font-size: 9.5px; letter-spacing: 1px; text-transform: uppercase; color: var(--text-subtle); margin-top: 4px; }
+.c1-stamp { position: absolute; top: 14px; right: -6px; transform: rotate(8deg);
+  font-size: 8px; letter-spacing: 2px; text-transform: uppercase; color: rgba(62,154,94,0.55);
+  border: 1.5px solid rgba(62,154,94,0.35); border-radius: 6px; padding: 4px 18px 4px 8px; }
+.c1-perf { margin: 15px -16px 4px; border-top: 2px dashed var(--glass-divider); position: relative; }
+.c1-attr { display: flex; align-items: center; gap: 10px; padding: 11px 2px; }
+.c1-attr + .c1-attr { border-top: 1px solid var(--glass-divider); }
+.c1-attr-lbl { font-size: 8.5px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-subtle); width: 74px; flex-shrink: 0; }
+.c1-attr-val { flex: 1; display: flex; align-items: center; gap: 7px; font-family: var(--font-header); font-weight: 700; font-size: 13px; color: var(--text-heading); }
+.c1-change { font-size: 9px; font-weight: 700; color: var(--text-muted); background: var(--glass-input); border: 1px solid var(--glass-edge-soft); border-radius: 6px; padding: 4px 9px; cursor: pointer; transition: transform .15s; }
+.c1-change:hover { transform: translateY(-1px); }
+
+/* ── 02 · Plain English ──────────────────────────────────────────────────── */
+.c2-sentence { font-family: var(--font-header); font-weight: 700; font-size: 21px; line-height: 1.5; color: var(--text-heading); text-wrap: balance; padding: 6px 2px 0; }
+.c2-word { color: var(--accent-text); border-bottom: 2px dashed rgba(36,120,166,0.5); cursor: pointer; transition: border-color .15s; white-space: nowrap; }
+.c2-word:hover { border-bottom-style: solid; }
+.c2-hint { margin-top: 14px; font-size: 9.5px; letter-spacing: 1px; text-transform: uppercase; color: var(--text-subtle); display: flex; align-items: center; gap: 6px; }
+.c2-hint::before { content: '👆'; font-size: 11px; }
+.c2-div { margin: 22px 0 2px; border-top: 1px solid var(--glass-divider); }
+
+/* ── 03 · Tile Grid ──────────────────────────────────────────────────────── */
+.c3-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.c3-tile { aspect-ratio: 1 / 0.92; background: var(--glass-fill); border: 1px solid var(--glass-edge-soft); border-top-color: var(--glass-edge); border-radius: 18px; padding: 13px; display: flex; flex-direction: column; cursor: pointer; transition: transform .15s; }
+.c3-tile:hover { transform: translateY(-2px); }
+.c3-tile.ro { opacity: .75; cursor: default; }
+.c3-tile.ro:hover { transform: none; }
+.c3-lbl { font-size: 8.5px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-subtle); }
+.c3-emoji { font-size: 30px; margin: auto 0; }
+.c3-val { font-family: var(--font-header); font-weight: 700; font-size: 12.5px; line-height: 1.3; color: var(--text-heading); }
+.c3-sub { font-size: 8.5px; color: var(--text-subtle); margin-top: 3px; }
+
+/* ── 04 · One Quiet List ─────────────────────────────────────────────────── */
+/* uses only the shared .gcard / .grow classes */
+
+/* ── 05 · Effort Dial ────────────────────────────────────────────────────── */
+.c5-track { display: flex; gap: 6px; background: var(--glass-fill); border: 1px solid var(--glass-edge-soft); border-top-color: var(--glass-edge); border-radius: 16px; padding: 6px; }
+.c5-seg { flex: 1; border-radius: 11px; padding: 11px 6px 9px; text-align: center; cursor: pointer; transition: background .15s; }
+.c5-seg:hover { background: rgba(255,255,255,0.35); }
+.c5-seg.on { background: var(--accent); }
+.c5-seg-emoji { font-size: 19px; display: block; }
+.c5-seg-lbl { display: block; margin-top: 6px; font-size: 8px; letter-spacing: 0.5px; font-weight: 700; line-height: 1.35; color: var(--text-muted); }
+.c5-seg.on .c5-seg-lbl { color: var(--accent-ink); }
+.c5-desc { margin-top: 10px; padding: 0 6px; font-size: 10px; line-height: 1.6; color: var(--text-muted); }
+.c5-desc b { color: var(--text-body); }
+
+/* ── 06 · Season Brief ───────────────────────────────────────────────────── */
+.c6-chips { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 12px; }
+.c6-chip { display: inline-flex; align-items: center; gap: 6px; background: var(--glass-fill); border: 1px solid var(--glass-edge-soft); border-top-color: var(--glass-edge); border-radius: 9999px; padding: 6px 12px 6px 8px; font-size: 10px; font-weight: 700; color: var(--text-body); cursor: pointer; transition: transform .15s; }
+.c6-chip:hover { transform: translateY(-1px); }
+.c6-chip.ro { opacity: .7; cursor: default; }
+.c6-chip.ro:hover { transform: none; }
+.c6-brief { background: var(--glass-fill); border: 1px solid var(--glass-edge-soft); border-top-color: var(--glass-edge); border-radius: 16px; padding: 14px 15px; }
+.c6-brief-txt { font-size: 11px; line-height: 1.75; color: var(--text-body); }
+.c6-brief-txt b { color: var(--text-heading); font-weight: 700; }
+
+/* Shared onboarding-style option card (concepts 07, 09, 10 — mirrors OptionCard.tsx) */
+.opt { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 14px; background: var(--glass-input); border: 1px solid var(--glass-edge-soft); cursor: pointer; }
+.opt + .opt { margin-top: 8px; }
+.opt.on { border-color: var(--accent); background: rgba(62,154,94,0.10); }
+.opt-emoji { font-size: 17px; flex-shrink: 0; }
+.opt-name { font-weight: 700; font-size: 11.5px; color: var(--text-heading); }
+.opt-desc { font-size: 9px; color: var(--text-muted); margin-top: 2px; }
+.opt-check { margin-left: auto; color: var(--accent); font-weight: 800; font-size: 13px; }
+
+/* ── 07 · Seed Packet ────────────────────────────────────────────────────── */
+.c7-card { background: var(--glass-fill); border: 1px solid var(--glass-edge-soft); border-top-color: var(--glass-edge); border-radius: 16px; padding: 15px; }
+.c7-head { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 1px solid var(--glass-divider); padding-bottom: 10px; margin-bottom: 4px; }
+.c7-title { font-size: 9px; letter-spacing: 3px; text-transform: uppercase; font-weight: 700; color: var(--text-subtle); }
+.c7-no { font-size: 8.5px; color: var(--text-faint); }
+.c7-row { display: flex; align-items: baseline; gap: 8px; padding: 10px 0; cursor: pointer; }
+.c7-row + .c7-row { border-top: 1px solid rgba(22,48,58,0.06); }
+.c7-lbl { font-size: 8.5px; letter-spacing: 2px; text-transform: uppercase; font-weight: 700; color: var(--text-subtle); flex-shrink: 0; }
+.c7-dots { flex: 1; border-bottom: 2px dotted var(--glass-divider); transform: translateY(-3px); }
+.c7-val { font-size: 11px; font-weight: 700; color: var(--text-heading); }
+.c7-val.ro { color: var(--text-muted); font-weight: 400; }
+.c7-chev { font-size: 11px; color: var(--text-faint); }
+
+/* ── 08 · Photo Hero ─────────────────────────────────────────────────────── */
+.c8-hero { height: 150px; border-radius: 20px; overflow: hidden; position: relative; border: 1px solid var(--glass-edge-soft); cursor: pointer; }
+.c8-img { position: absolute; inset: 0; background: url('../assets/images/sprinkler.png') center/cover; }
+.c8-fade { position: absolute; inset: 0; background: linear-gradient(rgba(10,28,10,0.04), rgba(10,28,10,0.58)); }
+.c8-from { position: absolute; top: 10px; right: 12px; font-size: 7.5px; letter-spacing: 1.5px; text-transform: uppercase; color: rgba(255,255,255,0.75); }
+.c8-meta { position: absolute; left: 14px; right: 14px; bottom: 12px; }
+.c8-name { font-family: var(--font-header); font-weight: 900; font-size: 16px; color: #fff; }
+.c8-tags { margin-top: 7px; display: flex; gap: 6px; flex-wrap: wrap; }
+.c8-tag { font-size: 8.5px; font-weight: 700; color: rgba(255,255,255,0.92); background: rgba(255,255,255,0.16); border: 1px solid rgba(255,255,255,0.35); border-radius: 9999px; padding: 3px 9px; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
+
+/* ── 09 · Sheet Editor ───────────────────────────────────────────────────── */
+.c9-dim { position: absolute; inset: 0; background: rgba(3,9,3,0.45); z-index: 7; }
+.c9-sheet { position: absolute; left: 8px; right: 8px; bottom: 8px; z-index: 8; border-radius: 28px; background: rgba(244,250,255,0.94); border: 1px solid var(--glass-edge); padding: 12px 14px 14px; }
+.c9-grab { width: 36px; height: 4px; border-radius: 9999px; background: var(--glass-divider); margin: 0 auto 12px; }
+.c9-q { font-family: var(--font-header); font-weight: 900; font-size: 16px; color: var(--text-heading); margin: 0 4px 12px; }
+.c9-save { margin-top: 12px; background: var(--accent); color: var(--accent-ink); border-radius: 12px; text-align: center; font-weight: 700; font-size: 12px; padding: 12px; cursor: pointer; }
+
+/* ── 10 · Your Answers ───────────────────────────────────────────────────── */
+.c10-q { font-family: var(--font-header); font-weight: 700; font-size: 13px; color: var(--text-heading); margin: 0 2px 8px; }
+</style>
+</head>
+<body>
+
+<header class="board-header">
+  <div class="board-kicker">Kura · Concept Board · Settings</div>
+  <h1 class="board-title">Settings, <em>ten ways</em></h1>
+  <p class="board-sub">
+    Ten structural takes on the Settings tab, all in the <b>Clear Sky</b> light theme and built
+    from tokens that already exist in <b>theme.ts</b>. Every concept keeps the same real content —
+    grass type, effort tier, log out, and the red <b>"I've moved"</b> reset — so they're directly
+    comparable. Concepts 3 and 6 sketch one optional read-only extra (season) to show how the
+    layout grows; nothing else is invented.
+  </p>
+</header>
+
+<div class="grid">
+
+  <!-- ════════ 01 · LAWN PASSPORT ════════ -->
+  <section class="concept">
+    <div class="concept-label">
+      <span class="concept-num">01</span>
+      <div>
+        <div class="concept-name">Lawn Passport</div>
+        <p class="concept-note">The whole profile is <b>one identity card</b> — crest, name, and
+        attribute lines with a dashed perforation, like a plant passport. Strongest "my lawn is a
+        thing I own" feel; the account rows stay quiet below it.</p>
+      </div>
+    </div>
+    <div class="phone">
+      <div class="p-photo"></div><div class="p-tint"></div>
+      <div class="screen">
+        <div class="statusbar"><span>9:41</span><span class="pillcam"></span><span>🔋</span></div>
+        <div class="p-head">
+          <div class="p-eyebrow">Kura · Your lawn</div>
+          <div class="p-heading">Settings</div>
+        </div>
+        <div class="p-body">
+          <div class="s-lbl">Lawn passport</div>
+          <div class="c1-passport">
+            <div class="c1-stamp">Kura · est 2026</div>
+            <div class="c1-top">
+              <div class="c1-crest">🌿</div>
+              <div>
+                <div class="c1-name">Farai's lawn</div>
+                <div class="c1-since">Growing since April 2026</div>
+              </div>
+            </div>
+            <div class="c1-perf"></div>
+            <div class="c1-attr">
+              <div class="c1-attr-lbl">Grass type</div>
+              <div class="c1-attr-val">🌿 Cool-season</div>
+              <div class="c1-change">Change</div>
+            </div>
+            <div class="c1-attr">
+              <div class="c1-attr-lbl">Effort</div>
+              <div class="c1-attr-val">🌿 Nice-looking lawn</div>
+              <div class="c1-change">Change</div>
+            </div>
+          </div>
+
+          <div class="s-lbl">Account</div>
+          <div class="gcard">
+            <div class="grow">
+              <div class="grow-ico">🚪</div>
+              <div class="grow-name">Log out</div>
+              <div class="grow-val">f•••@yahoo.com</div>
+            </div>
+          </div>
+
+          <div class="s-lbl">Data</div>
+          <div class="danger">
+            <div class="danger-ico">📦</div>
+            <div>
+              <div class="danger-name">I've moved</div>
+              <div class="danger-desc">Reset all lawn data and start fresh from onboarding</div>
+            </div>
+          </div>
+        </div>
+        <div class="p-scrim"></div>
+        <div class="tabbar"><div class="tab">☀️</div><div class="tab">📷</div><div class="tab on">⚙️</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════ 02 · PLAIN ENGLISH ════════ -->
+  <section class="concept">
+    <div class="concept-label">
+      <span class="concept-num">02</span>
+      <div>
+        <div class="concept-name">Plain English</div>
+        <p class="concept-note">Settings written as <b>one sentence you can edit</b> — tap a
+        highlighted word to change it. The most on-brand option for a beginner app: it reads like
+        advice, not a form. Risk: less scannable once more settings exist.</p>
+      </div>
+    </div>
+    <div class="phone">
+      <div class="p-photo"></div><div class="p-tint"></div>
+      <div class="screen">
+        <div class="statusbar"><span>9:41</span><span class="pillcam"></span><span>🔋</span></div>
+        <div class="p-head">
+          <div class="p-eyebrow">Kura · Your lawn</div>
+          <div class="p-heading">Settings</div>
+        </div>
+        <div class="p-body">
+          <p class="c2-sentence">You're growing a <span class="c2-word">cool-season</span> lawn
+          and keeping it <span class="c2-word">nice-looking</span> without going overboard.</p>
+          <div class="c2-hint">Tap a highlighted word to change it</div>
+
+          <div class="c2-div"></div>
+
+          <div class="s-lbl">Account</div>
+          <div class="gcard">
+            <div class="grow">
+              <div class="grow-ico">🚪</div>
+              <div class="grow-name">Log out</div>
+              <div class="grow-val">f•••@yahoo.com</div>
+            </div>
+          </div>
+
+          <div class="s-lbl">Data</div>
+          <div class="danger">
+            <div class="danger-ico">📦</div>
+            <div>
+              <div class="danger-name">I've moved</div>
+              <div class="danger-desc">Reset all lawn data and start fresh from onboarding</div>
+            </div>
+          </div>
+        </div>
+        <div class="p-scrim"></div>
+        <div class="tabbar"><div class="tab">☀️</div><div class="tab">📷</div><div class="tab on">⚙️</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════ 03 · TILE GRID ════════ -->
+  <section class="concept">
+    <div class="concept-label">
+      <span class="concept-num">03</span>
+      <div>
+        <div class="concept-name">Tile Grid</div>
+        <p class="concept-note">The two panels you have today, grown into a <b>2×2 tile board</b>.
+        Big emoji, tiny label, value at the base. The dimmed tiles (season, reminders) are
+        <b>optional future settings</b> shown read-only — the grid absorbs new ones gracefully.</p>
+      </div>
+    </div>
+    <div class="phone">
+      <div class="p-photo"></div><div class="p-tint"></div>
+      <div class="screen">
+        <div class="statusbar"><span>9:41</span><span class="pillcam"></span><span>🔋</span></div>
+        <div class="p-head">
+          <div class="p-eyebrow">Kura · Your lawn</div>
+          <div class="p-heading">Settings</div>
+        </div>
+        <div class="p-body">
+          <div class="s-lbl">Lawn profile</div>
+          <div class="c3-grid">
+            <div class="c3-tile">
+              <div class="c3-lbl">Grass type</div>
+              <div class="c3-emoji">🌿</div>
+              <div>
+                <div class="c3-val">Cool-season</div>
+                <div class="c3-sub">Tap to change</div>
+              </div>
+            </div>
+            <div class="c3-tile">
+              <div class="c3-lbl">Effort</div>
+              <div class="c3-emoji">🌿</div>
+              <div>
+                <div class="c3-val">Nice-looking lawn</div>
+                <div class="c3-sub">Tap to change</div>
+              </div>
+            </div>
+            <div class="c3-tile ro">
+              <div class="c3-lbl">Season</div>
+              <div class="c3-emoji">☀️</div>
+              <div>
+                <div class="c3-val">Summer</div>
+                <div class="c3-sub">Set automatically</div>
+              </div>
+            </div>
+            <div class="c3-tile ro">
+              <div class="c3-lbl">Reminders</div>
+              <div class="c3-emoji">🔔</div>
+              <div>
+                <div class="c3-val">Coming soon</div>
+                <div class="c3-sub">Future setting</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="s-lbl">Account</div>
+          <div class="gcard">
+            <div class="grow">
+              <div class="grow-ico">🚪</div>
+              <div class="grow-name">Log out</div>
+              <div class="grow-val">f•••@yahoo.com</div>
+            </div>
+          </div>
+
+          <div class="s-lbl">Data</div>
+          <div class="danger">
+            <div class="danger-ico">📦</div>
+            <div>
+              <div class="danger-name">I've moved</div>
+              <div class="danger-desc">Reset all lawn data and start fresh</div>
+            </div>
+          </div>
+        </div>
+        <div class="p-scrim"></div>
+        <div class="tabbar"><div class="tab">☀️</div><div class="tab">📷</div><div class="tab on">⚙️</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════ 04 · ONE QUIET LIST ════════ -->
+  <section class="concept">
+    <div class="concept-label">
+      <span class="concept-num">04</span>
+      <div>
+        <div class="concept-name">One Quiet List</div>
+        <p class="concept-note">The conservative option: a <b>familiar grouped list</b>, value on
+        the right, chevron to edit. Fastest to scan and the pattern every user already knows —
+        but it gives up the "lawn identity" feeling entirely.</p>
+      </div>
+    </div>
+    <div class="phone">
+      <div class="p-photo"></div><div class="p-tint"></div>
+      <div class="screen">
+        <div class="statusbar"><span>9:41</span><span class="pillcam"></span><span>🔋</span></div>
+        <div class="p-head">
+          <div class="p-eyebrow">Kura · Your lawn</div>
+          <div class="p-heading">Settings</div>
+        </div>
+        <div class="p-body">
+          <div class="s-lbl">Lawn</div>
+          <div class="gcard">
+            <div class="grow">
+              <div class="grow-ico">🌿</div>
+              <div class="grow-name">Grass type</div>
+              <div class="grow-val">Cool-season</div>
+              <div class="grow-chev">›</div>
+            </div>
+            <div class="grow">
+              <div class="grow-ico">🌿</div>
+              <div class="grow-name">Effort level</div>
+              <div class="grow-val">Nice-looking lawn</div>
+              <div class="grow-chev">›</div>
+            </div>
+          </div>
+
+          <div class="s-lbl">Account</div>
+          <div class="gcard">
+            <div class="grow">
+              <div class="grow-ico">✉️</div>
+              <div class="grow-name">Signed in as</div>
+              <div class="grow-val">f•••@yahoo.com</div>
+            </div>
+            <div class="grow">
+              <div class="grow-ico">🚪</div>
+              <div class="grow-name red">Log out</div>
+            </div>
+          </div>
+
+          <div class="s-lbl">Data</div>
+          <div class="danger">
+            <div class="danger-ico">📦</div>
+            <div>
+              <div class="danger-name">I've moved</div>
+              <div class="danger-desc">Reset all lawn data and start fresh from onboarding</div>
+            </div>
+          </div>
+        </div>
+        <div class="p-scrim"></div>
+        <div class="tabbar"><div class="tab">☀️</div><div class="tab">📷</div><div class="tab on">⚙️</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════ 05 · EFFORT DIAL ════════ -->
+  <section class="concept">
+    <div class="concept-label">
+      <span class="concept-num">05</span>
+      <div>
+        <div class="concept-name">Effort Dial</div>
+        <p class="concept-note">Effort becomes an <b>always-visible three-notch control</b> —
+        no hidden picker, no Save button, tap a notch and it sticks. The whole setting and all
+        its options are on screen at once, which beginners can't get lost in.</p>
+      </div>
+    </div>
+    <div class="phone">
+      <div class="p-photo"></div><div class="p-tint"></div>
+      <div class="screen">
+        <div class="statusbar"><span>9:41</span><span class="pillcam"></span><span>🔋</span></div>
+        <div class="p-head">
+          <div class="p-eyebrow">Kura · Your lawn</div>
+          <div class="p-heading">Settings</div>
+        </div>
+        <div class="p-body">
+          <div class="s-lbl">Grass type</div>
+          <div class="gcard">
+            <div class="grow">
+              <div class="grow-ico">🌿</div>
+              <div class="grow-name">Cool-season grass</div>
+              <div class="grow-val">Change</div>
+              <div class="grow-chev">›</div>
+            </div>
+          </div>
+
+          <div class="s-lbl">How much effort?</div>
+          <div class="c5-track">
+            <div class="c5-seg">
+              <span class="c5-seg-emoji">🌱</span>
+              <span class="c5-seg-lbl">Keep it<br>alive</span>
+            </div>
+            <div class="c5-seg on">
+              <span class="c5-seg-emoji">🌿</span>
+              <span class="c5-seg-lbl">Nice-looking<br>lawn</span>
+            </div>
+            <div class="c5-seg">
+              <span class="c5-seg-emoji">🏆</span>
+              <span class="c5-seg-lbl">Best on<br>the block</span>
+            </div>
+          </div>
+          <p class="c5-desc"><b>Regular upkeep, nothing too demanding.</b> Your plan updates the
+          moment you tap a different level.</p>
+
+          <div class="s-lbl">Account</div>
+          <div class="gcard">
+            <div class="grow">
+              <div class="grow-ico">🚪</div>
+              <div class="grow-name">Log out</div>
+              <div class="grow-val">f•••@yahoo.com</div>
+            </div>
+          </div>
+
+          <div class="s-lbl">Data</div>
+          <div class="danger">
+            <div class="danger-ico">📦</div>
+            <div>
+              <div class="danger-name">I've moved</div>
+              <div class="danger-desc">Reset all lawn data and start fresh from onboarding</div>
+            </div>
+          </div>
+        </div>
+        <div class="p-scrim"></div>
+        <div class="tabbar"><div class="tab">☀️</div><div class="tab">📷</div><div class="tab on">⚙️</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════ 06 · SEASON BRIEF ════════ -->
+  <section class="concept">
+    <div class="concept-label">
+      <span class="concept-num">06</span>
+      <div>
+        <div class="concept-name">Season Brief</div>
+        <p class="concept-note">Settings as <b>chips under the heading</b>, plus a card that
+        explains in plain words what those choices mean for the plan right now. The only concept
+        that teaches — changing a setting visibly rewrites the brief.</p>
+      </div>
+    </div>
+    <div class="phone">
+      <div class="p-photo"></div><div class="p-tint"></div>
+      <div class="screen">
+        <div class="statusbar"><span>9:41</span><span class="pillcam"></span><span>🔋</span></div>
+        <div class="p-head">
+          <div class="p-eyebrow">Kura · Your lawn</div>
+          <div class="p-heading">Farai's lawn</div>
+          <div class="c6-chips">
+            <span class="c6-chip">🌿 Cool-season</span>
+            <span class="c6-chip">🌿 Nice-looking</span>
+            <span class="c6-chip ro">☀️ Summer</span>
+          </div>
+        </div>
+        <div class="p-body">
+          <div class="s-lbl">What this means</div>
+          <div class="c6-brief">
+            <p class="c6-brief-txt">Because your grass is <b>cool-season</b> and it's high
+            <b>summer</b>, we keep things gentle — watering and spot checks, no feeding until
+            the weather cools down. Pick a different effort level and this plan updates.</p>
+          </div>
+
+          <div class="s-lbl">Account</div>
+          <div class="gcard">
+            <div class="grow">
+              <div class="grow-ico">🚪</div>
+              <div class="grow-name">Log out</div>
+              <div class="grow-val">f•••@yahoo.com</div>
+            </div>
+          </div>
+
+          <div class="s-lbl">Data</div>
+          <div class="danger">
+            <div class="danger-ico">📦</div>
+            <div>
+              <div class="danger-name">I've moved</div>
+              <div class="danger-desc">Reset all lawn data and start fresh from onboarding</div>
+            </div>
+          </div>
+        </div>
+        <div class="p-scrim"></div>
+        <div class="tabbar"><div class="tab">☀️</div><div class="tab">📷</div><div class="tab on">⚙️</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════ 07 · SEED PACKET ════════ -->
+  <section class="concept">
+    <div class="concept-label">
+      <span class="concept-num">07</span>
+      <div>
+        <div class="concept-name">Seed Packet</div>
+        <p class="concept-note">The profile as a <b>care label</b> — dotted leaders running from
+        label to value, like the back of a seed packet. Leans into the JetBrains Mono body face
+        the app already uses; the quietest concept that still has a point of view.</p>
+      </div>
+    </div>
+    <div class="phone">
+      <div class="p-photo"></div><div class="p-tint"></div>
+      <div class="screen">
+        <div class="statusbar"><span>9:41</span><span class="pillcam"></span><span>🔋</span></div>
+        <div class="p-head">
+          <div class="p-eyebrow">Kura · Your lawn</div>
+          <div class="p-heading">Settings</div>
+        </div>
+        <div class="p-body">
+          <div class="s-lbl">Care label</div>
+          <div class="c7-card">
+            <div class="c7-head">
+              <span class="c7-title">🌿 Farai's lawn</span>
+              <span class="c7-no">№ 2026-04</span>
+            </div>
+            <div class="c7-row">
+              <span class="c7-lbl">Grass</span>
+              <span class="c7-dots"></span>
+              <span class="c7-val">Cool-season</span>
+              <span class="c7-chev">›</span>
+            </div>
+            <div class="c7-row">
+              <span class="c7-lbl">Effort</span>
+              <span class="c7-dots"></span>
+              <span class="c7-val">Nice-looking lawn</span>
+              <span class="c7-chev">›</span>
+            </div>
+            <div class="c7-row">
+              <span class="c7-lbl">Season</span>
+              <span class="c7-dots"></span>
+              <span class="c7-val ro">Summer · automatic</span>
+            </div>
+            <div class="c7-row">
+              <span class="c7-lbl">Since</span>
+              <span class="c7-dots"></span>
+              <span class="c7-val ro">April 2026</span>
+            </div>
+          </div>
+
+          <div class="s-lbl">Account</div>
+          <div class="gcard">
+            <div class="grow">
+              <div class="grow-ico">🚪</div>
+              <div class="grow-name">Log out</div>
+              <div class="grow-val">f•••@yahoo.com</div>
+            </div>
+          </div>
+
+          <div class="s-lbl">Data</div>
+          <div class="danger">
+            <div class="danger-ico">📦</div>
+            <div>
+              <div class="danger-name">I've moved</div>
+              <div class="danger-desc">Reset all lawn data and start fresh from onboarding</div>
+            </div>
+          </div>
+        </div>
+        <div class="p-scrim"></div>
+        <div class="tabbar"><div class="tab">☀️</div><div class="tab">📷</div><div class="tab on">⚙️</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════ 08 · PHOTO HERO ════════ -->
+  <section class="concept">
+    <div class="concept-label">
+      <span class="concept-num">08</span>
+      <div>
+        <div class="concept-name">Photo Hero</div>
+        <p class="concept-note">The header is <b>your latest progress photo</b>, sharp while the
+        rest of the screen stays blurred, with the profile overlaid on it as chips. Connects
+        Settings to the Photos feature — your actual lawn becomes the identity.</p>
+      </div>
+    </div>
+    <div class="phone">
+      <div class="p-photo"></div><div class="p-tint"></div>
+      <div class="screen">
+        <div class="statusbar"><span>9:41</span><span class="pillcam"></span><span>🔋</span></div>
+        <div class="p-head">
+          <div class="p-eyebrow">Kura · Your lawn</div>
+          <div class="p-heading">Settings</div>
+        </div>
+        <div class="p-body">
+          <div class="c8-hero">
+            <div class="c8-img"></div>
+            <div class="c8-fade"></div>
+            <div class="c8-from">From your photos · Jun 28</div>
+            <div class="c8-meta">
+              <div class="c8-name">Farai's lawn</div>
+              <div class="c8-tags">
+                <span class="c8-tag">🌿 Cool-season</span>
+                <span class="c8-tag">🌿 Nice-looking</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="s-lbl">Lawn</div>
+          <div class="gcard">
+            <div class="grow">
+              <div class="grow-ico">🌿</div>
+              <div class="grow-name">Grass type</div>
+              <div class="grow-val">Cool-season</div>
+              <div class="grow-chev">›</div>
+            </div>
+            <div class="grow">
+              <div class="grow-ico">🌿</div>
+              <div class="grow-name">Effort level</div>
+              <div class="grow-val">Nice-looking</div>
+              <div class="grow-chev">›</div>
+            </div>
+          </div>
+
+          <div class="s-lbl">Account</div>
+          <div class="gcard">
+            <div class="grow">
+              <div class="grow-ico">🚪</div>
+              <div class="grow-name">Log out</div>
+              <div class="grow-val">f•••@yahoo.com</div>
+            </div>
+          </div>
+
+          <div class="s-lbl">Data</div>
+          <div class="danger">
+            <div class="danger-ico">📦</div>
+            <div>
+              <div class="danger-name">I've moved</div>
+              <div class="danger-desc">Reset all lawn data and start fresh</div>
+            </div>
+          </div>
+        </div>
+        <div class="p-scrim"></div>
+        <div class="tabbar"><div class="tab">☀️</div><div class="tab">📷</div><div class="tab on">⚙️</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════ 09 · SHEET EDITOR ════════ -->
+  <section class="concept">
+    <div class="concept-label">
+      <span class="concept-num">09</span>
+      <div>
+        <div class="concept-name">Sheet Editor</div>
+        <p class="concept-note">Not a layout — an <b>editing pattern</b>. The screen itself stays
+        a quiet list; tapping a setting slides up a bottom sheet, the same surface as the task
+        Details modal. Shown here mid-edit with the effort picker open.</p>
+      </div>
+    </div>
+    <div class="phone">
+      <div class="p-photo"></div><div class="p-tint"></div>
+      <div class="screen">
+        <div class="statusbar"><span>9:41</span><span class="pillcam"></span><span>🔋</span></div>
+        <div class="p-head">
+          <div class="p-eyebrow">Kura · Your lawn</div>
+          <div class="p-heading">Settings</div>
+        </div>
+        <div class="p-body">
+          <div class="s-lbl">Lawn</div>
+          <div class="gcard">
+            <div class="grow">
+              <div class="grow-ico">🌿</div>
+              <div class="grow-name">Grass type</div>
+              <div class="grow-val">Cool-season</div>
+              <div class="grow-chev">›</div>
+            </div>
+            <div class="grow">
+              <div class="grow-ico">🌿</div>
+              <div class="grow-name">Effort level</div>
+              <div class="grow-val">Nice-looking</div>
+              <div class="grow-chev">›</div>
+            </div>
+          </div>
+
+          <div class="s-lbl">Account</div>
+          <div class="gcard">
+            <div class="grow">
+              <div class="grow-ico">🚪</div>
+              <div class="grow-name">Log out</div>
+              <div class="grow-val">f•••@yahoo.com</div>
+            </div>
+          </div>
+        </div>
+        <div class="p-scrim"></div>
+        <div class="tabbar"><div class="tab">☀️</div><div class="tab">📷</div><div class="tab on">⚙️</div></div>
+        <div class="c9-dim"></div>
+        <div class="c9-sheet">
+          <div class="c9-grab"></div>
+          <div class="c9-q">How much effort?</div>
+          <div class="opt">
+            <span class="opt-emoji">🌱</span>
+            <div>
+              <div class="opt-name">Just keeping it alive</div>
+              <div class="opt-desc">Only the tasks that truly matter</div>
+            </div>
+          </div>
+          <div class="opt on">
+            <span class="opt-emoji">🌿</span>
+            <div>
+              <div class="opt-name">Nice-looking lawn</div>
+              <div class="opt-desc">Regular upkeep, nothing too demanding</div>
+            </div>
+            <span class="opt-check">✓</span>
+          </div>
+          <div class="opt">
+            <span class="opt-emoji">🏆</span>
+            <div>
+              <div class="opt-name">Best on the block</div>
+              <div class="opt-desc">The full seasonal routine, start to finish</div>
+            </div>
+          </div>
+          <div class="c9-save">Save</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════ 10 · YOUR ANSWERS ════════ -->
+  <section class="concept">
+    <div class="concept-label">
+      <span class="concept-num">10</span>
+      <div>
+        <div class="concept-name">Your Answers</div>
+        <p class="concept-note">Settings framed as <b>the onboarding questions, answered</b> —
+        the exact OptionCard stack from onboarding, permanently editable. Zero new UI vocabulary
+        to learn, and changing your mind feels like re-answering, not configuring.</p>
+      </div>
+    </div>
+    <div class="phone">
+      <div class="p-photo"></div><div class="p-tint"></div>
+      <div class="screen">
+        <div class="statusbar"><span>9:41</span><span class="pillcam"></span><span>🔋</span></div>
+        <div class="p-head">
+          <div class="p-eyebrow">Kura · Your answers</div>
+          <div class="p-heading">Settings</div>
+        </div>
+        <div class="p-body">
+          <div class="s-lbl">Which grass do you have?</div>
+          <div class="opt on">
+            <span class="opt-emoji">🌿</span>
+            <div>
+              <div class="opt-name">Cool-season grass</div>
+              <div class="opt-desc">Stays green in cool weather · tap to change</div>
+            </div>
+            <span class="opt-check">✓</span>
+          </div>
+
+          <div class="s-lbl">How much effort?</div>
+          <div class="opt">
+            <span class="opt-emoji">🌱</span>
+            <div>
+              <div class="opt-name">Just keeping it alive</div>
+              <div class="opt-desc">Only the tasks that truly matter</div>
+            </div>
+          </div>
+          <div class="opt on">
+            <span class="opt-emoji">🌿</span>
+            <div>
+              <div class="opt-name">Nice-looking lawn</div>
+              <div class="opt-desc">Regular upkeep, nothing too demanding</div>
+            </div>
+            <span class="opt-check">✓</span>
+          </div>
+          <div class="opt">
+            <span class="opt-emoji">🏆</span>
+            <div>
+              <div class="opt-name">Best on the block</div>
+              <div class="opt-desc">The full seasonal routine, start to finish</div>
+            </div>
+          </div>
+
+          <div class="s-lbl">Account</div>
+          <div class="gcard">
+            <div class="grow">
+              <div class="grow-ico">🚪</div>
+              <div class="grow-name">Log out</div>
+              <div class="grow-val">f•••@yahoo.com</div>
+            </div>
+          </div>
+
+          <div class="s-lbl">Data</div>
+          <div class="danger">
+            <div class="danger-ico">📦</div>
+            <div>
+              <div class="danger-name">I've moved</div>
+              <div class="danger-desc">Reset all lawn data and start fresh</div>
+            </div>
+          </div>
+        </div>
+        <div class="p-scrim"></div>
+        <div class="tabbar"><div class="tab">☀️</div><div class="tab">📷</div><div class="tab on">⚙️</div></div>
+      </div>
+    </div>
+  </section>
+
+</div>
+</body>
+</html>
