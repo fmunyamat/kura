@@ -12,6 +12,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import styled from 'styled-components/native';
 
 import { signOut } from '~/features/auth/services/authService';
+import type { GrassTypeList } from '~/features/onboarding/types';
+import { ResetLawnDataCard } from '~/features/settings/components/ResetLawnDataCard';
 import { BottomScrim } from '~/shared/components/BottomScrim';
 import { FLOATING_TAB_BAR_CLEARANCE } from '~/shared/components/FloatingTabBar';
 import { OptionCard } from '~/shared/components/OptionCard';
@@ -42,6 +44,37 @@ const EFFORT_OPTIONS: Array<{
     description: 'The full seasonal routine, start to finish',
   },
 ];
+
+// GRASS_OPTIONS — same three choices shown during onboarding's GrassType screen.
+const GRASS_OPTIONS: Array<{
+  value: GrassTypeList;
+  icon: string;
+  name: string;
+  description: string;
+}> = [
+  {
+    value: 'cool-season',
+    icon: '❄️',
+    name: 'Cool-season grass',
+    description: 'Grows best in spring and fall. Common in northern states.',
+  },
+  {
+    value: 'warm-season',
+    icon: '☀️',
+    name: 'Warm-season grass',
+    description: 'Thrives in summer heat. Common in southern states.',
+  },
+  {
+    value: 'unknown',
+    icon: '🤷',
+    name: "I'm not sure",
+    description: "We'll guess based on your ZIP code.",
+  },
+];
+
+// ActivePicker — which tile's option list (if any) is open below the row.
+// Only one can be open at a time, so opening one closes the other.
+type ActivePicker = 'grassType' | 'effort' | null;
 
 // The same blurred lawn photo used on the Today screen.
 const SETTINGS_BACKGROUND = require('../../../../assets/images/sprinkler.png');
@@ -129,7 +162,9 @@ const TileRow = styled.View`
 // to the row's width — that's what keeps it a small tap target instead of a
 // tall block with dead space in the middle on wider phones. $isActive draws
 // the accent border while that tile's picker is open (only the effort tile
-// does this).
+// does this). The idle border uses the same two-tone glass rim as the home
+// screen's open task card — glassEdgeSoft all around with a brighter
+// glassEdge along the top — so it reads as the same glass surface.
 const Tile = styled(Pressable)<{ $isActive?: boolean }>`
   flex: 1;
   gap: 6px;
@@ -138,6 +173,8 @@ const Tile = styled(Pressable)<{ $isActive?: boolean }>`
   border-width: 1px;
   background-color: ${({ theme }) => theme.colors.glassFill};
   border-color: ${({ theme, $isActive }) =>
+    $isActive ? theme.colors.accentPrimary : theme.colors.glassEdgeSoft};
+  border-top-color: ${({ theme, $isActive }) =>
     $isActive ? theme.colors.accentPrimary : theme.colors.glassEdge};
 `;
 
@@ -174,12 +211,13 @@ const TileCaption = styled.Text`
 
 // RowCard — the frosted-glass container that groups the account row(s).
 // Same glass treatment as a Tile, but shaped as a horizontal list instead of
-// a square button.
+// a square button. Same two-tone rim as the home screen's open task card.
 const RowCard = styled.View`
   background-color: ${({ theme }) => theme.colors.glassFill};
   border-radius: ${({ theme }) => theme.radii.lg}px;
   border-width: 1px;
-  border-color: ${({ theme }) => theme.colors.glassEdge};
+  border-color: ${({ theme }) => theme.colors.glassEdgeSoft};
+  border-top-color: ${({ theme }) => theme.colors.glassEdge};
   overflow: hidden;
 `;
 
@@ -214,58 +252,15 @@ const RowName = styled.Text`
   color: ${({ theme }) => theme.colors.textPhotoHeading};
 `;
 
-// DangerRow — the "I've moved" reset row. Same shape as RowCard/Row but its
-// own red-tinted card, since it's the one row that isn't inside an account
-// list — it's its own single-row "Data" group.
-const DangerRow = styled(Pressable)`
-  flex-direction: row;
-  align-items: center;
-  gap: ${({ theme }) => theme.spacing.sm}px;
-  padding: 12px 14px;
-  border-radius: ${({ theme }) => theme.radii.lg}px;
-  border-width: 1px;
-  background-color: rgba(239, 68, 68, 0.08);
-  border-color: rgba(239, 68, 68, 0.18);
-`;
-
-const DangerIcon = styled.View`
-  width: 34px;
-  height: 34px;
-  border-radius: ${({ theme }) => theme.radii.sm}px;
-  background-color: rgba(239, 68, 68, 0.12);
-  align-items: center;
-  justify-content: center;
-`;
-
-const DangerIconText = styled.Text`
-  font-size: 15px;
-`;
-
-const DangerBody = styled.View`
-  flex: 1;
-`;
-
-const DangerName = styled.Text`
-  font-family: ${({ theme }) => theme.typography.fontBodyBold};
-  font-size: 12px;
-  color: rgba(239, 68, 68, 0.9);
-`;
-
-const DangerDesc = styled.Text`
-  margin-top: 2px;
-  font-family: ${({ theme }) => theme.typography.fontBody};
-  font-size: 9.5px;
-  line-height: 13px;
-  color: rgba(239, 68, 68, 0.55);
-`;
-
-// PickerCard — the inline effort picker that appears below the tile grid
-// when the effort tile is tapped.
+// PickerCard — the inline option picker that appears below the tile row
+// when the grass type or effort tile is tapped. Same two-tone glass rim as
+// the other Settings cards.
 const PickerCard = styled.View`
   background-color: ${({ theme }) => theme.colors.glassFill};
   border-radius: ${({ theme }) => theme.radii.lg}px;
   border-width: 1px;
-  border-color: ${({ theme }) => theme.colors.glassEdge};
+  border-color: ${({ theme }) => theme.colors.glassEdgeSoft};
+  border-top-color: ${({ theme }) => theme.colors.glassEdge};
   margin-top: 12px;
   overflow: hidden;
 `;
@@ -293,24 +288,40 @@ const SaveButtonText = styled.Text`
 `;
 
 export const SettingsScreen = () => {
+  const [grassType, setGrassType] = useState<GrassTypeList>('cool-season');
+  const [pendingGrassType, setPendingGrassType] = useState<GrassTypeList>('cool-season');
+
   const [effortLevel, setEffortLevel] = useState<1 | 2 | 3>(2);
   const [pendingLevel, setPendingLevel] = useState<1 | 2 | 3>(2);
-  const [isPickerOpen, setIsPickerOpen] = useState(false);
 
+  // Only one tile's option list is open at a time — opening one closes the other.
+  const [activePicker, setActivePicker] = useState<ActivePicker>(null);
+
+  const currentGrassOption = GRASS_OPTIONS.find((o) => o.value === grassType)!;
   const currentOption = EFFORT_OPTIONS.find((o) => o.value === effortLevel)!;
 
-  const handleOpenPicker = () => {
-    setPendingLevel(effortLevel);
-    setIsPickerOpen(true);
+  const handleOpenGrassPicker = () => {
+    setPendingGrassType(grassType);
+    setActivePicker('grassType');
   };
 
-  const handleSave = () => {
+  const handleSaveGrassType = () => {
+    setGrassType(pendingGrassType);
+    setActivePicker(null);
+  };
+
+  const handleOpenEffortPicker = () => {
+    setPendingLevel(effortLevel);
+    setActivePicker('effort');
+  };
+
+  const handleSaveEffort = () => {
     setEffortLevel(pendingLevel);
-    setIsPickerOpen(false);
+    setActivePicker(null);
   };
 
   const handleCancel = () => {
-    setIsPickerOpen(false);
+    setActivePicker(null);
   };
 
   const handleSignOut = async () => {
@@ -321,6 +332,13 @@ export const SettingsScreen = () => {
       // expire. Never surface the raw error to the UI (MASVS-CODE-4).
     }
   };
+
+  // handleResetData — fires once the user completes the 2-second hold on
+  // "I've moved". TODO: wire this to the real reset flow (delete the
+  // user_profiles row via Supabase, then redirect into onboarding) once that
+  // service exists. The hold gesture itself is the confirmation step, so no
+  // extra alert is needed on top of it.
+  const handleResetData = () => {};
 
   return (
     <Screen>
@@ -345,35 +363,71 @@ export const SettingsScreen = () => {
           <Section>
             <SectionLabel>Lawn profile</SectionLabel>
             <TileRow>
-              {/* Grass type tile — read-only placeholder until the change
-                  flow (re-running GrassType onboarding + geocoding) is wired. */}
-              <Tile accessibilityRole="button" accessibilityLabel="Change grass type">
+              {/* Grass type tile — tapping toggles the picker below, same as
+                  the effort tile. The accent border on $isActive tells the
+                  user this is the open tile. */}
+              <Tile
+                $isActive={activePicker === 'grassType'}
+                onPress={activePicker === 'grassType' ? handleCancel : handleOpenGrassPicker}
+                accessibilityRole="button"
+                accessibilityLabel={
+                  activePicker === 'grassType'
+                    ? 'Cancel changing grass type'
+                    : 'Change grass type'
+                }
+              >
                 <TileCategory>Grass type</TileCategory>
-                <TileEmoji>🌿</TileEmoji>
-                <TileValue>Cool-season grass</TileValue>
-                <TileCaption>Tap to change</TileCaption>
+                <TileEmoji>{currentGrassOption.icon}</TileEmoji>
+                <TileValue>{currentGrassOption.name}</TileValue>
+                <TileCaption>{activePicker === 'grassType' ? 'Cancel' : 'Tap to change'}</TileCaption>
               </Tile>
 
               {/* Effort tile — tapping toggles the picker below. The accent
                   border on $isActive tells the user this is the open tile. */}
               <Tile
-                $isActive={isPickerOpen}
-                onPress={isPickerOpen ? handleCancel : handleOpenPicker}
+                $isActive={activePicker === 'effort'}
+                onPress={activePicker === 'effort' ? handleCancel : handleOpenEffortPicker}
                 accessibilityRole="button"
                 accessibilityLabel={
-                  isPickerOpen ? 'Cancel changing effort level' : 'Change effort level'
+                  activePicker === 'effort' ? 'Cancel changing effort level' : 'Change effort level'
                 }
               >
                 <TileCategory>Effort</TileCategory>
                 <TileEmoji>{currentOption.icon}</TileEmoji>
                 <TileValue>{currentOption.name}</TileValue>
-                <TileCaption>{isPickerOpen ? 'Cancel' : 'Tap to change'}</TileCaption>
+                <TileCaption>{activePicker === 'effort' ? 'Cancel' : 'Tap to change'}</TileCaption>
               </Tile>
             </TileRow>
 
+            {/* Picker card — expands below the tile row when the grass type
+                tile is open. */}
+            {activePicker === 'grassType' && (
+              <PickerCard>
+                <PickerInner>
+                  {GRASS_OPTIONS.map((opt) => (
+                    <OptionCard
+                      key={opt.value}
+                      icon={opt.icon}
+                      name={opt.name}
+                      description={opt.description}
+                      selected={pendingGrassType === opt.value}
+                      onPress={() => setPendingGrassType(opt.value)}
+                    />
+                  ))}
+                  <SaveButton
+                    onPress={handleSaveGrassType}
+                    accessibilityRole="button"
+                    accessibilityLabel="Save grass type"
+                  >
+                    <SaveButtonText>Save</SaveButtonText>
+                  </SaveButton>
+                </PickerInner>
+              </PickerCard>
+            )}
+
             {/* Picker card — expands below the tile row when the effort
                 tile is open. */}
-            {isPickerOpen && (
+            {activePicker === 'effort' && (
               <PickerCard>
                 <PickerInner>
                   {EFFORT_OPTIONS.map((opt) => (
@@ -387,7 +441,7 @@ export const SettingsScreen = () => {
                     />
                   ))}
                   <SaveButton
-                    onPress={handleSave}
+                    onPress={handleSaveEffort}
                     accessibilityRole="button"
                     accessibilityLabel="Save effort level"
                   >
@@ -415,21 +469,12 @@ export const SettingsScreen = () => {
             </RowCard>
           </Section>
 
-          {/* ── Data — the "I've moved" reset, its own red list row ──── */}
+          {/* ── Data — the "I've moved" reset: a warning banner explaining
+              what it does, plus a 2-second hold-to-confirm button instead of
+              a single tap ──── */}
           <Section>
             <SectionLabel>Data</SectionLabel>
-            <DangerRow
-              accessibilityRole="button"
-              accessibilityLabel="Reset all lawn data and restart onboarding"
-            >
-              <DangerIcon>
-                <DangerIconText>📦</DangerIconText>
-              </DangerIcon>
-              <DangerBody>
-                <DangerName>I've moved</DangerName>
-                <DangerDesc>Reset all lawn data and start fresh</DangerDesc>
-              </DangerBody>
-            </DangerRow>
+            <ResetLawnDataCard onReset={handleResetData} />
           </Section>
         </ScrollView>
       </Safe>
