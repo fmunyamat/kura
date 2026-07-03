@@ -44,8 +44,9 @@ const BUTTON_FILL = '#9c2510';
 
 // CollapsedRow — the minimized state. Same padding, gap, icon size, and
 // border-radius as the Account section's "Log out" row (Row/RowIcon in
-// SettingsScreen.tsx) so it occupies exactly the same footprint — only the
-// colors (red family) mark it as the dangerous one while collapsed.
+// SettingsScreen.tsx) so it occupies exactly the same footprint. Background
+// and border match Card exactly (below) so the row reads as the same
+// surface before and after it's expanded, not a different shade of red.
 const CollapsedRow = styled(Pressable)`
   flex-direction: row;
   align-items: center;
@@ -53,9 +54,9 @@ const CollapsedRow = styled(Pressable)`
   padding: 12px 14px;
   border-radius: ${({ theme }) => theme.radii.lg}px;
   border-width: 1px;
-  background-color: rgba(239, 68, 68, 0.41);
+  background-color: rgba(239, 68, 68, 0.47);
   border-color: rgba(239, 68, 68, 0.18);
-  border-top-color: rgba(239, 68, 68, 0.32);
+  border-top-color: rgba(255, 189, 189, 0.32);
 `;
 
 const CollapsedIcon = styled.View`
