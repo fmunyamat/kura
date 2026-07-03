@@ -25,7 +25,7 @@ export const ConfettiBurst = () => {
 
   // Freeze the random parameters once so the burst is stable across renders.
   const pieces = useMemo(() => {
-    const palette = [colors.limeSolid, colors.white, colors.primaryMid, colors.textOnPrimary];
+    const palette = [colors.accentPrimary, colors.accentText, colors.trackTo, colors.textPhotoHeading];
     return Array.from({ length: PIECE_COUNT }, (_, index) => ({
       id: index,
       color: palette[Math.floor(Math.random() * palette.length)],

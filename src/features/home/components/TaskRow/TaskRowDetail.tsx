@@ -43,7 +43,7 @@ const Description = styled.Text`
   font-family: ${({ theme }) => theme.typography.fontBody};
   font-size: 11px;
   line-height: 18px;
-  color: ${({ theme }) => theme.colors.textMutedOnDark};
+  color: ${({ theme }) => theme.colors.textPhotoMuted};
 `;
 
 const Steps = styled.View`
@@ -64,7 +64,7 @@ const StepDot = styled.View`
   height: 18px;
   border-radius: ${({ theme }) => theme.radii.full}px;
   border-width: 1px;
-  border-color: ${({ theme }) => theme.colors.glassClearDivider};
+  border-color: ${({ theme }) => theme.colors.glassDivider};
   align-items: center;
   justify-content: center;
 `;
@@ -72,14 +72,14 @@ const StepDot = styled.View`
 const StepNumber = styled.Text`
   font-family: ${({ theme }) => theme.typography.fontBodyBold};
   font-size: 9px;
-  color: ${({ theme }) => theme.colors.lime};
+  color: ${({ theme }) => theme.colors.accentText};
 `;
 
 const StepText = styled.Text`
   flex: 1;
   font-family: ${({ theme }) => theme.typography.fontBody};
   font-size: 11px;
-  color: ${({ theme }) => theme.colors.textOnDark};
+  color: ${({ theme }) => theme.colors.textPhotoBody};
 `;
 
 export const TaskRowDetail = ({

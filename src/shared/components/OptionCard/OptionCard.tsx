@@ -33,21 +33,24 @@ const IconText = styled.Text`font-size: 32px;`;
 // TextGroup — holds the name and description, fills available space.
 const TextGroup = styled.View`flex: 1;`;
 
-// CardName — the option's label. textOnDark matches the clear-glass input text
-// colour used on the sign-in and Location screens.
+// CardName — the option's label. textPhotoHeading is the same theme-aware
+// token the home screen's task cards use for their title, so this text stays
+// readable against the glass card in both light and dark mode instead of
+// staying hardcoded white (which was unreadable on the light theme's pale
+// glass).
 const CardName = styled.Text`
   font-family: ${({ theme }) => theme.typography.fontHeaderBold};
   font-size: 14px;
-  color: ${({ theme }) => theme.colors.textOnDark};
+  color: ${({ theme }) => theme.colors.textPhotoHeading};
 `;
 
-// CardDescription — one-line explanation below the name. textMutedOnDark sits
-// at 60% white opacity, consistent with FieldLabel and placeholder text on the
-// other clear-glass screens.
+// CardDescription — one-line explanation below the name. textPhotoMuted
+// matches the muted line under a task card's title, for the same reason as
+// CardName above.
 const CardDescription = styled.Text`
   font-family: ${({ theme }) => theme.typography.fontBody};
   font-size: 11px;
-  color: ${({ theme }) => theme.colors.textMutedOnDark};
+  color: ${({ theme }) => theme.colors.textPhotoMuted};
   margin-top: 2px;
   line-height: 17px;
 `;

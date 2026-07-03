@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Bottom Nav — Grounded (non-floating) Concepts</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=DM+Sans:opsz,wght@9..40,400;9..40,600;9..40,700&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --lime:        #b8e56a;
+    --lime-soft:   rgba(184,229,106,0.92);
+    --lime-glow:   rgba(184,229,106,0.22);
+    --lime-dim:    rgba(184,229,106,0.14);
+    --lime-border: rgba(184,229,106,0.34);
+    --deep:        #0c3520;
+
+    /* solid, anchored bar surfaces — deliberately near-opaque so the nav reads
+       as part of the device edge, NOT a floating pane of glass */
+    --nav-solid:   rgba(7,20,9,0.97);
+    --nav-solid-2: rgba(9,24,11,0.98);
+    --nav-hair:    rgba(184,229,106,0.16);
+    --edge-hair:   rgba(255,255,255,0.08);
+
+    --row-surface: rgba(8,22,10,0.72);
+    --row-border:  rgba(255,255,255,0.08);
+    --badge-bg:    rgba(10,28,10,0.88);
+    --badge-edge:  rgba(255,255,255,0.28);
+
+    --text:        rgba(255,255,255,0.86);
+    --text-muted:  rgba(255,255,255,0.55);
+    --text-faint:  rgba(255,255,255,0.34);
+
+    --font: 'DM Sans', sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+
+    --on:  var(--lime);
+    --off: var(--text-faint);
+  }
+
+  body {
+    background: radial-gradient(ellipse at top, #0a1f10 0%, #04120a 60%, #020a05 100%);
+    font-family: var(--font); color: var(--text); min-height: 100vh; padding: 48px 28px 100px;
+  }
+
+  .head { text-align:center; margin-bottom:8px; }
+  .head-kicker { font-size:11px; letter-spacing:3px; text-transform:uppercase; color:var(--lime); font-family:var(--mono); margin-bottom:12px; }
+  .head-title { font-size:30px; font-weight:700; letter-spacing:-0.5px; margin-bottom:10px; }
+  .head-sub { font-size:14px; color:var(--text-muted); max-width:600px; margin:0 auto; line-height:1.6; }
+  .head-spec { font-size:11px; color:var(--text-faint); font-family:var(--mono); margin-top:14px; }
+
+  .grid { display:grid; grid-template-columns:repeat(3,1fr); gap:56px 40px; max-width:1200px; margin:48px auto 0; justify-items:center; }
+  @media (max-width:1080px){ .grid{ grid-template-columns:repeat(2,1fr);} }
+  @media (max-width:760px){ .grid{ grid-template-columns:1fr;} }
+
+  .concept { display:flex; flex-direction:column; align-items:center; gap:16px; width:300px; }
+  .concept-head { text-align:center; }
+  .concept-num { display:inline-block; font-family:var(--mono); font-size:11px; font-weight:500; color:var(--deep); background:var(--lime); border-radius:100px; padding:2px 10px; margin-bottom:10px; letter-spacing:1px; }
+  .concept-name { font-size:17px; font-weight:700; margin-bottom:6px; }
+  .concept-desc { font-size:12px; color:var(--text-muted); line-height:1.55; max-width:280px; }
+
+  /* ── phone shell ─────────────────────────────────────────────────────── */
+  .phone { width:300px; height:600px; border-radius:42px; overflow:hidden; position:relative; box-shadow:0 0 0 1px rgba(255,255,255,0.07), 0 30px 60px rgba(0,0,0,0.7); }
+  .bg { position:absolute; inset:0; background:
+      radial-gradient(ellipse at 28% 55%, rgba(36,82,18,0.55) 0%, transparent 55%),
+      radial-gradient(ellipse at 78% 28%, rgba(20,58,14,0.45) 0%, transparent 50%),
+      linear-gradient(155deg,#1a4a10 0%,#0d3010 45%,#091e07 100%); }
+  .tint { position:absolute; inset:0; background:rgba(4,10,4,0.55); }
+  .inner { position:relative; z-index:1; height:100%; padding:34px 14px 0; overflow:hidden; }
+
+  .eyebrow { font-size:8.5px; letter-spacing:1.8px; text-transform:uppercase; color:var(--text-muted); font-family:var(--mono); margin-bottom:3px; }
+  .greet { font-size:18px; font-weight:700; margin-bottom:14px; }
+
+  /* context rows behind the nav so each bar is shown in situ */
+  .mini-row { display:flex; align-items:center; gap:10px; padding:11px 12px; background:var(--row-surface); border:1px solid var(--row-border); border-radius:13px; margin-bottom:8px; }
+  .mbadge { width:30px; height:30px; border-radius:9px; background:var(--badge-bg); border:1px solid var(--badge-edge); display:flex; align-items:center; justify-content:center; font-size:14px; flex-shrink:0; }
+  .mcount { font-size:8px; letter-spacing:1.2px; text-transform:uppercase; color:var(--lime); }
+  .mtitle { font-size:12.5px; font-weight:600; margin-top:1px; }
+  .mchev { font-size:12px; color:var(--text-faint); margin-left:auto; }
+
+  /* ── shared icon + label ─────────────────────────────────────────────── */
+  .ico { width:22px; height:22px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; display:block; }
+  .ico.sm { width:19px; height:19px; }
+  .lbl { font-family:var(--mono); font-size:8px; letter-spacing:1px; text-transform:uppercase; white-space:nowrap; }
+
+  /* ── active-cycle keyframes (color follows --on / --off) ─────────────── */
+  @keyframes act1 { 0%,16%{ color:var(--on);} 25%,94%{ color:var(--off);} 100%{ color:var(--on);} }
+  @keyframes act2 { 0%,18%{ color:var(--off);} 25%,43%{ color:var(--on);} 50%,100%{ color:var(--off);} }
+  @keyframes act3 { 0%,43%{ color:var(--off);} 50%,68%{ color:var(--on);} 75%,100%{ color:var(--off);} }
+  @keyframes act4 { 0%,68%{ color:var(--off);} 75%,93%{ color:var(--on);} 100%{ color:var(--off);} }
+  .t1 { animation: act1 8s ease-in-out infinite; }
+  .t2 { animation: act2 8s ease-in-out infinite; }
+  .t3 { animation: act3 8s ease-in-out infinite; }
+  .t4 { animation: act4 8s ease-in-out infinite; }
+
+  /* invert cycle: for content that should be BRIGHT only while its tab is active
+     but is drawn on a lime fill (deep-green ink) — used by chip + pill labels */
+  @keyframes ink1 { 0%,16%{ opacity:1;} 25%,94%{ opacity:0;} 100%{ opacity:1;} }
+  @keyframes ink2 { 0%,18%{ opacity:0;} 25%,43%{ opacity:1;} 50%,100%{ opacity:0;} }
+  @keyframes ink3 { 0%,43%{ opacity:0;} 50%,68%{ opacity:1;} 75%,100%{ opacity:0;} }
+  @keyframes ink4 { 0%,68%{ opacity:0;} 75%,93%{ opacity:1;} 100%{ opacity:0;} }
+
+  /* ── shared 4-slot slider ────────────────────────────────────────────── */
+  @keyframes slide4 {
+    0%,18%   { transform: translateX(0%); }
+    25%,43%  { transform: translateX(100%); }
+    50%,68%  { transform: translateX(200%); }
+    75%,93%  { transform: translateX(300%); }
+    100%     { transform: translateX(0%); }
+  }
+
+  .navrow { position:relative; display:flex; }
+  .tab { flex:1; display:flex; flex-direction:column; align-items:center; gap:5px; padding:9px 0; position:relative; z-index:2; }
+  .slot { position:absolute; width:25%; left:0; top:0; bottom:0; z-index:1; animation: slide4 8s ease-in-out infinite; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .t1,.t2,.t3,.t4,.slot { animation: none; }
+    .t1 { color: var(--on); }  /* show first tab active when motion is off */
+  }
+
+  /* ════════ 1 · GROUNDED BAR ════════
+     Solid edge-anchored bar, flush to the bottom. Active tab = lime icon + label
+     with a short lime tick pinned to the very top edge above it. The calm, honest
+     baseline: no float, no glass, nothing to decode. */
+  .c1 .nav { position:absolute; left:0; right:0; bottom:0; background:var(--nav-solid); border-top:1px solid var(--edge-hair); padding:8px 6px 20px; }
+  .c1 .slot { top:0; bottom:auto; height:3px; display:flex; justify-content:center; }
+  .c1 .tick { width:26px; height:3px; border-radius:0 0 3px 3px; background:var(--lime); }
+
+  /* ════════ 2 · TURF TILE  (the risk / signature) ════════
+     The active tab stands on a patch of lawn: a soft lime tile rises from the
+     bottom edge with a grass-blade serrated top. You are literally standing on
+     your grass. Unmistakably Kura. */
+  .c2 .nav { position:absolute; left:0; right:0; bottom:0; background:var(--nav-solid); border-top:1px solid var(--edge-hair); padding:10px 6px 20px; }
+  .c2 .tab { padding-top:12px; }
+  .c2 .slot { display:flex; align-items:flex-end; justify-content:center; }
+  .c2 .turf { position:relative; width:64px; height:46px; background:var(--lime-dim); border-radius:12px 12px 0 0; }
+  /* serrated grass edge along the tile top, made from two angled lime gradients */
+  .c2 .turf::before { content:""; position:absolute; left:0; right:0; top:-6px; height:7px;
+    background:
+      repeating-linear-gradient(135deg, var(--lime) 0 2px, transparent 2px 7px),
+      repeating-linear-gradient(45deg,  var(--lime) 0 2px, transparent 2px 7px);
+    -webkit-mask: linear-gradient(#000,#000); mask: linear-gradient(#000,#000);
+    opacity:0.9; }
+  .c2 .turf::after { content:""; position:absolute; left:0; right:0; top:0; height:2px; background:var(--lime-border); }
+
+  /* ════════ 3 · CHIP ROW  (beginner-first, always labeled) ════════
+     Every tab keeps its word — a zero-experience user never meets a naked icon.
+     Icon + label sit side-by-side; the active one fills into a solid lime chip
+     with deep-green ink. Horizontal chips set it apart from the stacked bars. */
+  .c3 .nav { position:absolute; left:0; right:0; bottom:0; background:var(--nav-solid-2); border-top:1px solid var(--edge-hair); padding:9px 6px 20px; }
+  /* active ink is deep green because it sits on the lime chip, not lime-on-lime */
+  .c3 { --on: var(--deep); }
+  .c3 .navrow { gap:2px; }
+  .c3 .tab { flex-direction:row; gap:5px; padding:8px 2px; border-radius:11px; }
+  .c3 .slot { top:6px; bottom:6px; z-index:1; display:flex; }
+  .c3 .chip { flex:1; margin:0 2px; border-radius:11px; background:var(--lime); box-shadow:0 0 16px var(--lime-glow); }
+  .c3 .lbl { font-size:7px; letter-spacing:0.5px; }
+  .c3 .ico.sm { width:17px; height:17px; }
+
+  /* ════════ 4 · HORIZON ════════
+     A lime horizon line runs the width of the bar; a filled sun rises over it
+     under the active tab. Ties straight to the "Morning, John" greeting and the
+     sun that marks Today. The ground is solid and anchored. */
+  .c4 .nav { position:absolute; left:0; right:0; bottom:0; background:linear-gradient(180deg, var(--nav-solid) 0%, #061307 100%); padding:14px 6px 20px; }
+  .c4 .horizon { position:absolute; left:0; right:0; top:8px; height:1px; background:var(--nav-hair); }
+  .c4 .navrow { margin-top:2px; }
+  .c4 .slot { top:-6px; bottom:auto; height:14px; display:flex; justify-content:center; align-items:flex-start; }
+  .c4 .sun { width:16px; height:8px; border-radius:16px 16px 0 0; background:var(--lime); box-shadow:0 -3px 12px var(--lime-glow); }
+
+  /* ════════ 5 · KEYCAP ════════
+     The active tab lifts out of the bar like a pressed key — a raised rounded
+     cell with a bright lime top-rim. Tactile and physical, still fully part of
+     the anchored bar (nothing floats free). */
+  .c5 .nav { position:absolute; left:0; right:0; bottom:0; background:var(--nav-solid); border-top:1px solid var(--edge-hair); padding:8px 8px 20px; }
+  .c5 .slot { top:4px; bottom:4px; display:flex; }
+  .c5 .cap { flex:1; margin:0 4px; border-radius:12px; background:linear-gradient(180deg, rgba(184,229,106,0.18) 0%, rgba(184,229,106,0.06) 100%); border:1px solid var(--lime-border); border-top-width:2px; box-shadow:0 -2px 10px rgba(0,0,0,0.35), inset 0 1px 0 rgba(184,229,106,0.4); }
+
+  /* ════════ 6 · LEDGER UNDERLINE ════════
+     Editorial and quiet — matches the detail modal. Small icon over a mono label;
+     the active tab is marked by a lime rule that slides along the inner base like
+     a ledger line. Type does the work; almost no chrome. */
+  .c6 .nav { position:absolute; left:0; right:0; bottom:0; background:var(--nav-solid); border-top:1px solid var(--edge-hair); padding:10px 10px 22px; }
+  .c6 .ico { width:19px; height:19px; }
+  .c6 .lbl { font-size:7.5px; letter-spacing:1.4px; }
+  .c6 .slot { top:auto; bottom:12px; height:2px; display:flex; justify-content:center; }
+  .c6 .rule { width:34px; height:2px; background:var(--lime); box-shadow:0 0 8px var(--lime-glow); }
+
+</style>
+</head>
+<body>
+
+  <!-- reusable line-icon symbols (stroke = currentColor) -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="ico-sun" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="4.2"/>
+      <path d="M12 2.5v2.4M12 19.1v2.4M4.2 4.2l1.7 1.7M18.1 18.1l1.7 1.7M2.5 12h2.4M19.1 12h2.4M4.2 19.8l1.7-1.7M18.1 5.9l1.7-1.7"/>
+    </symbol>
+    <symbol id="ico-tasks" viewBox="0 0 24 24">
+      <rect x="3.5" y="3.5" width="17" height="17" rx="4.5"/>
+      <path d="M8 12.3l2.6 2.6L16.5 9"/>
+    </symbol>
+    <symbol id="ico-learn" viewBox="0 0 24 24">
+      <path d="M12 6.5C10.4 5.2 8.2 4.7 4.8 4.9v12.6c3.4-.2 5.6.3 7.2 1.6 1.6-1.3 3.8-1.8 7.2-1.6V4.9c-3.4-.2-5.6.3-7.2 1.6z"/>
+      <path d="M12 6.5v12.2"/>
+    </symbol>
+    <symbol id="ico-settings" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="3"/>
+      <path d="M12 2.8l1.4 2.2 2.6-.5.6 2.6 2.4 1.1-1 2.4 1 2.4-2.4 1.1-.6 2.6-2.6-.5L12 21.2l-1.4-2.2-2.6.5-.6-2.6-2.4-1.1 1-2.4-1-2.4 2.4-1.1.6-2.6 2.6.5z"/>
+    </symbol>
+  </svg>
+
+  <div class="head">
+    <div class="head-kicker">Navigation · grounded</div>
+    <div class="head-title">Bottom Nav — six non-floating directions</div>
+    <div class="head-sub">Every bar here is anchored flush to the bottom edge, full width — no floating pill. All six stay inside Kura's existing world (solid deep-green surface, single lime accent, mono labels) and differ in <em>how</em> they mark the active tab. Tabs shown: Today · Tasks · Learn · Settings. The active state cycles automatically so you can see each one move.</div>
+    <div class="head-spec">4 tabs · solid anchored surface · lime = active · JetBrains Mono labels</div>
+  </div>
+
+  <div class="grid">
+
+    <!-- 1 · GROUNDED BAR -->
+    <div class="concept">
+      <div class="concept-head">
+        <span class="concept-num">01</span>
+        <div class="concept-name">Grounded Bar</div>
+        <div class="concept-desc">The honest baseline. Solid bar on the edge, lime icon + label active, a small tick pinned above it. Nothing to decode.</div>
+      </div>
+      <div class="phone">
+        <div class="bg"></div><div class="tint"></div>
+        <div class="inner">
+          <div class="eyebrow">On Deck · Friday</div>
+          <div class="greet">Morning, John</div>
+          <div class="mini-row"><div class="mbadge">💧</div><div><div class="mcount">Task 1 of 3</div><div class="mtitle">Give it a deep soak.</div></div><div class="mchev">›</div></div>
+          <div class="mini-row"><div class="mbadge">🔍</div><div><div class="mcount">Task 2 of 3</div><div class="mtitle">Walk the edges.</div></div><div class="mchev">›</div></div>
+          <div class="mini-row"><div class="mbadge">🌱</div><div><div class="mcount">Task 3 of 3</div><div class="mtitle">Feed the lawn.</div></div><div class="mchev">›</div></div>
+          <div class="c1 nav">
+            <div class="navrow">
+              <div class="slot"><div class="tick"></div></div>
+              <div class="tab"><span class="t1"><svg class="ico"><use href="#ico-sun"/></svg></span><span class="lbl t1">Today</span></div>
+              <div class="tab"><span class="t2"><svg class="ico"><use href="#ico-tasks"/></svg></span><span class="lbl t2">Tasks</span></div>
+              <div class="tab"><span class="t3"><svg class="ico"><use href="#ico-learn"/></svg></span><span class="lbl t3">Learn</span></div>
+              <div class="tab"><span class="t4"><svg class="ico"><use href="#ico-settings"/></svg></span><span class="lbl t4">Settings</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2 · TURF TILE -->
+    <div class="concept">
+      <div class="concept-head">
+        <span class="concept-num">02</span>
+        <div class="concept-name">Turf Tile</div>
+        <div class="concept-desc">The active tab stands on a patch of lawn — a lime tile with a grass-blade serrated top rising from the edge. The one that could only be Kura.</div>
+      </div>
+      <div class="phone">
+        <div class="bg"></div><div class="tint"></div>
+        <div class="inner">
+          <div class="eyebrow">On Deck · Friday</div>
+          <div class="greet">Morning, John</div>
+          <div class="mini-row"><div class="mbadge">💧</div><div><div class="mcount">Task 1 of 3</div><div class="mtitle">Give it a deep soak.</div></div><div class="mchev">›</div></div>
+          <div class="mini-row"><div class="mbadge">🔍</div><div><div class="mcount">Task 2 of 3</div><div class="mtitle">Walk the edges.</div></div><div class="mchev">›</div></div>
+          <div class="mini-row"><div class="mbadge">🌱</div><div><div class="mcount">Task 3 of 3</div><div class="mtitle">Feed the lawn.</div></div><div class="mchev">›</div></div>
+          <div class="c2 nav">
+            <div class="navrow">
+              <div class="slot"><div class="turf"></div></div>
+              <div class="tab"><span class="t1"><svg class="ico"><use href="#ico-sun"/></svg></span><span class="lbl t1">Today</span></div>
+              <div class="tab"><span class="t2"><svg class="ico"><use href="#ico-tasks"/></svg></span><span class="lbl t2">Tasks</span></div>
+              <div class="tab"><span class="t3"><svg class="ico"><use href="#ico-learn"/></svg></span><span class="lbl t3">Learn</span></div>
+              <div class="tab"><span class="t4"><svg class="ico"><use href="#ico-settings"/></svg></span><span class="lbl t4">Settings</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3 · CHIP ROW -->
+    <div class="concept">
+      <div class="concept-head">
+        <span class="concept-num">03</span>
+        <div class="concept-name">Chip Row</div>
+        <div class="concept-desc">Beginner-first: every tab keeps its word, no naked icons. The active one fills into a solid lime chip with deep-green ink.</div>
+      </div>
+      <div class="phone">
+        <div class="bg"></div><div class="tint"></div>
+        <div class="inner">
+          <div class="eyebrow">On Deck · Friday</div>
+          <div class="greet">Morning, John</div>
+          <div class="mini-row"><div class="mbadge">💧</div><div><div class="mcount">Task 1 of 3</div><div class="mtitle">Give it a deep soak.</div></div><div class="mchev">›</div></div>
+          <div class="mini-row"><div class="mbadge">🔍</div><div><div class="mcount">Task 2 of 3</div><div class="mtitle">Walk the edges.</div></div><div class="mchev">›</div></div>
+          <div class="mini-row"><div class="mbadge">🌱</div><div><div class="mcount">Task 3 of 3</div><div class="mtitle">Feed the lawn.</div></div><div class="mchev">›</div></div>
+          <div class="c3 nav">
+            <div class="navrow">
+              <div class="slot"><div class="chip"></div></div>
+              <div class="tab"><span class="t1"><svg class="ico sm"><use href="#ico-sun"/></svg></span><span class="lbl t1">Today</span></div>
+              <div class="tab"><span class="t2"><svg class="ico sm"><use href="#ico-tasks"/></svg></span><span class="lbl t2">Tasks</span></div>
+              <div class="tab"><span class="t3"><svg class="ico sm"><use href="#ico-learn"/></svg></span><span class="lbl t3">Learn</span></div>
+              <div class="tab"><span class="t4"><svg class="ico sm"><use href="#ico-settings"/></svg></span><span class="lbl t4">Settings</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4 · HORIZON -->
+    <div class="concept">
+      <div class="concept-head">
+        <span class="concept-num">04</span>
+        <div class="concept-name">Horizon</div>
+        <div class="concept-desc">A lime horizon line crosses the bar; a small sun rises over it under the active tab. Speaks to the "Morning" greeting and the day's start.</div>
+      </div>
+      <div class="phone">
+        <div class="bg"></div><div class="tint"></div>
+        <div class="inner">
+          <div class="eyebrow">On Deck · Friday</div>
+          <div class="greet">Morning, John</div>
+          <div class="mini-row"><div class="mbadge">💧</div><div><div class="mcount">Task 1 of 3</div><div class="mtitle">Give it a deep soak.</div></div><div class="mchev">›</div></div>
+          <div class="mini-row"><div class="mbadge">🔍</div><div><div class="mcount">Task 2 of 3</div><div class="mtitle">Walk the edges.</div></div><div class="mchev">›</div></div>
+          <div class="mini-row"><div class="mbadge">🌱</div><div><div class="mcount">Task 3 of 3</div><div class="mtitle">Feed the lawn.</div></div><div class="mchev">›</div></div>
+          <div class="c4 nav">
+            <div class="horizon"></div>
+            <div class="navrow">
+              <div class="slot"><div class="sun"></div></div>
+              <div class="tab"><span class="t1"><svg class="ico"><use href="#ico-sun"/></svg></span><span class="lbl t1">Today</span></div>
+              <div class="tab"><span class="t2"><svg class="ico"><use href="#ico-tasks"/></svg></span><span class="lbl t2">Tasks</span></div>
+              <div class="tab"><span class="t3"><svg class="ico"><use href="#ico-learn"/></svg></span><span class="lbl t3">Learn</span></div>
+              <div class="tab"><span class="t4"><svg class="ico"><use href="#ico-settings"/></svg></span><span class="lbl t4">Settings</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5 · KEYCAP -->
+    <div class="concept">
+      <div class="concept-head">
+        <span class="concept-num">05</span>
+        <div class="concept-name">Keycap</div>
+        <div class="concept-desc">The active tab lifts out of the bar like a pressed key — raised cell, bright lime top-rim. Tactile, physical, still anchored.</div>
+      </div>
+      <div class="phone">
+        <div class="bg"></div><div class="tint"></div>
+        <div class="inner">
+          <div class="eyebrow">On Deck · Friday</div>
+          <div class="greet">Morning, John</div>
+          <div class="mini-row"><div class="mbadge">💧</div><div><div class="mcount">Task 1 of 3</div><div class="mtitle">Give it a deep soak.</div></div><div class="mchev">›</div></div>
+          <div class="mini-row"><div class="mbadge">🔍</div><div><div class="mcount">Task 2 of 3</div><div class="mtitle">Walk the edges.</div></div><div class="mchev">›</div></div>
+          <div class="mini-row"><div class="mbadge">🌱</div><div><div class="mcount">Task 3 of 3</div><div class="mtitle">Feed the lawn.</div></div><div class="mchev">›</div></div>
+          <div class="c5 nav">
+            <div class="navrow">
+              <div class="slot"><div class="cap"></div></div>
+              <div class="tab"><span class="t1"><svg class="ico"><use href="#ico-sun"/></svg></span><span class="lbl t1">Today</span></div>
+              <div class="tab"><span class="t2"><svg class="ico"><use href="#ico-tasks"/></svg></span><span class="lbl t2">Tasks</span></div>
+              <div class="tab"><span class="t3"><svg class="ico"><use href="#ico-learn"/></svg></span><span class="lbl t3">Learn</span></div>
+              <div class="tab"><span class="t4"><svg class="ico"><use href="#ico-settings"/></svg></span><span class="lbl t4">Settings</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 6 · LEDGER UNDERLINE -->
+    <div class="concept">
+      <div class="concept-head">
+        <span class="concept-num">06</span>
+        <div class="concept-name">Ledger Underline</div>
+        <div class="concept-desc">Editorial and quiet — matches the detail modal. A lime rule slides along the base to mark the active tab. Type carries it.</div>
+      </div>
+      <div class="phone">
+        <div class="bg"></div><div class="tint"></div>
+        <div class="inner">
+          <div class="eyebrow">On Deck · Friday</div>
+          <div class="greet">Morning, John</div>
+          <div class="mini-row"><div class="mbadge">💧</div><div><div class="mcount">Task 1 of 3</div><div class="mtitle">Give it a deep soak.</div></div><div class="mchev">›</div></div>
+          <div class="mini-row"><div class="mbadge">🔍</div><div><div class="mcount">Task 2 of 3</div><div class="mtitle">Walk the edges.</div></div><div class="mchev">›</div></div>
+          <div class="mini-row"><div class="mbadge">🌱</div><div><div class="mcount">Task 3 of 3</div><div class="mtitle">Feed the lawn.</div></div><div class="mchev">›</div></div>
+          <div class="c6 nav">
+            <div class="navrow">
+              <div class="slot"><div class="rule"></div></div>
+              <div class="tab"><span class="t1"><svg class="ico"><use href="#ico-sun"/></svg></span><span class="lbl t1">Today</span></div>
+              <div class="tab"><span class="t2"><svg class="ico"><use href="#ico-tasks"/></svg></span><span class="lbl t2">Tasks</span></div>
+              <div class="tab"><span class="t3"><svg class="ico"><use href="#ico-learn"/></svg></span><span class="lbl t3">Learn</span></div>
+              <div class="tab"><span class="t4"><svg class="ico"><use href="#ico-settings"/></svg></span><span class="lbl t4">Settings</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>

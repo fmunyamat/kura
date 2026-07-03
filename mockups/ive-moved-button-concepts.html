@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kura — "I've moved", Six Ways</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Zalando+Sans:ital,wght@0,400;0,700;0,900;1,400&family=Zalando+Sans+Expanded:wght@700;900&display=swap" rel="stylesheet">
+<style>
+/* ── Studio board chrome (same system as the other concept boards) ───────── */
+:root {
+  --studio-lime: rgba(184,229,106,0.92);
+  --font-body:   'JetBrains Mono', monospace;
+  --font-header: 'Zalando Sans', sans-serif;
+  --font-header-x: 'Zalando Sans Expanded', 'Zalando Sans', sans-serif;
+
+  /* Clear Sky light-theme tokens, copied from src/config/theme.ts */
+  --photo-wash: rgba(226,241,251,0.42);
+  --glass-fill: rgba(248,252,255,0.55);
+  --glass-edge: rgba(255,255,255,0.85);
+  --glass-edge-soft: rgba(255,255,255,0.45);
+  --glass-divider: rgba(22,48,58,0.14);
+  --glass-input: rgba(255,255,255,0.55);
+  --text-heading: #16303a;
+  --text-body: rgba(22,48,58,0.80);
+  --text-muted: rgba(22,48,58,0.62);
+  --text-subtle: rgba(22,48,58,0.46);
+  --text-faint: rgba(22,48,58,0.34);
+  --accent: #3E9A5E;
+  --accent-ink: #FFFFFF;
+  --accent-text: #2478A6;
+  --badge-bg: rgba(255,255,255,0.62);
+  --badge-edge: rgba(255,255,255,0.75);
+  --nav-pill: rgba(244,250,255,0.55);
+  --tab-glow: rgba(36,120,166,0.18);
+
+  /* Red family — shared across every concept below */
+  --danger: rgba(177,24,0,0.92);
+  --danger-strong: #d33417;
+  --danger-fill: rgba(239,68,68,0.08);
+  --danger-fill-soft: rgba(239,68,68,0.04);
+  --danger-edge: rgba(239,68,68,0.18);
+  --danger-edge-top: rgba(239,68,68,0.32);
+  --danger-ico-bg: rgba(239,68,68,0.12);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background:
+    radial-gradient(1200px 600px at 80% -10%, rgba(45,106,45,0.28), transparent 60%),
+    radial-gradient(900px 500px at 10% 110%, rgba(184,229,106,0.10), transparent 55%),
+    #07120a;
+  font-family: var(--font-body);
+  color: rgba(255,255,255,0.7);
+  min-height: 100vh;
+  padding: 56px 40px 90px;
+}
+body::after {
+  content: ''; position: fixed; inset: 0; pointer-events: none; opacity: .5;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.04 0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.board-header { max-width: 1240px; margin: 0 auto 48px; }
+.board-kicker { font-size: 11px; letter-spacing: 4px; text-transform: uppercase; color: var(--studio-lime); margin-bottom: 14px; }
+.board-title { font-family: var(--font-header-x); font-weight: 900; font-size: clamp(32px, 4.2vw, 58px); line-height: 1.04; letter-spacing: -1px; color: #fff; }
+.board-title em { font-style: normal; color: #b8e56a; }
+.board-sub { margin-top: 16px; max-width: 720px; font-size: 12.5px; line-height: 1.8; color: rgba(255,255,255,0.55); }
+.board-sub b { color: var(--studio-lime); font-weight: 700; }
+
+.grid {
+  max-width: 1240px; margin: 0 auto;
+  display: grid; gap: 60px 36px;
+  grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+}
+.concept { animation: rise .7s cubic-bezier(.2,.7,.2,1) both; }
+.concept:nth-child(1){animation-delay:.04s}.concept:nth-child(2){animation-delay:.09s}
+.concept:nth-child(3){animation-delay:.14s}.concept:nth-child(4){animation-delay:.19s}
+.concept:nth-child(5){animation-delay:.24s}.concept:nth-child(6){animation-delay:.29s}
+@keyframes rise { from { opacity: 0; transform: translateY(28px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .concept { animation: none; } }
+
+.concept-label { display: flex; align-items: baseline; gap: 12px; margin-bottom: 16px; }
+.concept-num { font-family: var(--font-header-x); font-weight: 900; font-size: 28px; color: transparent; -webkit-text-stroke: 1.2px rgba(184,229,106,0.65); }
+.concept-name { font-family: var(--font-header); font-weight: 700; font-size: 16px; color: #fff; }
+.concept-note { font-size: 10.5px; color: rgba(255,255,255,0.55); margin-top: 5px; line-height: 1.65; max-width: 330px; }
+.concept-note b { color: var(--studio-lime); font-weight: 700; }
+
+/* ── Phone frame ─────────────────────────────────────────────────────────── */
+.phone {
+  width: 330px; height: 700px; margin: 0 auto;
+  border-radius: 44px; overflow: hidden; position: relative;
+  border: 1px solid rgba(255,255,255,0.14);
+  box-shadow: 0 0 0 9px #0d130d, 0 0 0 10px rgba(255,255,255,0.07), 0 44px 80px -22px rgba(0,0,0,0.85);
+  background: #cfe0c2;
+}
+.p-photo { position: absolute; inset: 0; background: url('../assets/images/sprinkler.png') center/cover; filter: blur(7px); transform: scale(1.06); }
+.p-tint { position: absolute; inset: 0; background: var(--photo-wash); }
+
+.screen { position: absolute; inset: 0; display: flex; flex-direction: column; }
+.statusbar { display: flex; justify-content: space-between; align-items: center; padding: 16px 26px 0; font-size: 11px; font-weight: 700; color: var(--text-heading); font-family: var(--font-header); position: relative; z-index: 5; }
+.statusbar .pillcam { width: 76px; height: 22px; background: rgba(20,40,20,0.7); border-radius: 9999px; position: absolute; left: 50%; transform: translateX(-50%); top: 12px; }
+
+.p-head { padding: 22px 20px 14px; flex-shrink: 0; position: relative; z-index: 4; }
+.p-eyebrow { font-size: 9.5px; letter-spacing: 2.5px; text-transform: uppercase; color: var(--text-subtle); }
+.p-heading { margin-top: 10px; font-family: var(--font-header); font-weight: 900; font-size: 26px; color: var(--text-heading); letter-spacing: -0.3px; }
+
+.p-body { flex: 1; overflow-y: auto; padding: 0 20px 120px; -webkit-overflow-scrolling: touch; }
+.p-body::-webkit-scrollbar { display: none; }
+
+/* Shared section label — same tiny eyebrow the Today screen uses */
+.s-lbl { font-size: 9.5px; letter-spacing: 2.5px; text-transform: uppercase; color: var(--text-subtle); margin: 18px 0 8px 4px; }
+.s-lbl:first-child { margin-top: 0; }
+
+/* Shared lawn-profile tiles + account row, identical across every concept —
+   only the Data section below changes. Matches the shipped app exactly. */
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.tile { background: var(--glass-fill); border: 1px solid var(--glass-edge-soft); border-top-color: var(--glass-edge); border-radius: 16px; padding: 12px; display: flex; flex-direction: column; gap: 6px; }
+.tile-lbl { font-size: 8.5px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-subtle); }
+.tile-emoji { font-size: 22px; }
+.tile-val { font-family: var(--font-header); font-weight: 700; font-size: 12px; color: var(--text-heading); }
+.tile-sub { font-size: 9px; color: var(--text-muted); }
+
+.gcard { background: var(--glass-fill); border: 1px solid var(--glass-edge-soft); border-top-color: var(--glass-edge); border-radius: 16px; overflow: hidden; }
+.grow { display: flex; align-items: center; gap: 10px; padding: 12px 14px; }
+.grow-ico { width: 34px; height: 34px; border-radius: 10px; background: var(--badge-bg); border: 1px solid var(--badge-edge); display: grid; place-items: center; font-size: 15px; flex-shrink: 0; }
+.grow-name { flex: 1; font-family: var(--font-body); font-weight: 700; font-size: 12px; color: var(--text-body); }
+
+/* Floating tab bar */
+.tabbar { position: absolute; bottom: 22px; left: 50%; transform: translateX(-50%); z-index: 6;
+  display: flex; gap: 6px; padding: 7px; border-radius: 9999px;
+  background: var(--nav-pill); border: 1px solid var(--glass-edge-soft);
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
+.tab { width: 42px; height: 42px; border-radius: 9999px; display: grid; place-items: center; font-size: 17px; opacity: .45; }
+.tab.on { opacity: 1; background: var(--tab-glow); }
+.p-scrim { position: absolute; left: 0; right: 0; bottom: 0; height: 130px; z-index: 5; pointer-events: none;
+  background: linear-gradient(rgba(234,245,250,0), rgba(120,150,120,0.55)); }
+
+/* ── 01 · Quiet Link ─────────────────────────────────────────────────────── */
+.d1-wrap { display: flex; justify-content: center; padding: 10px 0 4px; }
+.d1-link { display: flex; align-items: center; gap: 7px; cursor: pointer; }
+.d1-ico { font-size: 12px; }
+.d1-text { font-family: var(--font-body); font-weight: 700; font-size: 11px; color: var(--danger);
+  text-decoration: underline; text-decoration-color: rgba(177,24,0,0.35); text-underline-offset: 3px; }
+
+/* ── 02 · Refined Row + Chevron ──────────────────────────────────────────── */
+.d2-row { background: var(--danger-fill); border: 1px solid var(--danger-edge); border-top-color: var(--danger-edge-top);
+  border-radius: 16px; display: flex; align-items: center; gap: 11px; padding: 13px 14px; cursor: pointer; }
+.d2-ico { width: 34px; height: 34px; border-radius: 10px; background: var(--danger-ico-bg); display: grid; place-items: center; font-size: 15px; flex-shrink: 0; }
+.d2-body { flex: 1; }
+.d2-name { font-family: var(--font-body); font-weight: 700; font-size: 12px; color: var(--danger); }
+.d2-desc { font-size: 9.5px; line-height: 1.5; color: rgba(177,24,0,0.55); margin-top: 2px; }
+.d2-chev { color: rgba(177,24,0,0.4); font-size: 14px; }
+
+/* ── 03 · Expand-to-Confirm ──────────────────────────────────────────────── */
+.d3-card { background: var(--danger-fill); border: 1px solid var(--danger-edge); border-top-color: var(--danger-edge-top); border-radius: 16px; overflow: hidden; }
+.d3-row { display: flex; align-items: center; gap: 11px; padding: 13px 14px; }
+.d3-ico { width: 34px; height: 34px; border-radius: 10px; background: var(--danger-ico-bg); display: grid; place-items: center; font-size: 15px; flex-shrink: 0; }
+.d3-name { flex: 1; font-family: var(--font-body); font-weight: 700; font-size: 12px; color: var(--danger); }
+.d3-confirm { border-top: 1px solid var(--danger-edge); padding: 12px 14px 14px; }
+.d3-copy { font-size: 9.5px; line-height: 1.6; color: rgba(177,24,0,0.7); margin-bottom: 11px; }
+.d3-btns { display: flex; gap: 8px; }
+.d3-cancel { flex: 1; text-align: center; padding: 9px; border-radius: 10px; font-family: var(--font-body); font-weight: 700; font-size: 10.5px;
+  color: var(--text-muted); background: var(--glass-input); border: 1px solid var(--glass-edge-soft); }
+.d3-yes { flex: 1; text-align: center; padding: 9px; border-radius: 10px; font-family: var(--font-body); font-weight: 700; font-size: 10.5px;
+  color: #fff; background: var(--danger-strong); }
+
+/* ── 04 · Hold to Confirm ────────────────────────────────────────────────── */
+.d4-btn { position: relative; overflow: hidden; border-radius: 9999px; border: 1px solid var(--danger-edge-top);
+  background: var(--danger-fill); padding: 13px 16px; display: flex; align-items: center; gap: 9px; }
+.d4-fill { position: absolute; inset: 0; width: 62%; background: linear-gradient(90deg, rgba(239,68,68,0.35), rgba(211,52,23,0.55)); }
+.d4-ico { position: relative; font-size: 14px; }
+.d4-label { position: relative; flex: 1; font-family: var(--font-body); font-weight: 700; font-size: 11.5px; color: var(--danger-strong); }
+.d4-hint { margin-top: 8px; font-size: 8.5px; letter-spacing: 1.5px; text-transform: uppercase; color: rgba(177,24,0,0.5); text-align: center; }
+
+/* ── 05 · Ghost Outline ──────────────────────────────────────────────────── */
+.d5-btn { border: 1.5px solid rgba(211,52,23,0.45); border-radius: 9999px; background: transparent;
+  padding: 12px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.d5-ico { font-size: 13px; }
+.d5-label { font-family: var(--font-body); font-weight: 700; font-size: 11px; letter-spacing: 0.3px; color: var(--danger-strong); }
+.d5-sub { margin-top: 7px; font-size: 9px; color: var(--text-subtle); text-align: center; }
+
+/* ── 06 · Warning Banner ─────────────────────────────────────────────────── */
+.d6-card { background: linear-gradient(160deg, rgba(239,68,68,0.14), rgba(239,68,68,0.05)); border: 1px solid var(--danger-edge); border-top-color: var(--danger-edge-top);
+  border-radius: 18px; padding: 15px 15px 14px; }
+.d6-top { display: flex; align-items: flex-start; gap: 10px; }
+.d6-ico { font-size: 20px; line-height: 1; }
+.d6-head { font-family: var(--font-header); font-weight: 900; font-size: 14.5px; color: var(--danger-strong); }
+.d6-desc { font-size: 10px; line-height: 1.6; color: rgba(177,24,0,0.68); margin-top: 4px; }
+.d6-cta { margin-top: 13px; text-align: center; padding: 11px; border-radius: 11px; background: var(--danger-strong);
+  font-family: var(--font-body); font-weight: 700; font-size: 11px; color: #fff; }
+</style>
+</head>
+<body>
+
+<div class="board-header">
+  <div class="board-kicker">Kura · Settings concept board</div>
+  <div class="board-title">"I've moved," <em>six ways.</em></div>
+  <div class="board-sub">Six treatments for the lawn-data reset action. All keep the <b>same red "this matters" family</b> —
+  what changes is how much visual weight it carries and how hard it is to trigger by accident, from a quiet text link
+  up to a full warning banner with an explicit confirm step.</div>
+</div>
+
+<div class="grid">
+
+  <!-- 01 · Quiet Link -->
+  <div class="concept">
+    <div class="concept-label"><span class="concept-num">01</span><span class="concept-name">Quiet Link</span></div>
+    <div class="concept-note">No card at all — just a small underlined red line under the Data label. Lowest visual weight
+    of the six; reads as "a thing you can do" rather than a button demanding attention.</div>
+    <div class="phone">
+      <div class="p-photo"></div><div class="p-tint"></div>
+      <div class="screen">
+        <div class="statusbar"><span>9:41</span><span class="pillcam"></span><span>🔋</span></div>
+        <div class="p-head">
+          <div class="p-eyebrow">Kura · Your lawn</div>
+          <div class="p-heading">Settings</div>
+        </div>
+        <div class="p-body">
+          <div class="s-lbl">Lawn profile</div>
+          <div class="grid2">
+            <div class="tile"><div class="tile-lbl">Grass type</div><div class="tile-emoji">❄️</div><div><div class="tile-val">Cool-season grass</div><div class="tile-sub">Tap to change</div></div></div>
+            <div class="tile"><div class="tile-lbl">Effort</div><div class="tile-emoji">🌿</div><div><div class="tile-val">Nice-looking lawn</div><div class="tile-sub">Tap to change</div></div></div>
+          </div>
+          <div class="s-lbl">Account</div>
+          <div class="gcard"><div class="grow"><div class="grow-ico">🚪</div><div class="grow-name">Log out</div></div></div>
+          <div class="s-lbl">Data</div>
+          <div class="d1-wrap">
+            <div class="d1-link"><span class="d1-ico">📦</span><span class="d1-text">I've moved — reset lawn data</span></div>
+          </div>
+        </div>
+        <div class="p-scrim"></div>
+        <div class="tabbar"><div class="tab">☀️</div><div class="tab">📷</div><div class="tab on">⚙️</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 02 · Refined Row + Chevron -->
+  <div class="concept">
+    <div class="concept-label"><span class="concept-num">02</span><span class="concept-name">Refined Row</span></div>
+    <div class="concept-note">Closest to what's shipped today, tightened up: a trailing chevron signals it opens
+    something (a dedicated confirm screen) rather than firing immediately on tap.</div>
+    <div class="phone">
+      <div class="p-photo"></div><div class="p-tint"></div>
+      <div class="screen">
+        <div class="statusbar"><span>9:41</span><span class="pillcam"></span><span>🔋</span></div>
+        <div class="p-head">
+          <div class="p-eyebrow">Kura · Your lawn</div>
+          <div class="p-heading">Settings</div>
+        </div>
+        <div class="p-body">
+          <div class="s-lbl">Lawn profile</div>
+          <div class="grid2">
+            <div class="tile"><div class="tile-lbl">Grass type</div><div class="tile-emoji">❄️</div><div><div class="tile-val">Cool-season grass</div><div class="tile-sub">Tap to change</div></div></div>
+            <div class="tile"><div class="tile-lbl">Effort</div><div class="tile-emoji">🌿</div><div><div class="tile-val">Nice-looking lawn</div><div class="tile-sub">Tap to change</div></div></div>
+          </div>
+          <div class="s-lbl">Account</div>
+          <div class="gcard"><div class="grow"><div class="grow-ico">🚪</div><div class="grow-name">Log out</div></div></div>
+          <div class="s-lbl">Data</div>
+          <div class="d2-row">
+            <div class="d2-ico">📦</div>
+            <div class="d2-body"><div class="d2-name">I've moved</div><div class="d2-desc">Reset all lawn data and start fresh</div></div>
+            <div class="d2-chev">›</div>
+          </div>
+        </div>
+        <div class="p-scrim"></div>
+        <div class="tabbar"><div class="tab">☀️</div><div class="tab">📷</div><div class="tab on">⚙️</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 03 · Expand-to-Confirm -->
+  <div class="concept">
+    <div class="concept-label"><span class="concept-num">03</span><span class="concept-name">Expand-to-Confirm</span></div>
+    <div class="concept-note">Tapping the row opens an inline confirm step in place — same pattern the Grass type
+    and Effort tiles already use. Shown mid-expand: <b>"Cancel"</b> vs a solid <b>"Yes, reset"</b>. No accidental single-tap resets.</div>
+    <div class="phone">
+      <div class="p-photo"></div><div class="p-tint"></div>
+      <div class="screen">
+        <div class="statusbar"><span>9:41</span><span class="pillcam"></span><span>🔋</span></div>
+        <div class="p-head">
+          <div class="p-eyebrow">Kura · Your lawn</div>
+          <div class="p-heading">Settings</div>
+        </div>
+        <div class="p-body">
+          <div class="s-lbl">Lawn profile</div>
+          <div class="grid2">
+            <div class="tile"><div class="tile-lbl">Grass type</div><div class="tile-emoji">❄️</div><div><div class="tile-val">Cool-season grass</div><div class="tile-sub">Tap to change</div></div></div>
+            <div class="tile"><div class="tile-lbl">Effort</div><div class="tile-emoji">🌿</div><div><div class="tile-val">Nice-looking lawn</div><div class="tile-sub">Tap to change</div></div></div>
+          </div>
+          <div class="s-lbl">Account</div>
+          <div class="gcard"><div class="grow"><div class="grow-ico">🚪</div><div class="grow-name">Log out</div></div></div>
+          <div class="s-lbl">Data</div>
+          <div class="d3-card">
+            <div class="d3-row"><div class="d3-ico">📦</div><div class="d3-name">I've moved</div></div>
+            <div class="d3-confirm">
+              <div class="d3-copy">This clears your saved lawn profile and task history. You'll start over from setup.</div>
+              <div class="d3-btns"><div class="d3-cancel">Cancel</div><div class="d3-yes">Yes, reset</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="p-scrim"></div>
+        <div class="tabbar"><div class="tab">☀️</div><div class="tab">📷</div><div class="tab on">⚙️</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 04 · Hold to Confirm -->
+  <div class="concept">
+    <div class="concept-label"><span class="concept-num">04</span><span class="concept-name">Hold to Confirm</span></div>
+    <div class="concept-note">Reuses the app's own 2-second hold-to-complete gesture from the Today screen's Mark
+    Complete pill. Shown mid-hold: fill sweeps across, label reads "Keep holding…". No modal, no accidental taps.</div>
+    <div class="phone">
+      <div class="p-photo"></div><div class="p-tint"></div>
+      <div class="screen">
+        <div class="statusbar"><span>9:41</span><span class="pillcam"></span><span>🔋</span></div>
+        <div class="p-head">
+          <div class="p-eyebrow">Kura · Your lawn</div>
+          <div class="p-heading">Settings</div>
+        </div>
+        <div class="p-body">
+          <div class="s-lbl">Lawn profile</div>
+          <div class="grid2">
+            <div class="tile"><div class="tile-lbl">Grass type</div><div class="tile-emoji">❄️</div><div><div class="tile-val">Cool-season grass</div><div class="tile-sub">Tap to change</div></div></div>
+            <div class="tile"><div class="tile-lbl">Effort</div><div class="tile-emoji">🌿</div><div><div class="tile-val">Nice-looking lawn</div><div class="tile-sub">Tap to change</div></div></div>
+          </div>
+          <div class="s-lbl">Account</div>
+          <div class="gcard"><div class="grow"><div class="grow-ico">🚪</div><div class="grow-name">Log out</div></div></div>
+          <div class="s-lbl">Data</div>
+          <div class="d4-btn">
+            <div class="d4-fill"></div>
+            <div class="d4-ico">📦</div>
+            <div class="d4-label">Keep holding to reset…</div>
+          </div>
+          <div class="d4-hint">Hold 2 seconds · I've moved</div>
+        </div>
+        <div class="p-scrim"></div>
+        <div class="tabbar"><div class="tab">☀️</div><div class="tab">📷</div><div class="tab on">⚙️</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 05 · Ghost Outline -->
+  <div class="concept">
+    <div class="concept-label"><span class="concept-num">05</span><span class="concept-name">Ghost Outline</span></div>
+    <div class="concept-note">No fill at all — a thin red outline pill floating on the photo itself. Reads as the
+    lowest-commitment action on the screen despite being the most consequential one, on purpose.</div>
+    <div class="phone">
+      <div class="p-photo"></div><div class="p-tint"></div>
+      <div class="screen">
+        <div class="statusbar"><span>9:41</span><span class="pillcam"></span><span>🔋</span></div>
+        <div class="p-head">
+          <div class="p-eyebrow">Kura · Your lawn</div>
+          <div class="p-heading">Settings</div>
+        </div>
+        <div class="p-body">
+          <div class="s-lbl">Lawn profile</div>
+          <div class="grid2">
+            <div class="tile"><div class="tile-lbl">Grass type</div><div class="tile-emoji">❄️</div><div><div class="tile-val">Cool-season grass</div><div class="tile-sub">Tap to change</div></div></div>
+            <div class="tile"><div class="tile-lbl">Effort</div><div class="tile-emoji">🌿</div><div><div class="tile-val">Nice-looking lawn</div><div class="tile-sub">Tap to change</div></div></div>
+          </div>
+          <div class="s-lbl">Account</div>
+          <div class="gcard"><div class="grow"><div class="grow-ico">🚪</div><div class="grow-name">Log out</div></div></div>
+          <div class="s-lbl">Data</div>
+          <div class="d5-btn"><span class="d5-ico">📦</span><span class="d5-label">I've moved — reset lawn data</span></div>
+          <div class="d5-sub">This can't be undone</div>
+        </div>
+        <div class="p-scrim"></div>
+        <div class="tabbar"><div class="tab">☀️</div><div class="tab">📷</div><div class="tab on">⚙️</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 06 · Warning Banner -->
+  <div class="concept">
+    <div class="concept-label"><span class="concept-num">06</span><span class="concept-name">Warning Banner</span></div>
+    <div class="concept-note">The opposite instinct from 01/05 — give the destructive action real visual weight, like
+    a caution notice rather than a nav row. Headline + plain-English consequence + one explicit button.</div>
+    <div class="phone">
+      <div class="p-photo"></div><div class="p-tint"></div>
+      <div class="screen">
+        <div class="statusbar"><span>9:41</span><span class="pillcam"></span><span>🔋</span></div>
+        <div class="p-head">
+          <div class="p-eyebrow">Kura · Your lawn</div>
+          <div class="p-heading">Settings</div>
+        </div>
+        <div class="p-body">
+          <div class="s-lbl">Lawn profile</div>
+          <div class="grid2">
+            <div class="tile"><div class="tile-lbl">Grass type</div><div class="tile-emoji">❄️</div><div><div class="tile-val">Cool-season grass</div><div class="tile-sub">Tap to change</div></div></div>
+            <div class="tile"><div class="tile-lbl">Effort</div><div class="tile-emoji">🌿</div><div><div class="tile-val">Nice-looking lawn</div><div class="tile-sub">Tap to change</div></div></div>
+          </div>
+          <div class="s-lbl">Account</div>
+          <div class="gcard"><div class="grow"><div class="grow-ico">🚪</div><div class="grow-name">Log out</div></div></div>
+          <div class="s-lbl">Data</div>
+          <div class="d6-card">
+            <div class="d6-top">
+              <div class="d6-ico">⚠️</div>
+              <div><div class="d6-head">Moving to a new lawn?</div><div class="d6-desc">Resetting clears your saved profile and task history so setup starts clean at the new address.</div></div>
+            </div>
+            <div class="d6-cta">Reset & start over →</div>
+          </div>
+        </div>
+        <div class="p-scrim"></div>
+        <div class="tabbar"><div class="tab">☀️</div><div class="tab">📷</div><div class="tab on">⚙️</div></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

@@ -32,7 +32,7 @@ const Label = styled.Text`
   font-size: 9px;
   letter-spacing: 1.5px;
   text-transform: uppercase;
-  color: ${({ theme }) => theme.colors.subtextOnPhoto};
+  color: ${({ theme }) => theme.colors.textPhotoSubtle};
 `;
 
 // Track — the empty rail. overflow hidden clips the growing fill to the rail's
@@ -41,7 +41,7 @@ const Track = styled.View`
   flex: 1;
   height: 4px;
   border-radius: ${({ theme }) => theme.radii.full}px;
-  background-color: ${({ theme }) => theme.colors.glassClearInput};
+  background-color: ${({ theme }) => theme.colors.glassInput};
   overflow: hidden;
 `;
 
@@ -82,7 +82,7 @@ export const CompletionTrack = ({ label, progress }: CompletionTrackProps) => {
       <Track onLayout={handleTrackLayout}>
         <Fill style={fillStyle}>
           <Gradient
-            colors={[colors.primaryMid, colors.limeSolid]}
+            colors={[colors.trackFrom, colors.trackTo]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
           />

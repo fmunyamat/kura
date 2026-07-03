@@ -15,8 +15,8 @@ interface ClearedCardProps {
 const Card = styled.View`
   border-radius: ${({ theme }) => theme.radii.lg}px;
   border-width: 1px;
-  border-color: ${({ theme }) => theme.colors.glassClearEdgeBottom};
-  border-top-color: ${({ theme }) => theme.colors.glassClearEdge};
+  border-color: ${({ theme }) => theme.colors.glassEdgeSoft};
+  border-top-color: ${({ theme }) => theme.colors.glassEdge};
   background-color: ${({ theme }) => theme.colors.deckCardSurface};
   align-items: center;
   padding: 34px 20px 26px;
@@ -30,7 +30,7 @@ const Heading = styled.Text`
   margin-top: 14px;
   font-family: ${({ theme }) => theme.typography.fontHeaderHeavy};
   font-size: 22px;
-  color: ${({ theme }) => theme.colors.white};
+  color: ${({ theme }) => theme.colors.textPhotoHeading};
 `;
 
 const Copy = styled.Text`
@@ -39,13 +39,13 @@ const Copy = styled.Text`
   font-family: ${({ theme }) => theme.typography.fontBody};
   font-size: 11px;
   line-height: 18px;
-  color: ${({ theme }) => theme.colors.textMutedOnDark};
+  color: ${({ theme }) => theme.colors.textPhotoMuted};
 `;
 
-// Chip — the lime record badge.
+// Chip — the record badge, in the theme's action accent.
 const Chip = styled.View`
   margin-top: 16px;
-  background-color: ${({ theme }) => theme.colors.lime};
+  background-color: ${({ theme }) => theme.colors.accentPrimary};
   border-radius: ${({ theme }) => theme.radii.full}px;
   padding: 5px 12px;
 `;
@@ -55,7 +55,7 @@ const ChipText = styled.Text`
   font-size: 9.5px;
   letter-spacing: 1px;
   text-transform: uppercase;
-  color: ${({ theme }) => theme.colors.primaryDeep};
+  color: ${({ theme }) => theme.colors.accentPrimaryInk};
 `;
 
 export const ClearedCard = ({ streakLabel }: ClearedCardProps) => (

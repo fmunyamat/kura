@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kura — Today Screen · Collapsing Header · 6 Directions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Zalando+Sans:ital,wght@0,400;0,700;0,900;1,400&family=Zalando+Sans+Expanded:wght@700;900&display=swap" rel="stylesheet">
+<style>
+/* ────────────────────────────────────────────────────────────────────
+   STUDIO SHELL
+   ──────────────────────────────────────────────────────────────────── */
+:root {
+  --studio-lime: rgba(184,229,106,0.92);
+  --font-body:   'JetBrains Mono', monospace;
+  --font-header: 'Zalando Sans', sans-serif;
+  --font-header-x: 'Zalando Sans Expanded', 'Zalando Sans', sans-serif;
+
+  /* ── Clear Sky tokens, lifted from src/config/theme.ts lightSemantic ── */
+  --photo-wash: rgba(226,241,251,0.42);
+  --glass-fill: rgba(248,252,255,0.55);
+  --glass-edge: rgba(255,255,255,0.85);
+  --glass-edge-soft: rgba(255,255,255,0.45);
+  --glass-divider: rgba(22,48,58,0.14);
+  --glass-input: rgba(255,255,255,0.55);
+  --text-heading: #16303a;
+  --text-body: rgba(22,48,58,0.80);
+  --text-muted: rgba(22,48,58,0.62);
+  --text-subtle: rgba(22,48,58,0.46);
+  --text-faint: rgba(22,48,58,0.34);
+  --accent: #3E9A5E;
+  --accent-ink: #FFFFFF;
+  --accent-text: #2478A6;
+  --track-from: #3E9A5E;
+  --track-to: #7ED0BE;
+  --row-bg: rgba(248,252,255,0.55);
+  --row-border: rgba(255,255,255,0.55);
+  --badge-bg: rgba(255,255,255,0.62);
+  --badge-border: rgba(255,255,255,0.75);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background:
+    radial-gradient(1200px 600px at 80% -10%, rgba(45,106,45,0.28), transparent 60%),
+    radial-gradient(900px 500px at 10% 110%, rgba(184,229,106,0.10), transparent 55%),
+    #07120a;
+  font-family: var(--font-body);
+  color: rgba(255,255,255,0.7);
+  min-height: 100vh;
+  padding: 56px 40px 90px;
+}
+body::after {
+  content: ''; position: fixed; inset: 0; pointer-events: none; opacity: .5;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.04 0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.board-header { max-width: 1240px; margin: 0 auto 48px; }
+.board-kicker { font-size: 11px; letter-spacing: 4px; text-transform: uppercase; color: var(--studio-lime); margin-bottom: 14px; }
+.board-title { font-family: var(--font-header-x); font-weight: 900; font-size: clamp(32px, 4.2vw, 58px); line-height: 1.04; letter-spacing: -1px; color: #fff; }
+.board-title em { font-style: normal; color: #b8e56a; }
+.board-sub { margin-top: 16px; max-width: 700px; font-size: 12.5px; line-height: 1.8; color: rgba(255,255,255,0.55); }
+.board-sub b { color: var(--studio-lime); font-weight: 700; }
+
+.grid {
+  max-width: 1240px; margin: 0 auto;
+  display: grid; gap: 60px 36px;
+  grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+}
+.concept { animation: rise .7s cubic-bezier(.2,.7,.2,1) both; }
+.concept:nth-child(1){animation-delay:.04s}.concept:nth-child(2){animation-delay:.09s}
+.concept:nth-child(3){animation-delay:.14s}.concept:nth-child(4){animation-delay:.19s}
+.concept:nth-child(5){animation-delay:.24s}.concept:nth-child(6){animation-delay:.29s}
+@keyframes rise { from { opacity: 0; transform: translateY(28px); } to { opacity: 1; transform: none; } }
+
+.concept-label { display: flex; align-items: baseline; gap: 12px; margin-bottom: 16px; }
+.concept-num { font-family: var(--font-header-x); font-weight: 900; font-size: 28px; color: transparent; -webkit-text-stroke: 1.2px rgba(184,229,106,0.65); }
+.concept-name { font-family: var(--font-header); font-weight: 700; font-size: 16px; color: #fff; }
+.concept-note { font-size: 10.5px; color: rgba(255,255,255,0.55); margin-top: 5px; line-height: 1.65; max-width: 330px; }
+.concept-note b { color: var(--studio-lime); font-weight: 700; }
+.scroll-hint { margin-top: 10px; font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; color: rgba(184,229,106,0.85); display: flex; align-items: center; gap: 6px; }
+.scroll-hint::before { content: '↕'; font-size: 12px; }
+
+/* ────────────────────────────────────────────────────────────────────
+   PHONE FRAME
+   ──────────────────────────────────────────────────────────────────── */
+.phone {
+  width: 330px; height: 700px; margin: 0 auto;
+  border-radius: 44px; overflow: hidden; position: relative;
+  border: 1px solid rgba(255,255,255,0.14);
+  box-shadow: 0 0 0 9px #0d130d, 0 0 0 10px rgba(255,255,255,0.07), 0 44px 80px -22px rgba(0,0,0,0.85);
+  background: #cfe0c2;
+}
+.p-photo { position: absolute; inset: 0; background: url('../assets/images/sprinkler.png') center/cover; filter: blur(7px); transform: scale(1.06); }
+.p-tint { position: absolute; inset: 0; background: var(--photo-wash); }
+
+.screen { position: absolute; inset: 0; display: flex; flex-direction: column; }
+.statusbar { display: flex; justify-content: space-between; align-items: center; padding: 16px 26px 0; font-size: 11px; font-weight: 700; color: var(--text-heading); font-family: var(--font-header); position: relative; z-index: 5; }
+.statusbar .pillcam { width: 76px; height: 22px; background: rgba(20,40,20,0.7); border-radius: 9999px; position: absolute; left: 50%; transform: translateX(-50%); top: 12px; }
+
+/* fixed header block sitting above the scrollable list */
+.head-block { position: relative; z-index: 4; padding: 0 20px; flex-shrink: 0; }
+
+.p-eyebrow { font-size: 9.5px; letter-spacing: 2.5px; text-transform: uppercase; color: var(--text-subtle); white-space: nowrap; overflow: hidden; }
+.p-greet { font-family: var(--font-header-x); font-weight: 900; color: var(--text-heading); letter-spacing: -0.5px; white-space: nowrap; }
+
+.p-ctx { display: grid; grid-template-columns: 1fr 1px 1fr; background: var(--glass-fill); border-radius: 16px; border: 1px solid var(--glass-edge-soft); border-top-color: var(--glass-edge); overflow: hidden; }
+.p-ctx-half { padding: 11px 14px; }
+.p-ctx-div { background: var(--glass-divider); }
+.p-ctx-lbl { font-size: 8px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-subtle); }
+.p-ctx-row { display: flex; align-items: baseline; gap: 5px; margin-top: 4px; }
+.p-ctx-val { font-family: var(--font-header-x); font-weight: 900; font-size: 21px; color: var(--text-heading); letter-spacing: -1px; }
+.p-ctx-ico { font-size: 17px; }
+.p-ctx-sub { font-size: 8.5px; color: var(--text-body); margin-top: 3px; line-height: 1.4; }
+
+.p-track-row { display: flex; align-items: center; gap: 9px; }
+.p-track-lbl { font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-subtle); white-space: nowrap; }
+.p-track { flex: 1; height: 4px; border-radius: 9999px; background: var(--glass-input); overflow: hidden; }
+.p-track i { display: block; height: 100%; width: 62%; border-radius: inherit; background: linear-gradient(90deg, var(--track-from), var(--track-to)); }
+
+/* scrollable task list */
+.p-scroll { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 0 20px 100px; -webkit-overflow-scrolling: touch; }
+.p-scroll::-webkit-scrollbar { display: none; }
+.p-rows { display: flex; flex-direction: column; gap: 10px; }
+.p-row { border-radius: 16px; background: var(--row-bg); border: 1px solid var(--row-border); overflow: hidden; }
+.p-row-head { display: flex; align-items: center; gap: 12px; padding: 13px 14px; }
+.p-badge { width: 34px; height: 34px; border-radius: 11px; display: grid; place-items: center; background: var(--badge-bg); box-shadow: inset 0 1px 0 rgba(255,255,255,0.6); flex-shrink: 0; font-size: 16px; }
+.p-row-text { flex: 1; }
+.p-count { font-size: 7.5px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--accent-text); }
+.p-title { margin-top: 2px; font-family: var(--font-header); font-weight: 700; font-size: 14.5px; color: var(--text-heading); }
+.p-row.done .p-title { color: var(--text-faint); text-decoration: line-through; }
+.p-chev { font-size: 13px; color: var(--text-faint); }
+.p-check { width: 21px; height: 21px; border-radius: 9999px; background: var(--accent); display: grid; place-items: center; font-weight: 700; font-size: 11px; color: var(--accent-ink); flex-shrink: 0; }
+
+/* floating tab bar, always visible, unaffected by scroll */
+.p-tabbar { position: absolute; left: 20px; right: 20px; bottom: 14px; z-index: 6; display: flex; justify-content: space-around; align-items: center; padding: 6px; border-radius: 9999px; background: var(--glass-fill); border: 1px solid var(--glass-edge-soft); border-top-color: var(--glass-edge); }
+.p-tab { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 8px 0; }
+.p-tab .ico { font-size: 15px; padding: 4px 13px; border-radius: 9999px; }
+.p-tab.active .ico { background: rgba(36,120,166,0.18); }
+.p-tab .lbl { font-size: 7.5px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase; color: var(--text-faint); font-family: var(--font-header); }
+.p-tab.active .lbl { color: var(--accent-text); }
+
+/* ════════════════════════════════════════════════════════════════════
+   01 · SHRINK & FADE — the safest, most literal read: everything just
+   gets smaller and quieter as you scroll, in exactly the spot it
+   already lives. Greeting shrinks in place, eyebrow and the streak/
+   weather card fade out, the track's label shrinks to just a number.
+   ════════════════════════════════════════════════════════════════════ */
+.c1 .head-block { padding-top: 14px; }
+.c1 .p-eyebrow { margin-top: 8px; transform-origin: left top; }
+.c1 .p-greet { margin-top: 10px; font-size: 24px; transform-origin: left top; }
+.c1 .p-ctx { margin-top: 12px; transform-origin: top center; }
+.c1 .p-track-row { margin-top: 12px; margin-bottom: 12px; }
+
+/* ════════════════════════════════════════════════════════════════════
+   02 · STICKY STRIP + RING — header and track don't fade away, they
+   MERGE into one compact sticky bar (name + a small circular progress
+   ring) that stays pinned under the status bar. The streak/weather card
+   scrolls away with the list — it's context, not chrome.
+   ════════════════════════════════════════════════════════════════════ */
+.c2 .head-block { padding-top: 14px; }
+.c2 .expanded-head { padding-bottom: 6px; }
+.c2 .p-eyebrow { margin-top: 8px; }
+.c2 .p-greet { margin-top: 10px; font-size: 24px; }
+.c2 .sticky-strip {
+  position: absolute; top: 0; left: 0; right: 0; z-index: 5;
+  display: flex; align-items: center; gap: 10px;
+  padding: 14px 20px 10px;
+  opacity: 0; transform: translateY(-8px); pointer-events: none;
+  transition: opacity .1s linear;
+}
+.c2 .sticky-strip .name { font-family: var(--font-header-x); font-weight: 900; font-size: 15px; color: var(--text-heading); flex: 1; }
+.c2 .ring-wrap { position: relative; width: 26px; height: 26px; }
+.c2 .ring-wrap svg { transform: rotate(-90deg); }
+.c2 .ring-wrap .pct { position: absolute; inset: 0; display: grid; place-items: center; font-size: 7px; font-weight: 700; color: var(--accent-text); font-family: var(--font-body); }
+.c2 .p-ctx { margin-top: 12px; }
+.c2 .p-track-row { margin-top: 12px; margin-bottom: 12px; }
+
+/* ════════════════════════════════════════════════════════════════════
+   03 · SLIDE & SWAP — a two-layer crossfade rather than a continuous
+   morph: the full greeting block slides up and out, and a completely
+   separate mini bar (avatar initial + thin track) slides down from
+   behind the status bar to take its place. Reads as one clean swap.
+   ════════════════════════════════════════════════════════════════════ */
+.c3 .head-block { padding-top: 14px; position: relative; }
+.c3 .full-head { transition: none; }
+.c3 .p-eyebrow { margin-top: 8px; }
+.c3 .p-greet { margin-top: 10px; font-size: 24px; }
+.c3 .p-ctx { margin-top: 12px; }
+.c3 .p-track-row { margin-top: 12px; margin-bottom: 12px; }
+.c3 .mini-bar {
+  position: absolute; top: 0; left: 0; right: 0; z-index: 6;
+  display: flex; align-items: center; gap: 10px;
+  padding: 14px 20px 12px;
+  background: var(--glass-fill);
+  border-bottom: 1px solid var(--glass-edge-soft);
+  transform: translateY(-100%);
+}
+.c3 .mini-avatar { width: 24px; height: 24px; border-radius: 9999px; background: var(--accent); color: var(--accent-ink); display: grid; place-items: center; font-family: var(--font-header-x); font-weight: 900; font-size: 11px; flex-shrink: 0; }
+.c3 .mini-bar .mb-track { flex: 1; height: 3px; border-radius: 9999px; background: var(--glass-input); overflow: hidden; }
+.c3 .mini-bar .mb-track i { display: block; height: 100%; width: 62%; background: linear-gradient(90deg, var(--track-from), var(--track-to)); }
+.c3 .mini-bar .mb-lbl { font-size: 8px; letter-spacing: 1px; text-transform: uppercase; color: var(--text-subtle); white-space: nowrap; }
+
+/* ════════════════════════════════════════════════════════════════════
+   04 · RING TAKEOVER — the boldest shape change: the horizontal track
+   doesn't just shrink, it MORPHS into a small ring that migrates to sit
+   right beside the (shrunk) greeting on one line, like a badge earned
+   from finishing the bar. Everything else fades normally.
+   ════════════════════════════════════════════════════════════════════ */
+.c4 .head-block { padding-top: 14px; }
+.c4 .p-eyebrow { margin-top: 8px; }
+.c4 .greet-row { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
+.c4 .p-greet { font-size: 24px; }
+.c4 .p-ctx { margin-top: 12px; }
+.c4 .p-track-row { margin-top: 12px; margin-bottom: 12px; position: relative; }
+.c4 .ring-wrap { position: absolute; top: -35px; left: 0; width: 22px; height: 22px; opacity: 0; }
+.c4 .ring-wrap svg { transform: rotate(-90deg); }
+.c4 .ring-wrap .pct { position: absolute; inset: 0; display: grid; place-items: center; font-size: 6px; font-weight: 700; color: var(--accent-text); font-family: var(--font-body); }
+
+/* ════════════════════════════════════════════════════════════════════
+   05 · PARALLAX PEEL — layers peel away in sequence at different rates
+   instead of together: eyebrow goes first, greeting next, the streak/
+   weather card last — each faster than the scroll itself (parallax).
+   The track alone survives to the end, becoming the permanent slim
+   header once everything above it has peeled off.
+   ════════════════════════════════════════════════════════════════════ */
+.c5 .head-block { padding-top: 14px; overflow: hidden; }
+.c5 .p-eyebrow { margin-top: 8px; }
+.c5 .p-greet { margin-top: 10px; font-size: 24px; }
+.c5 .p-ctx { margin-top: 12px; }
+.c5 .p-track-row { margin-top: 12px; margin-bottom: 12px; }
+
+/* ════════════════════════════════════════════════════════════════════
+   06 · DYNAMIC PILL — the most consolidated read: on scroll, the whole
+   expanded block (greeting + streak/weather + track) collapses into ONE
+   small frosted pill centred at the top, summarising everything in a
+   single line — "Farai · 🔥6 · 62%" — like a dynamic-island capsule.
+   ════════════════════════════════════════════════════════════════════ */
+.c6 .head-block { padding-top: 14px; position: relative; }
+.c6 .p-eyebrow { margin-top: 8px; }
+.c6 .p-greet { margin-top: 10px; font-size: 24px; }
+.c6 .p-ctx { margin-top: 12px; }
+.c6 .p-track-row { margin-top: 12px; margin-bottom: 12px; }
+.c6 .capsule {
+  position: absolute; top: 14px; left: 50%; z-index: 6;
+  transform: translate(-50%, -6px) scale(0.9); opacity: 0; pointer-events: none;
+  display: flex; align-items: center; gap: 7px;
+  background: var(--glass-fill); border: 1px solid var(--glass-edge-soft); border-top-color: var(--glass-edge);
+  border-radius: 9999px; padding: 7px 14px;
+  white-space: nowrap;
+}
+.c6 .capsule .cap-name { font-family: var(--font-header-x); font-weight: 900; font-size: 12px; color: var(--text-heading); }
+.c6 .capsule .cap-sep { color: var(--text-faint); font-size: 10px; }
+.c6 .capsule .cap-item { font-size: 10px; color: var(--text-body); display: flex; align-items: center; gap: 3px; }
+.c6 .capsule .cap-pct { font-weight: 700; color: var(--accent-text); }
+</style>
+</head>
+<body>
+
+<header class="board-header">
+  <div class="board-kicker">Kura · Today Screen — Collapsing Header</div>
+  <h1 class="board-title">Six ways the header <em>gets out of the way.</em></h1>
+  <p class="board-sub">Scroll any phone's task list below and watch: the greeting and progress track minimise as the list's top edge scrolls up, and restore fully once you scroll back to the very top. Each concept answers the same question differently — what does "minimised" mean here, and what (if anything) happens to the streak/weather card in between. <b>These are live — scroll inside each phone.</b></p>
+</header>
+
+<div class="grid">
+
+  <!-- 01 — SHRINK & FADE -->
+  <section class="concept">
+    <div class="concept-label"><span class="concept-num">01</span><span class="concept-name">Shrink &amp; Fade</span></div>
+    <p class="concept-note">The literal read: nothing relocates, everything just gets <b>smaller and quieter</b> in place. Greeting shrinks 24px→15px, eyebrow and the streak/weather card fade out, the track's label shrinks to a bare number.</p>
+    <div class="scroll-hint">scroll the task list</div>
+    <div class="phone c1" data-concept="1">
+      <div class="p-photo"></div><div class="p-tint"></div>
+      <div class="screen">
+        <div class="statusbar"><span>9:41</span><span class="pillcam"></span><span>󰖝 ⚡︎</span></div>
+        <div class="head-block">
+          <div class="p-eyebrow" data-el="eyebrow">On Deck · Friday</div>
+          <div class="p-greet" data-el="greet">Morning, Farai</div>
+          <div class="p-ctx" data-el="ctx">
+            <div class="p-ctx-half"><div class="p-ctx-lbl">Streak</div><div class="p-ctx-row"><span class="p-ctx-ico">🔥</span><span class="p-ctx-val">6</span></div><div class="p-ctx-sub">days in a row</div></div>
+            <div class="p-ctx-div"></div>
+            <div class="p-ctx-half"><div class="p-ctx-lbl">Weather</div><div class="p-ctx-row"><span class="p-ctx-val">24°</span><span class="p-ctx-ico">☀️</span></div><div class="p-ctx-sub">Sunny · Wind 12 km/h</div></div>
+          </div>
+          <div class="p-track-row" data-el="trackrow">
+            <span class="p-track-lbl" data-el="tracklbl">Task 1 of 2</span>
+            <span class="p-track"><i></i></span>
+          </div>
+        </div>
+        <div class="p-scroll" data-el="scroll">
+          <div class="p-rows"></div>
+        </div>
+      </div>
+      <nav class="p-tabbar">
+        <div class="p-tab active"><span class="ico">☀️</span><span class="lbl">Today</span></div>
+        <div class="p-tab"><span class="ico">✅</span><span class="lbl">Tasks</span></div>
+        <div class="p-tab"><span class="ico">📚</span><span class="lbl">Learn</span></div>
+        <div class="p-tab"><span class="ico">⚙️</span><span class="lbl">Profile</span></div>
+      </nav>
+    </div>
+  </section>
+
+  <!-- 02 — STICKY STRIP + RING -->
+  <section class="concept">
+    <div class="concept-label"><span class="concept-num">02</span><span class="concept-name">Sticky Strip + Ring</span></div>
+    <p class="concept-note">Header and track <b>merge</b> into one compact sticky bar — first name plus a small progress ring — pinned under the status bar. The streak/weather card isn't chrome, so it scrolls away with the list instead of shrinking.</p>
+    <div class="scroll-hint">scroll the task list</div>
+    <div class="phone c2" data-concept="2">
+      <div class="p-photo"></div><div class="p-tint"></div>
+      <div class="sticky-strip" data-el="sticky">
+        <span class="name">Farai</span>
+        <span class="ring-wrap"><svg width="26" height="26"><circle cx="13" cy="13" r="10" stroke="var(--glass-input)" stroke-width="3" fill="none"/><circle data-el="ring" cx="13" cy="13" r="10" stroke="var(--accent)" stroke-width="3" fill="none" stroke-dasharray="62.8" stroke-dashoffset="62.8" stroke-linecap="round"/></svg><span class="pct" data-el="ringpct">0%</span></span>
+      </div>
+      <div class="screen">
+        <div class="statusbar"><span>9:41</span><span class="pillcam"></span><span>󰖝 ⚡︎</span></div>
+        <div class="head-block">
+          <div class="expanded-head" data-el="expanded">
+            <div class="p-eyebrow">On Deck · Friday</div>
+            <div class="p-greet">Morning, Farai</div>
+          </div>
+          <div class="p-ctx" data-el="ctx">
+            <div class="p-ctx-half"><div class="p-ctx-lbl">Streak</div><div class="p-ctx-row"><span class="p-ctx-ico">🔥</span><span class="p-ctx-val">6</span></div><div class="p-ctx-sub">days in a row</div></div>
+            <div class="p-ctx-div"></div>
+            <div class="p-ctx-half"><div class="p-ctx-lbl">Weather</div><div class="p-ctx-row"><span class="p-ctx-val">24°</span><span class="p-ctx-ico">☀️</span></div><div class="p-ctx-sub">Sunny · Wind 12 km/h</div></div>
+          </div>
+          <div class="p-track-row" data-el="trackrow">
+            <span class="p-track-lbl">Task 1 of 2</span>
+            <span class="p-track"><i></i></span>
+          </div>
+        </div>
+        <div class="p-scroll" data-el="scroll">
+          <div class="p-rows"></div>
+        </div>
+      </div>
+      <nav class="p-tabbar">
+        <div class="p-tab active"><span class="ico">☀️</span><span class="lbl">Today</span></div>
+        <div class="p-tab"><span class="ico">✅</span><span class="lbl">Tasks</span></div>
+        <div class="p-tab"><span class="ico">📚</span><span class="lbl">Learn</span></div>
+        <div class="p-tab"><span class="ico">⚙️</span><span class="lbl">Profile</span></div>
+      </nav>
+    </div>
+  </section>
+
+  <!-- 03 — SLIDE & SWAP -->
+  <section class="concept">
+    <div class="concept-label"><span class="concept-num">03</span><span class="concept-name">Slide &amp; Swap</span></div>
+    <p class="concept-note">Not a continuous morph — a clean <b>two-layer crossfade</b>. The full greeting block slides up and out; a separate mini bar (initial avatar + thin track) slides down from behind the status bar to take its place.</p>
+    <div class="scroll-hint">scroll the task list</div>
+    <div class="phone c3" data-concept="3">
+      <div class="p-photo"></div><div class="p-tint"></div>
+      <div class="mini-bar" data-el="minibar">
+        <span class="mini-avatar">F</span>
+        <span class="mb-track"><i></i></span>
+        <span class="mb-lbl">62%</span>
+      </div>
+      <div class="screen">
+        <div class="statusbar"><span>9:41</span><span class="pillcam"></span><span>󰖝 ⚡︎</span></div>
+        <div class="head-block">
+          <div class="full-head" data-el="fullhead">
+            <div class="p-eyebrow">On Deck · Friday</div>
+            <div class="p-greet">Morning, Farai</div>
+            <div class="p-ctx">
+              <div class="p-ctx-half"><div class="p-ctx-lbl">Streak</div><div class="p-ctx-row"><span class="p-ctx-ico">🔥</span><span class="p-ctx-val">6</span></div><div class="p-ctx-sub">days in a row</div></div>
+              <div class="p-ctx-div"></div>
+              <div class="p-ctx-half"><div class="p-ctx-lbl">Weather</div><div class="p-ctx-row"><span class="p-ctx-val">24°</span><span class="p-ctx-ico">☀️</span></div><div class="p-ctx-sub">Sunny · Wind 12 km/h</div></div>
+            </div>
+            <div class="p-track-row">
+              <span class="p-track-lbl">Task 1 of 2</span>
+              <span class="p-track"><i></i></span>
+            </div>
+          </div>
+        </div>
+        <div class="p-scroll" data-el="scroll">
+          <div class="p-rows"></div>
+        </div>
+      </div>
+      <nav class="p-tabbar">
+        <div class="p-tab active"><span class="ico">☀️</span><span class="lbl">Today</span></div>
+        <div class="p-tab"><span class="ico">✅</span><span class="lbl">Tasks</span></div>
+        <div class="p-tab"><span class="ico">📚</span><span class="lbl">Learn</span></div>
+        <div class="p-tab"><span class="ico">⚙️</span><span class="lbl">Profile</span></div>
+      </nav>
+    </div>
+  </section>
+
+  <!-- 04 — RING TAKEOVER -->
+  <section class="concept">
+    <div class="concept-label"><span class="concept-num">04</span><span class="concept-name">Ring Takeover</span></div>
+    <p class="concept-note">The boldest shape change: the horizontal track doesn't just shrink, it <b>morphs into a ring</b> that migrates to sit beside the shrunk greeting on one line — like a badge earned from the bar it came from.</p>
+    <div class="scroll-hint">scroll the task list</div>
+    <div class="phone c4" data-concept="4">
+      <div class="p-photo"></div><div class="p-tint"></div>
+      <div class="screen">
+        <div class="statusbar"><span>9:41</span><span class="pillcam"></span><span>󰖝 ⚡︎</span></div>
+        <div class="head-block">
+          <div class="p-eyebrow" data-el="eyebrow">On Deck · Friday</div>
+          <div class="greet-row">
+            <div class="p-greet" data-el="greet">Morning, Farai</div>
+          </div>
+          <div class="p-ctx" data-el="ctx">
+            <div class="p-ctx-half"><div class="p-ctx-lbl">Streak</div><div class="p-ctx-row"><span class="p-ctx-ico">🔥</span><span class="p-ctx-val">6</span></div><div class="p-ctx-sub">days in a row</div></div>
+            <div class="p-ctx-div"></div>
+            <div class="p-ctx-half"><div class="p-ctx-lbl">Weather</div><div class="p-ctx-row"><span class="p-ctx-val">24°</span><span class="p-ctx-ico">☀️</span></div><div class="p-ctx-sub">Sunny · Wind 12 km/h</div></div>
+          </div>
+          <div class="p-track-row" data-el="trackrow">
+            <span class="p-track-lbl" data-el="tracklbl">Task 1 of 2</span>
+            <span class="p-track" data-el="trackbar"><i></i></span>
+            <span class="ring-wrap" data-el="ring-wrap"><svg width="22" height="22"><circle cx="11" cy="11" r="8.5" stroke="var(--glass-input)" stroke-width="3" fill="none"/><circle cx="11" cy="11" r="8.5" stroke="var(--accent)" stroke-width="3" fill="none" stroke-dasharray="53.4" stroke-dashoffset="20.3" stroke-linecap="round"/></svg><span class="pct">62</span></span>
+          </div>
+        </div>
+        <div class="p-scroll" data-el="scroll">
+          <div class="p-rows"></div>
+        </div>
+      </div>
+      <nav class="p-tabbar">
+        <div class="p-tab active"><span class="ico">☀️</span><span class="lbl">Today</span></div>
+        <div class="p-tab"><span class="ico">✅</span><span class="lbl">Tasks</span></div>
+        <div class="p-tab"><span class="ico">📚</span><span class="lbl">Learn</span></div>
+        <div class="p-tab"><span class="ico">⚙️</span><span class="lbl">Profile</span></div>
+      </nav>
+    </div>
+  </section>
+
+  <!-- 05 — PARALLAX PEEL -->
+  <section class="concept">
+    <div class="concept-label"><span class="concept-num">05</span><span class="concept-name">Parallax Peel</span></div>
+    <p class="concept-note">Layers peel off <b>in sequence</b>, each faster than the scroll itself: eyebrow first, greeting next, the streak/weather card last. The track alone survives, becoming the permanent slim header once the rest has peeled away.</p>
+    <div class="scroll-hint">scroll the task list</div>
+    <div class="phone c5" data-concept="5">
+      <div class="p-photo"></div><div class="p-tint"></div>
+      <div class="screen">
+        <div class="statusbar"><span>9:41</span><span class="pillcam"></span><span>󰖝 ⚡︎</span></div>
+        <div class="head-block">
+          <div class="p-eyebrow" data-el="eyebrow">On Deck · Friday</div>
+          <div class="p-greet" data-el="greet">Morning, Farai</div>
+          <div class="p-ctx" data-el="ctx">
+            <div class="p-ctx-half"><div class="p-ctx-lbl">Streak</div><div class="p-ctx-row"><span class="p-ctx-ico">🔥</span><span class="p-ctx-val">6</span></div><div class="p-ctx-sub">days in a row</div></div>
+            <div class="p-ctx-div"></div>
+            <div class="p-ctx-half"><div class="p-ctx-lbl">Weather</div><div class="p-ctx-row"><span class="p-ctx-val">24°</span><span class="p-ctx-ico">☀️</span></div><div class="p-ctx-sub">Sunny · Wind 12 km/h</div></div>
+          </div>
+          <div class="p-track-row" data-el="trackrow">
+            <span class="p-track-lbl">Task 1 of 2</span>
+            <span class="p-track"><i></i></span>
+          </div>
+        </div>
+        <div class="p-scroll" data-el="scroll">
+          <div class="p-rows"></div>
+        </div>
+      </div>
+      <nav class="p-tabbar">
+        <div class="p-tab active"><span class="ico">☀️</span><span class="lbl">Today</span></div>
+        <div class="p-tab"><span class="ico">✅</span><span class="lbl">Tasks</span></div>
+        <div class="p-tab"><span class="ico">📚</span><span class="lbl">Learn</span></div>
+        <div class="p-tab"><span class="ico">⚙️</span><span class="lbl">Profile</span></div>
+      </nav>
+    </div>
+  </section>
+
+  <!-- 06 — DYNAMIC PILL -->
+  <section class="concept">
+    <div class="concept-label"><span class="concept-num">06</span><span class="concept-name">Dynamic Pill</span></div>
+    <p class="concept-note">The most consolidated read: the whole block collapses into <b>one small capsule</b> centred at the top, summarising everything on a single line — "Farai · 🔥6 · 62%" — like a dynamic-island for the day.</p>
+    <div class="scroll-hint">scroll the task list</div>
+    <div class="phone c6" data-concept="6">
+      <div class="p-photo"></div><div class="p-tint"></div>
+      <div class="screen">
+        <div class="statusbar"><span>9:41</span><span class="pillcam"></span><span>󰖝 ⚡︎</span></div>
+        <div class="head-block">
+          <div class="capsule" data-el="capsule">
+            <span class="cap-name">Farai</span>
+            <span class="cap-sep">·</span>
+            <span class="cap-item">🔥 6</span>
+            <span class="cap-sep">·</span>
+            <span class="cap-item cap-pct">62%</span>
+          </div>
+          <div class="p-eyebrow" data-el="eyebrow">On Deck · Friday</div>
+          <div class="p-greet" data-el="greet">Morning, Farai</div>
+          <div class="p-ctx" data-el="ctx">
+            <div class="p-ctx-half"><div class="p-ctx-lbl">Streak</div><div class="p-ctx-row"><span class="p-ctx-ico">🔥</span><span class="p-ctx-val">6</span></div><div class="p-ctx-sub">days in a row</div></div>
+            <div class="p-ctx-div"></div>
+            <div class="p-ctx-half"><div class="p-ctx-lbl">Weather</div><div class="p-ctx-row"><span class="p-ctx-val">24°</span><span class="p-ctx-ico">☀️</span></div><div class="p-ctx-sub">Sunny · Wind 12 km/h</div></div>
+          </div>
+          <div class="p-track-row" data-el="trackrow">
+            <span class="p-track-lbl">Task 1 of 2</span>
+            <span class="p-track"><i></i></span>
+          </div>
+        </div>
+        <div class="p-scroll" data-el="scroll">
+          <div class="p-rows"></div>
+        </div>
+      </div>
+      <nav class="p-tabbar">
+        <div class="p-tab active"><span class="ico">☀️</span><span class="lbl">Today</span></div>
+        <div class="p-tab"><span class="ico">✅</span><span class="lbl">Tasks</span></div>
+        <div class="p-tab"><span class="ico">📚</span><span class="lbl">Learn</span></div>
+        <div class="p-tab"><span class="ico">⚙️</span><span class="lbl">Profile</span></div>
+      </nav>
+    </div>
+  </section>
+
+</div>
+
+<script>
+// ── Shared task list content, injected into every phone's .p-rows ──
+const TASKS = [
+  { emoji: '💧', count: 'Task 1 of 2', title: 'Give it a deep soak.', open: true, done: false },
+  { emoji: '🔍', count: 'Task 2 of 2', title: 'Walk the edges.', open: false, done: false },
+  { emoji: '✂️', count: 'Completed', title: 'First mow of the week.', open: false, done: true },
+  { emoji: '🌱', count: 'Completed', title: 'Check for bare patches.', open: false, done: true },
+  { emoji: '🧪', count: 'Completed', title: 'Test the soil pH.', open: false, done: true },
+];
+
+function rowHTML(t) {
+  return `<div class="p-row${t.done ? ' done' : ''}">
+    <div class="p-row-head">
+      <div class="p-badge">${t.emoji}</div>
+      <div class="p-row-text"><div class="p-count">${t.count}</div><div class="p-title">${t.title}</div></div>
+      ${t.done ? '<div class="p-check">✓</div>' : '<span class="p-chev">⌄</span>'}
+    </div>
+  </div>`;
+}
+
+document.querySelectorAll('.p-rows').forEach(el => {
+  el.innerHTML = TASKS.map(rowHTML).join('');
+  // pad so every list is tall enough to scroll regardless of phone height
+  const spacer = document.createElement('div');
+  spacer.style.height = '340px';
+  el.appendChild(spacer);
+});
+
+// ── Scroll → progress mapping shared by every concept ──
+// progress 0 = fully expanded (scrollTop 0, "original place"), 1 = fully
+// collapsed. COLLAPSE_DISTANCE is how far you have to scroll before the
+// header is completely minimised.
+const COLLAPSE_DISTANCE = 100;
+const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
+const lerp = (a, b, t) => a + (b - a) * t;
+
+function bind(scrollEl, updateFn) {
+  const onScroll = () => {
+    const p = clamp(scrollEl.scrollTop / COLLAPSE_DISTANCE, 0, 1);
+    updateFn(p);
+  };
+  scrollEl.addEventListener('scroll', onScroll, { passive: true });
+  updateFn(0);
+}
+
+// 01 — Shrink & Fade
+(() => {
+  const phone = document.querySelector('.phone.c1');
+  const scroll = phone.querySelector('[data-el="scroll"]');
+  const eyebrow = phone.querySelector('[data-el="eyebrow"]');
+  const greet = phone.querySelector('[data-el="greet"]');
+  const ctx = phone.querySelector('[data-el="ctx"]');
+  const trackrow = phone.querySelector('[data-el="trackrow"]');
+  const tracklbl = phone.querySelector('[data-el="tracklbl"]');
+  bind(scroll, (p) => {
+    eyebrow.style.opacity = 1 - p;
+    eyebrow.style.transform = `scaleY(${1 - p})`;
+    eyebrow.style.marginTop = `${lerp(8, 0, p)}px`;
+    greet.style.fontSize = `${lerp(24, 15, p)}px`;
+    greet.style.marginTop = `${lerp(10, 6, p)}px`;
+    ctx.style.opacity = clamp(1 - p * 1.6, 0, 1);
+    ctx.style.transform = `scale(${lerp(1, 0.9, p)})`;
+    ctx.style.maxHeight = `${lerp(80, 0, clamp(p * 1.6, 0, 1))}px`;
+    ctx.style.marginTop = `${lerp(12, 0, clamp(p * 1.6, 0, 1))}px`;
+    ctx.style.overflow = 'hidden';
+    trackrow.style.marginTop = `${lerp(12, 8, p)}px`;
+    trackrow.style.marginBottom = `${lerp(12, 8, p)}px`;
+    tracklbl.textContent = p > 0.7 ? '62%' : 'Task 1 of 2';
+  });
+})();
+
+// 02 — Sticky Strip + Ring
+(() => {
+  const phone = document.querySelector('.phone.c2');
+  const scroll = phone.querySelector('[data-el="scroll"]');
+  const expanded = phone.querySelector('[data-el="expanded"]');
+  const sticky = phone.querySelector('[data-el="sticky"]');
+  const ring = phone.querySelector('[data-el="ring"]');
+  const ringpct = phone.querySelector('[data-el="ringpct"]');
+  const CIRC = 62.8, PROGRESS = 0.62;
+  bind(scroll, (p) => {
+    expanded.style.opacity = clamp(1 - p * 1.8, 0, 1);
+    expanded.style.maxHeight = `${lerp(70, 0, clamp(p * 1.8, 0, 1))}px`;
+    expanded.style.overflow = 'hidden';
+    sticky.style.opacity = clamp((p - 0.5) * 2, 0, 1);
+    sticky.style.transform = `translateY(${lerp(-8, 0, clamp((p - 0.5) * 2, 0, 1))}px)`;
+    ring.setAttribute('stroke-dashoffset', CIRC * (1 - PROGRESS * clamp((p - 0.5) * 2, 0, 1)));
+    ringpct.textContent = Math.round(PROGRESS * clamp((p - 0.5) * 2, 0, 1) * 100) + '%';
+  });
+})();
+
+// 03 — Slide & Swap
+(() => {
+  const phone = document.querySelector('.phone.c3');
+  const scroll = phone.querySelector('[data-el="scroll"]');
+  const fullhead = phone.querySelector('[data-el="fullhead"]');
+  const minibar = phone.querySelector('[data-el="minibar"]');
+  bind(scroll, (p) => {
+    fullhead.style.transform = `translateY(${lerp(0, -24, p)}px)`;
+    fullhead.style.opacity = clamp(1 - p * 1.6, 0, 1);
+    minibar.style.transform = `translateY(${lerp(-100, 0, clamp((p - 0.4) / 0.6, 0, 1))}%)`;
+  });
+})();
+
+// 04 — Ring Takeover
+(() => {
+  const phone = document.querySelector('.phone.c4');
+  const scroll = phone.querySelector('[data-el="scroll"]');
+  const eyebrow = phone.querySelector('[data-el="eyebrow"]');
+  const greet = phone.querySelector('[data-el="greet"]');
+  const ctx = phone.querySelector('[data-el="ctx"]');
+  const trackbar = phone.querySelector('[data-el="trackbar"]');
+  const ringWrap = phone.querySelector('[data-el="ring-wrap"]');
+  bind(scroll, (p) => {
+    eyebrow.style.opacity = 1 - p;
+    eyebrow.style.marginTop = `${lerp(8, 0, p)}px`;
+    greet.style.fontSize = `${lerp(24, 16, p)}px`;
+    greet.style.marginTop = `${lerp(10, 6, p)}px`;
+    ctx.style.opacity = clamp(1 - p * 1.6, 0, 1);
+    ctx.style.maxHeight = `${lerp(80, 0, clamp(p * 1.6, 0, 1))}px`;
+    ctx.style.marginTop = `${lerp(12, 0, clamp(p * 1.6, 0, 1))}px`;
+    ctx.style.overflow = 'hidden';
+    trackbar.style.opacity = 1 - p;
+    trackbar.style.maxWidth = `${lerp(1000, 0, p)}px`;
+    ringWrap.style.opacity = p;
+    ringWrap.style.top = `${lerp(-35, -22, p)}px`;
+    ringWrap.style.left = `${lerp(0, -30, p)}px`;
+  });
+})();
+
+// 05 — Parallax Peel (staggered offsets/speeds per layer)
+(() => {
+  const phone = document.querySelector('.phone.c5');
+  const scroll = phone.querySelector('[data-el="scroll"]');
+  const eyebrow = phone.querySelector('[data-el="eyebrow"]');
+  const greet = phone.querySelector('[data-el="greet"]');
+  const ctx = phone.querySelector('[data-el="ctx"]');
+  bind(scroll, (p) => {
+    // eyebrow: peels fastest, fully gone by p=0.35
+    const pe = clamp(p / 0.35, 0, 1);
+    eyebrow.style.opacity = 1 - pe;
+    eyebrow.style.transform = `translateY(${lerp(0, -14, pe)}px)`;
+    eyebrow.style.maxHeight = `${lerp(14, 0, pe)}px`;
+    eyebrow.style.overflow = 'hidden';
+    // greeting: peels next, fully gone by p=0.7
+    const pg = clamp((p - 0.15) / 0.55, 0, 1);
+    greet.style.opacity = 1 - pg;
+    greet.style.transform = `translateY(${lerp(0, -18, pg)}px)`;
+    greet.style.maxHeight = `${lerp(30, 0, pg)}px`;
+    greet.style.marginTop = `${lerp(10, 0, pg)}px`;
+    greet.style.overflow = 'hidden';
+    // streak/weather card: peels last, fully gone only at p=1
+    const pc = clamp((p - 0.4) / 0.6, 0, 1);
+    ctx.style.opacity = 1 - pc;
+    ctx.style.transform = `translateY(${lerp(0, -22, pc)}px)`;
+    ctx.style.maxHeight = `${lerp(78, 0, pc)}px`;
+    ctx.style.marginTop = `${lerp(12, 0, pc)}px`;
+    ctx.style.overflow = 'hidden';
+  });
+})();
+
+// 06 — Dynamic Pill
+(() => {
+  const phone = document.querySelector('.phone.c6');
+  const scroll = phone.querySelector('[data-el="scroll"]');
+  const eyebrow = phone.querySelector('[data-el="eyebrow"]');
+  const greet = phone.querySelector('[data-el="greet"]');
+  const ctx = phone.querySelector('[data-el="ctx"]');
+  const trackrow = phone.querySelector('[data-el="trackrow"]');
+  const capsule = phone.querySelector('[data-el="capsule"]');
+  bind(scroll, (p) => {
+    const full = clamp(1 - p * 1.4, 0, 1);
+    [eyebrow, greet, ctx, trackrow].forEach((el, i) => {
+      el.style.opacity = full;
+    });
+    eyebrow.style.maxHeight = `${lerp(14, 0, 1 - full)}px`;
+    greet.style.maxHeight = `${lerp(30, 0, 1 - full)}px`;
+    ctx.style.maxHeight = `${lerp(78, 0, 1 - full)}px`;
+    trackrow.style.maxHeight = `${lerp(20, 0, 1 - full)}px`;
+    [eyebrow, greet, ctx, trackrow].forEach(el => el.style.overflow = 'hidden');
+    const capP = clamp((p - 0.55) / 0.45, 0, 1);
+    capsule.style.opacity = capP;
+    capsule.style.transform = `translate(-50%, ${lerp(-6, 0, capP)}px) scale(${lerp(0.9, 1, capP)})`;
+  });
+})();
+</script>
+</body>
+</html>

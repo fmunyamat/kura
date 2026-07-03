@@ -57,8 +57,8 @@ const Pill = styled(BlurView)`
   border-radius: 26px;
   overflow: hidden;
   border-width: 1px;
-  border-color: ${({ theme }) => theme.colors.glassClearEdgeBottom};
-  border-top-color: ${({ theme }) => theme.colors.glassClearEdge};
+  border-color: ${({ theme }) => theme.colors.glassEdgeSoft};
+  border-top-color: ${({ theme }) => theme.colors.glassEdge};
   padding: 4px 6px;
 `;
 
@@ -107,7 +107,7 @@ const Label = styled.Text<{ $focused: boolean }>`
   letter-spacing: 1px;
   text-transform: uppercase;
   color: ${({ theme, $focused }) =>
-    $focused ? theme.colors.lime : theme.colors.textFaintOnDark};
+    $focused ? theme.colors.accentText : theme.colors.textPhotoFaint};
 `;
 
 export const FloatingTabBar = ({
@@ -117,8 +117,9 @@ export const FloatingTabBar = ({
 }: BottomTabBarProps) => {
   const insets = useSafeAreaInsets();
   // Ionicons takes a plain colour string, so we read the active/inactive
-  // colours off the theme here rather than through a styled-component.
-  const { colors } = useTheme();
+  // colours off the theme here rather than through a styled-component. `mode`
+  // sets the frosted pill's blur tint to match the light or dark theme.
+  const { colors, mode } = useTheme();
 
   return (
     // pointerEvents box-none lets taps fall through everywhere except the pill.
@@ -129,7 +130,7 @@ export const FloatingTabBar = ({
     >
       <Pill
         intensity={60}
-        tint="dark"
+        tint={mode === 'dark' ? 'dark' : 'light'}
         experimentalBlurMethod={
           Platform.OS === 'android' ? 'dimezisBlurView' : undefined
         }
@@ -170,7 +171,7 @@ export const FloatingTabBar = ({
                 <Ionicons
                   name={iconName}
                   size={ICON_SIZE}
-                  color={focused ? colors.lime : colors.textFaintOnDark}
+                  color={focused ? colors.accentText : colors.textPhotoFaint}
                 />
               </IconWrap>
               <Label $focused={focused}>{label}</Label>

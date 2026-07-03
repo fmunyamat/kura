@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kura — Today Screen · Light Glassmorphism · 3 Directions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Zalando+Sans:ital,wght@0,400;0,700;0,900;1,400&family=Zalando+Sans+Expanded:wght@700;900&display=swap" rel="stylesheet">
+<style>
+/* ────────────────────────────────────────────────────────────────────
+   STUDIO SHELL — the dark board the phones sit on, so the light phones
+   pop. Same convention as the other Kura mockup boards.
+   ──────────────────────────────────────────────────────────────────── */
+:root {
+  --studio-lime: rgba(184,229,106,0.92);
+  --font-body:   'JetBrains Mono', monospace;
+  --font-header: 'Zalando Sans', sans-serif;
+  --font-header-x: 'Zalando Sans Expanded', 'Zalando Sans', sans-serif;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background:
+    radial-gradient(1200px 600px at 80% -10%, rgba(45,106,45,0.28), transparent 60%),
+    radial-gradient(900px 500px at 10% 110%, rgba(184,229,106,0.10), transparent 55%),
+    #07120a;
+  font-family: var(--font-body);
+  color: rgba(255,255,255,0.7);
+  min-height: 100vh;
+  padding: 56px 40px 90px;
+}
+body::after {
+  content: ''; position: fixed; inset: 0; pointer-events: none; opacity: .5;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.04 0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.board-header { max-width: 1240px; margin: 0 auto 48px; }
+.board-kicker { font-size: 11px; letter-spacing: 4px; text-transform: uppercase; color: var(--studio-lime); margin-bottom: 14px; }
+.board-title { font-family: var(--font-header-x); font-weight: 900; font-size: clamp(32px, 4.2vw, 58px); line-height: 1.04; letter-spacing: -1px; color: #fff; }
+.board-title em { font-style: normal; color: #b8e56a; }
+.board-sub { margin-top: 16px; max-width: 700px; font-size: 12.5px; line-height: 1.8; color: rgba(255,255,255,0.55); }
+
+.grid {
+  max-width: 1240px; margin: 0 auto;
+  display: grid; gap: 60px 36px;
+  grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+}
+.concept { animation: rise .7s cubic-bezier(.2,.7,.2,1) both; }
+.concept:nth-child(1){animation-delay:.05s}.concept:nth-child(2){animation-delay:.14s}.concept:nth-child(3){animation-delay:.23s}
+@keyframes rise { from { opacity: 0; transform: translateY(28px); } to { opacity: 1; transform: none; } }
+
+.concept-label { display: flex; align-items: baseline; gap: 12px; margin-bottom: 16px; }
+.concept-num { font-family: var(--font-header-x); font-weight: 900; font-size: 28px; color: transparent; -webkit-text-stroke: 1.2px rgba(184,229,106,0.65); }
+.concept-name { font-family: var(--font-header); font-weight: 700; font-size: 16px; color: #fff; }
+.concept-note { font-size: 10.5px; color: rgba(255,255,255,0.55); margin-top: 5px; line-height: 1.65; max-width: 330px; }
+.concept-note b { color: var(--studio-lime); font-weight: 700; }
+
+/* ────────────────────────────────────────────────────────────────────
+   PHONE FRAME + SHARED GLASSMORPHISM RECIPE
+   Every surface (streak card, task rows, tab bar, badges) is now a real
+   frosted-glass pane: translucent tinted fill, a strong backdrop blur
+   with a saturation boost so the lawn colour bleeds through, a bright
+   light-catching top edge fading to a faint bottom edge, an inset sheen
+   line along the top, and a soft drop shadow for lift. Each concept only
+   sets its wash colour, accent and fill tint via CSS variables — the
+   glass behaviour below is identical across all three.
+   ──────────────────────────────────────────────────────────────────── */
+.phone {
+  width: 330px; height: 700px; margin: 0 auto;
+  border-radius: 44px; overflow: hidden; position: relative;
+  border: 1px solid rgba(255,255,255,0.14);
+  box-shadow: 0 0 0 9px #0d130d, 0 0 0 10px rgba(255,255,255,0.07), 0 44px 80px -22px rgba(0,0,0,0.85);
+  transition: transform .45s cubic-bezier(.2,.7,.2,1);
+  background: #cfe0c2;
+  /* shared glass tokens (concepts may override) */
+  --glass-blur: 26px;
+  --glass-sat: 1.5;
+  --glass-edge: rgba(255,255,255,0.9);
+  --glass-edge-btm: rgba(255,255,255,0.32);
+  --glass-sheen: rgba(255,255,255,0.55);
+  --r-card: 18px;
+}
+.concept:hover .phone { transform: translateY(-8px); }
+
+/* the blurred lawn photo, always on — the thing every glass pane refracts */
+.p-photo { position: absolute; inset: 0; background: var(--bg-image) center/cover; filter: blur(7px) saturate(var(--photo-sat, 1)); transform: scale(1.06); }
+.p-tint { position: absolute; inset: 0; background: var(--tint); }
+.p-glow { position: absolute; inset: 0; background: var(--glow, none); pointer-events: none; }
+
+.screen { position: absolute; inset: 0; display: flex; flex-direction: column; padding: 0 20px; z-index: 2; }
+.statusbar { display: flex; justify-content: space-between; align-items: center; padding: 16px 6px 0; font-size: 11px; font-weight: 700; color: var(--text-strong); font-family: var(--font-header); }
+.statusbar .pillcam { width: 76px; height: 22px; background: var(--statuspill, rgba(20,40,20,0.7)); border-radius: 9999px; position: absolute; left: 50%; transform: translateX(-50%); top: 12px; }
+
+/* ── the reusable glass surface ── */
+.glass {
+  background: var(--surface);
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+  box-shadow: var(--drop-shadow), inset 0 1px 0 var(--glass-sheen);
+}
+
+/* ── Header ── */
+.p-eyebrow { margin-top: 22px; font-size: 9.5px; letter-spacing: 2.5px; text-transform: uppercase; color: var(--text-faint); }
+.p-greet { margin-top: 12px; font-family: var(--font-header-x); font-weight: 900; font-size: 24px; color: var(--text-strong); letter-spacing: -0.5px; }
+
+/* ── Split streak/weather card ── */
+.p-ctx { margin-top: 14px; display: grid; grid-template-columns: 1fr 1px 1fr; border-radius: var(--r-card); overflow: hidden; position: relative; }
+.p-ctx-half { padding: 12px 14px; position: relative; }
+.p-ctx-div { background: var(--divider); }
+.p-ctx-lbl { font-size: 8px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-faint); }
+.p-ctx-row { display: flex; align-items: baseline; gap: 5px; margin-top: 5px; }
+.p-ctx-val { font-family: var(--font-header-x); font-weight: 900; font-size: 23px; color: var(--text-strong); letter-spacing: -1px; }
+.p-ctx-ico { font-size: 19px; }
+.p-ctx-sub { font-size: 9px; color: var(--text-body); margin-top: 4px; line-height: 1.4; }
+
+/* ── Completion track ── */
+.p-track-row { margin-top: 14px; display: flex; align-items: center; gap: 9px; }
+.p-track-lbl { font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-faint); white-space: nowrap; }
+.p-track { flex: 1; height: 4px; border-radius: 9999px; background: var(--track-bg); overflow: hidden; }
+.p-track i { display: block; height: 100%; width: 62%; border-radius: inherit; background: var(--accent-fill, var(--accent)); }
+
+/* ── Task rows ── */
+.p-rows { margin-top: 14px; display: flex; flex-direction: column; gap: 10px; }
+.p-row { border-radius: var(--r-card); overflow: hidden; }
+.p-row-head { display: flex; align-items: center; gap: 12px; padding: 13px 14px; }
+.p-badge { width: 34px; height: 34px; border-radius: 11px; display: grid; place-items: center; background: var(--badge-bg); box-shadow: inset 0 1px 0 var(--glass-sheen); flex-shrink: 0; font-size: 16px; }
+.p-row-text { flex: 1; }
+.p-count { font-size: 7.5px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--accent-text, var(--accent)); }
+.p-title { margin-top: 2px; font-family: var(--font-header); font-weight: 700; font-size: 14.5px; color: var(--text-strong); }
+.p-row.done .p-title { color: var(--text-faint); text-decoration: line-through; }
+.p-chev { font-size: 13px; color: var(--text-faint); }
+.p-check { width: 21px; height: 21px; border-radius: 9999px; background: var(--accent); display: grid; place-items: center; font-family: var(--font-body); font-weight: 700; font-size: 11px; color: var(--accent-ink); flex-shrink: 0; }
+
+/* open row body — keeps the per-task photo header from the real build */
+.p-row-open .p-photo-hd { height: 78px; background-size: cover; background-position: center; position: relative; margin: 0 0 -15px; }
+.p-row-open .p-photo-hd::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0.02), rgba(0,0,0,0.4)); }
+.p-row-open .p-photo-emoji { position: absolute; left: 14px; bottom: -14px; width: 38px; height: 38px; border-radius: 12px; background: var(--badge-bg); box-shadow: inset 0 1px 0 var(--glass-sheen), 0 6px 14px -6px rgba(0,0,0,0.3); display: grid; place-items: center; font-size: 18px; z-index: 2; }
+.p-row-open .p-body { padding: 22px 16px 16px; }
+.p-row-open .p-title { font-family: var(--font-header-x); font-weight: 900; font-size: 20px; margin-top: 8px; }
+.p-desc { font-size: 10.5px; line-height: 1.6; color: var(--text-body); margin-top: 8px; }
+.p-steps { margin-top: 11px; }
+.p-step { display: flex; gap: 9px; align-items: center; padding: 6px 0; font-size: 10.5px; color: var(--text-strong); }
+.p-dotn { width: 16px; height: 16px; border-radius: 50%; flex-shrink: 0; background: var(--divider); display: grid; place-items: center; font-size: 8px; color: var(--accent-text, var(--accent)); }
+.p-cta { margin-top: 13px; background: var(--accent); color: var(--accent-ink); border-radius: var(--r-cta, 9999px); text-align: center; font-family: var(--font-header); font-weight: 700; font-size: 12.5px; padding: 12px; box-shadow: var(--cta-shadow, none); }
+
+/* ── Floating tab bar ── */
+.p-tabbar { margin-top: auto; margin-bottom: 16px; display: flex; justify-content: space-around; align-items: center; padding: 6px; border-radius: 9999px; }
+.p-tab { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 8px 0; }
+.p-tab .ico { font-size: 15px; padding: 4px 13px; border-radius: 9999px; }
+.p-tab.active .ico { background: var(--tab-glow, transparent); }
+.p-tab .lbl { font-size: 7.5px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase; color: var(--text-faint); font-family: var(--font-header); }
+.p-tab.active .lbl { color: var(--accent-text, var(--accent)); }
+
+/* ════════════════════════════════════════════════════════════════════
+   01 · FRESH CUT — high-key glass. A bright, whitest frost so the pane
+   reads almost like milk-glass, vivid grass-green accent. Airy and clean,
+   but now a proper translucent pane with the lawn saturating through.
+   ════════════════════════════════════════════════════════════════════ */
+.phone.c4 {
+  --bg-image: url('../assets/images/grass-bkg.jpg'); --photo-sat: 1.2;
+  --tint: linear-gradient(180deg, rgba(255,255,255,0.4) 0%, rgba(252,255,250,0.62) 55%, rgba(250,255,248,0.72) 100%);
+  --text-strong: #14300f; --text-body: rgba(20,48,15,0.62); --text-faint: rgba(20,48,15,0.44);
+  --accent: #4CA82E; --accent-fill: linear-gradient(90deg,#4CA82E,#95D95A); --accent-ink: #fff; --accent-text: #3C8A22;
+  --surface: rgba(255,255,255,0.42);
+  --badge-bg: rgba(255,255,255,0.5);
+  --drop-shadow: 0 12px 30px -16px rgba(20,48,15,0.35);
+  --divider: rgba(20,48,15,0.12);
+  --track-bg: rgba(20,48,15,0.1);
+  --cta-shadow: 0 8px 18px -8px rgba(76,168,46,0.55);
+  --tab-glow: rgba(76,168,46,0.2);
+  --glass-edge: rgba(255,255,255,0.95); --glass-sheen: rgba(255,255,255,0.7);
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   02 · SUN & SHADE — editorial glass. A diagonal wash runs warm peach
+   top-left to cool mint bottom-right, so light has a real direction and
+   the glass panes catch a warm sheen on one edge, cool on the other.
+   Deep forest accent for weight, oversized display greeting.
+   ════════════════════════════════════════════════════════════════════ */
+.phone.c5 {
+  --bg-image: url('../assets/images/sprinkler-android.jpg'); --photo-sat: 1.05;
+  --tint: linear-gradient(150deg, rgba(255,238,214,0.5) 0%, rgba(250,246,232,0.5) 42%, rgba(230,246,238,0.66) 100%);
+  --text-strong: #16311b; --text-body: rgba(22,49,27,0.64); --text-faint: rgba(22,49,27,0.44);
+  --accent: #2D6A2D; --accent-fill: linear-gradient(90deg,#2D6A2D,#6fae3a); --accent-ink: #fff; --accent-text: #2D6A2D;
+  --surface: rgba(255,251,244,0.34);
+  --badge-bg: rgba(255,251,244,0.42);
+  --drop-shadow: 0 12px 30px -16px rgba(22,49,27,0.34);
+  --divider: rgba(22,49,27,0.16);
+  --track-bg: rgba(255,255,255,0.5);
+  --cta-shadow: 0 8px 18px -8px rgba(45,106,45,0.5);
+  --tab-glow: rgba(45,106,45,0.18);
+  --glass-edge: rgba(255,244,224,0.92); --glass-sheen: rgba(255,246,228,0.6);
+}
+.c5 .p-greet { font-size: 34px; line-height: 0.98; letter-spacing: -1.2px; }
+.c5 .p-eyebrow { color: #B4740E; }
+
+/* ════════════════════════════════════════════════════════════════════
+   03 · CLEAR SKY — cool glass. A blue-white wash floats over the lawn,
+   the panes frost to a cool sky tint, chrome runs sky-blue but the CTA
+   stays brand green so it still reads as Kura. A clear-forecast morning.
+   ════════════════════════════════════════════════════════════════════ */
+.phone.c7 {
+  --bg-image: url('../assets/images/sprinkler.png'); --photo-sat: 1;
+  --tint: linear-gradient(180deg, rgba(226,241,251,0.4) 0%, rgba(230,243,250,0.62) 55%, rgba(234,245,250,0.72) 100%);
+  --text-strong: #16303a; --text-body: rgba(22,48,58,0.64); --text-faint: rgba(22,48,58,0.44);
+  --accent: #3E9A5E; --accent-fill: linear-gradient(90deg,#3E9A5E,#7ED0BE); --accent-ink: #fff; --accent-text: #2478A6;
+  --surface: rgba(244,250,255,0.36);
+  --badge-bg: rgba(244,250,255,0.44);
+  --drop-shadow: 0 12px 30px -16px rgba(22,48,58,0.34);
+  --divider: rgba(22,48,58,0.15);
+  --track-bg: rgba(255,255,255,0.55);
+  --cta-shadow: 0 8px 18px -8px rgba(62,154,94,0.5);
+  --tab-glow: rgba(36,120,166,0.2);
+  --glass-edge: rgba(255,255,255,0.92); --glass-sheen: rgba(236,246,255,0.6);
+  --glow: radial-gradient(280px 220px at 60% -14%, rgba(255,255,255,0.65), transparent 60%);
+}
+</style>
+</head>
+<body>
+
+<header class="board-header">
+  <div class="board-kicker">Kura · Today Screen — Light Glassmorphism</div>
+  <h1 class="board-title">Three frosted takes, <em>one glass system.</em></h1>
+  <p class="board-sub">Fresh Cut, Sun &amp; Shade and Clear Sky, now sharing a single glassmorphism recipe: every surface is a translucent frosted pane with a real backdrop blur and saturation boost, a bright light-catching top edge fading to a faint base, an inset sheen line, and a soft drop shadow. Only the wash colour, accent and fill tint change between them — the glass behaves the same everywhere.</p>
+</header>
+
+<div class="grid">
+
+  <!-- 01 — FRESH CUT (glass) -->
+  <section class="concept">
+    <div class="concept-label"><span class="concept-num">01</span><span class="concept-name">Fresh Cut</span></div>
+    <p class="concept-note">High-key milk-glass. The whitest frost of the three so panes read bright and clean, with a vivid grass-green accent. Airy — but now a true translucent pane with the <b>lawn saturating through</b>.</p>
+    <div class="phone c4">
+      <div class="p-photo"></div><div class="p-tint"></div><div class="p-glow"></div>
+      <div class="screen">
+        <div class="statusbar"><span>9:41</span><span class="pillcam"></span><span>󰖝 ⚡︎</span></div>
+        <div class="p-eyebrow">On Deck · Friday</div>
+        <div class="p-greet">Morning, Farai</div>
+        <div class="p-ctx glass">
+          <div class="p-ctx-half"><div class="p-ctx-lbl">Streak</div><div class="p-ctx-row"><span class="p-ctx-ico">🔥</span><span class="p-ctx-val">6</span></div><div class="p-ctx-sub">days in a row</div></div>
+          <div class="p-ctx-div"></div>
+          <div class="p-ctx-half"><div class="p-ctx-lbl">Weather</div><div class="p-ctx-row"><span class="p-ctx-val">24°</span><span class="p-ctx-ico">☀️</span></div><div class="p-ctx-sub">Sunny · Wind 12 km/h</div></div>
+        </div>
+        <div class="p-track-row"><span class="p-track-lbl">Task 1 of 2</span><span class="p-track"><i></i></span></div>
+        <div class="p-rows">
+          <div class="p-row glass p-row-open">
+            <div class="p-photo-hd" style="background-image:url('../assets/images/sprinkler-android.jpg')"><span class="p-photo-emoji">💧</span></div>
+            <div class="p-body">
+              <div class="p-count">Task 1 of 2 · Today</div>
+              <div class="p-title">Give it a deep soak.</div>
+              <div class="p-desc">Water slowly so it sinks in — quick sprinkles only wet the surface.</div>
+              <div class="p-steps">
+                <div class="p-step"><span class="p-dotn">1</span> Set sprinkler on the front patch</div>
+                <div class="p-step"><span class="p-dotn">2</span> Run 20 minutes, then move it</div>
+              </div>
+              <div class="p-cta">Done ✓</div>
+            </div>
+          </div>
+          <div class="p-row glass"><div class="p-row-head"><div class="p-badge">🔍</div><div class="p-row-text"><div class="p-count">Task 2 of 2</div><div class="p-title">Walk the edges.</div></div><span class="p-chev">⌄</span></div></div>
+          <div class="p-row glass done"><div class="p-row-head"><div class="p-badge" style="opacity:.55">✂️</div><div class="p-row-text"><div class="p-count">Completed</div><div class="p-title">First mow of the week.</div></div><div class="p-check">✓</div></div></div>
+        </div>
+        <nav class="p-tabbar glass">
+          <div class="p-tab active"><span class="ico">☀️</span><span class="lbl">Today</span></div>
+          <div class="p-tab"><span class="ico">✅</span><span class="lbl">Tasks</span></div>
+          <div class="p-tab"><span class="ico">📚</span><span class="lbl">Learn</span></div>
+          <div class="p-tab"><span class="ico">⚙️</span><span class="lbl">Profile</span></div>
+        </nav>
+      </div>
+    </div>
+  </section>
+
+  <!-- 02 — SUN & SHADE (glass) -->
+  <section class="concept">
+    <div class="concept-label"><span class="concept-num">02</span><span class="concept-name">Sun &amp; Shade</span></div>
+    <p class="concept-note">Editorial glass. A diagonal wash runs warm peach top-left to cool mint bottom-right, so the panes catch a <b>warm sheen on one edge, cool on the other</b>. Deep forest accent for weight, oversized display greeting.</p>
+    <div class="phone c5">
+      <div class="p-photo"></div><div class="p-tint"></div><div class="p-glow"></div>
+      <div class="screen">
+        <div class="statusbar"><span>9:41</span><span class="pillcam"></span><span>󰖝 ⚡︎</span></div>
+        <div class="p-eyebrow">On Deck · Friday</div>
+        <div class="p-greet">Morning,<br>Farai</div>
+        <div class="p-ctx glass" style="margin-top:16px">
+          <div class="p-ctx-half"><div class="p-ctx-lbl">Streak</div><div class="p-ctx-row"><span class="p-ctx-ico">🔥</span><span class="p-ctx-val">6</span></div><div class="p-ctx-sub">days in a row</div></div>
+          <div class="p-ctx-div"></div>
+          <div class="p-ctx-half"><div class="p-ctx-lbl">Weather</div><div class="p-ctx-row"><span class="p-ctx-val">24°</span><span class="p-ctx-ico">☀️</span></div><div class="p-ctx-sub">Sunny · Wind 12 km/h</div></div>
+        </div>
+        <div class="p-track-row"><span class="p-track-lbl">Task 1 of 2</span><span class="p-track"><i></i></span></div>
+        <div class="p-rows">
+          <div class="p-row glass p-row-open">
+            <div class="p-photo-hd" style="background-image:url('../assets/images/sprinkler-android.jpg')"><span class="p-photo-emoji">💧</span></div>
+            <div class="p-body">
+              <div class="p-count">Task 1 of 2 · Today</div>
+              <div class="p-title">Give it a deep soak.</div>
+              <div class="p-desc">Water slowly so it sinks in — quick sprinkles only wet the surface.</div>
+              <div class="p-steps">
+                <div class="p-step"><span class="p-dotn">1</span> Set sprinkler on the front patch</div>
+                <div class="p-step"><span class="p-dotn">2</span> Run 20 minutes, then move it</div>
+              </div>
+              <div class="p-cta">Done ✓</div>
+            </div>
+          </div>
+          <div class="p-row glass"><div class="p-row-head"><div class="p-badge">🔍</div><div class="p-row-text"><div class="p-count">Task 2 of 2</div><div class="p-title">Walk the edges.</div></div><span class="p-chev">⌄</span></div></div>
+          <div class="p-row glass done"><div class="p-row-head"><div class="p-badge" style="opacity:.55">✂️</div><div class="p-row-text"><div class="p-count">Completed</div><div class="p-title">First mow of the week.</div></div><div class="p-check">✓</div></div></div>
+        </div>
+        <nav class="p-tabbar glass">
+          <div class="p-tab active"><span class="ico">☀️</span><span class="lbl">Today</span></div>
+          <div class="p-tab"><span class="ico">✅</span><span class="lbl">Tasks</span></div>
+          <div class="p-tab"><span class="ico">📚</span><span class="lbl">Learn</span></div>
+          <div class="p-tab"><span class="ico">⚙️</span><span class="lbl">Profile</span></div>
+        </nav>
+      </div>
+    </div>
+  </section>
+
+  <!-- 03 — CLEAR SKY (glass) -->
+  <section class="concept">
+    <div class="concept-label"><span class="concept-num">03</span><span class="concept-name">Clear Sky</span></div>
+    <p class="concept-note">Cool glass. A blue-white wash floats over the lawn and the panes frost to a <b>cool sky tint</b>; chrome runs sky-blue but the CTA stays brand green so it still reads as Kura. A clear-forecast morning.</p>
+    <div class="phone c7">
+      <div class="p-photo"></div><div class="p-tint"></div><div class="p-glow"></div>
+      <div class="screen">
+        <div class="statusbar"><span>9:41</span><span class="pillcam"></span><span>󰖝 ⚡︎</span></div>
+        <div class="p-eyebrow">On Deck · Friday</div>
+        <div class="p-greet">Morning, Farai</div>
+        <div class="p-ctx glass">
+          <div class="p-ctx-half"><div class="p-ctx-lbl">Streak</div><div class="p-ctx-row"><span class="p-ctx-ico">🔥</span><span class="p-ctx-val">6</span></div><div class="p-ctx-sub">days in a row</div></div>
+          <div class="p-ctx-div"></div>
+          <div class="p-ctx-half"><div class="p-ctx-lbl">Weather</div><div class="p-ctx-row"><span class="p-ctx-val">24°</span><span class="p-ctx-ico">☀️</span></div><div class="p-ctx-sub">Sunny · Wind 12 km/h</div></div>
+        </div>
+        <div class="p-track-row"><span class="p-track-lbl">Task 1 of 2</span><span class="p-track"><i></i></span></div>
+        <div class="p-rows">
+          <div class="p-row glass p-row-open">
+            <div class="p-photo-hd" style="background-image:url('../assets/images/sprinkler-android.jpg')"><span class="p-photo-emoji">💧</span></div>
+            <div class="p-body">
+              <div class="p-count">Task 1 of 2 · Today</div>
+              <div class="p-title">Give it a deep soak.</div>
+              <div class="p-desc">Water slowly so it sinks in — quick sprinkles only wet the surface.</div>
+              <div class="p-steps">
+                <div class="p-step"><span class="p-dotn">1</span> Set sprinkler on the front patch</div>
+                <div class="p-step"><span class="p-dotn">2</span> Run 20 minutes, then move it</div>
+              </div>
+              <div class="p-cta">Done ✓</div>
+            </div>
+          </div>
+          <div class="p-row glass"><div class="p-row-head"><div class="p-badge">🔍</div><div class="p-row-text"><div class="p-count">Task 2 of 2</div><div class="p-title">Walk the edges.</div></div><span class="p-chev">⌄</span></div></div>
+          <div class="p-row glass done"><div class="p-row-head"><div class="p-badge" style="opacity:.55">✂️</div><div class="p-row-text"><div class="p-count">Completed</div><div class="p-title">First mow of the week.</div></div><div class="p-check">✓</div></div></div>
+        </div>
+        <nav class="p-tabbar glass">
+          <div class="p-tab active"><span class="ico">☀️</span><span class="lbl">Today</span></div>
+          <div class="p-tab"><span class="ico">✅</span><span class="lbl">Tasks</span></div>
+          <div class="p-tab"><span class="ico">📚</span><span class="lbl">Learn</span></div>
+          <div class="p-tab"><span class="ico">⚙️</span><span class="lbl">Profile</span></div>
+        </nav>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+</body>
+</html>

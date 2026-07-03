@@ -17,11 +17,11 @@ interface SplitContextCardProps {
 const Card = styled.View`
   margin-top: 12px;
   flex-direction: row;
-  background-color: ${({ theme }) => theme.colors.glassClearPanel};
+  background-color: ${({ theme }) => theme.colors.glassFill};
   border-radius: ${({ theme }) => theme.radii.lg}px;
   border-width: 1px;
-  border-color: ${({ theme }) => theme.colors.glassClearEdgeBottom};
-  border-top-color: ${({ theme }) => theme.colors.glassClearEdge};
+  border-color: ${({ theme }) => theme.colors.glassEdgeSoft};
+  border-top-color: ${({ theme }) => theme.colors.glassEdge};
   overflow: hidden;
 `;
 
@@ -33,7 +33,7 @@ const Half = styled.View`
 // Divider — the 1px rule separating the two halves.
 const Divider = styled.View`
   width: 1px;
-  background-color: ${({ theme }) => theme.colors.glassClearDivider};
+  background-color: ${({ theme }) => theme.colors.glassDivider};
 `;
 
 const Label = styled.Text`
@@ -41,7 +41,7 @@ const Label = styled.Text`
   font-size: 8px;
   letter-spacing: 2px;
   text-transform: uppercase;
-  color: ${({ theme }) => theme.colors.subtextOnPhoto};
+  color: ${({ theme }) => theme.colors.textPhotoSubtle};
 `;
 
 // ValueRow — the icon and the big number/temperature sitting on one baseline.
@@ -56,7 +56,7 @@ const Value = styled.Text`
   font-family: ${({ theme }) => theme.typography.fontHeaderHeavy};
   font-size: 24px;
   letter-spacing: -1px;
-  color: ${({ theme }) => theme.colors.white};
+  color: ${({ theme }) => theme.colors.textPhotoHeading};
 `;
 
 const Icon = styled.Text`
@@ -69,7 +69,7 @@ const Sub = styled.Text`
   font-family: ${({ theme }) => theme.typography.fontBody};
   font-size: 9px;
   line-height: 13px;
-  color: ${({ theme }) => theme.colors.textMutedOnDark};
+  color: ${({ theme }) => theme.colors.textPhotoMuted};
 `;
 
 export const SplitContextCard = ({ streakDays, weather }: SplitContextCardProps) => (

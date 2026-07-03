@@ -8,8 +8,8 @@
 
 import { BlurView } from 'expo-blur';
 import { Platform, Pressable } from 'react-native';
-import Animated, { LinearTransition } from 'react-native-reanimated';
-import styled from 'styled-components/native';
+import Animated from 'react-native-reanimated';
+import styled, { useTheme } from 'styled-components/native';
 
 import type { DeckCardData } from '../../types';
 import { TaskRowCta } from './TaskRowCta';
@@ -28,17 +28,20 @@ interface TaskRowProps {
   onComplete: () => void;
 }
 
-// Container — the animated wrapper for the whole row. LinearTransition makes the
-// rows below glide down/up when this one opens or closes. The 1px rim brightens
+// Container — the animated wrapper for the whole row. It has no layout
+// animation of its own: as the drawer's real height changes every frame (see
+// useTaskRowAnimation), ordinary flex layout reflows the rows below in the
+// same frame, so opening and closing move the rest of the list in lockstep
+// instead of on a second, separately-timed animation. The 1px rim brightens
 // along the top when the row is open, the way the app's other glass surfaces do.
 const Container = styled(Animated.View)<{ $open: boolean }>`
   border-radius: ${({ theme }) => theme.radii.lg}px;
   overflow: hidden;
   border-width: 1px;
   border-color: ${({ theme, $open }) =>
-    $open ? theme.colors.glassClearEdgeBottom : theme.colors.deckRowBorder};
+    $open ? theme.colors.glassEdgeSoft : theme.colors.deckRowBorder};
   border-top-color: ${({ theme, $open }) =>
-    $open ? theme.colors.glassClearEdge : theme.colors.deckRowBorder};
+    $open ? theme.colors.glassEdge : theme.colors.deckRowBorder};
 `;
 
 // Solid — the fill + border for a collapsed row. An open row hides this behind
@@ -74,7 +77,7 @@ const Tint = styled.View`
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: ${({ theme }) => theme.colors.deckCardExpanded};
+  background-color: ${({ theme }) => theme.colors.rowExpandedTint};
 `;
 
 const Header = styled(Pressable)`
@@ -109,7 +112,7 @@ const Count = styled.Text`
   font-size: 8px;
   letter-spacing: 1.5px;
   text-transform: uppercase;
-  color: ${({ theme }) => theme.colors.lime};
+  color: ${({ theme }) => theme.colors.accentText};
 `;
 
 // Title — the task headline. A done task is struck through and dimmed.
@@ -118,7 +121,7 @@ const Title = styled.Text<{ $done: boolean }>`
   font-family: ${({ theme }) => theme.typography.fontHeaderBold};
   font-size: 16px;
   color: ${({ theme, $done }) =>
-    $done ? theme.colors.textMutedOnDark : theme.colors.white};
+    $done ? theme.colors.textPhotoMuted : theme.colors.textPhotoHeading};
   text-decoration-line: ${({ $done }) => ($done ? 'line-through' : 'none')};
 `;
 
@@ -126,15 +129,15 @@ const Title = styled.Text<{ $done: boolean }>`
 const Chevron = styled(Animated.Text)`
   font-family: ${({ theme }) => theme.typography.fontBody};
   font-size: 13px;
-  color: ${({ theme }) => theme.colors.textMutedOnDark};
+  color: ${({ theme }) => theme.colors.textPhotoMuted};
 `;
 
-// Check — the lime tick shown in place of the chevron once a task is done.
+// Check — the tick shown in place of the chevron once a task is done.
 const Check = styled.View`
   width: 22px;
   height: 22px;
   border-radius: ${({ theme }) => theme.radii.full}px;
-  background-color: ${({ theme }) => theme.colors.limeSolid};
+  background-color: ${({ theme }) => theme.colors.accentPrimary};
   align-items: center;
   justify-content: center;
 `;
@@ -142,7 +145,7 @@ const Check = styled.View`
 const CheckMark = styled.Text`
   font-family: ${({ theme }) => theme.typography.fontBodyBold};
   font-size: 12px;
-  color: ${({ theme }) => theme.colors.primaryDeep};
+  color: ${({ theme }) => theme.colors.accentPrimaryInk};
 `;
 
 // Drawer — the clipped, animated container that grows the detail into view.
@@ -161,7 +164,12 @@ export const TaskRow = ({
   onToggle,
   onComplete,
 }: TaskRowProps) => {
-  const { drawerStyle, chevronStyle } = useTaskRowAnimation({ isOpen });
+  const { drawerStyle, chevronStyle, handleContentLayout } = useTaskRowAnimation({
+    isOpen,
+  });
+  // The frosted blur behind an open row matches the theme: a light frost in
+  // light mode, a dark frost in dark mode.
+  const { mode } = useTheme();
 
   // Done tasks read "Completed"; everything else keeps its own count line.
   const countLabel = isDone ? 'Completed' : card.countLabel;
@@ -169,13 +177,13 @@ export const TaskRow = ({
   const rowTitle = card.title.replace(/\n/g, ' ');
 
   return (
-    <Container $open={isOpen} layout={LinearTransition.duration(420)}>
+    <Container $open={isOpen}>
       <Solid $open={isOpen} $done={isDone} />
       {isOpen && (
         <>
           <Backdrop
             intensity={CARD_BLUR_INTENSITY}
-            tint="dark"
+            tint={mode === 'dark' ? 'dark' : 'light'}
             experimentalBlurMethod={
               Platform.OS === 'android' ? 'dimezisBlurView' : undefined
             }
@@ -206,7 +214,7 @@ export const TaskRow = ({
       </Header>
 
       <Drawer style={drawerStyle}>
-        <DrawerInner>
+        <DrawerInner onLayout={handleContentLayout}>
           <TaskRowDetail
             image={card.image}
             description={card.description}

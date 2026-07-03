@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kura — Today Screen · Light Theme · 6 Directions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Zalando+Sans:ital,wght@0,400;0,700;0,900;1,400&family=Zalando+Sans+Expanded:wght@700;900&family=Caveat:wght@600;700&display=swap" rel="stylesheet">
+<style>
+/* ────────────────────────────────────────────────────────────────────
+   STUDIO SHELL — the dark board the phones sit on. Kept dark regardless
+   of the theme being shown, same convention as dashboard-concepts.html,
+   so light phones pop against it instead of bleeding into the page.
+   ──────────────────────────────────────────────────────────────────── */
+:root {
+  --studio-lime: rgba(184,229,106,0.92);
+  --font-body:   'JetBrains Mono', monospace;
+  --font-header: 'Zalando Sans', sans-serif;
+  --font-header-x: 'Zalando Sans Expanded', 'Zalando Sans', sans-serif;
+  --font-hand: 'Caveat', cursive;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background:
+    radial-gradient(1200px 600px at 80% -10%, rgba(45,106,45,0.28), transparent 60%),
+    radial-gradient(900px 500px at 10% 110%, rgba(184,229,106,0.10), transparent 55%),
+    #07120a;
+  font-family: var(--font-body);
+  color: rgba(255,255,255,0.7);
+  min-height: 100vh;
+  padding: 56px 40px 90px;
+}
+body::after {
+  content: ''; position: fixed; inset: 0; pointer-events: none; opacity: .5;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.04 0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.board-header { max-width: 1560px; margin: 0 auto 48px; }
+.board-kicker { font-size: 11px; letter-spacing: 4px; text-transform: uppercase; color: var(--studio-lime); margin-bottom: 14px; }
+.board-title { font-family: var(--font-header-x); font-weight: 900; font-size: clamp(32px, 4.2vw, 58px); line-height: 1.04; letter-spacing: -1px; color: #fff; }
+.board-title em { font-style: normal; color: #b8e56a; }
+.board-sub { margin-top: 16px; max-width: 660px; font-size: 12.5px; line-height: 1.8; color: rgba(255,255,255,0.55); }
+
+.grid {
+  max-width: 1560px; margin: 0 auto;
+  display: grid; gap: 60px 36px;
+  grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+}
+.concept { animation: rise .7s cubic-bezier(.2,.7,.2,1) both; }
+.concept:nth-child(1){animation-delay:.05s}.concept:nth-child(2){animation-delay:.12s}
+.concept:nth-child(3){animation-delay:.19s}.concept:nth-child(4){animation-delay:.26s}
+.concept:nth-child(5){animation-delay:.33s}.concept:nth-child(6){animation-delay:.40s}
+@keyframes rise { from { opacity: 0; transform: translateY(28px); } to { opacity: 1; transform: none; } }
+
+.concept-label { display: flex; align-items: baseline; gap: 12px; margin-bottom: 16px; }
+.concept-num { font-family: var(--font-header-x); font-weight: 900; font-size: 28px; color: transparent; -webkit-text-stroke: 1.2px rgba(184,229,106,0.65); }
+.concept-name { font-family: var(--font-header); font-weight: 700; font-size: 16px; color: #fff; }
+.concept-note { font-size: 10.5px; color: rgba(255,255,255,0.55); margin-top: 5px; line-height: 1.65; max-width: 320px; }
+.concept-note b { color: var(--studio-lime); font-weight: 700; }
+
+/* ────────────────────────────────────────────────────────────────────
+   PHONE FRAME — shared chrome. Each concept sets its own CSS custom
+   properties on .phone.cN to repaint every shared component below.
+   ──────────────────────────────────────────────────────────────────── */
+.phone {
+  width: 330px; height: 700px; margin: 0 auto;
+  border-radius: 44px; overflow: hidden; position: relative;
+  border: 1px solid rgba(255,255,255,0.14);
+  box-shadow: 0 0 0 9px #0d130d, 0 0 0 10px rgba(255,255,255,0.07), 0 44px 80px -22px rgba(0,0,0,0.85);
+  transition: transform .45s cubic-bezier(.2,.7,.2,1);
+  background: var(--bg);
+}
+.concept:hover .phone { transform: translateY(-8px); }
+
+.p-photo { position: absolute; inset: 0; background: var(--bg-image, none) center/cover; filter: blur(7px); transform: scale(1.06); opacity: var(--bg-image-on, 0); }
+.p-tint { position: absolute; inset: 0; background: var(--tint, transparent); }
+.p-grain { position: absolute; inset: 0; opacity: var(--grain-on, 0); mix-blend-mode: multiply; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 0.1 0 0 0 0 0.2 0 0 0 0 0.1 0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E"); }
+/* faint ruled-notebook lines, only switched on for concept 6 */
+.p-rules { position: absolute; inset: 0; opacity: var(--rules-on, 0); background-image: repeating-linear-gradient(to bottom, var(--rule-color, transparent) 0 1px, transparent 1px 28px); }
+
+.screen { position: absolute; inset: 0; display: flex; flex-direction: column; padding: 0 20px; }
+.statusbar { display: flex; justify-content: space-between; align-items: center; padding: 16px 6px 0; font-size: 11px; font-weight: 700; color: var(--text-strong); font-family: var(--font-header); }
+.statusbar .pillcam { width: 76px; height: 22px; background: var(--statuspill, #000); border-radius: 9999px; position: absolute; left: 50%; transform: translateX(-50%); top: 12px; }
+
+/* ── Header ── */
+.p-eyebrow { margin-top: 22px; font-size: 9.5px; letter-spacing: 2.5px; text-transform: uppercase; color: var(--text-faint); }
+.p-greet { margin-top: 12px; font-family: var(--font-header-x); font-weight: 900; font-size: 24px; color: var(--text-strong); letter-spacing: -0.5px; }
+
+/* ── Split streak/weather card ── */
+.p-ctx { margin-top: 14px; display: grid; grid-template-columns: 1fr 1px 1fr; background: var(--card-bg); border-radius: var(--r-card, 16px); border: var(--card-border, none); box-shadow: var(--card-shadow, none); backdrop-filter: blur(var(--card-blur, 0px)); -webkit-backdrop-filter: blur(var(--card-blur, 0px)); overflow: visible; position: relative; }
+.p-ctx-half { padding: 12px 14px; position: relative; }
+.p-ctx-div { background: var(--divider); }
+.p-ctx-lbl { font-size: 8px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-faint); }
+.p-ctx-row { display: flex; align-items: baseline; gap: 5px; margin-top: 5px; }
+.p-ctx-val { font-family: var(--font-header-x); font-weight: 900; font-size: 23px; color: var(--text-strong); letter-spacing: -1px; }
+.p-ctx-ico { font-size: 19px; }
+.p-ctx-sub { font-size: 9px; color: var(--text-body); margin-top: 4px; line-height: 1.4; }
+
+/* ── Completion track ── */
+.p-track-row { margin-top: 14px; display: flex; align-items: center; gap: 9px; }
+.p-track-lbl { font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-faint); white-space: nowrap; }
+.p-track { flex: 1; height: 4px; border-radius: 9999px; background: var(--track-bg); overflow: hidden; }
+.p-track i { display: block; height: 100%; width: 62%; border-radius: inherit; background: var(--accent-fill, var(--accent)); }
+
+/* ── Task rows ── */
+.p-rows { margin-top: 14px; display: flex; flex-direction: column; gap: 10px; }
+.p-row { border-radius: var(--r-card, 16px); background: var(--row-bg); border: var(--row-border, none); box-shadow: var(--row-shadow, none); overflow: hidden; }
+.p-row-head { display: flex; align-items: center; gap: 12px; padding: 13px 14px; }
+.p-badge { width: 34px; height: 34px; border-radius: 11px; display: grid; place-items: center; background: var(--badge-bg); border: var(--badge-border, none); box-shadow: var(--badge-shadow, none); flex-shrink: 0; font-size: 16px; }
+.p-row-text { flex: 1; }
+.p-count { font-size: 7.5px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--accent-text, var(--accent)); }
+.p-title { margin-top: 2px; font-family: var(--font-header); font-weight: 700; font-size: 14.5px; color: var(--text-strong); }
+.p-row.done .p-title { color: var(--text-faint); text-decoration: line-through; }
+.p-chev { font-size: 13px; color: var(--text-faint); }
+.p-check { width: 21px; height: 21px; border-radius: 9999px; background: var(--accent); display: grid; place-items: center; font-family: var(--font-body); font-weight: 700; font-size: 11px; color: var(--accent-ink); flex-shrink: 0; }
+
+/* open row body */
+.p-row-open .p-photo-hd { height: 78px; background-size: cover; background-position: center; position: relative; margin: 0 0 -15px; opacity: var(--taskphoto-on, 1); }
+.p-row-open .p-photo-hd::after { content: ''; position: absolute; inset: 0; background: var(--photo-fade, linear-gradient(180deg, rgba(0,0,0,0.02), rgba(0,0,0,0.45))); }
+.p-row-open .p-photo-emoji { position: absolute; left: 14px; bottom: -14px; width: 38px; height: 38px; border-radius: 12px; background: var(--badge-bg); border: var(--badge-border, none); box-shadow: var(--badge-shadow, none); display: grid; place-items: center; font-size: 18px; z-index: 2; }
+.p-row-open .p-body { padding: 22px 16px 16px; }
+.p-row-open .p-count { color: var(--accent-text, var(--accent)); }
+.p-row-open .p-title { font-family: var(--font-header-x); font-weight: 900; font-size: 20px; margin-top: 8px; }
+.p-desc { font-size: 10.5px; line-height: 1.6; color: var(--text-body); margin-top: 8px; }
+.p-steps { margin-top: 11px; }
+.p-step { display: flex; gap: 9px; align-items: center; padding: 6px 0; font-size: 10.5px; color: var(--text-strong); }
+.p-dotn { width: 16px; height: 16px; border-radius: 50%; flex-shrink: 0; border: 1px solid var(--divider); display: grid; place-items: center; font-size: 8px; color: var(--accent-text, var(--accent)); background: var(--dotn-bg, transparent); }
+.p-cta { margin-top: 13px; background: var(--accent); color: var(--accent-ink); border-radius: var(--r-cta, 9999px); text-align: center; font-family: var(--font-header); font-weight: 700; font-size: 12.5px; padding: 12px; box-shadow: var(--cta-shadow, none); border: var(--cta-border, none); }
+
+/* ── Floating tab bar ── */
+.p-tabbar { margin-top: auto; margin-bottom: 16px; display: flex; justify-content: space-around; align-items: center; padding: 6px; border-radius: 9999px; background: var(--tab-bg); border: var(--tab-border, none); box-shadow: var(--tab-shadow, none); backdrop-filter: blur(var(--tab-blur, 0px)); -webkit-backdrop-filter: blur(var(--tab-blur, 0px)); }
+.p-tab { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 8px 0; }
+.p-tab .ico { font-size: 15px; padding: 4px 13px; border-radius: 9999px; }
+.p-tab.active .ico { background: var(--tab-glow, transparent); }
+.p-tab .lbl { font-size: 7.5px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase; color: var(--text-faint); font-family: var(--font-header); }
+.p-tab.active .lbl { color: var(--accent-text, var(--accent)); }
+
+/* ════════════════════════════════════════════════════════════════════
+   01 · SUNLIT PHOTO — the current dark recipe, relit. Same full-bleed
+   blurred photo + glass-over-photo language, but the photo is a bright
+   morning shot and the tint runs warm cream instead of forest-black, so
+   the whole scene reads like stepping outside at 8am instead of dusk.
+   ════════════════════════════════════════════════════════════════════ */
+.phone.c1 {
+  --bg: #cfe0c2;
+  --bg-image: url('../assets/images/grass.jpg'); --bg-image-on: 1;
+  --tint: linear-gradient(180deg, rgba(255,252,240,0.38), rgba(255,250,235,0.72));
+  --statuspill: rgba(20,40,20,0.7);
+  --text-strong: #17331c; --text-body: rgba(23,51,28,0.68); --text-faint: rgba(23,51,28,0.48);
+  --accent: #6fae3a; --accent-fill: linear-gradient(90deg,#5A9E3A,#b8e56a); --accent-ink: #123018; --accent-text: #3f7a22;
+  --card-bg: rgba(255,255,255,0.55); --card-border: 1px solid rgba(255,255,255,0.75); --card-shadow: 0 10px 26px -14px rgba(23,51,28,0.35); --card-blur: 20px; --r-card: 18px;
+  --divider: rgba(23,51,28,0.14);
+  --track-bg: rgba(255,255,255,0.6);
+  --row-bg: rgba(255,255,255,0.58); --row-border: 1px solid rgba(255,255,255,0.8); --row-shadow: 0 8px 20px -14px rgba(23,51,28,0.3);
+  --badge-bg: rgba(255,255,255,0.75); --badge-border: 1px solid rgba(255,255,255,0.9);
+  --cta-shadow: 0 8px 18px -8px rgba(90,158,58,0.55);
+  --tab-bg: rgba(255,255,255,0.55); --tab-border: 1px solid rgba(255,255,255,0.8); --tab-blur: 20px; --tab-shadow: 0 10px 24px -12px rgba(23,51,28,0.35); --tab-glow: rgba(111,174,58,0.22);
+}
+.c1 .flare { position: absolute; top: -60px; right: -60px; width: 220px; height: 220px; border-radius: 50%; background: radial-gradient(circle, rgba(255,250,220,0.85), transparent 70%); filter: blur(6px); pointer-events: none; }
+
+/* ════════════════════════════════════════════════════════════════════
+   02 · FIELD JOURNAL — no photo. A warm paper background like a page
+   in a beginner's garden notebook: ink-green headings, a torn strip
+   across the top, a marigold "today" pin, and hand-checked steps.
+   ════════════════════════════════════════════════════════════════════ */
+.phone.c2 {
+  --bg: #FBF4E4;
+  --statuspill: rgba(22,52,30,0.85);
+  --text-strong: #16341E; --text-body: rgba(22,52,30,0.62); --text-faint: rgba(22,52,30,0.4);
+  --accent: #E08A3C; --accent-ink: #fff; --accent-text: #C06A1F;
+  --card-bg: #FFFDF6; --card-border: 1px solid rgba(22,52,30,0.14); --card-shadow: 2px 4px 0 rgba(22,52,30,0.08); --r-card: 12px;
+  --divider: rgba(22,52,30,0.16);
+  --track-bg: rgba(22,52,30,0.1);
+  --row-bg: #FFFDF6; --row-border: 1px solid rgba(22,52,30,0.14); --row-shadow: 2px 3px 0 rgba(22,52,30,0.06);
+  --badge-bg: #F3E9D2; --badge-border: 1px solid rgba(22,52,30,0.16);
+  --taskphoto-on: 0;
+  --cta-border: 1px solid rgba(22,52,30,0.15);
+  --tab-bg: #16341E; --tab-glow: rgba(224,138,60,0.28);
+  --grain-on: .06;
+}
+.c2 .p-tab .lbl { color: rgba(255,255,255,0.4); } .c2 .p-tab.active .lbl { color: #F3D9A4; }
+.c2 .torn { position: absolute; top: 0; left: 0; right: 0; height: 34px; background: repeating-linear-gradient(115deg, #16341E 0 14px, transparent 14px 28px); opacity: .9; }
+.c2 .pin { position: absolute; top: 44px; right: 20px; font-family: var(--font-hand); font-weight: 700; font-size: 15px; color: #E08A3C; transform: rotate(-6deg); }
+.c2 .p-dotn.hand { border: none; color: #16341E; font-family: var(--font-hand); font-size: 15px; font-weight: 700; }
+
+/* ════════════════════════════════════════════════════════════════════
+   03 · SUNROOM — flat, chunky, sticker-bright colour blocks. No blur,
+   no translucency: every surface is an opaque pastel panel with a thick
+   ink outline and an offset "pop" shadow, like laminated flash-cards
+   for someone who has never done this before.
+   ════════════════════════════════════════════════════════════════════ */
+.phone.c3 {
+  --bg: linear-gradient(160deg, #EAF6E9 0%, #DCEEE0 100%);
+  --statuspill: rgba(15,40,20,0.85);
+  --text-strong: #0F2814; --text-body: rgba(15,40,20,0.64); --text-faint: rgba(15,40,20,0.44);
+  --accent: #FFD65C; --accent-ink: #0F2814; --accent-text: #1F6B33;
+  --card-bg: #DDEEFB; --card-border: 2px solid #0F2814; --card-shadow: 3px 4px 0 #0F2814; --r-card: 20px;
+  --divider: rgba(15,40,20,0.5);
+  --track-bg: rgba(15,40,20,0.12);
+  --row-bg: #FFF3D0; --row-border: 2px solid #0F2814; --row-shadow: 3px 4px 0 #0F2814;
+  --badge-bg: #DCF2D8; --badge-border: 2px solid #0F2814;
+  --cta-border: 2px solid #0F2814; --r-cta: 14px; --cta-shadow: 3px 4px 0 #0F2814;
+  --tab-bg: #0F2814; --tab-glow: rgba(255,214,92,0.3);
+}
+.c3 .p-tab .lbl { color: rgba(255,255,255,0.4); } .c3 .p-tab.active .lbl { color: #FFD65C; }
+.c3 .p-row-open { background: #DDEEFB; }
+.c3 .sticker { position: absolute; top: -8px; left: -8px; width: 100%; height: 100%; border-radius: inherit; z-index: -1; }
+.c3 .p-badge { transform: rotate(-4deg); }
+
+/* ════════════════════════════════════════════════════════════════════
+   04 · MORNING GRADIENT — a soft sunrise wash instead of a photo. Frost
+   glass survives from the dark version, but the signature accent swaps
+   lime for a warm gold, with a glow ring behind the streak flame like
+   the sun coming up over the fence.
+   ════════════════════════════════════════════════════════════════════ */
+.phone.c4 {
+  --bg: linear-gradient(165deg, #FFE9D2 0%, #FDEFDD 38%, #E4F3E3 100%);
+  --statuspill: rgba(30,40,20,0.75);
+  --text-strong: #22391F; --text-body: rgba(34,57,31,0.62); --text-faint: rgba(34,57,31,0.42);
+  --accent: #F0B429; --accent-ink: #3A2A08; --accent-text: #B9790E; --accent-fill: linear-gradient(90deg,#F0B429,#5A9E3A);
+  --card-bg: rgba(255,255,255,0.55); --card-border: 1px solid rgba(255,255,255,0.8); --card-shadow: 0 10px 26px -16px rgba(122,79,10,0.3); --card-blur: 22px; --r-card: 18px;
+  --divider: rgba(34,57,31,0.14);
+  --track-bg: rgba(255,255,255,0.55);
+  --row-bg: rgba(255,255,255,0.5); --row-border: 1px solid rgba(255,255,255,0.75); --row-shadow: 0 8px 20px -14px rgba(122,79,10,0.25);
+  --badge-bg: rgba(255,255,255,0.7); --badge-border: 1px solid rgba(255,255,255,0.85);
+  --cta-shadow: 0 8px 18px -8px rgba(240,180,41,0.55);
+  --tab-bg: rgba(255,255,255,0.5); --tab-border: 1px solid rgba(255,255,255,0.75); --tab-blur: 22px; --tab-shadow: 0 10px 24px -12px rgba(122,79,10,0.3); --tab-glow: rgba(240,180,41,0.28);
+}
+.c4 .sunring { position: absolute; width: 46px; height: 46px; border-radius: 50%; background: radial-gradient(circle, rgba(240,180,41,0.45), transparent 70%); left: 8px; top: -4px; filter: blur(2px); }
+
+/* ════════════════════════════════════════════════════════════════════
+   05 · FIELD NOTES — near-white, photography demoted from backdrop to
+   detail: each open task keeps a small pinned photo (like a polaroid
+   clipped to a page) instead of a full-bleed image, with brand-primary
+   green used solid since white gives it all the contrast it needs.
+   ════════════════════════════════════════════════════════════════════ */
+.phone.c5 {
+  --bg: #FCFCFA;
+  --statuspill: rgba(15,30,15,0.85);
+  --text-strong: #16261A; --text-body: rgba(22,38,26,0.6); --text-faint: rgba(22,38,26,0.4);
+  --accent: #2D6A2D; --accent-ink: #fff; --accent-text: #2D6A2D;
+  --card-bg: #FFFFFF; --card-border: 1px solid rgba(22,38,26,0.08); --card-shadow: 0 14px 30px -20px rgba(22,38,26,0.25); --r-card: 16px;
+  --divider: rgba(22,38,26,0.1);
+  --track-bg: rgba(22,38,26,0.08);
+  --row-bg: #FFFFFF; --row-border: 1px solid rgba(22,38,26,0.08); --row-shadow: 0 10px 22px -18px rgba(22,38,26,0.2);
+  --badge-bg: #EAF4E5; --badge-border: 1px solid rgba(22,38,26,0.08);
+  --taskphoto-on: 0;
+  --tab-bg: #FFFFFF; --tab-border: 1px solid rgba(22,38,26,0.08); --tab-shadow: 0 -6px 20px -14px rgba(22,38,26,0.2); --tab-glow: rgba(45,106,45,0.14);
+}
+.c5 .polaroid { width: 60px; height: 60px; border-radius: 8px; background-size: cover; background-position: center; border: 3px solid #fff; box-shadow: 0 6px 14px -6px rgba(22,38,26,0.35); transform: rotate(-4deg); flex-shrink: 0; }
+.c5 .tape { position: absolute; top: -10px; right: 10px; width: 34px; height: 14px; background: rgba(240,180,41,0.55); transform: rotate(6deg); }
+
+/* ════════════════════════════════════════════════════════════════════
+   06 · FIELD MANUAL — crisp, near-white, hairline-only. No blur, no
+   shadow, thin ruled "graph paper" lines behind the content, bracket
+   corner marks on the open task — reads like an instruction sheet,
+   which fits a beginner app better than anything atmospheric.
+   ════════════════════════════════════════════════════════════════════ */
+.phone.c6 {
+  --bg: #FFFFFF;
+  --rule-color: rgba(15,32,19,0.045); --rules-on: 1;
+  --statuspill: rgba(15,32,19,0.9);
+  --text-strong: #0F2013; --text-body: rgba(15,32,19,0.62); --text-faint: rgba(15,32,19,0.42);
+  --accent: #b8e56a; --accent-ink: #0F2013; --accent-text: #4C7A2A;
+  --card-bg: #FFFFFF; --card-border: 1.5px solid #0F2013; --r-card: 6px;
+  --divider: rgba(15,32,19,0.5);
+  --track-bg: rgba(15,32,19,0.1);
+  --row-bg: #FFFFFF; --row-border: 1.5px solid rgba(15,32,19,0.7);
+  --badge-bg: #fff; --badge-border: 1.5px solid #0F2013;
+  --cta-border: 1.5px solid #0F2013; --r-cta: 6px; --dotn-bg: #0F2013;
+  --tab-bg: #0F2013; --tab-glow: rgba(184,229,106,0.35);
+}
+.c6 .p-tab .lbl { color: rgba(255,255,255,0.4); } .c6 .p-tab.active .lbl { color: #b8e56a; }
+.c6 .bracket { position: absolute; width: 10px; height: 10px; border-color: #0F2013; }
+.c6 .bracket.tl { top: 6px; left: 6px; border-top: 1.5px solid; border-left: 1.5px solid; }
+.c6 .bracket.tr { top: 6px; right: 6px; border-top: 1.5px solid; border-right: 1.5px solid; }
+.c6 .p-dotn { color: #0F2013; }
+.c6 .p-step { color: var(--text-strong); }
+.c6 .p-count { color: #4C7A2A; }
+</style>
+</head>
+<body>
+
+<header class="board-header">
+  <div class="board-kicker">Kura · Today Screen — Light Theme Board</div>
+  <h1 class="board-title">Six ways to see it <em>in daylight.</em></h1>
+  <p class="board-sub">The build today only has the dusk version — a blurred photo under a dark green wash. These six repaint the same screen (greeting, streak/weather card, progress bar, task list, floating nav) for a light theme, each with its own logic for what replaces the dark photo backdrop: relit, papered over, flattened, sunrise-gradient, photo-as-detail, or dropped entirely.</p>
+</header>
+
+<div class="grid">
+
+  <!-- 01 — SUNLIT PHOTO -->
+  <section class="concept">
+    <div class="concept-label"><span class="concept-num">01</span><span class="concept-name">Sunlit Photo</span></div>
+    <p class="concept-note">Closest to today's build: same full-bleed blurred photo + frosted-glass language, just relit. A bright morning lawn photo, a warm cream tint instead of forest-black, and a soft <b>lens-flare glow</b> in the corner instead of an app-wide vignette.</p>
+    <div class="phone c1">
+      <div class="p-photo"></div>
+      <div class="p-tint"></div>
+      <div class="flare"></div>
+      <div class="screen">
+        <div class="statusbar"><span>9:41</span><span class="pillcam"></span><span>󰖝 ⚡︎</span></div>
+        <div class="p-eyebrow">On Deck · Friday</div>
+        <div class="p-greet">Morning, Farai</div>
+        <div class="p-ctx">
+          <div class="p-ctx-half"><div class="p-ctx-lbl">Streak</div><div class="p-ctx-row"><span class="p-ctx-ico">🔥</span><span class="p-ctx-val">6</span></div><div class="p-ctx-sub">days in a row</div></div>
+          <div class="p-ctx-div"></div>
+          <div class="p-ctx-half"><div class="p-ctx-lbl">Weather</div><div class="p-ctx-row"><span class="p-ctx-val">24°</span><span class="p-ctx-ico">☀️</span></div><div class="p-ctx-sub">Sunny · Wind 12 km/h</div></div>
+        </div>
+        <div class="p-track-row"><span class="p-track-lbl">Task 1 of 2</span><span class="p-track"><i></i></span></div>
+        <div class="p-rows">
+          <div class="p-row p-row-open">
+            <div class="p-photo-hd" style="background-image:url('../assets/images/sprinkler-android.jpg')"><span class="p-photo-emoji">💧</span></div>
+            <div class="p-body">
+              <div class="p-count">Task 1 of 2 · Today</div>
+              <div class="p-title">Give it a deep soak.</div>
+              <div class="p-desc">Water slowly so it sinks in — quick sprinkles only wet the surface.</div>
+              <div class="p-steps">
+                <div class="p-step"><span class="p-dotn">1</span> Set sprinkler on the front patch</div>
+                <div class="p-step"><span class="p-dotn">2</span> Run 20 minutes, then move it</div>
+              </div>
+              <div class="p-cta">Done ✓</div>
+            </div>
+          </div>
+          <div class="p-row">
+            <div class="p-row-head"><div class="p-badge">🔍</div><div class="p-row-text"><div class="p-count">Task 2 of 2</div><div class="p-title">Walk the edges.</div></div><span class="p-chev">⌄</span></div>
+          </div>
+          <div class="p-row done">
+            <div class="p-row-head"><div class="p-badge" style="opacity:.55">✂️</div><div class="p-row-text"><div class="p-count">Completed</div><div class="p-title">First mow of the week.</div></div><div class="p-check">✓</div></div>
+          </div>
+        </div>
+        <nav class="p-tabbar">
+          <div class="p-tab active"><span class="ico">☀️</span><span class="lbl">Today</span></div>
+          <div class="p-tab"><span class="ico">✅</span><span class="lbl">Tasks</span></div>
+          <div class="p-tab"><span class="ico">📚</span><span class="lbl">Learn</span></div>
+          <div class="p-tab"><span class="ico">⚙️</span><span class="lbl">Profile</span></div>
+        </nav>
+      </div>
+    </div>
+  </section>
+
+  <!-- 02 — FIELD JOURNAL -->
+  <section class="concept">
+    <div class="concept-label"><span class="concept-num">02</span><span class="concept-name">Field Journal</span></div>
+    <p class="concept-note">Drops the photo entirely. Warm paper background, a torn strip across the top like a page ripped from a notebook, a hand-written <b>"today"</b> pin, and marigold instead of lime — the friendliest, least "app-like" of the six.</p>
+    <div class="phone c2">
+      <div class="p-grain"></div>
+      <div class="torn"></div>
+      <div class="pin">today ✎</div>
+      <div class="screen">
+        <div class="statusbar"><span>9:41</span><span class="pillcam"></span><span>󰖝 ⚡︎</span></div>
+        <div class="p-eyebrow" style="margin-top:34px">On Deck · Friday</div>
+        <div class="p-greet">Morning, Farai</div>
+        <div class="p-ctx">
+          <div class="p-ctx-half"><div class="p-ctx-lbl">Streak</div><div class="p-ctx-row"><span class="p-ctx-ico">🔥</span><span class="p-ctx-val">6</span></div><div class="p-ctx-sub">days in a row</div></div>
+          <div class="p-ctx-div"></div>
+          <div class="p-ctx-half"><div class="p-ctx-lbl">Weather</div><div class="p-ctx-row"><span class="p-ctx-val">24°</span><span class="p-ctx-ico">☀️</span></div><div class="p-ctx-sub">Sunny · Wind 12 km/h</div></div>
+        </div>
+        <div class="p-track-row"><span class="p-track-lbl">Task 1 of 2</span><span class="p-track"><i></i></span></div>
+        <div class="p-rows">
+          <div class="p-row p-row-open">
+            <div class="p-body" style="padding-top:16px">
+              <div style="display:flex;align-items:center;gap:11px"><div class="p-badge">💧</div><div><div class="p-count">Task 1 of 2 · Today</div><div class="p-title" style="font-size:16px;margin-top:1px">Give it a deep soak.</div></div></div>
+              <div class="p-desc" style="margin-top:12px">Water slowly so it sinks in — quick sprinkles only wet the surface.</div>
+              <div class="p-steps">
+                <div class="p-step"><span class="p-dotn hand">✓</span> Set sprinkler on the front patch</div>
+                <div class="p-step"><span class="p-dotn hand">2</span> Run 20 minutes, then move it</div>
+              </div>
+              <div class="p-cta">Done ✓</div>
+            </div>
+          </div>
+          <div class="p-row">
+            <div class="p-row-head"><div class="p-badge">🔍</div><div class="p-row-text"><div class="p-count">Task 2 of 2</div><div class="p-title">Walk the edges.</div></div><span class="p-chev">⌄</span></div>
+          </div>
+          <div class="p-row done">
+            <div class="p-row-head"><div class="p-badge" style="opacity:.55">✂️</div><div class="p-row-text"><div class="p-count">Completed</div><div class="p-title">First mow of the week.</div></div><div class="p-check">✓</div></div>
+          </div>
+        </div>
+        <nav class="p-tabbar">
+          <div class="p-tab active"><span class="ico">☀️</span><span class="lbl">Today</span></div>
+          <div class="p-tab"><span class="ico">✅</span><span class="lbl">Tasks</span></div>
+          <div class="p-tab"><span class="ico">📚</span><span class="lbl">Learn</span></div>
+          <div class="p-tab"><span class="ico">⚙️</span><span class="lbl">Profile</span></div>
+        </nav>
+      </div>
+    </div>
+  </section>
+
+  <!-- 03 — SUNROOM -->
+  <section class="concept">
+    <div class="concept-label"><span class="concept-num">03</span><span class="concept-name">Sunroom</span></div>
+    <p class="concept-note">Flat, opaque colour-blocking instead of glass — no blur, no translucency anywhere. Thick ink outlines and offset "sticker" shadows make every surface feel tappable and forgiving, aimed squarely at someone who's never used a lawn app before.</p>
+    <div class="phone c3">
+      <div class="screen">
+        <div class="statusbar"><span>9:41</span><span class="pillcam"></span><span>󰖝 ⚡︎</span></div>
+        <div class="p-eyebrow">On Deck · Friday</div>
+        <div class="p-greet">Morning, Farai</div>
+        <div class="p-ctx">
+          <div class="p-ctx-half"><div class="p-ctx-lbl">Streak</div><div class="p-ctx-row"><span class="p-ctx-ico">🔥</span><span class="p-ctx-val">6</span></div><div class="p-ctx-sub">days in a row</div></div>
+          <div class="p-ctx-div"></div>
+          <div class="p-ctx-half"><div class="p-ctx-lbl">Weather</div><div class="p-ctx-row"><span class="p-ctx-val">24°</span><span class="p-ctx-ico">☀️</span></div><div class="p-ctx-sub">Sunny · Wind 12 km/h</div></div>
+        </div>
+        <div class="p-track-row"><span class="p-track-lbl">Task 1 of 2</span><span class="p-track"><i></i></span></div>
+        <div class="p-rows">
+          <div class="p-row p-row-open">
+            <div class="p-body">
+              <div style="display:flex;align-items:center;gap:11px"><div class="p-badge">💧</div><div><div class="p-count">Task 1 of 2 · Today</div><div class="p-title" style="font-size:16px;margin-top:1px">Give it a deep soak.</div></div></div>
+              <div class="p-desc" style="margin-top:12px">Water slowly so it sinks in — quick sprinkles only wet the surface.</div>
+              <div class="p-steps">
+                <div class="p-step"><span class="p-dotn">1</span> Set sprinkler on the front patch</div>
+                <div class="p-step"><span class="p-dotn">2</span> Run 20 minutes, then move it</div>
+              </div>
+              <div class="p-cta">Done ✓</div>
+            </div>
+          </div>
+          <div class="p-row" style="background:#DCF2D8">
+            <div class="p-row-head"><div class="p-badge">🔍</div><div class="p-row-text"><div class="p-count">Task 2 of 2</div><div class="p-title">Walk the edges.</div></div><span class="p-chev">⌄</span></div>
+          </div>
+          <div class="p-row done" style="background:#EAF4E5;border-color:rgba(15,40,20,0.35)">
+            <div class="p-row-head"><div class="p-badge" style="opacity:.6">✂️</div><div class="p-row-text"><div class="p-count">Completed</div><div class="p-title">First mow of the week.</div></div><div class="p-check">✓</div></div>
+          </div>
+        </div>
+        <nav class="p-tabbar">
+          <div class="p-tab active"><span class="ico">☀️</span><span class="lbl">Today</span></div>
+          <div class="p-tab"><span class="ico">✅</span><span class="lbl">Tasks</span></div>
+          <div class="p-tab"><span class="ico">📚</span><span class="lbl">Learn</span></div>
+          <div class="p-tab"><span class="ico">⚙️</span><span class="lbl">Profile</span></div>
+        </nav>
+      </div>
+    </div>
+  </section>
+
+  <!-- 04 — MORNING GRADIENT -->
+  <section class="concept">
+    <div class="concept-label"><span class="concept-num">04</span><span class="concept-name">Morning Gradient</span></div>
+    <p class="concept-note">No photo — a soft peach-to-mint sunrise gradient instead. Frost glass survives from the dark build, but the signature accent swaps lime for warm gold, with a <b>glow ring behind the streak flame</b> like the sun coming up over the fence.</p>
+    <div class="phone c4">
+      <div class="screen">
+        <div class="statusbar"><span>9:41</span><span class="pillcam"></span><span>󰖝 ⚡︎</span></div>
+        <div class="p-eyebrow">On Deck · Friday</div>
+        <div class="p-greet">Morning, Farai</div>
+        <div class="p-ctx">
+          <div class="p-ctx-half"><div class="p-ctx-lbl">Streak</div><div class="p-ctx-row" style="position:relative"><div class="sunring"></div><span class="p-ctx-ico" style="position:relative">🔥</span><span class="p-ctx-val">6</span></div><div class="p-ctx-sub">days in a row</div></div>
+          <div class="p-ctx-div"></div>
+          <div class="p-ctx-half"><div class="p-ctx-lbl">Weather</div><div class="p-ctx-row"><span class="p-ctx-val">24°</span><span class="p-ctx-ico">☀️</span></div><div class="p-ctx-sub">Sunny · Wind 12 km/h</div></div>
+        </div>
+        <div class="p-track-row"><span class="p-track-lbl">Task 1 of 2</span><span class="p-track"><i></i></span></div>
+        <div class="p-rows">
+          <div class="p-row p-row-open">
+            <div class="p-body">
+              <div style="display:flex;align-items:center;gap:11px"><div class="p-badge">💧</div><div><div class="p-count">Task 1 of 2 · Today</div><div class="p-title" style="font-size:16px;margin-top:1px">Give it a deep soak.</div></div></div>
+              <div class="p-desc" style="margin-top:12px">Water slowly so it sinks in — quick sprinkles only wet the surface.</div>
+              <div class="p-steps">
+                <div class="p-step"><span class="p-dotn">1</span> Set sprinkler on the front patch</div>
+                <div class="p-step"><span class="p-dotn">2</span> Run 20 minutes, then move it</div>
+              </div>
+              <div class="p-cta">Done ✓</div>
+            </div>
+          </div>
+          <div class="p-row">
+            <div class="p-row-head"><div class="p-badge">🔍</div><div class="p-row-text"><div class="p-count">Task 2 of 2</div><div class="p-title">Walk the edges.</div></div><span class="p-chev">⌄</span></div>
+          </div>
+          <div class="p-row done">
+            <div class="p-row-head"><div class="p-badge" style="opacity:.55">✂️</div><div class="p-row-text"><div class="p-count">Completed</div><div class="p-title">First mow of the week.</div></div><div class="p-check">✓</div></div>
+          </div>
+        </div>
+        <nav class="p-tabbar">
+          <div class="p-tab active"><span class="ico">☀️</span><span class="lbl">Today</span></div>
+          <div class="p-tab"><span class="ico">✅</span><span class="lbl">Tasks</span></div>
+          <div class="p-tab"><span class="ico">📚</span><span class="lbl">Learn</span></div>
+          <div class="p-tab"><span class="ico">⚙️</span><span class="lbl">Profile</span></div>
+        </nav>
+      </div>
+    </div>
+  </section>
+
+  <!-- 05 — FIELD NOTES -->
+  <section class="concept">
+    <div class="concept-label"><span class="concept-num">05</span><span class="concept-name">Field Notes</span></div>
+    <p class="concept-note">Near-white background; photography moves from full-bleed backdrop to a small <b>pinned photo</b> per task, like a polaroid clipped to a page. Solid brand-primary green (not lime) works fine here — white gives it all the contrast it needs.</p>
+    <div class="phone c5">
+      <div class="screen">
+        <div class="statusbar"><span>9:41</span><span class="pillcam"></span><span>󰖝 ⚡︎</span></div>
+        <div class="p-eyebrow">On Deck · Friday</div>
+        <div class="p-greet">Morning, Farai</div>
+        <div class="p-ctx" style="position:relative">
+          <div class="tape"></div>
+          <div class="p-ctx-half"><div class="p-ctx-lbl">Streak</div><div class="p-ctx-row"><span class="p-ctx-ico">🔥</span><span class="p-ctx-val">6</span></div><div class="p-ctx-sub">days in a row</div></div>
+          <div class="p-ctx-div"></div>
+          <div class="p-ctx-half"><div class="p-ctx-lbl">Weather</div><div class="p-ctx-row"><span class="p-ctx-val">24°</span><span class="p-ctx-ico">☀️</span></div><div class="p-ctx-sub">Sunny · Wind 12 km/h</div></div>
+        </div>
+        <div class="p-track-row"><span class="p-track-lbl">Task 1 of 2</span><span class="p-track"><i></i></span></div>
+        <div class="p-rows">
+          <div class="p-row p-row-open">
+            <div class="p-body">
+              <div style="display:flex;align-items:flex-start;gap:12px">
+                <div class="polaroid" style="background-image:url('../assets/images/sprinkler-android.jpg')"></div>
+                <div><div class="p-count">Task 1 of 2 · Today</div><div class="p-title" style="font-size:16px;margin-top:1px">Give it a deep soak.</div></div>
+              </div>
+              <div class="p-desc" style="margin-top:12px">Water slowly so it sinks in — quick sprinkles only wet the surface.</div>
+              <div class="p-steps">
+                <div class="p-step"><span class="p-dotn">1</span> Set sprinkler on the front patch</div>
+                <div class="p-step"><span class="p-dotn">2</span> Run 20 minutes, then move it</div>
+              </div>
+              <div class="p-cta">Done ✓</div>
+            </div>
+          </div>
+          <div class="p-row">
+            <div class="p-row-head"><div class="p-badge">🔍</div><div class="p-row-text"><div class="p-count">Task 2 of 2</div><div class="p-title">Walk the edges.</div></div><span class="p-chev">⌄</span></div>
+          </div>
+          <div class="p-row done">
+            <div class="p-row-head"><div class="p-badge" style="opacity:.55">✂️</div><div class="p-row-text"><div class="p-count">Completed</div><div class="p-title">First mow of the week.</div></div><div class="p-check">✓</div></div>
+          </div>
+        </div>
+        <nav class="p-tabbar">
+          <div class="p-tab active"><span class="ico">☀️</span><span class="lbl">Today</span></div>
+          <div class="p-tab"><span class="ico">✅</span><span class="lbl">Tasks</span></div>
+          <div class="p-tab"><span class="ico">📚</span><span class="lbl">Learn</span></div>
+          <div class="p-tab"><span class="ico">⚙️</span><span class="lbl">Profile</span></div>
+        </nav>
+      </div>
+    </div>
+  </section>
+
+  <!-- 06 — FIELD MANUAL -->
+  <section class="concept">
+    <div class="concept-label"><span class="concept-num">06</span><span class="concept-name">Field Manual</span></div>
+    <p class="concept-note">Crisp and near-white, hairline-only — no blur, no shadow anywhere. Faint ruled lines behind the content and bracket corner-marks on the open task make it read like an instruction sheet, which suits a total-beginner app better than anything atmospheric.</p>
+    <div class="phone c6">
+      <div class="p-rules"></div>
+      <div class="bracket tl"></div>
+      <div class="bracket tr"></div>
+      <div class="screen">
+        <div class="statusbar"><span>9:41</span><span class="pillcam"></span><span>󰖝 ⚡︎</span></div>
+        <div class="p-eyebrow">On Deck · Friday</div>
+        <div class="p-greet">Morning, Farai</div>
+        <div class="p-ctx">
+          <div class="p-ctx-half"><div class="p-ctx-lbl">Streak</div><div class="p-ctx-row"><span class="p-ctx-ico">🔥</span><span class="p-ctx-val">6</span></div><div class="p-ctx-sub">days in a row</div></div>
+          <div class="p-ctx-div"></div>
+          <div class="p-ctx-half"><div class="p-ctx-lbl">Weather</div><div class="p-ctx-row"><span class="p-ctx-val">24°</span><span class="p-ctx-ico">☀️</span></div><div class="p-ctx-sub">Sunny · Wind 12 km/h</div></div>
+        </div>
+        <div class="p-track-row"><span class="p-track-lbl">Task 1 of 2</span><span class="p-track"><i></i></span></div>
+        <div class="p-rows">
+          <div class="p-row p-row-open">
+            <div class="p-body">
+              <div style="display:flex;align-items:center;gap:11px"><div class="p-badge">💧</div><div><div class="p-count">Task 1 of 2 · Today</div><div class="p-title" style="font-size:16px;margin-top:1px">Give it a deep soak.</div></div></div>
+              <div class="p-desc" style="margin-top:12px">Water slowly so it sinks in — quick sprinkles only wet the surface.</div>
+              <div class="p-steps">
+                <div class="p-step"><span class="p-dotn">1</span> Set sprinkler on the front patch</div>
+                <div class="p-step"><span class="p-dotn">2</span> Run 20 minutes, then move it</div>
+              </div>
+              <div class="p-cta">Done ✓</div>
+            </div>
+          </div>
+          <div class="p-row">
+            <div class="p-row-head"><div class="p-badge">🔍</div><div class="p-row-text"><div class="p-count">Task 2 of 2</div><div class="p-title">Walk the edges.</div></div><span class="p-chev">⌄</span></div>
+          </div>
+          <div class="p-row done">
+            <div class="p-row-head"><div class="p-badge" style="opacity:.55">✂️</div><div class="p-row-text"><div class="p-count">Completed</div><div class="p-title">First mow of the week.</div></div><div class="p-check">✓</div></div>
+          </div>
+        </div>
+        <nav class="p-tabbar">
+          <div class="p-tab active"><span class="ico">☀️</span><span class="lbl">Today</span></div>
+          <div class="p-tab"><span class="ico">✅</span><span class="lbl">Tasks</span></div>
+          <div class="p-tab"><span class="ico">📚</span><span class="lbl">Learn</span></div>
+          <div class="p-tab"><span class="ico">⚙️</span><span class="lbl">Profile</span></div>
+        </nav>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+</body>
+</html>

@@ -1,15 +1,20 @@
 import { Image } from 'expo-image';
 import { useLocalSearchParams } from 'expo-router';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
-    Animated,
-    Easing,
     ImageBackground,
     Keyboard,
     KeyboardAvoidingView,
     Platform,
     useWindowDimensions,
 } from 'react-native';
+import Animated, {
+    Easing,
+    runOnJS,
+    useAnimatedStyle,
+    useSharedValue,
+    withTiming,
+} from 'react-native-reanimated';
 import styled, { useTheme } from 'styled-components/native';
 import { sendOtpCode, verifyOtpCode } from '~/features/auth/services/authService';
 import { ErrorMessage } from '~/shared/components/ErrorMessage';
@@ -128,10 +133,10 @@ const GlassAuthContent = styled.View<{ $width: number; $isTablet: boolean }>`
     $isTablet ? theme.spacing.xxl * 2 : theme.spacing.md}px;
 `;
 
-// PanelRow — the horizontal Animated row that holds both panels side-by-side.
-// flex-direction: row and flex: 1 are static layout values defined here so the
-// Animated.View inline style only needs to carry the two runtime-computed values:
-// the total width (2× screen width) and the translateX transform (slideAnim).
+// PanelRow — the horizontal Reanimated row that holds both panels side-by-side.
+// flex-direction: row and flex: 1 are static layout values defined here. The
+// runtime-computed width (2× screen width) is passed as an inline style and the
+// translateX slide comes from a Reanimated animated style (see panelRowStyle).
 const PanelRow = styled(Animated.View)`
   flex-direction: row;
   flex: 1;
@@ -235,24 +240,35 @@ export const SignInScreen = () => {
   const { width: screenWidth } = useWindowDimensions();
   const isTablet = useIsTablet();
 
-  // slideAnim is the horizontal offset applied to the panel row.
-  // 0 = OTP request form visible. -screenWidth = OTP verify panel visible.
-  const slideAnim = useRef(new Animated.Value(0)).current;
+  // slideX is the horizontal offset applied to the panel row, held as a
+  // Reanimated shared value. 0 = OTP request form visible. -screenWidth = OTP
+  // verify panel visible.
+  const slideX = useSharedValue(0);
+
+  // panelRowStyle drives the row's translateX from slideX on the UI thread.
+  // Reanimated mutates the actual view (shadow node), so layout and touch
+  // hit-testing follow the visual position — taps and scroll gestures on the
+  // OTP verify panel land correctly after the slide. (This is why the old
+  // legacy-Animated version used useNativeDriver: false; Reanimated gives the
+  // same layout-accurate behaviour without the onAnimatedValueUpdate warning.)
+  const panelRowStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: slideX.value }],
+  }));
 
   // slide animates the panel row to any target offset using an ease-out-cubic
-  // curve so the motion feels physical rather than mechanical.
-  // useNativeDriver: false is intentional — native-driver transforms update only
-  // the GPU render position, not the JS layout. After translation, touch hit-test
-  // areas stay at the original off-screen coordinates, so taps and scroll
-  // gestures on the OTP verify panel would miss. JS-driven animation keeps
-  // layout and hit-testing in sync with the visual position.
-  const slide = (toValue: number, onDone?: () => void) =>
-    Animated.timing(slideAnim, {
+  // curve so the motion feels physical rather than mechanical. withTiming's
+  // completion callback runs on the UI thread, so onDone is bounced back to the
+  // JS thread via runOnJS — and only when the animation actually finished, so
+  // interrupted slides never fire the reset callback.
+  const slide = (toValue: number, onDone?: () => void) => {
+    slideX.value = withTiming(
       toValue,
-      duration: 320,
-      easing: Easing.out(Easing.cubic),
-      useNativeDriver: false,
-    }).start(onDone);
+      { duration: 320, easing: Easing.out(Easing.cubic) },
+      (finished) => {
+        if (finished && onDone) runOnJS(onDone)();
+      }
+    );
+  };
 
   // handleSubmit sends the OTP code email then slides in the verify panel on
   // success. On failure, we show a generic message — never the raw Supabase
@@ -359,15 +375,10 @@ export const SignInScreen = () => {
           <PanelHost>
             {/* PanelRow holds both panels in a horizontal row.
                 Total width is 2× screen width — one panel slot each.
-                slideAnim shifts the entire row so the right panel comes
-                into view. Both panels are always mounted so the slide
-                is instant with no layout recalculation mid-animation. */}
-            <PanelRow
-              style={{
-                width: screenWidth * 2,
-                transform: [{ translateX: slideAnim }],
-              }}
-            >
+                panelRowStyle (driven by slideX) shifts the entire row so the
+                right panel comes into view. Both panels are always mounted so
+                the slide is instant with no layout recalculation mid-animation. */}
+            <PanelRow style={[{ width: screenWidth * 2 }, panelRowStyle]}>
               <GlassAuthContent
                 $width={screenWidth}
                 $isTablet={isTablet}
