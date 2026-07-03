@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kura — Shrink &amp; Fade · Stats Opposite the Greeting · 6 Directions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Zalando+Sans:ital,wght@0,400;0,700;0,900;1,400&family=Zalando+Sans+Expanded:wght@700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --studio-lime: rgba(184,229,106,0.92);
+  --font-body:   'JetBrains Mono', monospace;
+  --font-header: 'Zalando Sans', sans-serif;
+  --font-header-x: 'Zalando Sans Expanded', 'Zalando Sans', sans-serif;
+
+  --photo-wash: rgba(226,241,251,0.42);
+  --glass-fill: rgba(248,252,255,0.55);
+  --glass-edge: rgba(255,255,255,0.85);
+  --glass-edge-soft: rgba(255,255,255,0.45);
+  --glass-divider: rgba(22,48,58,0.14);
+  --glass-input: rgba(255,255,255,0.55);
+  --text-heading: #16303a;
+  --text-body: rgba(22,48,58,0.80);
+  --text-muted: rgba(22,48,58,0.62);
+  --text-subtle: rgba(22,48,58,0.46);
+  --text-faint: rgba(22,48,58,0.34);
+  --accent: #3E9A5E;
+  --accent-ink: #FFFFFF;
+  --accent-text: #2478A6;
+  --track-from: #3E9A5E;
+  --track-to: #7ED0BE;
+  --row-bg: rgba(248,252,255,0.55);
+  --row-border: rgba(255,255,255,0.55);
+  --badge-bg: rgba(255,255,255,0.62);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background:
+    radial-gradient(1200px 600px at 80% -10%, rgba(45,106,45,0.28), transparent 60%),
+    radial-gradient(900px 500px at 10% 110%, rgba(184,229,106,0.10), transparent 55%),
+    #07120a;
+  font-family: var(--font-body);
+  color: rgba(255,255,255,0.7);
+  min-height: 100vh;
+  padding: 56px 40px 90px;
+}
+body::after {
+  content: ''; position: fixed; inset: 0; pointer-events: none; opacity: .5;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.04 0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.board-header { max-width: 1240px; margin: 0 auto 48px; }
+.board-kicker { font-size: 11px; letter-spacing: 4px; text-transform: uppercase; color: var(--studio-lime); margin-bottom: 14px; }
+.board-title { font-family: var(--font-header-x); font-weight: 900; font-size: clamp(32px, 4.2vw, 58px); line-height: 1.04; letter-spacing: -1px; color: #fff; }
+.board-title em { font-style: normal; color: #b8e56a; }
+.board-sub { margin-top: 16px; max-width: 700px; font-size: 12.5px; line-height: 1.8; color: rgba(255,255,255,0.55); }
+.board-sub b { color: var(--studio-lime); font-weight: 700; }
+
+.grid {
+  max-width: 1240px; margin: 0 auto;
+  display: grid; gap: 60px 36px;
+  grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+}
+.concept { animation: rise .7s cubic-bezier(.2,.7,.2,1) both; }
+.concept:nth-child(1){animation-delay:.04s}.concept:nth-child(2){animation-delay:.09s}
+.concept:nth-child(3){animation-delay:.14s}.concept:nth-child(4){animation-delay:.19s}
+.concept:nth-child(5){animation-delay:.24s}.concept:nth-child(6){animation-delay:.29s}
+@keyframes rise { from { opacity: 0; transform: translateY(28px); } to { opacity: 1; transform: none; } }
+
+.concept-label { display: flex; align-items: baseline; gap: 12px; margin-bottom: 16px; }
+.concept-num { font-family: var(--font-header-x); font-weight: 900; font-size: 28px; color: transparent; -webkit-text-stroke: 1.2px rgba(184,229,106,0.65); }
+.concept-name { font-family: var(--font-header); font-weight: 700; font-size: 16px; color: #fff; }
+.concept-note { font-size: 10.5px; color: rgba(255,255,255,0.55); margin-top: 5px; line-height: 1.65; max-width: 330px; }
+.concept-note b { color: var(--studio-lime); font-weight: 700; }
+.scroll-hint { margin-top: 10px; font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; color: rgba(184,229,106,0.85); display: flex; align-items: center; gap: 6px; }
+.scroll-hint::before { content: '↕'; font-size: 12px; }
+
+.phone {
+  width: 330px; height: 700px; margin: 0 auto;
+  border-radius: 44px; overflow: hidden; position: relative;
+  border: 1px solid rgba(255,255,255,0.14);
+  box-shadow: 0 0 0 9px #0d130d, 0 0 0 10px rgba(255,255,255,0.07), 0 44px 80px -22px rgba(0,0,0,0.85);
+  background: #cfe0c2;
+}
+.p-photo { position: absolute; inset: 0; background: url('../assets/images/sprinkler.png') center/cover; filter: blur(7px); transform: scale(1.06); }
+.p-tint { position: absolute; inset: 0; background: var(--photo-wash); }
+
+.screen { position: absolute; inset: 0; display: flex; flex-direction: column; }
+.statusbar { display: flex; justify-content: space-between; align-items: center; padding: 16px 26px 0; font-size: 11px; font-weight: 700; color: var(--text-heading); font-family: var(--font-header); position: relative; z-index: 5; }
+.statusbar .pillcam { width: 76px; height: 22px; background: rgba(20,40,20,0.7); border-radius: 9999px; position: absolute; left: 50%; transform: translateX(-50%); top: 12px; }
+
+.head-block { position: relative; z-index: 4; padding: 14px 20px 0; flex-shrink: 0; }
+
+.p-eyebrow { font-size: 9.5px; letter-spacing: 2.5px; text-transform: uppercase; color: var(--text-subtle); white-space: nowrap; overflow: hidden; margin-top: 8px; transform-origin: left top; }
+.p-greet { font-family: var(--font-header-x); font-weight: 900; color: var(--text-heading); letter-spacing: -0.5px; white-space: nowrap; transform-origin: left top; }
+
+.p-track-row { display: flex; align-items: center; gap: 9px; margin-top: 12px; margin-bottom: 12px; }
+.p-track-lbl { font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-subtle); white-space: nowrap; }
+.p-track { flex: 1; height: 4px; border-radius: 9999px; background: var(--glass-input); overflow: hidden; }
+.p-track i { display: block; height: 100%; width: 62%; border-radius: inherit; background: linear-gradient(90deg, var(--track-from), var(--track-to)); }
+
+.p-scroll { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 0 20px 100px; -webkit-overflow-scrolling: touch; }
+.p-scroll::-webkit-scrollbar { display: none; }
+.p-rows { display: flex; flex-direction: column; gap: 10px; }
+.p-row { border-radius: 16px; background: var(--row-bg); border: 1px solid var(--row-border); overflow: hidden; }
+.p-row-head { display: flex; align-items: center; gap: 12px; padding: 13px 14px; }
+.p-badge { width: 34px; height: 34px; border-radius: 11px; display: grid; place-items: center; background: var(--badge-bg); box-shadow: inset 0 1px 0 rgba(255,255,255,0.6); flex-shrink: 0; font-size: 16px; }
+.p-row-text { flex: 1; }
+.p-count { font-size: 7.5px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--accent-text); }
+.p-title { margin-top: 2px; font-family: var(--font-header); font-weight: 700; font-size: 14.5px; color: var(--text-heading); }
+.p-row.done .p-title { color: var(--text-faint); text-decoration: line-through; }
+.p-chev { font-size: 13px; color: var(--text-faint); }
+.p-check { width: 21px; height: 21px; border-radius: 9999px; background: var(--accent); display: grid; place-items: center; font-weight: 700; font-size: 11px; color: var(--accent-ink); flex-shrink: 0; }
+
+.p-tabbar { position: absolute; left: 20px; right: 20px; bottom: 14px; z-index: 6; display: flex; justify-content: space-around; align-items: center; padding: 6px; border-radius: 9999px; background: var(--glass-fill); border: 1px solid var(--glass-edge-soft); border-top-color: var(--glass-edge); }
+.p-tab { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 8px 0; }
+.p-tab .ico { font-size: 15px; padding: 4px 13px; border-radius: 9999px; }
+.p-tab.active .ico { background: rgba(36,120,166,0.18); }
+.p-tab .lbl { font-size: 7.5px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase; color: var(--text-faint); font-family: var(--font-header); }
+.p-tab.active .lbl { color: var(--accent-text); }
+
+/* ── shared "opposite side" atoms ── */
+.greet-row { display: flex; align-items: flex-end; justify-content: space-between; gap: 10px; }
+.eyebrow-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.stat-mini { display: flex; align-items: center; gap: 3px; font-size: 11px; color: var(--text-body); white-space: nowrap; }
+.stat-mini b { color: var(--text-heading); font-family: var(--font-header-x); font-weight: 900; }
+.stat-ico { font-size: 12px; }
+
+/* ════════════════════════════════════════════════════════════════════
+   01 · RIGHT STAT COLUMN — greeting keeps the left, a compact two-line
+   column (streak over weather) sits opposite it on the right, no card,
+   just plain text mirroring the greeting's weight. Shrinks together
+   with the greeting on scroll, staying visible at a smaller size.
+   ════════════════════════════════════════════════════════════════════ */
+.c1 .greet-row { align-items: center; }
+.c1 .stat-col { text-align: right; transform-origin: right center; }
+.c1 .stat-col .row1 { font-size: 12px; color: var(--text-body); display: flex; align-items: center; justify-content: flex-end; gap: 4px; }
+.c1 .stat-col .row1 b { font-family: var(--font-header-x); font-weight: 900; font-size: 15px; color: var(--text-heading); }
+.c1 .stat-col .row2 { margin-top: 2px; font-size: 9px; color: var(--text-subtle); }
+
+/* ════════════════════════════════════════════════════════════════════
+   02 · SINGLE COMBINED READOUT — one line, one baseline: "Morning,
+   Farai" on the left, "🔥6 · 24°☀️" on the right of the exact same
+   line. The most compact pairing of the six.
+   ════════════════════════════════════════════════════════════════════ */
+.c2 .greet-row { align-items: baseline; }
+.c2 .combined { font-size: 12px; color: var(--text-body); transform-origin: right center; white-space: nowrap; }
+.c2 .combined b { color: var(--text-heading); font-weight: 700; }
+.c2 .combined .sep { color: var(--text-faint); margin: 0 4px; }
+
+/* ════════════════════════════════════════════════════════════════════
+   03 · CORNER CHIPS — two independent frosted-glass chips float in the
+   top-right, stacked, as a self-contained widget opposite the greeting
+   block. Since they're a distinct surface (not inline text), they fade
+   away as a unit on scroll rather than shrinking with the greeting.
+   ════════════════════════════════════════════════════════════════════ */
+.c3 .head-block { position: relative; }
+.c3 .chip-stack { position: absolute; top: 14px; right: 20px; display: flex; flex-direction: column; gap: 6px; align-items: flex-end; }
+.c3 .chip { display: flex; align-items: center; gap: 5px; background: var(--glass-fill); border: 1px solid var(--glass-edge-soft); border-top-color: var(--glass-edge); border-radius: 9999px; padding: 5px 10px; font-size: 10px; color: var(--text-body); white-space: nowrap; }
+.c3 .chip b { color: var(--text-heading); font-family: var(--font-header-x); font-weight: 900; }
+
+/* ════════════════════════════════════════════════════════════════════
+   04 · INLINE SPLIT ROW — one row, one seam: "Morning, Farai" flexes
+   left, a hairline divider, streak | weather as two tight mini-columns
+   on the right — the old split-card's own divider logic, now paired
+   directly against the name instead of living underneath it.
+   ════════════════════════════════════════════════════════════════════ */
+.c4 .split-row { display: flex; align-items: center; gap: 12px; }
+.c4 .split-row .p-greet { flex: 1; }
+.c4 .split-divider { width: 1px; align-self: stretch; background: var(--glass-divider); }
+.c4 .split-stats { display: flex; align-items: center; gap: 10px; transform-origin: right center; }
+.c4 .split-stat { text-align: center; }
+.c4 .split-stat .v { font-family: var(--font-header-x); font-weight: 900; font-size: 15px; color: var(--text-heading); display: flex; align-items: center; gap: 2px; justify-content: center; }
+.c4 .split-stat .l { font-size: 7px; letter-spacing: 1px; text-transform: uppercase; color: var(--text-subtle); margin-top: 1px; }
+
+/* ════════════════════════════════════════════════════════════════════
+   05 · MASTHEAD BYLINE — editorial pairing: the greeting reads like a
+   title, and a small right-aligned meta stack sits opposite it like a
+   newspaper byline — "6-day streak" / "24° · Sunny", both in the quiet
+   mono voice. Fades away on scroll, the way a byline recedes once
+   you're reading the story rather than the headline.
+   ════════════════════════════════════════════════════════════════════ */
+.c5 .greet-row { align-items: flex-end; }
+.c5 .byline { text-align: right; transform-origin: right bottom; }
+.c5 .byline .l1 { font-size: 9.5px; color: var(--text-body); letter-spacing: 0.3px; }
+.c5 .byline .l2 { margin-top: 2px; font-size: 9px; color: var(--text-subtle); }
+
+/* ════════════════════════════════════════════════════════════════════
+   06 · SPLIT ACROSS TWO ROWS — each stat pairs with its own row instead
+   of sharing one: streak sits opposite the eyebrow ("On Deck · Friday"),
+   weather sits opposite the greeting ("Morning, Farai"). Two separate
+   opposite-pairings rather than one combined block.
+   ════════════════════════════════════════════════════════════════════ */
+.c6 .eyebrow-row .stat-mini { font-size: 9.5px; }
+.c6 .eyebrow-row .stat-mini b { font-size: 11px; }
+.c6 .greet-row { align-items: baseline; }
+.c6 .greet-row .stat-mini { transform-origin: right center; }
+</style>
+</head>
+<body>
+
+<header class="board-header">
+  <div class="board-kicker">Kura · Today Screen — Shrink &amp; Fade, Stats Opposite the Greeting</div>
+  <h1 class="board-title">Same collapse. <em>New pairing.</em></h1>
+  <p class="board-sub">All six keep the Shrink &amp; Fade behaviour you picked — the greeting shrinks in place as you scroll, everything restores once you're back at the very top. What changes is where the streak and weather live: instead of a full-width card underneath "Morning, Farai," each one puts it on the <b>opposite side of the same line or block</b>. <b>Scroll inside each phone to see it live.</b></p>
+</header>
+
+<div class="grid">
+
+  <!-- 01 — RIGHT STAT COLUMN -->
+  <section class="concept">
+    <div class="concept-label"><span class="concept-num">01</span><span class="concept-name">Right Stat Column</span></div>
+    <p class="concept-note">Greeting keeps the left; a plain two-line column (streak over weather, <b>no card</b>) sits opposite it on the right, matching the greeting's weight instead of framing itself separately.</p>
+    <div class="scroll-hint">scroll the task list</div>
+    <div class="phone c1" data-concept="1">
+      <div class="p-photo"></div><div class="p-tint"></div>
+      <div class="screen">
+        <div class="statusbar"><span>9:41</span><span class="pillcam"></span><span>󰖝 ⚡︎</span></div>
+        <div class="head-block">
+          <div class="p-eyebrow" data-el="eyebrow">On Deck · Friday</div>
+          <div class="greet-row" style="margin-top:10px;">
+            <div class="p-greet" data-el="greet" style="font-size:24px;">Morning, Farai</div>
+            <div class="stat-col" data-el="stats">
+              <div class="row1"><span class="stat-ico">🔥</span><b>6</b><span>days</span></div>
+              <div class="row2">24° ☀️ Sunny</div>
+            </div>
+          </div>
+          <div class="p-track-row" data-el="trackrow">
+            <span class="p-track-lbl" data-el="tracklbl">Task 1 of 2</span>
+            <span class="p-track"><i></i></span>
+          </div>
+        </div>
+        <div class="p-scroll" data-el="scroll"><div class="p-rows"></div></div>
+      </div>
+      <nav class="p-tabbar">
+        <div class="p-tab active"><span class="ico">☀️</span><span class="lbl">Today</span></div>
+        <div class="p-tab"><span class="ico">✅</span><span class="lbl">Tasks</span></div>
+        <div class="p-tab"><span class="ico">📚</span><span class="lbl">Learn</span></div>
+        <div class="p-tab"><span class="ico">⚙️</span><span class="lbl">Profile</span></div>
+      </nav>
+    </div>
+  </section>
+
+  <!-- 02 — SINGLE COMBINED READOUT -->
+  <section class="concept">
+    <div class="concept-label"><span class="concept-num">02</span><span class="concept-name">Single Combined Readout</span></div>
+    <p class="concept-note">One line, one baseline: <b>"Morning, Farai"</b> on the left, <b>"🔥6 · 24°☀️"</b> on the right of the exact same line. The most compact pairing of the six — nothing sits below the name at all.</p>
+    <div class="scroll-hint">scroll the task list</div>
+    <div class="phone c2" data-concept="2">
+      <div class="p-photo"></div><div class="p-tint"></div>
+      <div class="screen">
+        <div class="statusbar"><span>9:41</span><span class="pillcam"></span><span>󰖝 ⚡︎</span></div>
+        <div class="head-block">
+          <div class="p-eyebrow" data-el="eyebrow">On Deck · Friday</div>
+          <div class="greet-row" style="margin-top:10px;">
+            <div class="p-greet" data-el="greet" style="font-size:24px;">Morning, Farai</div>
+            <div class="combined" data-el="stats"><b>🔥 6</b><span class="sep">·</span><b>24°</b> ☀️</div>
+          </div>
+          <div class="p-track-row" data-el="trackrow">
+            <span class="p-track-lbl" data-el="tracklbl">Task 1 of 2</span>
+            <span class="p-track"><i></i></span>
+          </div>
+        </div>
+        <div class="p-scroll" data-el="scroll"><div class="p-rows"></div></div>
+      </div>
+      <nav class="p-tabbar">
+        <div class="p-tab active"><span class="ico">☀️</span><span class="lbl">Today</span></div>
+        <div class="p-tab"><span class="ico">✅</span><span class="lbl">Tasks</span></div>
+        <div class="p-tab"><span class="ico">📚</span><span class="lbl">Learn</span></div>
+        <div class="p-tab"><span class="ico">⚙️</span><span class="lbl">Profile</span></div>
+      </nav>
+    </div>
+  </section>
+
+  <!-- 03 — CORNER CHIPS -->
+  <section class="concept">
+    <div class="concept-label"><span class="concept-num">03</span><span class="concept-name">Corner Chips</span></div>
+    <p class="concept-note">Two independent frosted chips float top-right as their own widget, opposite the whole eyebrow+greeting block. Being a distinct surface, they <b>fade away as a unit</b> on scroll rather than shrinking with the text.</p>
+    <div class="scroll-hint">scroll the task list</div>
+    <div class="phone c3" data-concept="3">
+      <div class="p-photo"></div><div class="p-tint"></div>
+      <div class="screen">
+        <div class="statusbar"><span>9:41</span><span class="pillcam"></span><span>󰖝 ⚡︎</span></div>
+        <div class="head-block">
+          <div class="chip-stack" data-el="stats">
+            <div class="chip"><span>🔥</span><b>6</b><span>days</span></div>
+            <div class="chip"><b>24°</b><span>☀️ Sunny</span></div>
+          </div>
+          <div class="p-eyebrow" data-el="eyebrow">On Deck · Friday</div>
+          <div class="p-greet" data-el="greet" style="margin-top:10px; font-size:24px;">Morning, Farai</div>
+          <div class="p-track-row" data-el="trackrow">
+            <span class="p-track-lbl" data-el="tracklbl">Task 1 of 2</span>
+            <span class="p-track"><i></i></span>
+          </div>
+        </div>
+        <div class="p-scroll" data-el="scroll"><div class="p-rows"></div></div>
+      </div>
+      <nav class="p-tabbar">
+        <div class="p-tab active"><span class="ico">☀️</span><span class="lbl">Today</span></div>
+        <div class="p-tab"><span class="ico">✅</span><span class="lbl">Tasks</span></div>
+        <div class="p-tab"><span class="ico">📚</span><span class="lbl">Learn</span></div>
+        <div class="p-tab"><span class="ico">⚙️</span><span class="lbl">Profile</span></div>
+      </nav>
+    </div>
+  </section>
+
+  <!-- 04 — INLINE SPLIT ROW -->
+  <section class="concept">
+    <div class="concept-label"><span class="concept-num">04</span><span class="concept-name">Inline Split Row</span></div>
+    <p class="concept-note">Keeps the old split-card's <b>hairline divider</b> logic, but paired directly against the name in one row instead of living underneath it: name flexes left, streak | weather sit tight on the right.</p>
+    <div class="scroll-hint">scroll the task list</div>
+    <div class="phone c4" data-concept="4">
+      <div class="p-photo"></div><div class="p-tint"></div>
+      <div class="screen">
+        <div class="statusbar"><span>9:41</span><span class="pillcam"></span><span>󰖝 ⚡︎</span></div>
+        <div class="head-block">
+          <div class="p-eyebrow" data-el="eyebrow">On Deck · Friday</div>
+          <div class="split-row" style="margin-top:10px;">
+            <div class="p-greet" data-el="greet" style="font-size:24px;">Morning, Farai</div>
+            <div class="split-divider"></div>
+            <div class="split-stats" data-el="stats">
+              <div class="split-stat"><div class="v">🔥6</div><div class="l">Streak</div></div>
+              <div class="split-stat"><div class="v">24°</div><div class="l">☀️ Sun</div></div>
+            </div>
+          </div>
+          <div class="p-track-row" data-el="trackrow">
+            <span class="p-track-lbl" data-el="tracklbl">Task 1 of 2</span>
+            <span class="p-track"><i></i></span>
+          </div>
+        </div>
+        <div class="p-scroll" data-el="scroll"><div class="p-rows"></div></div>
+      </div>
+      <nav class="p-tabbar">
+        <div class="p-tab active"><span class="ico">☀️</span><span class="lbl">Today</span></div>
+        <div class="p-tab"><span class="ico">✅</span><span class="lbl">Tasks</span></div>
+        <div class="p-tab"><span class="ico">📚</span><span class="lbl">Learn</span></div>
+        <div class="p-tab"><span class="ico">⚙️</span><span class="lbl">Profile</span></div>
+      </nav>
+    </div>
+  </section>
+
+  <!-- 05 — MASTHEAD BYLINE -->
+  <section class="concept">
+    <div class="concept-label"><span class="concept-num">05</span><span class="concept-name">Masthead Byline</span></div>
+    <p class="concept-note">Editorial pairing: the greeting reads like a headline, and a quiet right-aligned byline sits opposite it — <b>"6-day streak" / "24° · Sunny"</b> — receding on scroll the way a byline fades once you're past the headline.</p>
+    <div class="scroll-hint">scroll the task list</div>
+    <div class="phone c5" data-concept="5">
+      <div class="p-photo"></div><div class="p-tint"></div>
+      <div class="screen">
+        <div class="statusbar"><span>9:41</span><span class="pillcam"></span><span>󰖝 ⚡︎</span></div>
+        <div class="head-block">
+          <div class="p-eyebrow" data-el="eyebrow">On Deck · Friday</div>
+          <div class="greet-row" style="margin-top:10px;">
+            <div class="p-greet" data-el="greet" style="font-size:24px;">Morning, Farai</div>
+            <div class="byline" data-el="stats">
+              <div class="l1">🔥 6-day streak</div>
+              <div class="l2">24° · Sunny</div>
+            </div>
+          </div>
+          <div class="p-track-row" data-el="trackrow">
+            <span class="p-track-lbl" data-el="tracklbl">Task 1 of 2</span>
+            <span class="p-track"><i></i></span>
+          </div>
+        </div>
+        <div class="p-scroll" data-el="scroll"><div class="p-rows"></div></div>
+      </div>
+      <nav class="p-tabbar">
+        <div class="p-tab active"><span class="ico">☀️</span><span class="lbl">Today</span></div>
+        <div class="p-tab"><span class="ico">✅</span><span class="lbl">Tasks</span></div>
+        <div class="p-tab"><span class="ico">📚</span><span class="lbl">Learn</span></div>
+        <div class="p-tab"><span class="ico">⚙️</span><span class="lbl">Profile</span></div>
+      </nav>
+    </div>
+  </section>
+
+  <!-- 06 — SPLIT ACROSS TWO ROWS -->
+  <section class="concept">
+    <div class="concept-label"><span class="concept-num">06</span><span class="concept-name">Split Across Two Rows</span></div>
+    <p class="concept-note">Each stat pairs with its own row: streak sits opposite <b>"On Deck · Friday,"</b> weather sits opposite <b>"Morning, Farai."</b> Two separate opposite-pairings instead of one combined block.</p>
+    <div class="scroll-hint">scroll the task list</div>
+    <div class="phone c6" data-concept="6">
+      <div class="p-photo"></div><div class="p-tint"></div>
+      <div class="screen">
+        <div class="statusbar"><span>9:41</span><span class="pillcam"></span><span>󰖝 ⚡︎</span></div>
+        <div class="head-block">
+          <div class="eyebrow-row" data-el="eyebrow">
+            <span class="p-eyebrow" style="margin-top:0;">On Deck · Friday</span>
+            <span class="stat-mini" data-el="stat1"><span class="stat-ico">🔥</span><b>6</b></span>
+          </div>
+          <div class="greet-row" style="margin-top:10px;">
+            <div class="p-greet" data-el="greet" style="font-size:24px;">Morning, Farai</div>
+            <span class="stat-mini" data-el="stat2"><b>24°</b> ☀️</span>
+          </div>
+          <div class="p-track-row" data-el="trackrow">
+            <span class="p-track-lbl" data-el="tracklbl">Task 1 of 2</span>
+            <span class="p-track"><i></i></span>
+          </div>
+        </div>
+        <div class="p-scroll" data-el="scroll"><div class="p-rows"></div></div>
+      </div>
+      <nav class="p-tabbar">
+        <div class="p-tab active"><span class="ico">☀️</span><span class="lbl">Today</span></div>
+        <div class="p-tab"><span class="ico">✅</span><span class="lbl">Tasks</span></div>
+        <div class="p-tab"><span class="ico">📚</span><span class="lbl">Learn</span></div>
+        <div class="p-tab"><span class="ico">⚙️</span><span class="lbl">Profile</span></div>
+      </nav>
+    </div>
+  </section>
+
+</div>
+
+<script>
+const TASKS = [
+  { emoji: '💧', count: 'Task 1 of 2', title: 'Give it a deep soak.', done: false },
+  { emoji: '🔍', count: 'Task 2 of 2', title: 'Walk the edges.', done: false },
+  { emoji: '✂️', count: 'Completed', title: 'First mow of the week.', done: true },
+  { emoji: '🌱', count: 'Completed', title: 'Check for bare patches.', done: true },
+  { emoji: '🧪', count: 'Completed', title: 'Test the soil pH.', done: true },
+];
+
+function rowHTML(t) {
+  return `<div class="p-row${t.done ? ' done' : ''}">
+    <div class="p-row-head">
+      <div class="p-badge">${t.emoji}</div>
+      <div class="p-row-text"><div class="p-count">${t.count}</div><div class="p-title">${t.title}</div></div>
+      ${t.done ? '<div class="p-check">✓</div>' : '<span class="p-chev">⌄</span>'}
+    </div>
+  </div>`;
+}
+
+document.querySelectorAll('.p-rows').forEach(el => {
+  el.innerHTML = TASKS.map(rowHTML).join('');
+  const spacer = document.createElement('div');
+  spacer.style.height = '340px';
+  el.appendChild(spacer);
+});
+
+const COLLAPSE_DISTANCE = 100;
+const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
+const lerp = (a, b, t) => a + (b - a) * t;
+
+function bind(scrollEl, updateFn) {
+  const onScroll = () => updateFn(clamp(scrollEl.scrollTop / COLLAPSE_DISTANCE, 0, 1));
+  scrollEl.addEventListener('scroll', onScroll, { passive: true });
+  updateFn(0);
+}
+
+// Shared "shrink & fade" base: eyebrow fades, greeting shrinks in place,
+// track row tightens. Each concept then drives its own stat element.
+function baseCollapse(phone, p) {
+  const eyebrow = phone.querySelector('[data-el="eyebrow"]');
+  const greet = phone.querySelector('[data-el="greet"]');
+  const trackrow = phone.querySelector('[data-el="trackrow"]');
+  const tracklbl = phone.querySelector('[data-el="tracklbl"]');
+  eyebrow.style.opacity = 1 - p;
+  eyebrow.style.transform = `scaleY(${1 - p})`;
+  greet.style.fontSize = `${lerp(24, 15, p)}px`;
+  trackrow.style.marginTop = `${lerp(12, 8, p)}px`;
+  trackrow.style.marginBottom = `${lerp(12, 8, p)}px`;
+  if (tracklbl) tracklbl.textContent = p > 0.7 ? '62%' : 'Task 1 of 2';
+}
+
+// 01 — Right Stat Column: shrinks in sync with the greeting, stays visible.
+(() => {
+  const phone = document.querySelector('.phone.c1');
+  const scroll = phone.querySelector('[data-el="scroll"]');
+  const stats = phone.querySelector('[data-el="stats"]');
+  bind(scroll, (p) => {
+    baseCollapse(phone, p);
+    stats.style.transform = `scale(${lerp(1, 0.72, p)})`;
+  });
+})();
+
+// 02 — Single Combined Readout: shrinks + fades slightly at full collapse.
+(() => {
+  const phone = document.querySelector('.phone.c2');
+  const scroll = phone.querySelector('[data-el="scroll"]');
+  const stats = phone.querySelector('[data-el="stats"]');
+  bind(scroll, (p) => {
+    baseCollapse(phone, p);
+    stats.style.transform = `scale(${lerp(1, 0.78, p)})`;
+    stats.style.opacity = lerp(1, 0.8, p);
+  });
+})();
+
+// 03 — Corner Chips: fades away as a unit, like the old context card did.
+(() => {
+  const phone = document.querySelector('.phone.c3');
+  const scroll = phone.querySelector('[data-el="scroll"]');
+  const stats = phone.querySelector('[data-el="stats"]');
+  bind(scroll, (p) => {
+    baseCollapse(phone, p);
+    const fp = clamp(p * 1.6, 0, 1);
+    stats.style.opacity = 1 - fp;
+    stats.style.transform = `translateY(${lerp(0, -10, fp)}px)`;
+  });
+})();
+
+// 04 — Inline Split Row: the whole row (name + divider + stats) shrinks together.
+(() => {
+  const phone = document.querySelector('.phone.c4');
+  const scroll = phone.querySelector('[data-el="scroll"]');
+  const stats = phone.querySelector('[data-el="stats"]');
+  bind(scroll, (p) => {
+    baseCollapse(phone, p);
+    stats.style.transform = `scale(${lerp(1, 0.7, p)})`;
+  });
+})();
+
+// 05 — Masthead Byline: fades out fully, like a receding byline.
+(() => {
+  const phone = document.querySelector('.phone.c5');
+  const scroll = phone.querySelector('[data-el="scroll"]');
+  const stats = phone.querySelector('[data-el="stats"]');
+  bind(scroll, (p) => {
+    baseCollapse(phone, p);
+    const fp = clamp(p * 1.6, 0, 1);
+    stats.style.opacity = 1 - fp;
+    stats.style.transform = `scale(${lerp(1, 0.85, fp)})`;
+  });
+})();
+
+// 06 — Split Across Two Rows: streak fades with the eyebrow, weather
+// shrinks in sync with the greeting.
+(() => {
+  const phone = document.querySelector('.phone.c6');
+  const scroll = phone.querySelector('[data-el="scroll"]');
+  const greet = phone.querySelector('[data-el="greet"]');
+  const trackrow = phone.querySelector('[data-el="trackrow"]');
+  const tracklbl = phone.querySelector('[data-el="tracklbl"]');
+  const eyebrowRow = phone.querySelector('[data-el="eyebrow"]');
+  const stat1 = phone.querySelector('[data-el="stat1"]');
+  const stat2 = phone.querySelector('[data-el="stat2"]');
+  bind(scroll, (p) => {
+    eyebrowRow.style.opacity = 1 - p;
+    eyebrowRow.style.transform = `scaleY(${1 - p})`;
+    stat1.style.opacity = 1 - p;
+    greet.style.fontSize = `${lerp(24, 15, p)}px`;
+    stat2.style.transform = `scale(${lerp(1, 0.75, p)})`;
+    trackrow.style.marginTop = `${lerp(12, 8, p)}px`;
+    trackrow.style.marginBottom = `${lerp(12, 8, p)}px`;
+    if (tracklbl) tracklbl.textContent = p > 0.7 ? '62%' : 'Task 1 of 2';
+  });
+})();
+</script>
+</body>
+</html>

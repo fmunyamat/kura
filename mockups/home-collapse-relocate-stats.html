@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kura — Collapse Relocates Stats · 6 Directions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Zalando+Sans:ital,wght@0,400;0,700;0,900;1,400&family=Zalando+Sans+Expanded:wght@700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --studio-lime: rgba(184,229,106,0.92);
+  --font-body:   'JetBrains Mono', monospace;
+  --font-header: 'Zalando Sans', sans-serif;
+  --font-header-x: 'Zalando Sans Expanded', 'Zalando Sans', sans-serif;
+
+  --photo-wash: rgba(226,241,251,0.42);
+  --glass-fill: rgba(248,252,255,0.55);
+  --glass-edge: rgba(255,255,255,0.85);
+  --glass-edge-soft: rgba(255,255,255,0.45);
+  --glass-divider: rgba(22,48,58,0.14);
+  --glass-input: rgba(255,255,255,0.55);
+  --text-heading: #16303a;
+  --text-body: rgba(22,48,58,0.80);
+  --text-muted: rgba(22,48,58,0.62);
+  --text-subtle: rgba(22,48,58,0.46);
+  --text-faint: rgba(22,48,58,0.34);
+  --accent: #3E9A5E;
+  --accent-ink: #FFFFFF;
+  --accent-text: #2478A6;
+  --track-from: #3E9A5E;
+  --track-to: #7ED0BE;
+  --row-bg: rgba(248,252,255,0.55);
+  --row-border: rgba(255,255,255,0.55);
+  --badge-bg: rgba(255,255,255,0.62);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background:
+    radial-gradient(1200px 600px at 80% -10%, rgba(45,106,45,0.28), transparent 60%),
+    radial-gradient(900px 500px at 10% 110%, rgba(184,229,106,0.10), transparent 55%),
+    #07120a;
+  font-family: var(--font-body);
+  color: rgba(255,255,255,0.7);
+  min-height: 100vh;
+  padding: 56px 40px 90px;
+}
+body::after {
+  content: ''; position: fixed; inset: 0; pointer-events: none; opacity: .5;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.04 0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.board-header { max-width: 1240px; margin: 0 auto 48px; }
+.board-kicker { font-size: 11px; letter-spacing: 4px; text-transform: uppercase; color: var(--studio-lime); margin-bottom: 14px; }
+.board-title { font-family: var(--font-header-x); font-weight: 900; font-size: clamp(32px, 4.2vw, 58px); line-height: 1.04; letter-spacing: -1px; color: #fff; }
+.board-title em { font-style: normal; color: #b8e56a; }
+.board-sub { margin-top: 16px; max-width: 700px; font-size: 12.5px; line-height: 1.8; color: rgba(255,255,255,0.55); }
+.board-sub b { color: var(--studio-lime); font-weight: 700; }
+
+.grid {
+  max-width: 1240px; margin: 0 auto;
+  display: grid; gap: 60px 36px;
+  grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+}
+.concept { animation: rise .7s cubic-bezier(.2,.7,.2,1) both; }
+.concept:nth-child(1){animation-delay:.04s}.concept:nth-child(2){animation-delay:.09s}
+.concept:nth-child(3){animation-delay:.14s}.concept:nth-child(4){animation-delay:.19s}
+.concept:nth-child(5){animation-delay:.24s}.concept:nth-child(6){animation-delay:.29s}
+@keyframes rise { from { opacity: 0; transform: translateY(28px); } to { opacity: 1; transform: none; } }
+
+.concept-label { display: flex; align-items: baseline; gap: 12px; margin-bottom: 16px; }
+.concept-num { font-family: var(--font-header-x); font-weight: 900; font-size: 28px; color: transparent; -webkit-text-stroke: 1.2px rgba(184,229,106,0.65); }
+.concept-name { font-family: var(--font-header); font-weight: 700; font-size: 16px; color: #fff; }
+.concept-note { font-size: 10.5px; color: rgba(255,255,255,0.55); margin-top: 5px; line-height: 1.65; max-width: 330px; }
+.concept-note b { color: var(--studio-lime); font-weight: 700; }
+.scroll-hint { margin-top: 10px; font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; color: rgba(184,229,106,0.85); display: flex; align-items: center; gap: 6px; }
+.scroll-hint::before { content: '↕'; font-size: 12px; }
+
+.phone {
+  width: 330px; height: 700px; margin: 0 auto;
+  border-radius: 44px; overflow: hidden; position: relative;
+  border: 1px solid rgba(255,255,255,0.14);
+  box-shadow: 0 0 0 9px #0d130d, 0 0 0 10px rgba(255,255,255,0.07), 0 44px 80px -22px rgba(0,0,0,0.85);
+  background: #cfe0c2;
+}
+.p-photo { position: absolute; inset: 0; background: url('../assets/images/sprinkler.png') center/cover; filter: blur(7px); transform: scale(1.06); }
+.p-tint { position: absolute; inset: 0; background: var(--photo-wash); }
+
+.screen { position: absolute; inset: 0; display: flex; flex-direction: column; }
+.statusbar { display: flex; justify-content: space-between; align-items: center; padding: 16px 26px 0; font-size: 11px; font-weight: 700; color: var(--text-heading); font-family: var(--font-header); position: relative; z-index: 5; }
+.statusbar .pillcam { width: 76px; height: 22px; background: rgba(20,40,20,0.7); border-radius: 9999px; position: absolute; left: 50%; transform: translateX(-50%); top: 12px; }
+
+.head-block { position: relative; z-index: 4; padding: 14px 20px 0; flex-shrink: 0; }
+
+/* ── Pixel-faithful recreation of the REAL, at-rest components ──
+   HomeHeader / SplitContextCard / CompletionTrack, matching the actual
+   token values and spacing used in src/features/home/components. This is
+   the p=0 (untouched) state every concept must return to exactly. */
+.p-eyebrow { margin-top: 12px; font-size: 9.5px; letter-spacing: 2.5px; text-transform: uppercase; color: var(--text-subtle); white-space: nowrap; overflow: hidden; transform-origin: left top; }
+.greet-row { position: relative; }
+.p-greet { margin-top: 12px; font-family: var(--font-header-x); font-weight: 900; font-size: 24px; color: var(--text-heading); letter-spacing: -0.5px; white-space: nowrap; transform-origin: left top; }
+
+.card-slot { overflow: hidden; }
+.orig-card { margin-top: 12px; display: flex; background: var(--glass-fill); border-radius: 16px; border: 1px solid var(--glass-edge-soft); border-top-color: var(--glass-edge); overflow: hidden; }
+.oc-half { flex: 1; padding: 11px 14px; }
+.oc-div { width: 1px; background: var(--glass-divider); }
+.oc-lbl { font-size: 8px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-subtle); }
+.oc-row { display: flex; align-items: baseline; gap: 5px; margin-top: 4px; }
+.oc-val { font-family: var(--font-header-x); font-weight: 900; font-size: 24px; letter-spacing: -1px; color: var(--text-heading); }
+.oc-ico { font-size: 20px; }
+.oc-sub { margin-top: 4px; font-size: 9px; line-height: 13px; color: var(--text-muted); }
+
+.p-track-row { display: flex; align-items: center; gap: 9px; margin-top: 12px; margin-bottom: 12px; }
+.p-track-lbl { font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-subtle); white-space: nowrap; }
+.p-track { flex: 1; height: 4px; border-radius: 9999px; background: var(--glass-input); overflow: hidden; }
+.p-track i { display: block; height: 100%; width: 62%; border-radius: inherit; background: linear-gradient(90deg, var(--track-from), var(--track-to)); }
+
+.p-scroll { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 0 20px 100px; -webkit-overflow-scrolling: touch; }
+.p-scroll::-webkit-scrollbar { display: none; }
+.p-rows { display: flex; flex-direction: column; gap: 10px; }
+.p-row { border-radius: 16px; background: var(--row-bg); border: 1px solid var(--row-border); overflow: hidden; }
+.p-row-head { display: flex; align-items: center; gap: 12px; padding: 13px 14px; }
+.p-badge { width: 34px; height: 34px; border-radius: 11px; display: grid; place-items: center; background: var(--badge-bg); box-shadow: inset 0 1px 0 rgba(255,255,255,0.6); flex-shrink: 0; font-size: 16px; }
+.p-row-text { flex: 1; }
+.p-count { font-size: 7.5px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--accent-text); }
+.p-title { margin-top: 2px; font-family: var(--font-header); font-weight: 700; font-size: 14.5px; color: var(--text-heading); }
+.p-row.done .p-title { color: var(--text-faint); text-decoration: line-through; }
+.p-chev { font-size: 13px; color: var(--text-faint); }
+.p-check { width: 21px; height: 21px; border-radius: 9999px; background: var(--accent); display: grid; place-items: center; font-weight: 700; font-size: 11px; color: var(--accent-ink); flex-shrink: 0; }
+
+.p-tabbar { position: absolute; left: 20px; right: 20px; bottom: 14px; z-index: 6; display: flex; justify-content: space-around; align-items: center; padding: 6px; border-radius: 9999px; background: var(--glass-fill); border: 1px solid var(--glass-edge-soft); border-top-color: var(--glass-edge); }
+.p-tab { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 8px 0; }
+.p-tab .ico { font-size: 15px; padding: 4px 13px; border-radius: 9999px; }
+.p-tab.active .ico { background: rgba(36,120,166,0.18); }
+.p-tab .lbl { font-size: 7.5px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase; color: var(--text-faint); font-family: var(--font-header); }
+.p-tab.active .lbl { color: var(--accent-text); }
+
+/* ── the compact "opposite side" readout every concept animates INTO,
+   absolutely positioned over the greet-row's right edge, invisible at
+   p=0 (rest) ── */
+.opp-wrap { position: absolute; right: 0; top: 0; bottom: 0; display: flex; align-items: center; opacity: 0; pointer-events: none; }
+.opp-stat { display: flex; align-items: center; gap: 3px; font-size: 12px; color: var(--text-body); white-space: nowrap; }
+.opp-stat b { color: var(--text-heading); font-family: var(--font-header-x); font-weight: 900; }
+.opp-sep { color: var(--text-faint); margin: 0 6px; font-size: 10px; }
+
+/* ════════════════════════════════════════════════════════════════════
+   01 · CROSS-FADE IN PLACE — simplest handoff: the card dissolves where
+   it sits (no directional motion) while the compact readout simply
+   fades in beside the greeting at the same time. A pure opacity swap.
+   ════════════════════════════════════════════════════════════════════ */
+
+/* ════════════════════════════════════════════════════════════════════
+   02 · FLY-UP MERGE — the streak and weather VALUES themselves travel
+   from inside the card up to the greeting's side, arriving as the
+   compact readout. The card empties out as its numbers leave it.
+   ════════════════════════════════════════════════════════════════════ */
+.c2 .fly { position: absolute; display: flex; align-items: center; gap: 3px; font-size: 20px; font-family: var(--font-header-x); font-weight: 900; color: var(--text-heading); white-space: nowrap; opacity: 0; }
+.c2 .fly .u { font-size: 10px; font-family: var(--font-body); font-weight: 400; color: var(--text-muted); margin-left: 3px; }
+
+/* ════════════════════════════════════════════════════════════════════
+   03 · SLIDE & COMPRESS — one continuous object: the whole card itself
+   slides up and compresses down into the compact readout, rather than
+   handing off to a separate element.
+   ════════════════════════════════════════════════════════════════════ */
+.c3 .orig-card { transform-origin: right center; }
+
+/* ════════════════════════════════════════════════════════════════════
+   04 · STAGGERED RELAY — streak and weather fly up on different
+   schedules: streak departs and arrives early, weather follows a beat
+   later, like a relay hand-off instead of a synchronised move.
+   ════════════════════════════════════════════════════════════════════ */
+.c4 .fly { position: absolute; display: flex; align-items: center; gap: 3px; font-size: 20px; font-family: var(--font-header-x); font-weight: 900; color: var(--text-heading); white-space: nowrap; opacity: 0; }
+.c4 .fly .u { font-size: 10px; font-family: var(--font-body); font-weight: 400; color: var(--text-muted); margin-left: 3px; }
+
+/* ════════════════════════════════════════════════════════════════════
+   05 · IMPLODE & REFORM — two stages instead of one continuous move:
+   the card first collapses into itself and vanishes, THEN the compact
+   readout grows in from nothing at the greeting's side.
+   ════════════════════════════════════════════════════════════════════ */
+.c5 .orig-card { transform-origin: center center; }
+.c5 .opp-wrap { transform-origin: right center; }
+
+/* ════════════════════════════════════════════════════════════════════
+   06 · PUSH DOWN / PULL UP — opposite vertical drift: the card sinks
+   downward and out as if dropping below the fold, while the compact
+   readout rises up into place from below it — a push/pull pairing.
+   ════════════════════════════════════════════════════════════════════ */
+.c6 .opp-wrap { transform-origin: right center; }
+</style>
+</head>
+<body>
+
+<header class="board-header">
+  <div class="board-kicker">Kura · Today Screen — Collapse Relocates the Stats</div>
+  <h1 class="board-title">Untouched at rest. <em>Then it moves.</em></h1>
+  <p class="board-sub">At the very top, every concept is <b>pixel-identical to the real screen today</b> — same header, same streak/weather card, same track. Only once you scroll does the card empty out and its numbers reappear on the opposite side of "Morning, Farai." The six differ only in <b>how that handoff moves</b>. <b>Scroll inside each phone, then scroll back to the top to see it return exactly.</b></p>
+</header>
+
+<div class="grid">
+
+  <!-- 01 — CROSS-FADE IN PLACE -->
+  <section class="concept">
+    <div class="concept-label"><span class="concept-num">01</span><span class="concept-name">Cross-Fade in Place</span></div>
+    <p class="concept-note">The simplest handoff: the card <b>dissolves where it sits</b> — no directional motion — while the compact readout fades in beside the greeting at the same rate. A pure opacity swap.</p>
+    <div class="scroll-hint">scroll the task list</div>
+    <div class="phone c1" data-concept="1">
+      <div class="p-photo"></div><div class="p-tint"></div>
+      <div class="screen">
+        <div class="statusbar"><span>9:41</span><span class="pillcam"></span><span>󰖝 ⚡︎</span></div>
+        <div class="head-block">
+          <div class="p-eyebrow" data-el="eyebrow">On Deck · Friday</div>
+          <div class="greet-row">
+            <div class="p-greet" data-el="greet">Morning, Farai</div>
+            <div class="opp-wrap" data-el="opp">
+              <span class="opp-stat"><b>🔥6</b></span><span class="opp-sep">·</span><span class="opp-stat"><b>24°</b>☀️</span>
+            </div>
+          </div>
+          <div class="card-slot" data-el="cardslot">
+            <div class="orig-card" data-el="origcard">
+              <div class="oc-half"><div class="oc-lbl">Streak</div><div class="oc-row"><span class="oc-ico">🔥</span><span class="oc-val">6</span></div><div class="oc-sub">days in a row</div></div>
+              <div class="oc-div"></div>
+              <div class="oc-half"><div class="oc-lbl">Weather</div><div class="oc-row"><span class="oc-val">24°</span><span class="oc-ico">☀️</span></div><div class="oc-sub">Sunny · Wind 12 km/h</div></div>
+            </div>
+          </div>
+          <div class="p-track-row" data-el="trackrow">
+            <span class="p-track-lbl" data-el="tracklbl">Task 1 of 2</span>
+            <span class="p-track"><i></i></span>
+          </div>
+        </div>
+        <div class="p-scroll" data-el="scroll"><div class="p-rows"></div></div>
+      </div>
+      <nav class="p-tabbar">
+        <div class="p-tab active"><span class="ico">☀️</span><span class="lbl">Today</span></div>
+        <div class="p-tab"><span class="ico">✅</span><span class="lbl">Tasks</span></div>
+        <div class="p-tab"><span class="ico">📚</span><span class="lbl">Learn</span></div>
+        <div class="p-tab"><span class="ico">⚙️</span><span class="lbl">Profile</span></div>
+      </nav>
+    </div>
+  </section>
+
+  <!-- 02 — FLY-UP MERGE -->
+  <section class="concept">
+    <div class="concept-label"><span class="concept-num">02</span><span class="concept-name">Fly-Up Merge</span></div>
+    <p class="concept-note">The streak and weather <b>values themselves travel</b> from inside the card up to the greeting's side — a real shared-element move, not a fade. The card visibly empties as they leave it.</p>
+    <div class="scroll-hint">scroll the task list</div>
+    <div class="phone c2" data-concept="2">
+      <div class="p-photo"></div><div class="p-tint"></div>
+      <div class="screen">
+        <div class="statusbar"><span>9:41</span><span class="pillcam"></span><span>󰖝 ⚡︎</span></div>
+        <div class="head-block">
+          <div class="p-eyebrow" data-el="eyebrow">On Deck · Friday</div>
+          <div class="greet-row">
+            <div class="p-greet" data-el="greet">Morning, Farai</div>
+            <div class="fly" data-el="fly1" style="font-size:13px;">🔥<b>6</b></div>
+            <div class="fly" data-el="fly2" style="font-size:13px;"><b>24°</b>☀️</div>
+          </div>
+          <div class="card-slot" data-el="cardslot">
+            <div class="orig-card" data-el="origcard">
+              <div class="oc-half"><div class="oc-lbl">Streak</div><div class="oc-row" data-el="streaksrc"><span class="oc-ico">🔥</span><span class="oc-val">6</span></div><div class="oc-sub">days in a row</div></div>
+              <div class="oc-div"></div>
+              <div class="oc-half"><div class="oc-lbl">Weather</div><div class="oc-row" data-el="weathersrc"><span class="oc-val">24°</span><span class="oc-ico">☀️</span></div><div class="oc-sub">Sunny · Wind 12 km/h</div></div>
+            </div>
+          </div>
+          <div class="p-track-row" data-el="trackrow">
+            <span class="p-track-lbl" data-el="tracklbl">Task 1 of 2</span>
+            <span class="p-track"><i></i></span>
+          </div>
+        </div>
+        <div class="p-scroll" data-el="scroll"><div class="p-rows"></div></div>
+      </div>
+      <nav class="p-tabbar">
+        <div class="p-tab active"><span class="ico">☀️</span><span class="lbl">Today</span></div>
+        <div class="p-tab"><span class="ico">✅</span><span class="lbl">Tasks</span></div>
+        <div class="p-tab"><span class="ico">📚</span><span class="lbl">Learn</span></div>
+        <div class="p-tab"><span class="ico">⚙️</span><span class="lbl">Profile</span></div>
+      </nav>
+    </div>
+  </section>
+
+  <!-- 03 — SLIDE & COMPRESS -->
+  <section class="concept">
+    <div class="concept-label"><span class="concept-num">03</span><span class="concept-name">Slide &amp; Compress</span></div>
+    <p class="concept-note">One continuous object, not a handoff: the <b>whole card slides up and compresses</b> into the compact readout itself, landing beside the greeting as the same element it started as.</p>
+    <div class="scroll-hint">scroll the task list</div>
+    <div class="phone c3" data-concept="3">
+      <div class="p-photo"></div><div class="p-tint"></div>
+      <div class="screen">
+        <div class="statusbar"><span>9:41</span><span class="pillcam"></span><span>󰖝 ⚡︎</span></div>
+        <div class="head-block">
+          <div class="p-eyebrow" data-el="eyebrow">On Deck · Friday</div>
+          <div class="greet-row">
+            <div class="p-greet" data-el="greet">Morning, Farai</div>
+          </div>
+          <div class="card-slot" data-el="cardslot">
+            <div class="orig-card" data-el="origcard">
+              <div class="oc-half"><div class="oc-lbl">Streak</div><div class="oc-row"><span class="oc-ico">🔥</span><span class="oc-val">6</span></div><div class="oc-sub">days in a row</div></div>
+              <div class="oc-div"></div>
+              <div class="oc-half"><div class="oc-lbl">Weather</div><div class="oc-row"><span class="oc-val">24°</span><span class="oc-ico">☀️</span></div><div class="oc-sub">Sunny · Wind 12 km/h</div></div>
+            </div>
+          </div>
+          <div class="p-track-row" data-el="trackrow">
+            <span class="p-track-lbl" data-el="tracklbl">Task 1 of 2</span>
+            <span class="p-track"><i></i></span>
+          </div>
+        </div>
+        <div class="p-scroll" data-el="scroll"><div class="p-rows"></div></div>
+      </div>
+      <nav class="p-tabbar">
+        <div class="p-tab active"><span class="ico">☀️</span><span class="lbl">Today</span></div>
+        <div class="p-tab"><span class="ico">✅</span><span class="lbl">Tasks</span></div>
+        <div class="p-tab"><span class="ico">📚</span><span class="lbl">Learn</span></div>
+        <div class="p-tab"><span class="ico">⚙️</span><span class="lbl">Profile</span></div>
+      </nav>
+    </div>
+  </section>
+
+  <!-- 04 — STAGGERED RELAY -->
+  <section class="concept">
+    <div class="concept-label"><span class="concept-num">04</span><span class="concept-name">Staggered Relay</span></div>
+    <p class="concept-note">Streak and weather fly up on <b>different schedules</b> — streak departs and lands early, weather follows a beat later — a relay hand-off instead of one synchronised move.</p>
+    <div class="scroll-hint">scroll the task list</div>
+    <div class="phone c4" data-concept="4">
+      <div class="p-photo"></div><div class="p-tint"></div>
+      <div class="screen">
+        <div class="statusbar"><span>9:41</span><span class="pillcam"></span><span>󰖝 ⚡︎</span></div>
+        <div class="head-block">
+          <div class="p-eyebrow" data-el="eyebrow">On Deck · Friday</div>
+          <div class="greet-row">
+            <div class="p-greet" data-el="greet">Morning, Farai</div>
+            <div class="fly" data-el="fly1" style="font-size:13px;">🔥<b>6</b></div>
+            <div class="fly" data-el="fly2" style="font-size:13px;"><b>24°</b>☀️</div>
+          </div>
+          <div class="card-slot" data-el="cardslot">
+            <div class="orig-card" data-el="origcard">
+              <div class="oc-half"><div class="oc-lbl">Streak</div><div class="oc-row"><span class="oc-ico">🔥</span><span class="oc-val">6</span></div><div class="oc-sub">days in a row</div></div>
+              <div class="oc-div"></div>
+              <div class="oc-half"><div class="oc-lbl">Weather</div><div class="oc-row"><span class="oc-val">24°</span><span class="oc-ico">☀️</span></div><div class="oc-sub">Sunny · Wind 12 km/h</div></div>
+            </div>
+          </div>
+          <div class="p-track-row" data-el="trackrow">
+            <span class="p-track-lbl" data-el="tracklbl">Task 1 of 2</span>
+            <span class="p-track"><i></i></span>
+          </div>
+        </div>
+        <div class="p-scroll" data-el="scroll"><div class="p-rows"></div></div>
+      </div>
+      <nav class="p-tabbar">
+        <div class="p-tab active"><span class="ico">☀️</span><span class="lbl">Today</span></div>
+        <div class="p-tab"><span class="ico">✅</span><span class="lbl">Tasks</span></div>
+        <div class="p-tab"><span class="ico">📚</span><span class="lbl">Learn</span></div>
+        <div class="p-tab"><span class="ico">⚙️</span><span class="lbl">Profile</span></div>
+      </nav>
+    </div>
+  </section>
+
+  <!-- 05 — IMPLODE & REFORM -->
+  <section class="concept">
+    <div class="concept-label"><span class="concept-num">05</span><span class="concept-name">Implode &amp; Reform</span></div>
+    <p class="concept-note">Two stages, not one continuous move: the card first <b>collapses into itself and vanishes</b>, then the compact readout grows in from nothing at the greeting's side.</p>
+    <div class="scroll-hint">scroll the task list</div>
+    <div class="phone c5" data-concept="5">
+      <div class="p-photo"></div><div class="p-tint"></div>
+      <div class="screen">
+        <div class="statusbar"><span>9:41</span><span class="pillcam"></span><span>󰖝 ⚡︎</span></div>
+        <div class="head-block">
+          <div class="p-eyebrow" data-el="eyebrow">On Deck · Friday</div>
+          <div class="greet-row">
+            <div class="p-greet" data-el="greet">Morning, Farai</div>
+            <div class="opp-wrap" data-el="opp">
+              <span class="opp-stat"><b>🔥6</b></span><span class="opp-sep">·</span><span class="opp-stat"><b>24°</b>☀️</span>
+            </div>
+          </div>
+          <div class="card-slot" data-el="cardslot">
+            <div class="orig-card" data-el="origcard">
+              <div class="oc-half"><div class="oc-lbl">Streak</div><div class="oc-row"><span class="oc-ico">🔥</span><span class="oc-val">6</span></div><div class="oc-sub">days in a row</div></div>
+              <div class="oc-div"></div>
+              <div class="oc-half"><div class="oc-lbl">Weather</div><div class="oc-row"><span class="oc-val">24°</span><span class="oc-ico">☀️</span></div><div class="oc-sub">Sunny · Wind 12 km/h</div></div>
+            </div>
+          </div>
+          <div class="p-track-row" data-el="trackrow">
+            <span class="p-track-lbl" data-el="tracklbl">Task 1 of 2</span>
+            <span class="p-track"><i></i></span>
+          </div>
+        </div>
+        <div class="p-scroll" data-el="scroll"><div class="p-rows"></div></div>
+      </div>
+      <nav class="p-tabbar">
+        <div class="p-tab active"><span class="ico">☀️</span><span class="lbl">Today</span></div>
+        <div class="p-tab"><span class="ico">✅</span><span class="lbl">Tasks</span></div>
+        <div class="p-tab"><span class="ico">📚</span><span class="lbl">Learn</span></div>
+        <div class="p-tab"><span class="ico">⚙️</span><span class="lbl">Profile</span></div>
+      </nav>
+    </div>
+  </section>
+
+  <!-- 06 — PUSH DOWN / PULL UP -->
+  <section class="concept">
+    <div class="concept-label"><span class="concept-num">06</span><span class="concept-name">Push Down / Pull Up</span></div>
+    <p class="concept-note">Opposite vertical drift: the card <b>sinks down and out</b> as if dropping below the fold, while the compact readout <b>rises up into place</b> from below it — a push/pull pairing.</p>
+    <div class="scroll-hint">scroll the task list</div>
+    <div class="phone c6" data-concept="6">
+      <div class="p-photo"></div><div class="p-tint"></div>
+      <div class="screen">
+        <div class="statusbar"><span>9:41</span><span class="pillcam"></span><span>󰖝 ⚡︎</span></div>
+        <div class="head-block">
+          <div class="p-eyebrow" data-el="eyebrow">On Deck · Friday</div>
+          <div class="greet-row">
+            <div class="p-greet" data-el="greet">Morning, Farai</div>
+            <div class="opp-wrap" data-el="opp">
+              <span class="opp-stat"><b>🔥6</b></span><span class="opp-sep">·</span><span class="opp-stat"><b>24°</b>☀️</span>
+            </div>
+          </div>
+          <div class="card-slot" data-el="cardslot">
+            <div class="orig-card" data-el="origcard">
+              <div class="oc-half"><div class="oc-lbl">Streak</div><div class="oc-row"><span class="oc-ico">🔥</span><span class="oc-val">6</span></div><div class="oc-sub">days in a row</div></div>
+              <div class="oc-div"></div>
+              <div class="oc-half"><div class="oc-lbl">Weather</div><div class="oc-row"><span class="oc-val">24°</span><span class="oc-ico">☀️</span></div><div class="oc-sub">Sunny · Wind 12 km/h</div></div>
+            </div>
+          </div>
+          <div class="p-track-row" data-el="trackrow">
+            <span class="p-track-lbl" data-el="tracklbl">Task 1 of 2</span>
+            <span class="p-track"><i></i></span>
+          </div>
+        </div>
+        <div class="p-scroll" data-el="scroll"><div class="p-rows"></div></div>
+      </div>
+      <nav class="p-tabbar">
+        <div class="p-tab active"><span class="ico">☀️</span><span class="lbl">Today</span></div>
+        <div class="p-tab"><span class="ico">✅</span><span class="lbl">Tasks</span></div>
+        <div class="p-tab"><span class="ico">📚</span><span class="lbl">Learn</span></div>
+        <div class="p-tab"><span class="ico">⚙️</span><span class="lbl">Profile</span></div>
+      </nav>
+    </div>
+  </section>
+
+</div>
+
+<script>
+const TASKS = [
+  { emoji: '💧', count: 'Task 1 of 2', title: 'Give it a deep soak.', done: false },
+  { emoji: '🔍', count: 'Task 2 of 2', title: 'Walk the edges.', done: false },
+  { emoji: '✂️', count: 'Completed', title: 'First mow of the week.', done: true },
+  { emoji: '🌱', count: 'Completed', title: 'Check for bare patches.', done: true },
+  { emoji: '🧪', count: 'Completed', title: 'Test the soil pH.', done: true },
+];
+
+function rowHTML(t) {
+  return `<div class="p-row${t.done ? ' done' : ''}">
+    <div class="p-row-head">
+      <div class="p-badge">${t.emoji}</div>
+      <div class="p-row-text"><div class="p-count">${t.count}</div><div class="p-title">${t.title}</div></div>
+      ${t.done ? '<div class="p-check">✓</div>' : '<span class="p-chev">⌄</span>'}
+    </div>
+  </div>`;
+}
+
+document.querySelectorAll('.p-rows').forEach(el => {
+  el.innerHTML = TASKS.map(rowHTML).join('');
+  const spacer = document.createElement('div');
+  spacer.style.height = '340px';
+  el.appendChild(spacer);
+});
+
+const COLLAPSE_DISTANCE = 100;
+const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
+const lerp = (a, b, t) => a + (b - a) * t;
+
+function bind(scrollEl, updateFn) {
+  const onScroll = () => updateFn(clamp(scrollEl.scrollTop / COLLAPSE_DISTANCE, 0, 1));
+  scrollEl.addEventListener('scroll', onScroll, { passive: true });
+  updateFn(0);
+}
+
+// Shared base: eyebrow fades, greeting shrinks in place, track tightens,
+// and the card's flow-space collapses (cardslot maxHeight → 0) so the
+// track glides up to sit right under the shrunk greeting. Identical to
+// the real screen at p=0.
+function baseCollapse(phone, p) {
+  const eyebrow = phone.querySelector('[data-el="eyebrow"]');
+  const greet = phone.querySelector('[data-el="greet"]');
+  const trackrow = phone.querySelector('[data-el="trackrow"]');
+  const tracklbl = phone.querySelector('[data-el="tracklbl"]');
+  const cardslot = phone.querySelector('[data-el="cardslot"]');
+  eyebrow.style.opacity = 1 - p;
+  eyebrow.style.transform = `scaleY(${1 - p})`;
+  greet.style.fontSize = `${lerp(24, 15, p)}px`;
+  trackrow.style.marginTop = `${lerp(12, 8, p)}px`;
+  trackrow.style.marginBottom = `${lerp(12, 8, p)}px`;
+  if (tracklbl) tracklbl.textContent = p > 0.7 ? '62%' : 'Task 1 of 2';
+  cardslot.style.maxHeight = `${lerp(80, 0, clamp(p * 1.4, 0, 1))}px`;
+  cardslot.style.marginTop = `${lerp(0, 0, p)}px`;
+}
+
+// 01 — Cross-Fade in Place
+(() => {
+  const phone = document.querySelector('.phone.c1');
+  const scroll = phone.querySelector('[data-el="scroll"]');
+  const origcard = phone.querySelector('[data-el="origcard"]');
+  const opp = phone.querySelector('[data-el="opp"]');
+  bind(scroll, (p) => {
+    baseCollapse(phone, p);
+    origcard.style.opacity = clamp(1 - p * 1.6, 0, 1);
+    opp.style.opacity = clamp((p - 0.4) / 0.6, 0, 1);
+  });
+})();
+
+// 02 — Fly-Up Merge: values travel from the card's own position up to
+// beside the greeting, using a fixed approximate flight offset.
+(() => {
+  const phone = document.querySelector('.phone.c2');
+  const scroll = phone.querySelector('[data-el="scroll"]');
+  const origcard = phone.querySelector('[data-el="origcard"]');
+  const streaksrc = phone.querySelector('[data-el="streaksrc"]');
+  const weathersrc = phone.querySelector('[data-el="weathersrc"]');
+  const fly1 = phone.querySelector('[data-el="fly1"]');
+  const fly2 = phone.querySelector('[data-el="fly2"]');
+  bind(scroll, (p) => {
+    baseCollapse(phone, p);
+    // the source values fade out quickly as their "clones" take flight
+    const srcFade = clamp(1 - p * 3, 0, 1);
+    streaksrc.style.opacity = srcFade;
+    weathersrc.style.opacity = srcFade;
+    origcard.style.opacity = clamp(1 - p * 1.6, 0, 1);
+    // flying clones: start big + low + left (card's position), end small
+    // + at rest beside the greeting.
+    const fp = clamp((p - 0.05) / 0.7, 0, 1);
+    [ [fly1, 0], [fly2, 46] ].forEach(([el, rightOffset]) => {
+      el.style.opacity = clamp(fp * 2.5, 0, 1) * clamp(1 - p * 0.1, 0.9, 1);
+      el.style.right = `${rightOffset}px`;
+      el.style.top = '2px';
+      const startY = 78, startX = -20, startScale = 1;
+      const endY = 0, endX = 0, endScale = 0.62;
+      el.style.transform = `translate(${lerp(startX, endX, fp)}px, ${lerp(startY, endY, fp)}px) scale(${lerp(startScale, endScale, fp)})`;
+    });
+  });
+})();
+
+// 03 — Slide & Compress: the whole card is one object that transforms
+// from full size in its slot to a compact pill beside the greeting.
+(() => {
+  const phone = document.querySelector('.phone.c3');
+  const scroll = phone.querySelector('[data-el="scroll"]');
+  const origcard = phone.querySelector('[data-el="origcard"]');
+  bind(scroll, (p) => {
+    baseCollapse(phone, p);
+    const mp = clamp(p / 0.85, 0, 1);
+    const ty = lerp(0, -84, mp);
+    const tx = lerp(0, -8, mp);
+    const sx = lerp(1, 0.32, mp);
+    const sy = lerp(1, 0.42, mp);
+    origcard.style.transform = `translate(${tx}px, ${ty}px) scale(${sx}, ${sy})`;
+    origcard.style.opacity = clamp(1 - Math.max(0, p - 0.85) * 6, 0, 1);
+  });
+})();
+
+// 04 — Staggered Relay: streak flies across the first half of the
+// scroll, weather departs later and flies across the second half.
+(() => {
+  const phone = document.querySelector('.phone.c4');
+  const scroll = phone.querySelector('[data-el="scroll"]');
+  const origcard = phone.querySelector('[data-el="origcard"]');
+  const streaksrc = phone.querySelector('[data-el="streaksrc"]') || phone.querySelector('.oc-half .oc-row');
+  const halves = phone.querySelectorAll('.oc-row');
+  const fly1 = phone.querySelector('[data-el="fly1"]');
+  const fly2 = phone.querySelector('[data-el="fly2"]');
+  bind(scroll, (p) => {
+    baseCollapse(phone, p);
+    origcard.style.opacity = clamp(1 - p * 1.6, 0, 1);
+    // streak: departs p:[0, 0.5]
+    const p1 = clamp(p / 0.5, 0, 1);
+    fly1.style.opacity = clamp(p1 * 3, 0, 1) * clamp(1 - Math.max(0, p - 0.9) * 10, 0, 1);
+    fly1.style.right = '46px';
+    fly1.style.top = '2px';
+    fly1.style.transform = `translate(${lerp(-14, 0, p1)}px, ${lerp(70, 0, p1)}px) scale(${lerp(1, 0.62, p1)})`;
+    // weather: departs p:[0.35, 1] — a beat later
+    const p2 = clamp((p - 0.35) / 0.65, 0, 1);
+    fly2.style.opacity = clamp(p2 * 3, 0, 1);
+    fly2.style.right = '0px';
+    fly2.style.top = '2px';
+    fly2.style.transform = `translate(${lerp(-14, 0, p2)}px, ${lerp(78, 0, p2)}px) scale(${lerp(1, 0.62, p2)})`;
+  });
+})();
+
+// 05 — Implode & Reform: card shrinks to nothing at its own centre in
+// the first half of the scroll; the compact readout only starts growing
+// in during the second half.
+(() => {
+  const phone = document.querySelector('.phone.c5');
+  const scroll = phone.querySelector('[data-el="scroll"]');
+  const origcard = phone.querySelector('[data-el="origcard"]');
+  const opp = phone.querySelector('[data-el="opp"]');
+  bind(scroll, (p) => {
+    baseCollapse(phone, p);
+    const implode = clamp(p / 0.45, 0, 1);
+    origcard.style.transform = `scale(${lerp(1, 0.05, implode)})`;
+    origcard.style.opacity = clamp(1 - implode * 1.3, 0, 1);
+    const reform = clamp((p - 0.5) / 0.5, 0, 1);
+    opp.style.opacity = reform;
+    opp.style.transform = `scale(${lerp(0.3, 1, reform)})`;
+  });
+})();
+
+// 06 — Push Down / Pull Up: card exits downward, readout enters upward.
+(() => {
+  const phone = document.querySelector('.phone.c6');
+  const scroll = phone.querySelector('[data-el="scroll"]');
+  const origcard = phone.querySelector('[data-el="origcard"]');
+  const opp = phone.querySelector('[data-el="opp"]');
+  bind(scroll, (p) => {
+    baseCollapse(phone, p);
+    const ep = clamp(p * 1.6, 0, 1);
+    origcard.style.transform = `translateY(${lerp(0, 26, ep)}px)`;
+    origcard.style.opacity = 1 - ep;
+    const ip = clamp((p - 0.3) / 0.7, 0, 1);
+    opp.style.opacity = ip;
+    opp.style.transform = `translateY(${lerp(14, 0, ip)}px)`;
+  });
+})();
+</script>
+</body>
+</html>
