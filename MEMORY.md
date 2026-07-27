@@ -1,3 +1,17 @@
+# Dependency Audit — 2026-07-27
+
+Automated weekly dependency audit completed. Full report at `DEPENDENCY_AUDIT_2026-07-27.md`.
+
+Key findings:
+- 2 CRITICAL CVEs (shell-quote, tar) — fix with `npm audit fix`
+- 7 HIGH CVEs (postcss requires Expo SDK 57; rest fixable with `npm audit fix`)
+- lightningcss MPL-2.0 and node-forge BSD-3-OR-GPL-2.0 licence flags — need legal sign-off
+- Expo SDK 54 installed; SDK 57 available (major migration backlogged)
+- @sentry 8.11→8.20, @supabase 2.105→2.110 security-relevant minor updates due this sprint
+- No New Architecture blockers found
+
+---
+
 # Error Handling Implementation — Phase Plan
 
 Audit completed 2026-05-17. Full findings in session history.
