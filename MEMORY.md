@@ -5,6 +5,29 @@ Build these phases in order — each one unblocks the next.
 
 ---
 
+## Weekly Dependency Audit — 2026-08-03
+
+**Status:** Complete. Report written to `DEPENDENCY_AUDIT_2026-08-03.md`.
+
+**Key findings:**
+- 2 CRITICAL CVEs: `shell-quote` (command injection) and `tar` (decompression DoS) — both transitive build-tool deps; fix with `npm audit fix` after `npm install`
+- 7 HIGH CVEs: `postcss` (path traversal, needs expo@57), `fast-uri` (host confusion), `ws` (DoS), `undici` (HTTP injection), `form-data` (CRLF), `js-yaml` (DoS), `brace-expansion` (DoS)
+- Expo SDK lag: project is on SDK 54, latest is 57; 18 of 28 CVEs resolve with SDK upgrade
+- `expo-linear-gradient` version mismatch: pinned to ^55.0.13 but expo is ~54.0.33
+- `node_modules` not installed — run `npm install` before next `npx expo-doctor` or license scan
+- `@sentry/react-native` and `@supabase/supabase-js` need minor updates this sprint
+- Missing from package.json (required by CLAUDE.md stack): `expo-screen-capture`, `expo-image-picker`, `@tanstack/react-query`
+
+**Next actions (in order):**
+1. `npm install`
+2. `npm audit fix` (for shell-quote, tar, and other fixable transitive deps)
+3. `npx expo install expo-linear-gradient` (fix version mismatch)
+4. `npx expo install @sentry/react-native @supabase/supabase-js` (minor security updates)
+5. Full license scan: `npx license-checker --json --production --excludePrivatePackages`
+6. Plan Expo SDK 54 → 57 migration (major task, create dedicated branch)
+
+---
+
 ## Phase 1 — Logger + Sentry foundation (CRITICAL)
 **Everything else depends on this existing first.**
 
