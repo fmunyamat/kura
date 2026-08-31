@@ -1,3 +1,29 @@
+# Dependency Audit — 2026-08-31
+
+**Task:** Weekly automated dependency audit  
+**Status:** Complete — report at `DEPENDENCY_AUDIT_2026-08-31.md`
+
+**Key findings:**
+- 2 CRITICAL CVEs (tar, shell-quote) — both transitive build-tool deps, resolved by Expo SDK upgrade
+- 16 HIGH CVEs — majority tied to expo internal toolchain (metro, postcss, undici, ws, brace-expansion, js-yaml, nanoid, form-data, image-size, fast-uri)
+- `expo` direct dep is HIGH severity — fix = SDK 57 major upgrade
+- Project is on Expo SDK 54 (not SDK 52 as documented in CLAUDE.md)
+- Expo SDK 57 is current; 3 major versions behind
+- `@sentry/react-native` is 13 minor versions behind (8.11.1 → 8.24.0) — risk to crash reporting
+- `@supabase/supabase-js` is 7 minor versions behind (2.105.4 → 2.112.4)
+- License scan incomplete (node_modules not installed in audit env); no copyleft found in partial scan
+- expo-doctor could not run for same reason
+
+**Next actions (priority order):**
+1. Plan Expo SDK 57 upgrade (resolves most CVEs)
+2. Update CLAUDE.md to reflect SDK 54 (not 52)
+3. Update @sentry/react-native → 8.24.0 this sprint
+4. Update @supabase/supabase-js → 2.112.4 this sprint
+5. Update react-native-reanimated + worklets together (4.6.0 / 0.12.1)
+6. Add npm audit + license-checker to GitHub Actions CI
+
+---
+
 # Error Handling Implementation — Phase Plan
 
 Audit completed 2026-05-17. Full findings in session history.
