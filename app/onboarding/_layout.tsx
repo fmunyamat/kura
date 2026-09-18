@@ -1,9 +1,7 @@
-import { router, usePathname } from 'expo-router';
-import { Stack } from 'expo-router';
+import { router, Stack, usePathname } from 'expo-router';
 import { View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import styled, { useTheme } from 'styled-components/native';
-import { OnboardingProgressBar } from '~/features/onboarding/components/OnboardingProgressBar';
 
 // STEP_MAP — maps each onboarding route to its 1-based step number.
 const STEP_MAP: Record<string, number> = {
@@ -22,10 +20,6 @@ const SHOWS_BACK = new Set([
   '/onboarding/effort-level',
   '/onboarding/photo-capture',
 ]);
-
-// PROGRESS_BAR_HEIGHT — rendered height of OnboardingProgressBar:
-// 3px Segment + 8px padding-bottom on Bar = 11px total.
-const PROGRESS_BAR_HEIGHT = 11;
 
 // BackButton — 40×40 touchable rendered as an absolute overlay so it sits
 // completely outside the Stack and never animates with screen transitions.
@@ -60,11 +54,6 @@ export default function OnboardingStackLayout() {
     <View style={{ flex: 1 }}>
       <Stack screenOptions={{ headerShown: false, animation: 'none' }} />
 
-      {/* Progress bar overlay — pointerEvents none lets touches pass through. */}
-      <View style={{ position: 'absolute', top, left: 0, right: 0, pointerEvents: 'none' }}>
-        <OnboardingProgressBar currentStep={currentStep} totalSteps={TOTAL_STEPS} />
-      </View>
-
       {/* Back button — appears below the progress bar on step 2 and 3.
           Lives outside the Stack so it never participates in slide animations.
           top is inset + bar height + a little breathing room. */}
@@ -74,7 +63,7 @@ export default function OnboardingStackLayout() {
           accessibilityRole="button"
           accessibilityLabel="Go back"
           style={{
-            top: top + PROGRESS_BAR_HEIGHT + theme.spacing.xs,
+            top: theme.spacing.xs,
             left: theme.spacing.md,
           }}
         >
