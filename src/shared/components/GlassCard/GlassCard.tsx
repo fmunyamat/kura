@@ -1,3 +1,11 @@
+// The frosted-glass panel used all over the app — the soft, blurred card that
+// content sits on top of so it stands out against the photo backgrounds. It
+// comes in two looks: 'frost' (a heavier white frost for the welcome/onboarding
+// cards) and 'clear' (a barely-there pane used on sign-in, where the photo
+// behind should stay the star). Screens wrap their content in a GlassCard and
+// pick a variant; this file handles the blur, tint, and border that sell the
+// glass effect (with small platform tweaks so it looks right on iOS and Android).
+
 import { BlurView } from 'expo-blur';
 import { Image } from 'expo-image';
 import { ComponentProps, ReactNode } from 'react';

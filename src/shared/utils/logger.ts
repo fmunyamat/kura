@@ -1,3 +1,10 @@
+// The app's single logging helper. Instead of scattering console.log calls
+// (which are unsafe to ship), every part of the app logs through this so we
+// control what happens: during development messages print to the console for us
+// to read, and in the released app errors are sent to Sentry for monitoring
+// while debug messages disappear entirely. It also encodes an important safety
+// rule — never log personal information — explained in the comments below.
+
 import * as Sentry from '@sentry/react-native';
 
 // logger — production-safe logging utility.

@@ -20,6 +20,7 @@ interface CompletionTrackProps {
   progress: number;
 }
 
+// Row — lays the label and the progress bar out side by side on one line.
 const Row = styled.View`
   margin-top: 12px;
   flex-direction: row;
@@ -27,6 +28,7 @@ const Row = styled.View`
   gap: 9px;
 `;
 
+// Label — the small uppercase "TASK 1 OF 3" text to the left of the bar.
 const Label = styled.Text`
   font-family: ${({ theme }) => theme.typography.fontBody};
   font-size: 9px;
@@ -52,6 +54,8 @@ const Fill = styled(Animated.View)`
   overflow: hidden;
 `;
 
+// Gradient — the lime colour sweep painted inside the fill, giving the bar its
+// fresh-cut-grass look rather than a flat single colour.
 const Gradient = styled(LinearGradient)`
   flex: 1;
 `;

@@ -119,12 +119,42 @@ These rules exist because the codebase is actively being debugged and extended �
 
 Write comments as if explaining to someone who has never seen this code before. Use everyday words, no jargon. Every comment must explain **how** the code works, not just name what it is.
 
-Add a comment on:
+**Every file starts with a top-of-file summary.** Before any import, add a short block comment (3–6 lines) that a non-technical teammate could read and understand what the file is for. This applies to every file that holds code — screens, components, hooks, services, stores, barrels (`index.tsx` re-exports), Expo Router route files and `_layout.tsx` files, config, and utils. No exceptions for "it's just a one-liner" — a barrel file gets a short summary explaining what it re-exports and why; a route file gets a summary explaining what screen it maps to.
+
+The summary should cover, in plain words:
+- What the file is (a screen, a reusable component, a service, a store, a route, etc.)
+- What it draws or does, and when it runs
+- How it fits into the surrounding feature (what calls it, what it calls)
+
+```tsx
+// The sign-in screen — the whole logged-out entry point of the app. It stitches
+// the two auth steps together into one sliding, two-panel experience: the email
+// form (OtpRequestForm) on the left and the 6-digit code entry (OtpVerifyPanel)
+// on the right. This screen owns the shared state between them — the email being
+// typed, whether a code has been sent, error messages, and the keyboard state —
+// and it drives the horizontal slide animation between panels. The actual
+// talking-to-Supabase work is delegated to authService.
+
+import { Image } from 'expo-image';
+...
+```
+
+```tsx
+// Barrel file for the CtaButton component. Its only job is to re-export the
+// button from one tidy path, so other files can write
+// `import { CtaButton } from '@/src/shared/components/CtaButton'` instead of
+// reaching all the way into the CtaButton.tsx file. Nothing here draws to the
+// screen — it just forwards the real component along.
+
+export { CtaButton } from './CtaButton';
+```
+
+**Then, comment every block inside the file.** Add a comment on:
 
 - **Every component** — describe what it draws on screen and how it behaves when the user interacts with it.
 - **Every hook** — explain what it tracks, what triggers it, and what it hands back to the component.
 - **Every service function** — describe the database or API call it makes, what data goes in, and what comes back.
-- **Every styled-component** — explain its visual role and any behaviour-driven styles (e.g. why opacity changes on a certain prop).
+- **Every styled-component** — explain its visual role and any behaviour-driven styles (e.g. why opacity changes on a certain prop). No styled-component is left without a one-line comment, even simple layout wrappers (`flex: 1`, `width: 100%`) — say what it's a wrapper *for*.
 - **Non-trivial logic** — walk through what the condition checks, what each branch does, and why.
 - **Security controls** — explain in plain English why the restriction exists, not just that it does.
 
@@ -138,6 +168,8 @@ const EmailInput = styled(TextInput)`
   border-color: ${({ theme }) => theme.colors.inputBorderDark};
 `;
 ```
+
+This is not a one-time cleanup pass — it applies to every new file and every new block added from now on. When editing an existing file that's missing its top-of-file summary, add one as part of the edit rather than leaving it out.
 
 ### Naming
 

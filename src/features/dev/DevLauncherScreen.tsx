@@ -1,3 +1,10 @@
+// The developer launcher screen — a hidden menu, reachable only in development
+// via the DevPill, that lets us skip straight to any part of the app without
+// clicking through it. It lists the flows (sign-in, onboarding, welcome, tabs)
+// with a short description each; picking one and launching jumps there, and we
+// can also "pin" a default so the app opens on that flow after a full reload.
+// None of this ships to real users — it exists purely to speed up building.
+
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Pressable } from 'react-native';
@@ -38,11 +45,13 @@ const Screen = styled(SafeAreaView)`
   background-color: #090e09;
 `;
 
+// Content — the padded area holding everything below the dark background.
 const Content = styled.View`
   flex: 1;
   padding: 8px ${({ theme }) => theme.spacing.md}px ${({ theme }) => theme.spacing.md}px;
 `;
 
+// BadgeRow — the little "green dot + DEV MODE" strip at the very top.
 const BadgeRow = styled.View`
   flex-direction: row;
   align-items: center;
@@ -50,6 +59,7 @@ const BadgeRow = styled.View`
   margin-bottom: ${({ theme }) => theme.spacing.md}px;
 `;
 
+// BadgeDot — the small green dot in that strip.
 const BadgeDot = styled.View`
   width: 6px;
   height: 6px;
@@ -57,6 +67,7 @@ const BadgeDot = styled.View`
   background-color: #4ade80;
 `;
 
+// BadgeText — the tiny uppercase green "DEV MODE" label next to the dot.
 const BadgeText = styled.Text`
   font-size: 9px;
   font-weight: ${({ theme }) => theme.typography.weightBold};
@@ -65,6 +76,7 @@ const BadgeText = styled.Text`
   color: #4ade80;
 `;
 
+// Heading — the big white screen title ("Dev Launcher").
 const Heading = styled.Text`
   font-size: 20px;
   font-weight: ${({ theme }) => theme.typography.weightBlack};
@@ -81,6 +93,7 @@ const SubheadingRow = styled.View`
   margin-bottom: ${({ theme }) => theme.spacing.lg}px;
 `;
 
+// SubheadingText — the faint one-line description under the heading.
 const SubheadingText = styled.Text`
   font-size: 11px;
   color: rgba(255, 255, 255, 0.28);
@@ -133,12 +146,14 @@ const ActiveBar = styled.View<{ $visible: boolean }>`
   opacity: ${({ $visible }) => ($visible ? 1 : 0)};
 `;
 
+// FlowIcon — the emoji on the left of each flow row (🔑, 📍, 🌱, …).
 const FlowIcon = styled.Text`
   font-size: 18px;
   width: 28px;
   text-align: center;
 `;
 
+// FlowInfo — the middle column holding the flow's name and description.
 const FlowInfo = styled.View`flex: 1;`;
 
 // FlowNameRow — holds the label text and the optional DEFAULT badge side by side.
@@ -148,6 +163,7 @@ const FlowNameRow = styled.View`
   gap: 6px;
 `;
 
+// FlowName — the flow's label; turns green when this row is the active choice.
 const FlowName = styled.Text<{ $active: boolean }>`
   font-size: 12px;
   font-weight: ${({ theme }) => theme.typography.weightBold};
@@ -169,6 +185,7 @@ const DefaultBadge = styled.Text`
   overflow: hidden;
 `;
 
+// FlowDesc — the small grey description line under each flow's name.
 const FlowDesc = styled.Text`
   font-size: 9px;
   color: rgba(255, 255, 255, 0.28);
@@ -182,6 +199,7 @@ const FlowRight = styled.View`
   gap: 8px;
 `;
 
+// FlowCheck — the green checkmark shown on whichever flow is currently selected.
 const FlowCheck = styled.Text<{ $visible: boolean }>`
   font-size: 12px;
   color: #4ade80;
@@ -200,6 +218,8 @@ const PinButton = styled(Pressable)<{ $isDefault: boolean }>`
     $isDefault ? 'rgba(74, 222, 128, 0.14)' : 'transparent'};
 `;
 
+// PinIcon — the pin glyph inside the pin button; bright when this flow is the
+// pinned default, dim otherwise.
 const PinIcon = styled.Text<{ $isDefault: boolean }>`
   font-size: 12px;
   opacity: ${({ $isDefault }) => ($isDefault ? 1 : 0.22)};
@@ -215,6 +235,7 @@ const LaunchButton = styled(Pressable)`
   align-items: center;
 `;
 
+// LaunchLabel — the dark "Launch" text on the green confirm button.
 const LaunchLabel = styled.Text`
   font-size: ${({ theme }) => theme.typography.sizeSm}px;
   font-weight: ${({ theme }) => theme.typography.weightBold};

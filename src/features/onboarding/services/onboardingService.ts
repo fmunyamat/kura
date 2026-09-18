@@ -1,3 +1,12 @@
+// The onboarding service — the code that saves a new user's setup answers to the
+// database at the end of onboarding. Two jobs live here: (1) turn the ZIP code
+// they entered into map coordinates (lat/lng) using a free public lookup, since
+// the lawn-advice engine needs to know roughly where they are, and (2) write the
+// whole profile (grass type, effort, sprinkler, location) into the user_profiles
+// table. Writing that row is the moment the app considers onboarding "done" and
+// starts sending the user to the main tabs instead of back to setup. Any failure
+// is thrown up to the caller, which must show a friendly message, not the raw error.
+
 import { z } from 'zod';
 
 import { supabase } from '~/shared/lib/supabase';

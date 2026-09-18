@@ -1,3 +1,11 @@
+// The first step of signing in: a small panel with an email box and a "Send
+// code →" button. The user types their address, taps the button, and Supabase
+// emails them a 6-digit code (handled by the screen above, not here). This file
+// is purely the look and feel of that panel — the styled-components below define
+// the glass input and green button, and the component wires the text box and
+// button up to the callbacks the parent screen passes in. While a code is being
+// sent, the button is disabled and shows a spinner instead of its label.
+
 import { useState } from 'react';
 import { ActivityIndicator, Pressable, TextInput, useColorScheme } from 'react-native';
 import styled, { DefaultTheme, useTheme } from 'styled-components/native';
@@ -13,6 +21,7 @@ interface OtpRequestFormProps {
   isTablet?: boolean;
 }
 
+// Container — the full-width wrapper holding the email field and submit button.
 const Container = styled.View`
   width: 100%;
 `;

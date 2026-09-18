@@ -1,3 +1,11 @@
+// Sets up the single Supabase client the whole app shares. Supabase is our
+// backend — it holds the database, handles login, and stores files. This file
+// does three careful things before creating that client: (1) it tells Supabase
+// to keep login tokens in the phone's encrypted secure storage rather than
+// plain storage, (2) it checks at startup that the backend address and key are
+// present and use a secure https:// connection, and (3) it exports the ready-to-
+// use `supabase` object every service in the app imports to talk to the server.
+
 import { createClient } from '@supabase/supabase-js';
 import * as SecureStore from 'expo-secure-store';
 import { z } from 'zod';

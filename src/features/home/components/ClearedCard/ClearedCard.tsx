@@ -22,10 +22,12 @@ const Card = styled.View`
   padding: 34px 20px 26px;
 `;
 
+// Emoji — the big party emoji (🎉) that zooms in at the top of the card.
 const Emoji = styled.Text`
   font-size: 46px;
 `;
 
+// Heading — the bold "Deck cleared." congratulation headline.
 const Heading = styled.Text`
   margin-top: 14px;
   font-family: ${({ theme }) => theme.typography.fontHeaderHeavy};
@@ -33,6 +35,7 @@ const Heading = styled.Text`
   color: ${({ theme }) => theme.colors.textPhotoHeading};
 `;
 
+// Copy — the short reassuring sentence explaining tomorrow's task is already lined up.
 const Copy = styled.Text`
   margin-top: 8px;
   text-align: center;
@@ -50,6 +53,7 @@ const Chip = styled.View`
   padding: 5px 12px;
 `;
 
+// ChipText — the uppercase streak text inside the chip (e.g. "🔥 7 DAYS — NEW RECORD").
 const ChipText = styled.Text`
   font-family: ${({ theme }) => theme.typography.fontBodyBold};
   font-size: 9.5px;

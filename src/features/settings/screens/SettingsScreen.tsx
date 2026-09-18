@@ -80,10 +80,13 @@ type ActivePicker = 'grassType' | 'effort' | null;
 const SETTINGS_BACKGROUND = require('../../../../assets/images/sprinkler.png');
 const SETTINGS_BACKGROUND_BLUR_RADIUS = 7;
 
+// Screen — the full-height container everything on the Settings page sits in.
 const Screen = styled.View`
   flex: 1;
 `;
 
+// PhotoBackground — the blurred lawn photo pinned behind everything as the
+// backdrop for the Settings page.
 const PhotoBackground = styled(ImageBackground)`
   position: absolute;
   top: 0;
@@ -103,6 +106,7 @@ const PhotoWash = styled(LinearGradient).attrs(({ theme }) => ({
   bottom: 0;
 `;
 
+// Safe — keeps the page content clear of the notch and home indicator.
 const Safe = styled(SafeAreaView)`
   flex: 1;
 `;
@@ -188,6 +192,7 @@ const TileCategory = styled.Text`
   color: ${({ theme }) => theme.colors.textPhotoSubtle};
 `;
 
+// TileEmoji — the big emoji shown on each lawn-profile tile (grass type, effort).
 const TileEmoji = styled.Text`
   font-size: 22px;
 `;
@@ -241,10 +246,13 @@ const RowIcon = styled.View`
   justify-content: center;
 `;
 
+// RowIconText — the emoji/icon glyph inside a plain list row (e.g. Log out).
 const RowIconText = styled.Text`
   font-size: 15px;
 `;
 
+// RowName — the label text of a plain list row (e.g. "Log out"), taking up the
+// space between the icon and the row's right edge.
 const RowName = styled.Text`
   flex: 1;
   font-family: ${({ theme }) => theme.typography.fontBodyBold};
@@ -281,6 +289,8 @@ const SaveButton = styled(Pressable)`
   align-items: center;
 `;
 
+// SaveButtonText — the "Save" label inside the green save button that confirms
+// a picker change.
 const SaveButtonText = styled.Text`
   font-family: ${({ theme }) => theme.typography.fontBodyBold};
   font-size: ${({ theme }) => theme.typography.sizeSm}px;

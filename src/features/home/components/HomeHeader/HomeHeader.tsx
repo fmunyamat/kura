@@ -8,6 +8,8 @@ interface HomeHeaderProps {
   greeting: string;
 }
 
+// Eyebrow — the tiny, wide-spaced uppercase line above the greeting (e.g. the
+// day of the week). Deliberately faint so it sits quietly over the photo.
 const Eyebrow = styled.Text`
   font-family: ${({ theme }) => theme.typography.fontBody};
   font-size: 9.5px;
@@ -16,6 +18,8 @@ const Eyebrow = styled.Text`
   color: ${({ theme }) => theme.colors.textPhotoSubtle};
 `;
 
+// Greeting — the big, bold personal hello (e.g. "Good morning, Sam"). This is
+// the main headline of the Today screen, sized large to lead the eye.
 const Greeting = styled.Text`
   margin-top: 12px;
   font-family: ${({ theme }) => theme.typography.fontHeaderHeavy};

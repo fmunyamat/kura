@@ -1,3 +1,10 @@
+// The final onboarding step: inviting the user to take a first photo of their
+// lawn so they have a "before" picture to compare against later. This step is
+// optional — the user can snap a photo or skip it — and finishing it is what
+// completes onboarding and saves their whole profile to the database, sending
+// them into the main app. It uses OnboardingScreenShell for the frame and shows
+// an error message via ErrorMessage if saving the profile fails.
+
 import { useState } from 'react';
 import { Pressable } from 'react-native';
 import styled from 'styled-components/native';
@@ -28,6 +35,7 @@ const CameraWell = styled(Pressable)`
   gap: ${({ theme }) => theme.spacing.xs}px;
 `;
 
+// CameraIcon — the large camera emoji shown as the tap-to-take-a-photo prompt.
 const CameraIcon = styled.Text`font-size: 40px;`;
 
 // CameraLabel — instruction text below the camera icon. fontHeaderBold and

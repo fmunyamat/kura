@@ -1,3 +1,10 @@
+// Onboarding step: "What kind of grass do you have?". Shows three tappable
+// choices — cool-season, warm-season, or "I'm not sure" — as a list of option
+// cards. The user picks one, it's saved into the onboarding scratchpad, and the
+// Continue button moves them to the next step. The screen leans on the shared
+// OnboardingScreenShell for its frame and OptionCard for each choice, so this
+// file is mostly the three grass options and the pick-and-continue wiring.
+
 import { router } from 'expo-router';
 import { Fragment, useState } from 'react';
 import { ScrollView } from 'react-native';

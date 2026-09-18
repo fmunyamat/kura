@@ -1,3 +1,9 @@
+// Small helper module for tablet-aware styling. The app scales some layouts up
+// on tablets, and styled-components decide how to look by reading a `$isTablet`
+// flag. This file provides two things that make that work everywhere: the shared
+// TabletProps type (so components don't each re-declare the same flag) and the
+// useIsTablet hook (which answers "are we on a tablet right now?").
+
 import DeviceInfo from 'react-native-device-info';
 
 // TabletProps — the prop shape every tablet-aware styled-component receives.

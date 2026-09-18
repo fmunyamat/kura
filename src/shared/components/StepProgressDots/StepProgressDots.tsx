@@ -1,3 +1,8 @@
+// The row of little dots at the top of the welcome and onboarding screens that
+// shows how many steps there are and which one you're on. Every step is a small
+// dot except the current one, which stretches into a short pill so it stands out.
+// This file only draws those dots; the screen tells it the total and which is active.
+
 import styled from 'styled-components/native';
 
 interface StepProgressDotsProps {

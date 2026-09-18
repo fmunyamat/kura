@@ -1,3 +1,9 @@
+// The app's main "move forward" button — the green pill at the bottom of the
+// welcome and onboarding screens. It lives in one place so every screen uses the
+// same button instead of re-creating it, and it handles its own look for the
+// normal, loading (spinner), and disabled states. Screens just give it a label
+// and an onPress; this file owns how it looks and feels.
+
 import { ActivityIndicator, Pressable } from 'react-native';
 import styled, { useTheme } from 'styled-components/native';
 import { useIsTablet } from '~/shared/hooks/use-is-tablet';

@@ -1,3 +1,11 @@
+// Layout + traffic cop for the logged-in part of the app. Every screen under
+// `(app)` (the tabs and the onboarding/welcome flows) passes through here first.
+// On each render it looks at who the user is and decides where they belong:
+// a brand-new user gets sent to onboarding, someone who hasn't seen the intro
+// gets the welcome tour, and a fully set-up user is allowed through to the tabs.
+// There's also a developer-only shortcut at the top that lets us jump straight
+// to any flow while building, which never ships to real users.
+
 import { Redirect, Stack, usePathname } from 'expo-router';
 import { useEffect } from 'react';
 
@@ -27,6 +35,8 @@ export default function AppGroupLayout() {
     }
   }, []);
 
+  // While the session is still being restored from secure storage we don't yet
+  // know where the user should go, so render nothing rather than guess wrong.
   if (isLoading) return null;
 
   // Dev override — bypass all auth/profile guards and jump directly to the

@@ -25,11 +25,13 @@ const Photo = styled.View`
   overflow: hidden;
 `;
 
+// PhotoImage — the task photo filling the band.
 const PhotoImage = styled(Image)`
   width: 100%;
   height: 100%;
 `;
 
+// PhotoFade — the dark-to-clear gradient laid over the photo so text stays readable.
 const PhotoFade = styled(LinearGradient)`
   position: absolute;
   top: 0;
@@ -38,6 +40,7 @@ const PhotoFade = styled(LinearGradient)`
   bottom: 0;
 `;
 
+// Description — the plain-English explanation of the task under the photo.
 const Description = styled.Text`
   margin-top: 12px;
   font-family: ${({ theme }) => theme.typography.fontBody};
@@ -46,10 +49,12 @@ const Description = styled.Text`
   color: ${({ theme }) => theme.colors.textPhotoMuted};
 `;
 
+// Steps — the container stacking the numbered how-to steps.
 const Steps = styled.View`
   margin-top: 13px;
 `;
 
+// StepRow — one step line: the numbered dot on the left, the step text on the right.
 const StepRow = styled.View`
   flex-direction: row;
   align-items: center;
@@ -69,12 +74,14 @@ const StepDot = styled.View`
   justify-content: center;
 `;
 
+// StepNumber — the number (or lock glyph) shown inside each step dot.
 const StepNumber = styled.Text`
   font-family: ${({ theme }) => theme.typography.fontBodyBold};
   font-size: 9px;
   color: ${({ theme }) => theme.colors.accentText};
 `;
 
+// StepText — the wording of each step, filling the rest of the row.
 const StepText = styled.Text`
   flex: 1;
   font-family: ${({ theme }) => theme.typography.fontBody};

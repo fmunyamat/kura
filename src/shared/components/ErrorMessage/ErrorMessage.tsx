@@ -1,3 +1,9 @@
+// The small red line of text shown when something goes wrong (e.g. "Something
+// went wrong. Please try again."). It's coloured to stay readable on the app's
+// dark glassy backgrounds, and it can sit just above or just below a button with
+// a size option to match each screen. This file is only that styled message —
+// the screens decide when to show it and what it says.
+
 import styled from 'styled-components/native';
 
 // ErrorMessage — inline error text shown above or below a CTA when an async
@@ -15,6 +21,8 @@ interface ErrorMessageProps {
   children: React.ReactNode;
 }
 
+// Text — the actual red message text. The size and spacing props adjust the
+// font size and whether the margin sits above or below it (see the props above).
 const Text = styled.Text<{ $size: 'xs' | 'sm'; $spacing: 'below' | 'above' }>`
   font-size: ${({ theme, $size }) =>
     $size === 'sm' ? theme.typography.sizeSm : theme.typography.sizeXs}px;

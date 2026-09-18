@@ -80,6 +80,8 @@ const Tint = styled.View`
   background-color: ${({ theme }) => theme.colors.rowExpandedTint};
 `;
 
+// Header — the always-visible top bar of the row (emoji badge, title, chevron)
+// that the user taps to open or close it.
 const Header = styled(Pressable)`
   flex-direction: row;
   align-items: center;
@@ -99,14 +101,18 @@ const Badge = styled.View`
   justify-content: center;
 `;
 
+// BadgeEmoji — the task's emoji shown inside the badge square.
 const BadgeEmoji = styled.Text`
   font-size: 17px;
 `;
 
+// HeaderText — the middle column holding the small count line and the title,
+// taking up the space between the badge and the chevron.
 const HeaderText = styled.View`
   flex: 1;
 `;
 
+// Count — the tiny uppercase line above the title (e.g. the task's position).
 const Count = styled.Text`
   font-family: ${({ theme }) => theme.typography.fontBody};
   font-size: 8px;
@@ -142,6 +148,7 @@ const Check = styled.View`
   justify-content: center;
 `;
 
+// CheckMark — the tick glyph drawn inside the green Check circle on a done row.
 const CheckMark = styled.Text`
   font-family: ${({ theme }) => theme.typography.fontBodyBold};
   font-size: 12px;
@@ -153,6 +160,8 @@ const Drawer = styled(Animated.View)`
   overflow: hidden;
 `;
 
+// DrawerInner — the padding wrapper around the revealed detail content, so the
+// photo and steps aren't flush against the row's edges when it's open.
 const DrawerInner = styled.View`
   padding: 0 15px 16px;
 `;

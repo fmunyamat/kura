@@ -1,3 +1,10 @@
+// Layout file for the "logged out" part of the app. In Expo Router a `_layout`
+// file wraps every screen in its folder; the `(auth)` folder holds the screens
+// someone sees before they sign in (right now just the sign-in screen). This
+// file also acts as a guard: if the app already has a saved login session, it
+// bounces the user straight into the app so a logged-in person never gets stuck
+// looking at the sign-in screen again.
+
 import { Redirect, Stack } from 'expo-router';
 
 import { useAuthStore } from '~/features/auth/stores/authStore';

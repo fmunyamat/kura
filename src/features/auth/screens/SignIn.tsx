@@ -1,3 +1,12 @@
+// The sign-in screen — the whole logged-out entry point of the app. It stitches
+// the two auth steps together into one sliding, two-panel experience: the email
+// form (OtpRequestForm) on the left and the 6-digit code entry (OtpVerifyPanel)
+// on the right. This screen owns the shared state between them — the email being
+// typed, whether a code has been sent, error messages, and the keyboard state —
+// and it drives the horizontal slide animation that moves from the email panel
+// to the code panel once a code is sent. The actual talking-to-Supabase work is
+// delegated to authService; this file is the choreography and layout on top.
+
 import { Image } from 'expo-image';
 import { useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';

@@ -1,3 +1,9 @@
+// Welcome tour, screen 2 of 4 — explains the core idea of the app: "Each morning,
+// one task." It shows a little mocked-up preview of a task list (one task due
+// today, one coming tomorrow) so the user sees what their daily to-do will look
+// like, reassuring a beginner that they only ever face one job at a time. No real
+// data here — it's an illustration. Tapping Next slides to screen 3.
+
 import styled, { useTheme } from 'styled-components/native';
 import { CtaButton } from '~/shared/components/CtaButton';
 import { GlassCard } from '~/shared/components/GlassCard';
@@ -31,8 +37,10 @@ const TaskRow = styled.View<{ $first: boolean }>`
     !$first ? 'border-top-width: 1px; border-top-color: rgba(255, 255, 255, 0.18);' : ''}
 `;
 
+// TaskIcon — the emoji on the left of each example task row in the preview.
 const TaskIcon = styled.Text`font-size: 32px;`;
 
+// TaskBody — the middle column holding an example task's name and detail line.
 const TaskBody = styled.View`flex: 1;`;
 
 // TaskName — task title inside the card. White to match the headline color,
@@ -61,6 +69,7 @@ const UrgencyPill = styled.View`
   padding: 3px 8px;
 `;
 
+// UrgencyText — the small "TODAY" / "SOON" label inside the urgency pill.
 const UrgencyText = styled.Text`
   font-size: 9px;
   font-weight: ${({ theme }) => theme.typography.weightBold};

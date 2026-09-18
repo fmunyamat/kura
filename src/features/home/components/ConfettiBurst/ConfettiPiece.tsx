@@ -22,6 +22,9 @@ interface ConfettiPieceProps {
 // How far each piece falls. Comfortably past the bottom of any phone screen.
 const FALL_DISTANCE = 560;
 
+// Piece — the actual little coloured rectangle. It starts just above the top of
+// the screen ($leftPercent sets where across the width) and the animation below
+// moves it down. Small and rounded so the shower reads as confetti, not blocks.
 const Piece = styled(Animated.View)<{ $color: string; $leftPercent: number }>`
   position: absolute;
   top: -10px;

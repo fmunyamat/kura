@@ -1,3 +1,10 @@
+// Onboarding step: "How much time do you want to put into your lawn?". Offers
+// three effort levels (roughly low / medium / high) as tappable option cards.
+// The choice decides how many and how demanding the tasks the app hands the user
+// later will be, so a beginner can pick a gentle pace. It saves the pick into
+// the onboarding scratchpad and continues to the next step. Like the other
+// steps, it reuses OnboardingScreenShell for the frame and OptionCard per choice.
+
 import { router } from 'expo-router';
 import { Fragment, useState } from 'react';
 import { ScrollView } from 'react-native';

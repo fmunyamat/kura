@@ -1,3 +1,11 @@
+// The auth store — one small in-memory box that holds the answer to "who is
+// logged in right now, and how far through setup are they?". It's built with
+// Zustand, a lightweight state tool: any screen can read these values, and they
+// all see the same copy. AuthProvider is the only thing that writes here (after
+// checking Supabase); screens and routing guards only read. Keeping it in one
+// place means the whole app agrees on the login state instead of each screen
+// asking Supabase separately and possibly disagreeing.
+
 import type { Session, User } from '@supabase/supabase-js';
 import { create } from 'zustand';
 

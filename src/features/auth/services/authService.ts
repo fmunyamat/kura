@@ -1,3 +1,11 @@
+// The auth service — every function that talks to Supabase about *logging in*
+// lives here, so the rest of the app never calls the auth API directly. It
+// covers the whole email-code sign-in journey: send a 6-digit code to an email
+// (sendOtpCode), swap a typed-in code for a live session (verifyOtpCode), look
+// up whether a signed-in user has finished onboarding yet (checkUserProfile),
+// and log out (signOut). These functions throw raw errors on failure; whoever
+// calls them must show the user a friendly message, never the raw error.
+
 import { supabase } from '~/shared/lib/supabase';
 
 // sendOtpCode — sends a 6-digit OTP email to the user.

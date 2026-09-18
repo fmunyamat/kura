@@ -1,3 +1,9 @@
+// A reusable "pick this one" row. Each card shows an emoji, a name, a short
+// description, and a circle that fills in when it's the chosen one. Stacking a
+// few of these makes a multiple-choice list — used by the onboarding pickers
+// (grass type, effort) and the Settings effort picker. Kept here in shared so
+// every picker looks and behaves identically.
+
 import { Pressable } from 'react-native';
 import styled from 'styled-components/native';
 

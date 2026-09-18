@@ -1,3 +1,12 @@
+// The second step of signing in: the screen where the user types the 6-digit
+// code we emailed them. It shows six digit boxes with a hidden text field behind
+// them capturing the keyboard, fills the boxes in as they type, and enables the
+// verify button once all six are entered. It also runs a 60-second countdown
+// before the "resend code" option becomes available again, and it reshapes
+// itself when the keyboard is open so every box and button stays visible. This
+// file is a big one because it juggles the input, the countdown, and the
+// keyboard-aware layout — the comments throughout walk through each piece.
+
 import { LinearGradient } from 'expo-linear-gradient';
 import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, TextInput, useWindowDimensions } from 'react-native';
@@ -62,11 +71,13 @@ const IconCircle = styled.View<{ $isTablet: boolean }>`
   justify-content: center;
 `;
 
+// IconText — the emoji/icon shown above the heading on the verify panel.
 const IconText = styled.Text<{ $isTablet: boolean }>`
   font-size: ${({ $isTablet, theme }) =>
     $isTablet ? theme.typography.sizeXl : theme.typography.sizeLg}px;
 `;
 
+// Heading — the panel title (e.g. "Check your email"), bold and prominent.
 const Heading = styled.Text<{ $isTablet: boolean }>`
   font-size: ${({ $isTablet, theme }) =>
     $isTablet ? theme.typography.sizeXl : theme.typography.sizeLg}px;
@@ -75,6 +86,8 @@ const Heading = styled.Text<{ $isTablet: boolean }>`
   letter-spacing: ${({ theme }) => theme.typography.letterSpacingTight}px;
 `;
 
+// BodyText — the supporting sentence under the heading ("We sent a code to…"),
+// centred and muted.
 const BodyText = styled.Text<{ $isTablet: boolean }>`
   font-size: ${({ $isTablet, theme }) =>
     $isTablet ? theme.typography.sizeMd : theme.typography.sizeSm}px;
@@ -86,6 +99,8 @@ const BodyText = styled.Text<{ $isTablet: boolean }>`
 // carries enough contrast to identify the address as a distinct element.
 const EmailPillWrapper = styled.View``;
 
+// EmailPillText — the user's own email address, shown in lime so they can
+// confirm at a glance that the code was sent to the right place.
 const EmailPillText = styled.Text`
   color: ${({ theme }: { theme: DefaultTheme }) => theme.colors.lime};
   font-weight: ${({ theme }: { theme: DefaultTheme }) => theme.typography.weightBold};
@@ -160,11 +175,13 @@ const VerifyButton = styled(Pressable)<{ $isDisabled: boolean }>`
   opacity: ${({ $isDisabled }) => ($isDisabled ? 0.45 : 1)};
 `;
 
+// GradientBackground — the green gradient fill inside the verify button.
 const GradientBackground = styled(LinearGradient)`
   padding: ${({ theme }: { theme: DefaultTheme }) => theme.spacing.md}px;
   align-items: center;
 `;
 
+// ButtonText — the white "Verify" label on the button.
 const ButtonText = styled.Text`
   color: ${({ theme }: { theme: DefaultTheme }) => theme.colors.white};
   font-size: ${({ theme }: { theme: DefaultTheme }) => theme.typography.sizeMd}px;
@@ -187,6 +204,8 @@ const ResendText = styled.Text<{ $canResend: boolean }>`
   text-decoration-line: ${({ $canResend }) => ($canResend ? 'underline' : 'none')};
 `;
 
+// ResetLink — the underlined "use a different email" link that takes the user
+// back to the email step.
 const ResetLink = styled.Text`
   font-size: ${({ theme }: { theme: DefaultTheme }) => theme.typography.sizeSm}px;
   color: ${({ theme }: { theme: DefaultTheme }) => theme.colors.textMutedOnDark};

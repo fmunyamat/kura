@@ -1,3 +1,11 @@
+// The app's root layout — the very first file Expo Router loads, and the outer
+// shell that every other screen lives inside. It does the one-time startup
+// work: keeps the splash screen up until the custom fonts finish loading, sets
+// up crash reporting (Sentry), wraps the whole app in the theme and login
+// providers so any screen can read the current colours and session, and
+// registers the two top-level sections — (auth) for logged-out screens and
+// (app) for logged-in screens. It also mounts the dev-only launcher pill.
+
 import { DarkTheme, DefaultTheme, ThemeProvider as NavThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
@@ -77,12 +85,20 @@ export default Sentry.wrap(function RootLayout() {
     if (__DEV__) loadDefaultFlow();
   }, []);
 
+  // Don't render anything until the fonts are settled (loaded or failed).
+  // Returning null here keeps the splash screen visible instead of flashing a
+  // half-styled screen with the wrong fonts.
   if (!fontsLoaded && !fontError) return null;
 
   // Wait for the default flow to load before rendering screens in dev so the
   // routing guard in app/(app)/_layout.tsx has a settled defaultFlow value.
   if (__DEV__ && !isDefaultLoaded) return null;
 
+  // The providers below are nested outer-to-inner. Each one hands something down
+  // to every screen: ThemeProvider gives our styled-components the right light/
+  // dark colours, NavThemeProvider does the same for React Navigation's own
+  // chrome, AuthProvider supplies the login session, and GestureHandlerRootView
+  // lets touch gestures (swipes, holds) work anywhere in the tree.
   return (
     <ThemeProvider theme={colorScheme === 'dark' ? darkTheme : lightTheme}>
       <NavThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>

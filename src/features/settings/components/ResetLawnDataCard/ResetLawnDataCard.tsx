@@ -59,6 +59,8 @@ const CollapsedRow = styled(Pressable)`
   border-top-color: rgba(255, 189, 189, 0.32);
 `;
 
+// CollapsedIcon — the small red rounded square holding the icon when the card
+// is in its compact, tapped-shut state.
 const CollapsedIcon = styled.View`
   width: 34px;
   height: 34px;
@@ -68,6 +70,7 @@ const CollapsedIcon = styled.View`
   justify-content: center;
 `;
 
+// CollapsedIconText — the emoji/icon glyph shown inside that red square.
 const CollapsedIconText = styled.Text`
   font-size: 15px;
 `;
@@ -79,6 +82,7 @@ const CollapsedBody = styled.View`
   flex: 1;
 `;
 
+// CollapsedName — the bold "I've moved" label on the compact row.
 const CollapsedName = styled.Text`
   font-family: ${({ theme }) => theme.typography.fontBodyBold};
   font-size: 12px;
@@ -95,6 +99,7 @@ const CollapsedDesc = styled.Text`
   color: rgba(255, 255, 255, 0.7);
 `;
 
+// CollapsedChevron — the small "›" arrow hinting the compact row expands on tap.
 const CollapsedChevron = styled.Text`
   font-size: 14px;
   color: rgba(255, 255, 255, 0.55);
@@ -120,21 +125,26 @@ const Top = styled(Pressable)`
   gap: 10px;
 `;
 
+// WarningIcon — the ⚠️ symbol at the top-left of the expanded banner.
 const WarningIcon = styled.Text`
   font-size: 20px;
   line-height: 22px;
 `;
 
+// TextGroup — wraps the headline and description so they stack next to the icon.
 const TextGroup = styled.View`
   flex: 1;
 `;
 
+// Headline — the bold warning title of the expanded banner (e.g. "Moving to a
+// new lawn?").
 const Headline = styled.Text`
   font-family: ${({ theme }) => theme.typography.fontHeaderHeavy};
   font-size: 14.5px;
   color: rgba(255, 255, 255, 0.95);
 `;
 
+// Description — the plain-English sentence explaining what resetting will do.
 const Description = styled.Text`
   margin-top: 4px;
   font-family: ${({ theme }) => theme.typography.fontBody};
@@ -174,6 +184,8 @@ const ButtonLabel = styled.Text`
   color: #ffffff;
 `;
 
+// HoldHint — the small uppercase caption under the button telling the user they
+// need to press and hold (not just tap) to confirm the reset.
 const HoldHint = styled.Text`
   margin-top: 8px;
   font-family: ${({ theme }) => theme.typography.fontBody};

@@ -1,3 +1,8 @@
+// Welcome tour, screen 1 of 4 — the friendly greeting. It says "Welcome to Kura,
+// [their name]" and a short "your journey starts today" card, then a Next button.
+// It's purely a warm hello with no input; the user's first name is passed in from
+// WelcomeFlow and dropped into the headline. Tapping Next slides to screen 2.
+
 import styled, { useTheme } from 'styled-components/native';
 import { CtaButton } from '~/shared/components/CtaButton';
 import { GlassCard } from '~/shared/components/GlassCard';

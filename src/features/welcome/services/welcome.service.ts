@@ -1,3 +1,8 @@
+// The welcome service — the one tiny piece of database work the welcome tour
+// needs. When the user finishes the 4-screen intro, this records that they've
+// seen it (by flipping a single flag on their profile) so the tour never shows
+// again. That's its only job; everything else about the welcome flow is UI.
+
 import { logger } from '~/shared/utils/logger';
 import { supabase } from '~/shared/lib/supabase';
 

@@ -80,6 +80,8 @@ const DetailsLink = styled(Pressable)`
   margin-top: 15px;
 `;
 
+// DetailsLinkText — the underlined "see full details" link text beneath the
+// complete button.
 const DetailsLinkText = styled.Text`
   font-family: ${({ theme }) => theme.typography.fontBody};
   font-size: 11px;

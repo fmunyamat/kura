@@ -1,3 +1,9 @@
+// Welcome tour, screen 4 of 4 — the sign-off: "You're all set." Its button says
+// "Start Growing" and is the finish line of onboarding: pressing it runs the
+// onFinish action (handled by WelcomeFlow) that records the tour as seen and
+// sends the user into the main app. While that's saving, the button shows a busy
+// state; if it fails, an error line appears so the user can try again.
+
 import styled from 'styled-components/native';
 import { CtaButton } from '~/shared/components/CtaButton';
 import { ErrorMessage } from '~/shared/components/ErrorMessage';
@@ -33,6 +39,7 @@ const CheckCircle = styled.View<TabletProps>`
   margin-bottom: ${({ theme }) => theme.spacing.md}px;
 `;
 
+// CheckIcon — the large celebratory checkmark shown above "You're all set."
 const CheckIcon = styled.Text<TabletProps>`
   font-size: ${({ $isTablet }) => ($isTablet ? 44 : 32)}px;
 `;

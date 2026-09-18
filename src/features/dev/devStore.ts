@@ -1,3 +1,10 @@
+// The memory behind the developer launcher. It remembers which flow we've asked
+// the app to jump to while building (sign-in, onboarding, welcome, or tabs).
+// There are two layers: a live in-memory choice that resets each time the app
+// fully reloads, and a "default flow" saved to the phone's secure storage so a
+// pinned choice survives a manual reload. Like the rest of the dev tooling, this
+// only matters in development and never affects real users. Built with Zustand.
+
 import * as SecureStore from 'expo-secure-store';
 import { create } from 'zustand';
 

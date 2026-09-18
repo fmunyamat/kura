@@ -1,3 +1,12 @@
+// The welcome tour — the 4-screen intro a brand-new user sees right after
+// finishing setup, before they reach the main app. All four steps live side by
+// side in a single horizontal row; tapping "Next" slides the row left to reveal
+// the next one, and a back arrow slides it the other way. This file owns which
+// step is showing, the slide animation, and the "Start Growing" finish action on
+// the last screen (which records that the tour has been seen, then lets the
+// routing guard move the user into the tabs). The four steps themselves are
+// separate WelcomeStep files; this is the pager that stitches them together.
+
 import { useState } from 'react';
 import { ImageBackground, Pressable, useWindowDimensions } from 'react-native';
 import Animated, {
@@ -20,21 +29,30 @@ import WelcomeStep4 from './WelcomeStep4';
 const GRASS_BG = require('../../../../assets/images/lawn.png') as number;
 const TOTAL_STEPS = 4;
 
+// Screen — the full-height container everything else stacks inside.
 const Screen = styled.View`flex: 1;`;
 
+// PhotoBackground — the blurred lawn photo pinned to fill the whole screen,
+// sitting behind everything as the backdrop for the tour.
 const PhotoBackground = styled(ImageBackground)`
   position: absolute;
   top: 0; left: 0; right: 0; bottom: 0;
 `;
 
+// Safe — keeps the tour's content inside the phone's safe area (clear of the
+// notch at the top and the home indicator at the bottom).
 const Safe = styled(SafeAreaView)`flex: 1;`;
 
+// DarkOverlay — a translucent dark-green wash over the photo so the white text
+// on top stays easy to read no matter how bright the lawn image is.
 const DarkOverlay = styled.View`
   position: absolute;
   top: 0; left: 0; right: 0; bottom: 0;
   background-color: rgba(10, 28, 10, 0.60);
 `;
 
+// TopBar — the strip at the very top that holds the progress dots, with a little
+// breathing room above and below.
 const TopBar = styled.View`
   padding: ${({ theme }) => theme.spacing.xl}px 0 ${({ theme }) => theme.spacing.sm}px;
 `;
@@ -62,6 +80,7 @@ const NavBackButton = styled(Pressable)`
   padding-right: 8px;
 `;
 
+// NavBackArrow — the faint white "‹" glyph used as the back button on steps 2–4.
 const NavBackArrow = styled.Text`
   font-size: 32px;
   line-height: 36px;
@@ -74,6 +93,8 @@ const StepClip = styled.View`
   overflow: hidden;
 `;
 
+// StepSlot — one step's slot in the sliding row, made exactly as wide as the
+// screen so each step fills the view and the next one waits just off-screen.
 const StepSlot = styled.View<{ $width: number }>`
   width: ${({ $width }) => $width}px;
 `;

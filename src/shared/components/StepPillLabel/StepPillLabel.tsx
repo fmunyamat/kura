@@ -1,3 +1,8 @@
+// The little capsule that reads "Quick Tour · 2 of 4" at the top of the welcome
+// and onboarding screens, telling the user how far along they are. This file is
+// just that pill: a translucent rounded background with small uppercase text
+// inside. The screen passes in the label prefix and the current/total step.
+
 import styled from 'styled-components/native';
 
 interface StepPillLabelProps {

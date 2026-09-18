@@ -1,3 +1,10 @@
+// The first onboarding step: asking where the user's lawn is (their ZIP code)
+// and how big it is. Location matters because the app's advice depends on local
+// weather and climate, so the ZIP is later turned into map coordinates. This
+// screen collects and lightly checks those two inputs, saves them into the
+// onboarding scratchpad, and continues to the next step. It also handles the
+// keyboard politely (sliding content up) and links out to explain why we ask.
+
 import { router } from 'expo-router';
 import { useState } from 'react';
 import {
@@ -72,6 +79,7 @@ const UnitBadge = styled.View`
   justify-content: center;
 `;
 
+// UnitText — the small "sq ft" unit label sitting inside the lawn size field.
 const UnitText = styled.Text`
   font-family: ${({ theme }) => theme.typography.fontBody};
   font-size: 11px;
@@ -87,8 +95,10 @@ const HintRow = styled(Pressable)`
   margin-top: 10px;
 `;
 
+// HintIcon — the small icon at the start of the "not sure of your lawn size?" hint.
 const HintIcon = styled.Text`font-size: 12px; margin-top: 1px;`;
 
+// HintBody — the hint's wording, filling the rest of the row next to the icon.
 const HintBody = styled.Text`
   font-family: ${({ theme }) => theme.typography.fontBody};
   font-size: 11px;
@@ -97,6 +107,7 @@ const HintBody = styled.Text`
   line-height: 16px;
 `;
 
+// HintLink — the underlined, tappable part of the hint that opens the measuring tool.
 const HintLink = styled.Text`
   font-family: ${({ theme }) => theme.typography.fontBodyBold};
   color: ${({ theme }) => theme.colors.textOnDark};

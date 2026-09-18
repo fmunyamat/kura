@@ -1,3 +1,9 @@
+// Welcome tour, screen 3 of 4 — a quick map of the app: "Four tabs, four tools."
+// It lists the main sections (today's task + streak, the month-ahead view, the
+// beginner guides, and the profile/settings) with a one-line description of each,
+// so the user knows where to find things before they arrive. It's an explainer
+// with no input. Tapping Next slides to the final screen.
+
 import styled, { useTheme } from 'styled-components/native';
 import { CtaButton } from '~/shared/components/CtaButton';
 import { GlassCard } from '~/shared/components/GlassCard';
@@ -36,6 +42,8 @@ const NavPill = styled.View`
 // NavPillIcon — emoji on the left of each pill. Matches CardIcon/TaskIcon size.
 const NavPillIcon = styled.Text`font-size: 32px;`;
 
+// NavPillBody — the text column of each tab row (the tab name plus its
+// one-line description), filling the space next to the icon.
 const NavPillBody = styled.View`flex: 1;`;
 
 // NavPillName — tab label inside each pill. Uses fontHeaderBold and white text
@@ -86,6 +94,7 @@ const TabIconWrapper = styled.View<{ $active: boolean }>`
   ${({ $active }) => ($active ? 'background-color: rgba(214, 239, 216, 0.18);' : '')}
 `;
 
+// TabIcon — the small emoji shown for each tab in the "four tabs" list.
 const TabIcon = styled.Text`font-size: 15px;`;
 
 // TabLabel — small text below each tab icon. Active tab is white; inactive is muted.

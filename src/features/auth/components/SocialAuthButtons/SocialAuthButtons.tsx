@@ -1,3 +1,10 @@
+// The "Continue with Google / Apple" row on the sign-in screen. It draws two
+// side-by-side buttons, each with the provider's logo and name, styled to match
+// the email input so all the secondary controls look like one set. Google always
+// shows; Apple only shows on iPhones (Sign in with Apple isn't available on
+// Android). The buttons themselves don't do the signing in — they just call the
+// onGooglePress / onApplePress handlers the sign-in screen hands down.
+
 import { Image } from 'expo-image';
 import { Platform, Pressable } from 'react-native';
 import styled from 'styled-components/native';

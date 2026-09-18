@@ -1,3 +1,10 @@
+// A small scratchpad that remembers the user's answers as they move through the
+// five onboarding steps (location, grass type, effort, sprinkler). Each step
+// saves its answer here; at the very end everything is written to the database
+// in one go. It's deliberately temporary — nothing is saved to disk, so if the
+// user force-quits halfway through, they start onboarding fresh. Built with
+// Zustand so every onboarding screen reads and writes the same shared answers.
+
 import { create } from 'zustand';
 
 import type { GrassTypeList } from '../types';

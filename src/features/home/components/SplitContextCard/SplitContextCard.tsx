@@ -25,6 +25,8 @@ const Card = styled.View`
   overflow: hidden;
 `;
 
+// Half — one of the two equal sides of the card (streak on the left, weather on
+// the right); flex: 1 makes them share the width evenly.
 const Half = styled.View`
   flex: 1;
   padding: 11px 14px;
@@ -36,6 +38,7 @@ const Divider = styled.View`
   background-color: ${({ theme }) => theme.colors.glassDivider};
 `;
 
+// Label — the tiny uppercase heading over each half ("STREAK" / "WEATHER").
 const Label = styled.Text`
   font-family: ${({ theme }) => theme.typography.fontBody};
   font-size: 8px;
@@ -52,6 +55,7 @@ const ValueRow = styled.View`
   margin-top: 4px;
 `;
 
+// Value — the big bold number on each side (the streak count / the temperature).
 const Value = styled.Text`
   font-family: ${({ theme }) => theme.typography.fontHeaderHeavy};
   font-size: 24px;
@@ -59,6 +63,7 @@ const Value = styled.Text`
   color: ${({ theme }) => theme.colors.textPhotoHeading};
 `;
 
+// Icon — the emoji beside each value (🔥 for the streak, the weather symbol).
 const Icon = styled.Text`
   font-size: 20px;
 `;

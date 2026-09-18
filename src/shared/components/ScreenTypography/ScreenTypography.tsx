@@ -1,3 +1,8 @@
+// The shared title-and-subtitle text pair for screens. Instead of each screen
+// styling its own big heading and supporting line, they use these two components
+// so the type looks identical everywhere. This file just defines that headline
+// and subtext styling (in a couple of sizes) — no screen logic lives here.
+
 import { ReactNode } from 'react';
 import styled from 'styled-components/native';
 import { useIsTablet } from '~/shared/hooks/use-is-tablet';

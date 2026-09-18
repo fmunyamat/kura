@@ -1,3 +1,10 @@
+// AuthProvider is the bridge between Supabase (which actually knows who's logged
+// in) and the app's auth store (which every screen reads from). It mounts once,
+// near the top of the app, and quietly keeps the two in sync: it restores a
+// saved login when the app opens, listens for later sign-ins and sign-outs, and
+// pauses token refreshing while the app is in the background. It draws no UI of
+// its own — it just wraps the app and renders whatever children it's given.
+
 import { useEffect } from 'react';
 import { AppState } from 'react-native';
 

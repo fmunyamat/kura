@@ -1,3 +1,10 @@
+// A set of reusable layout pieces that give every welcome and onboarding screen
+// the same vertical rhythm — the outer content area with its side padding, the
+// flexible spacers that push content into place, and the button area at the
+// bottom. Screens assemble these blocks instead of hand-tuning their own spacing,
+// so the whole flow feels consistent. This file just defines those building
+// blocks; the spacing tokens come from the theme.
+
 import { ReactNode } from 'react';
 import { useWindowDimensions } from 'react-native';
 import styled, { useTheme } from 'styled-components/native';
@@ -59,6 +66,8 @@ const CtaAreaView = styled.View<{ $sidePadding: number }>`
     ${({ theme }) => theme.spacing.md}px;
 `;
 
+// GapSpacerView — a plain fixed-height gap used to add a specific amount of
+// vertical space between two blocks on a screen.
 const GapSpacerView = styled.View<{ $height: number }>`
   height: ${({ $height }) => $height}px;
 `;

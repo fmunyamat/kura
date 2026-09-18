@@ -1,3 +1,10 @@
+// The shared frame that every onboarding step sits inside, so all the steps look
+// and behave the same. It draws the blurred lawn background, the back arrow, the
+// "Step 2 of 5" pill and the row of progress dots at the top, and it runs the
+// slide-in / slide-out animation as the user moves between steps. Each step
+// screen just fills in its own content and hands this shell its step number —
+// the shell takes care of all the surrounding navigation chrome and motion.
+
 import { router, useFocusEffect } from 'expo-router';
 import { ReactNode, useCallback, useRef } from 'react';
 import { ImageBackground, Pressable, useWindowDimensions } from 'react-native';
@@ -23,19 +30,23 @@ interface OnboardingScreenShellProps {
   children: ReactNode;
 }
 
+// Screen — the full-height container the whole onboarding step sits in.
 const Screen = styled.View`flex: 1;`;
 
+// PhotoBackground — the blurred lawn photo pinned behind everything as the backdrop.
 const PhotoBackground = styled(ImageBackground)`
   position: absolute;
   top: 0; left: 0; right: 0; bottom: 0;
 `;
 
+// DarkOverlay — a dark-green wash over the photo so white text stays readable.
 const DarkOverlay = styled.View`
   position: absolute;
   top: 0; left: 0; right: 0; bottom: 0;
   background-color: rgba(10, 28, 10, 0.60);
 `;
 
+// Safe — keeps the step's content clear of the notch and home indicator.
 const Safe = styled(SafeAreaView)`flex: 1;`;
 
 // TopBar — holds the progress dots. Top padding matches WelcomeFlow.
