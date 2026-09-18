@@ -38,6 +38,45 @@ The recommendation engine decides what lawn care actions to recommend and when. 
 
 Fetch `soil_temperature_6cm` from Open-Meteo. This is the closest depth to the 2-inch threshold cited by university turfgrass research for pre-emergent timing. Surface temperature (0cm) fluctuates too much with direct sunlight to be reliable for grass dormancy or pre-emergent timing.
 
+### Soil temperature thresholds (warm-season and cool-season both complete)
+
+These thresholds drive which recommendation rules fire and when. The Edge Function maps each rule's `type` to the relevant temperature range below. Full card copy for every non-trivial type (both grass groups) lives in `docs/superpowers/specs/2026-05-11-recommendation-engine-design.md` and `RECOMMENDATIONS.md` (repo root).
+
+#### Cool-season grass (fully confirmed, start to end of season)
+
+Directional column shows whether the threshold fires on the way up (spring warm-up) or the way down (fall cool-down).
+
+| Soil temp | Direction | Recommendation type | What is happening | Recommended action |
+|---|---|---|---|---|
+| 40–45°F | Rising | — (internal only, no card) | Root growth begins | Too early for fertilizer; roots growing but shoots dormant |
+| 50°F | Rising | `pre_emergent` | Pre-emergent window opens; grass breaking dormancy | Apply pre-emergent herbicide (standalone, without heavy nitrogen) |
+| 55°F | Rising | `fertilize, water, mow` | Actively growing; crabgrass germination begins | First spring fertilizer window |
+| 55–65°F | Rising/holding | `fertilize, water, mow` | Optimal growth range | Primary fertilizer window; slow-release nitrogen most effective |
+| 77–80°F | Rising | `heat_stress` | Root growth stops; heat-stressed | Raise mow height, hold watering steady, stop fertilizing, stay off the lawn |
+| 50–45°F | Falling | `winterizer` | Cooling toward dormancy | Apply a winterizer fertilizer |
+| Below 45°F | Falling | `fertilize_stop` | Approaching dormancy | No more fertilizer until spring |
+| Below 40°F | Falling | `dormant` | Fully dormant for winter | No mowing, no fertilizing, no scheduled watering |
+
+Falling back out of `heat_stress` (77–80°F cooling back into 55–65°F) is not silent — the `fertilize, water, mow` card re-fires, same as warm-season. `winterizer`, `fertilize_stop`, and `dormant` are a one-way trip — once fired, none of them re-fire or reverse on a temperature bounce back up.
+
+#### Warm-season grass (fully confirmed, start to end of season)
+
+Directional column shows whether the threshold fires on the way up (spring warm-up) or the way down (fall cool-down) — several thresholds share a number but mean different things depending on direction. Full card copy for each type lives in `docs/superpowers/specs/2026-05-11-recommendation-engine-design.md`.
+
+| Soil temp | Direction | Recommendation type | What is happening | Recommended action |
+|---|---|---|---|---|
+| 45°F | Rising | `mower_blade_sharpen` (universal — all users, any `grass_type`) | Warming up, mowing season approaching | Sharpen blade now; one spare per mowing month if possible, sharpened all at once |
+| 50–55°F | Rising | `pre_emergent` | Pre-emergent window opens; crabgrass germination begins | Apply pre-emergent herbicide (standalone, without heavy nitrogen) |
+| 65°F | Rising | `fertilize, water, mow` | Grasses fully awake | First fertilizer application (bermuda, zoysia, St. Augustine) |
+| 65–90°F | Rising/holding | `fertilize, water, mow` | Peak growth | Continue warm-season feeding program |
+| 91–95°F | Rising | `heat_prep` | Pre-stress period | Raise mow height to 3–4", confirm ~1"/week watering, ease off fertilizer timing |
+| 95–100°F | Rising | `heat_stress` | Stress period, growth rate slows | Water deeply as normal, fertilize at half the normal rate, mow less often |
+| 100°F+ | Rising | `drought` | Drought / survival mode | Stop fertilizing, mow only if needed, add a watering day if locally permitted |
+| Below 70°F | Falling | `fertilize_stop` | Growth slowing toward dormancy | No more fertilizer for the season |
+| 55°F and below | Falling | `dormant` | Fully dormant for winter | No mowing, no fertilizing, no scheduled watering |
+
+Falling back out of a heat stage (e.g. 100°F+ drought cooling back into the 65–90°F range) is not silent — the `fertilize, water, mow` card re-fires to let the user know they're back in the normal feeding window.
+
 ### Weather data (Open-Meteo)
 
 Open-Meteo is free, requires no API key, and provides soil temperature at 6cm depth. Temperatures are requested in °F (`temperature_unit=fahrenheit`).
