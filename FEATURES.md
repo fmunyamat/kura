@@ -6,7 +6,7 @@ All FK references to `auth.users` use `ON DELETE CASCADE` so account deletion re
 
 | Table | Key columns |
 |---|---|
-| `user_profiles` | `user_id` (FK → auth.users CASCADE DELETE), `zip_code`, `lawn_size`, `grass_type`, `lat`, `lng`, `push_token`, `season_override`, `notifications_enabled`, `effort_level` |
+| `user_profiles` | `user_id` (FK → auth.users CASCADE DELETE), `zip_code`, `lawn_size`, `grass_type`, `lat`, `lng`, `push_token`, `season_override`, `notifications_enabled`, `effort_level`, `save_photos_to_device` |
 | `tasks` | `id`, `title`, `subtitle`, `why_it_matters`, `estimated_minutes`, `recurrence`, `seasons text[]`, `grass_types text[]`, `min_effort_level` |
 | `task_completions` | `id`, `user_id` (RLS + CASCADE DELETE), `task_id`, `completed_at`, `week_of` |
 | `lawn_photos` | `id`, `user_id` (RLS + CASCADE DELETE), `storage_path`, `taken_at`, `week_number`, `season` |
@@ -348,11 +348,43 @@ const result = await ImagePicker.launchCameraAsync({
 });
 ```
 
-Request `CAMERA` permission at the moment the user taps "Take a photo" — not at app launch — and show a plain-English rationale before the system dialog appears (MASWE-0117). `MEDIA_LIBRARY` permission is never requested because photos go directly to Supabase Storage, not the device gallery.
+Request `CAMERA` permission at the moment the user taps "Take a photo" — not at app launch — and show a plain-English rationale before the system dialog appears (MASWE-0117).
+
+`MEDIA_LIBRARY` permission (write-only, "add" scope — iOS `NSPhotoLibraryAddUsageDescription`; the app never requests read/browse access) is requested only when the user has actively opted in to saving photos on their own device. It is never requested up front and never bundled with the camera permission — see "Device save preference" below for when and how that choice is made.
+
+### Device save preference
+
+By default, captured photos live **only inside Kura**, and only for the current calendar year (all previous-year photos are purged on January 1 — see "Lawn Progress Photos" retention below). Saving a copy to the phone's own photo library is opt-in, not automatic.
+
+**First-photo prompt:** the first time a user taps "Use photo" on any captured photo (onboarding or the Gallery tab), before it uploads, show an in-app dialog — not the OS permission dialog — explaining this plainly: *"Photos stay in Kura for the current calendar year, then they're removed. Want us to also save a copy to your phone so you keep it longer?"* with two choices: **"Yes, save to my phone"** / **"No, just keep it in Kura."**
+
+- **Yes** → writes `save_photos_to_device = true` to `user_profiles`, then requests the `MEDIA_LIBRARY` write permission (with its own plain-English rationale) before saving. If the user then denies the OS dialog, the local save is silently skipped for that photo (the Supabase upload still happens) — the preference stays `true` so the next photo simply retries the OS prompt.
+- **No** → writes `save_photos_to_device = false`. No library permission is ever requested.
+
+The chosen value is reused for every later photo without asking again. It can be changed anytime from **Settings → Photos** (a toggle row, "Also save photos to my phone," using the same `RowCard`/`Switch` pattern as other Settings rows) via a `useUpdateSavePhotosPreference` mutation. Changing the setting only affects photos captured from then on — it does not retroactively add or remove device copies for photos already taken.
+
+**Schema:**
+
+```sql
+-- NULL until the user answers the first-photo prompt (meaning "not yet asked").
+-- true/false once they've chosen, and from then on used silently for every photo.
+ALTER TABLE user_profiles
+  ADD COLUMN save_photos_to_device boolean;
+```
+
+**Zod:**
+
+```ts
+// savePhotosToDeviceSchema — the preference is always an explicit boolean once
+// answered; validated before any settings write.
+export const savePhotosToDeviceSchema = z.boolean();
+```
 
 ### Photo storage
 
-Photos live in a **private** Supabase Storage bucket named `lawn-photos`. The bucket has no public access — the app always fetches images via signed URLs with a 1-hour expiry. Photos are never cached to `AsyncStorage`, the device gallery, or any external storage (MASWE-0007).
+Photos live in a **private** Supabase Storage bucket named `lawn-photos`. The bucket has no public access — the app always fetches images via signed URLs with a 1-hour expiry. Photos are never cached to `AsyncStorage` or any other unmanaged external storage (MASWE-0007). The one sanctioned exception is the device-gallery save described in "Device save preference" above — it only happens when the user has explicitly opted in, saved through `expo-media-library`'s write-only API, never a raw filesystem write.
+
+**Retention:** photos are kept only for the current calendar year. On January 1, all photos with a `taken_at` from a previous year are removed from both the `lawn_photos` table and the `lawn-photos` Storage bucket (client-side purge on app launch — see the Lawn Progress Photos folder structure below). Any device-gallery copies the user opted into saving are unaffected — they remain on the phone.
 
 ```ts
 // features/progress-photos/services/progressPhotos.service.ts
