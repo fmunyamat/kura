@@ -7,7 +7,7 @@ description: Use when the user asks to commit and push changes. Inspects what ch
 
 ## Overview
 
-Inspect what changed → derive branch name from the work → stage appropriate files → commit with a structured message → push.
+Inspect what changed → derive branch name from the work → check with user to make sure the branch name is ok with them → stage appropriate files → commit with a structured message → push.
 
 **Announce at start:** "Using the push skill to branch, commit, and push."
 
