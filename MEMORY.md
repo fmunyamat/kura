@@ -1,3 +1,22 @@
+# Weekly Dependency Audit — 2026-10-19
+
+Automated audit completed. Report published at: https://claude.ai/artifact/J6rXA9TVEKKuDND1dSMd19
+
+## Findings summary
+- 2 CRITICAL CVEs: `tar` (6 advisories, file smuggling + DoS) and `shell-quote` (command injection + DoS). Both transitive build-tool deps. Fix: `npm audit fix`.
+- 3 HIGH MASVS-relevant CVEs: `fast-uri` SSRF (MASVS-NETWORK-1), `xmldom` injection (MASVS-CODE-4), `form-data` CRLF injection (MASVS-CODE-4). Fix: `npm audit fix`.
+- 3 Expo SDK 54 mismatches: `@sentry/react-native` (8.x vs expected ~7.2.0), `expo-linear-gradient` (55.x vs ~15.0.8), `jest-expo` (55 vs ~54). Fix: `npx expo install @sentry/react-native expo-linear-gradient jest-expo`.
+- 3 copyleft license flags: `lightningcss` (MPL-2.0, build-tool only, likely OK), `node-forge` (BSD-3-Clause OR GPL-2.0, use BSD-3-Clause).
+- expo SDK 54 is 4 versions behind current (58). All expo-* packages need coordinated upgrade.
+- Security-relevant minor updates needed: supabase 2.105→2.118, sentry 8.11→8.31, zod 4.4→4.6.
+
+## Action items created
+Fix Now: npm audit fix, expo SDK mismatches
+This Sprint: supabase, sentry, zod, patch updates
+Backlog: SDK 54→58 upgrade, RN 0.81→0.88, jest 29→30, TS 5→7
+
+---
+
 # Error Handling Implementation — Phase Plan
 
 Audit completed 2026-05-17. Full findings in session history.
