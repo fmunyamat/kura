@@ -1,3 +1,11 @@
+# Dependency Audit — 2026-11-02
+
+Weekly automated audit completed. Full report at scratchpad/dependency-audit-2026-11-02.md.
+Key findings: 2 critical CVEs (tar, shell-quote — transitive), 19 high CVEs, zod (direct dep) has HIGH CVE fixed by patch bump to 4.6.7. Expo SDK 54 is 4 major versions behind current SDK 58. undici TLS bypass (MASVS-NETWORK-1) and zod memory exhaustion (MASVS-CODE-4) are the highest-priority MASVS violations.
+Next: run `npm install zod@^4.6.7 && npm audit fix`, then plan SDK 58 upgrade.
+
+---
+
 # Error Handling Implementation — Phase Plan
 
 Audit completed 2026-05-17. Full findings in session history.
