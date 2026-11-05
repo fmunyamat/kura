@@ -1,8 +1,13 @@
-# Dependency Audit — 2026-11-02
+# Dependency Audit — 2026-11-05
 
-Weekly automated audit completed. Full report at scratchpad/dependency-audit-2026-11-02.md.
-Key findings: 2 critical CVEs (tar, shell-quote — transitive), 19 high CVEs, zod (direct dep) has HIGH CVE fixed by patch bump to 4.6.7. Expo SDK 54 is 4 major versions behind current SDK 58. undici TLS bypass (MASVS-NETWORK-1) and zod memory exhaustion (MASVS-CODE-4) are the highest-priority MASVS violations.
-Next: run `npm install zod@^4.6.7 && npm audit fix`, then plan SDK 58 upgrade.
+Weekly automated audit completed. Full report at scratchpad/dependency-audit-2026-11-05.md.
+Key findings (same critical issues remain unresolved from 2026-11-02):
+- 2 CRITICAL CVEs: shell-quote (GHSA-w7jw-789q-3m8p) + tar (GHSA-23hp-3jrh-7fpw) — both transitive, fix with `npm audit fix`
+- 19 HIGH CVEs: zod (DIRECT, MASVS-CODE-4, GHSA-mrhx-c7xc-m3w5), undici (MASVS-NETWORK-1), expo-router (fix requires SDK 58 upgrade), + 16 transitive
+- NEW: expo-linear-gradient ^55.0.13 is wrong major for SDK 54 — peer mismatch, run `npx expo install expo-linear-gradient` to fix
+- Expo SDK 54 vs latest SDK 58 — 4 major versions behind (unchanged)
+- node_modules not installed — license check incomplete, expo-doctor could not run
+Next: `npm install && npm install zod@^4.6.7 && npm audit fix`, then fix expo-linear-gradient mismatch, then plan SDK 58 upgrade sprint.
 
 ---
 
