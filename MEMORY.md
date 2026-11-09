@@ -1,3 +1,21 @@
+# Dependency Audit — 2026-11-09
+
+Weekly automated audit completed. Full report at scratchpad/dependency-audit-2026-11-09.md.
+Key findings:
+- 2 CRITICAL CVEs still unresolved (shell-quote GHSA-w7jw-789q-3m8p, tar GHSA-23hp-3jrh-7fpw) — `npm audit fix` fixes both
+- 1 HIGH DIRECT: zod 4.4.3 must upgrade to 4.6.7 (MASVS-CODE-4, GHSA-mrhx-c7xc-m3w5)
+- 19 HIGH transitive CVEs (undici MASVS-NETWORK-1, @react-navigation/core, decode-uri-component chain, etc.)
+- expo-linear-gradient 55.0.13 wrong major for SDK 54 (fix: `npx expo install expo-linear-gradient`)
+- @sentry/react-native 8.11.1 but SDK 54 expects ~7.2.0 — downgrade or plan SDK upgrade
+- jest-expo 55.0.17 vs expected ~54.0.17 — fix with `npx expo install jest-expo`
+- 4 copyleft license flags: lightningcss@1.32.0 (MPL-2.0, build-time only — likely OK), node-forge (dual BSD-3/GPL-2 — OK to use BSD-3)
+- @supabase/supabase-js 2.105.4 → 2.119.0 (14 minor versions behind)
+- @sentry/react-native 8.11.1 → 8.34.0 (also behind latest, but must resolve SDK 54 conflict first)
+- Expo SDK 54 vs SDK 58 — still 4 major versions behind (unchanged since Nov 2)
+Next: `npm audit fix && npm install zod@^4.6.7 && npx expo install expo-linear-gradient jest-expo`, then downgrade @sentry/react-native to ~7.2.0, then update @supabase/supabase-js and @react-navigation/* this sprint. SDK 58 upgrade is backlog.
+
+---
+
 # Dependency Audit — 2026-11-05
 
 Weekly automated audit completed. Full report at scratchpad/dependency-audit-2026-11-05.md.
